@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import dns from "node:dns";
+import net from "node:net";
 import https from "node:https";
 import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
@@ -10,9 +11,13 @@ import { URL as NodeURL } from "node:url";
 // — about 1 fragment in 20 returns UND_ERR_CONNECT_TIMEOUT (10s) on undici's
 // IPv6 attempt, surfacing to the caller as a bare "fetch failed". curl works
 // because it does Happy Eyeballs and falls back to IPv4; Node's fetch does
-// not by default. Forcing ipv4first sidesteps this for every eBL call (and
-// every other host the process hits). Verified 2026-05-14 on IM.77027.
+// not by default. ipv4first alone is NOT enough on Node ≥ 20 — undici/net
+// runs autoSelectFamily (its own Happy Eyeballs) at the socket layer and
+// ignores the DNS-order hint. We have to disable BOTH: tell DNS to prefer
+// IPv4, and disable the socket-level family race so the resolved-first
+// address actually gets used. Verified 2026-05-14 on K.2862, IM.77027.
 dns.setDefaultResultOrder("ipv4first");
+net.setDefaultAutoSelectFamily?.(false);
 
 // InCommon RSA Server CA 2 — the intermediate that oracc.museum.upenn.edu's
 // server omits from its TLS handshake. Browsers/curl resolve it via AIA
@@ -1055,11 +1060,100 @@ server.registerTool(
 //      cache), then call scoreBoth() against every other fragment.
 //   3. Return top 15 by raw score AND top 15 by ruling-weighted score —
 //      the same NUMBER_OF_RESULTS_TO_RETURN = 15 as LineToVecRanker.
+//
+// The scorer is a STRUCTURAL-SIMILARITY ranker, not a physical-join finder:
+// it surfaces parallel manuscripts (same composition, different MSS),
+// structurally similar bilinguals, AND possible physical joins. To help the
+// reader disambiguate, we enrich top-K candidates with their genres + known
+// joins from eBL's full record, and optionally filter on those.
+//
+// Enrichment is on-demand (the JSONL cache only holds lineToVec). For each
+// call we fetch ≤ 1 + 2k records (target + union of top-k from each
+// ranking). Results are cached process-wide so repeat queries are cheap.
+
+type EnrichedRecord = {
+  museumNumber: string;
+  designation?: string;
+  lineToVec?: number[][];
+  genres: string[];             // human-readable category paths, e.g. "Literature → Lugal-e"
+  genreSet: Set<string>;        // every category name at every level — for overlap test
+  joinMembers: Set<string>;     // every museum number in any of this fragment's join groups
+  joinGroupsStr: string;        // joined for display, e.g. "BM.1 + BM.2; K.5"
+};
+
+const enrichmentCache = new Map<string, EnrichedRecord | null>();
+
+const fmtMnTuple = (x: { prefix: string; number: string; suffix: string }) =>
+  `${x.prefix}.${x.number}${x.suffix ? "." + x.suffix : ""}`;
+
+async function fetchEnrichment(mn: string): Promise<EnrichedRecord | null> {
+  if (enrichmentCache.has(mn)) return enrichmentCache.get(mn)!;
+  const url = `${URLS.EBL_BASE}/fragments/${encodeURIComponent(mn)}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  } catch {
+    enrichmentCache.set(mn, null);
+    return null;
+  }
+  if (!res.ok) {
+    enrichmentCache.set(mn, null);
+    return null;
+  }
+  type FragRec = {
+    museumNumber?: { prefix: string; number: string; suffix: string };
+    designation?: string;
+    lineToVec?: number[][];
+    genres?: Array<{ category: string[] }>;
+    joins?: Array<Array<{ museumNumber: { prefix: string; number: string; suffix: string } }>>;
+  };
+  const body = (await res.json()) as FragRec;
+  const genres = (body.genres ?? []).map((g) => g.category.join(" → "));
+  const genreSet = new Set<string>();
+  // Skip "CANONICAL" — it's the universal top-level marker for every
+  // curated-corpus fragment in eBL, so it leaks overlap to all pairs and
+  // makes require_genre_overlap useless. We keep it in the display path.
+  for (const g of body.genres ?? []) {
+    for (const c of g.category) {
+      if (c !== "CANONICAL") genreSet.add(c);
+    }
+  }
+  const joinMembers = new Set<string>();
+  const joinGroupStrs: string[] = [];
+  for (const group of body.joins ?? []) {
+    const groupStr = group.map((j) => fmtMnTuple(j.museumNumber)).join(" + ");
+    if (groupStr) joinGroupStrs.push(groupStr);
+    for (const j of group) joinMembers.add(fmtMnTuple(j.museumNumber));
+  }
+  const rec: EnrichedRecord = {
+    museumNumber: body.museumNumber ? fmtMnTuple(body.museumNumber) : mn,
+    designation: body.designation,
+    lineToVec: Array.isArray(body.lineToVec) ? body.lineToVec : undefined,
+    genres,
+    genreSet,
+    joinMembers,
+    joinGroupsStr: joinGroupStrs.join("; "),
+  };
+  enrichmentCache.set(mn, rec);
+  return rec;
+}
+
+async function fetchEnrichmentBatch(mns: string[], concurrency = 5): Promise<void> {
+  let cursor = 0;
+  async function worker() {
+    while (cursor < mns.length) {
+      const i = cursor++;
+      await fetchEnrichment(mns[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, mns.length) }, () => worker()));
+}
+
 server.registerTool(
   "find_join_candidates",
   {
     description:
-      "Find fragments that may physically join a target eBL fragment by running the same lineToVec prefix/suffix overlap algorithm as eBL's /match endpoint (reproduced locally, no Auth0). Returns top 15 by raw score and top 15 by ruling-weighted score.",
+      "Rank eBL fragments by line-structure fingerprint similarity to a target — surfaces parallel manuscripts of the same composition, structurally similar bilinguals, AND possible physical joins (not all hits are joins). Reproduces eBL's /match algorithm locally (lineToVec prefix/suffix overlap, no Auth0). Returns top 15 by raw overlap length and top 15 by ruling-weighted score, with each candidate's genres + known joins surfaced inline.",
     inputSchema: {
       museum_number: z
         .string()
@@ -1072,10 +1166,24 @@ server.registerTool(
         .max(50)
         .optional()
         .describe("Number of candidates returned per ranking (default 15, matches eBL)."),
+      filter_known_joins: z
+        .boolean()
+        .optional()
+        .describe(
+          "When true, drop candidates already listed in the target's joins[] (the matcher will otherwise re-surface them). Default false.",
+        ),
+      require_genre_overlap: z
+        .boolean()
+        .optional()
+        .describe(
+          "When true, drop candidates that don't share at least one genre category with the target (at any level of the hierarchy). Helpful for separating parallel manuscripts from coincidentally similar bilinguals. Default false.",
+        ),
     },
   },
-  async ({ museum_number, top_k }) => {
+  async ({ museum_number, top_k, filter_known_joins, require_genre_overlap }) => {
     const k = top_k ?? 15;
+    const filterJoins = filter_known_joins === true;
+    const requireGenre = require_genre_overlap === true;
     // Normalize "BM.41255C" → "BM.41255.C" same as get_fragment.
     const normalize = (s: string): string => {
       const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
@@ -1095,46 +1203,26 @@ server.registerTool(
       );
     }
 
-    // Locate the target in the corpus. If it's not present (e.g. cache
-    // doesn't yet cover this prefix), fetch it on-demand from eBL.
-    let target = corpus.fragments.find((f) => f.museumNumber === targetId);
-    if (!target) {
-      const url = `${URLS.EBL_BASE}/fragments/${encodeURIComponent(targetId)}`;
-      let res: Response;
-      try {
-        res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-      } catch (err) {
-        return textResult(
-          `Target "${targetId}" not in local cache (${corpus.fragments.length} fragments) ` +
-            `and live fetch failed: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
-      if (res.status === 404) {
-        return textResult(
-          `No fragment "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
-        );
-      }
-      if (!res.ok) {
-        return textResult(`eBL returned HTTP ${res.status} fetching ${targetId}.`);
-      }
-      const body = (await res.json()) as {
-        museumNumber?: { prefix: string; number: string; suffix: string };
-        lineToVec?: number[][];
-        designation?: string;
-      };
-      const mn = body.museumNumber
-        ? `${body.museumNumber.prefix}.${body.museumNumber.number}${body.museumNumber.suffix ? "." + body.museumNumber.suffix : ""}`
-        : targetId;
-      target = {
-        museumNumber: mn,
-        lineToVec: Array.isArray(body.lineToVec) ? body.lineToVec : [],
-        designation: body.designation,
-      };
+    // Always fetch target's enriched record — we need genres + joins for
+    // display and (optionally) filtering. fetchEnrichment also returns
+    // lineToVec, so this single call covers the cache-miss path too.
+    const targetEnriched = await fetchEnrichment(targetId);
+    if (!targetEnriched) {
+      // Distinguish "no such fragment" from "couldn't fetch": loadCorpus
+      // already proved the cache works, so a null here means HTTP failure or 404.
+      return textResult(
+        `Couldn't fetch eBL record for "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
+      );
     }
 
-    if (!target.lineToVec || target.lineToVec.length === 0) {
+    // Prefer the target's lineToVec from the corpus (saves no fetch, but
+    // proves the corpus was built from the same /fragments/<id> shape).
+    const targetCached = corpus.fragments.find((f) => f.museumNumber === targetEnriched.museumNumber);
+    const targetLineToVec = targetCached?.lineToVec ?? targetEnriched.lineToVec;
+    const targetDesignation = targetCached?.designation ?? targetEnriched.designation;
+    if (!targetLineToVec || targetLineToVec.length === 0) {
       return textResult(
-        `${targetId} has no lineToVec encoding (likely untransliterated). The join matcher cannot score it.`,
+        `${targetEnriched.museumNumber} has no lineToVec encoding (likely untransliterated). The join matcher cannot score it.`,
       );
     }
 
@@ -1142,9 +1230,9 @@ server.registerTool(
     type RankedHit = { museumNumber: string; designation?: string; score: number; weighted: number };
     const hits: RankedHit[] = [];
     for (const cand of corpus.fragments) {
-      if (cand.museumNumber === target.museumNumber) continue;
+      if (cand.museumNumber === targetEnriched.museumNumber) continue;
       if (!cand.lineToVec || cand.lineToVec.length === 0) continue;
-      const { score, scoreWeighted } = scoreBoth(target.lineToVec, cand.lineToVec);
+      const { score, scoreWeighted } = scoreBoth(targetLineToVec, cand.lineToVec);
       if (score === 0 && scoreWeighted === 0) continue;
       hits.push({
         museumNumber: cand.museumNumber,
@@ -1154,27 +1242,70 @@ server.registerTool(
       });
     }
 
-    const topRaw = [...hits].sort((a, b) => b.score - a.score).slice(0, k);
-    const topWeighted = [...hits].sort((a, b) => b.weighted - a.weighted).slice(0, k);
+    // Sort once per ranking; take the union of the top-K candidates from
+    // each as the enrichment pool. Filters are applied AFTER enrichment,
+    // so the returned list can be shorter than K if filtering culls hits.
+    const topRawAll = [...hits].sort((a, b) => b.score - a.score);
+    const topWeightedAll = [...hits].sort((a, b) => b.weighted - a.weighted);
+    const poolSet = new Set<string>();
+    for (const h of topRawAll.slice(0, k)) poolSet.add(h.museumNumber);
+    for (const h of topWeightedAll.slice(0, k)) poolSet.add(h.museumNumber);
+    await fetchEnrichmentBatch([...poolSet], 5);
+
+    const matchesFilters = (mn: string): boolean => {
+      if (filterJoins && targetEnriched.joinMembers.has(mn)) return false;
+      if (requireGenre) {
+        const candEnriched = enrichmentCache.get(mn);
+        if (!candEnriched) return false; // couldn't enrich → can't prove overlap
+        let overlap = false;
+        for (const c of candEnriched.genreSet) {
+          if (targetEnriched.genreSet.has(c)) {
+            overlap = true;
+            break;
+          }
+        }
+        if (!overlap) return false;
+      }
+      return true;
+    };
+
+    const topRaw = topRawAll.filter((h) => matchesFilters(h.museumNumber)).slice(0, k);
+    const topWeighted = topWeightedAll.filter((h) => matchesFilters(h.museumNumber)).slice(0, k);
+
+    const renderHit = (h: RankedHit, i: number, scoreField: "score" | "weighted"): string[] => {
+      const cand = enrichmentCache.get(h.museumNumber);
+      const out: string[] = [];
+      const scoreLabel = scoreField === "score" ? "score" : "weighted";
+      out.push(
+        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} ${scoreLabel}=${h[scoreField]}` +
+          (h.designation ? `   ${h.designation}` : ""),
+      );
+      if (cand?.genres.length) out.push(`     genres: ${cand.genres.join("; ")}`);
+      if (cand?.joinGroupsStr) out.push(`     joins:  ${cand.joinGroupsStr}`);
+      return out;
+    };
+
+    const targetHeaderBits: string[] = [];
+    if (targetEnriched.genres.length) targetHeaderBits.push(`Target genres: ${targetEnriched.genres.join("; ")}`);
+    if (targetEnriched.joinGroupsStr) targetHeaderBits.push(`Target known joins: ${targetEnriched.joinGroupsStr}`);
+
+    const filterNotes: string[] = [];
+    if (filterJoins) filterNotes.push(`filter_known_joins=true (${targetEnriched.joinMembers.size} fragments excluded)`);
+    if (requireGenre) filterNotes.push(`require_genre_overlap=true (${targetEnriched.genreSet.size} target categories)`);
 
     const ageMin = corpus.ageMs ? (corpus.ageMs / 60_000).toFixed(1) : "?";
     const lines: string[] = [
-      `Join candidates for ${target.museumNumber}${target.designation ? `  (${target.designation})` : ""}`,
-      `Scored against ${corpus.fragments.length} cached fragments. Cache age: ${ageMin}m. Local algorithm (eBL lineToVec overlap), no Auth0.`,
+      `Structural-similarity candidates for ${targetEnriched.museumNumber}${targetDesignation ? `  (${targetDesignation})` : ""}`,
+      `Scored against ${corpus.fragments.length} cached fragments. Cache age: ${ageMin}m. Local lineToVec algorithm, no Auth0.`,
+      `Note: hits include parallel manuscripts + structurally similar bilinguals + possible physical joins — disambiguate with the genres/joins below each hit.`,
+      ...targetHeaderBits,
+      ...(filterNotes.length ? [`Filters: ${filterNotes.join(" · ")}`] : []),
       ``,
       `— TOP ${topRaw.length} BY RAW SCORE (suffix/prefix overlap length) —`,
-      ...topRaw.map(
-        (h, i) =>
-          `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} score=${h.score}` +
-          (h.designation ? `   ${h.designation}` : ""),
-      ),
+      ...topRaw.flatMap((h, i) => renderHit(h, i, "score")),
       ``,
       `— TOP ${topWeighted.length} BY WEIGHTED SCORE (rulings count 3-10×, text lines 1×) —`,
-      ...topWeighted.map(
-        (h, i) =>
-          `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} weighted=${h.weighted}` +
-          (h.designation ? `   ${h.designation}` : ""),
-      ),
+      ...topWeighted.flatMap((h, i) => renderHit(h, i, "weighted")),
     ];
     return textResult(lines.join("\n"));
   },
