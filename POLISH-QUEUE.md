@@ -42,7 +42,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 - [ ] **Try filtering `X` (unreadable) tokens from trigrams.** ~35% of known siblings score zero by trigram — partly because damaged pieces have many `X`-trigrams that don't match the corresponding readable signs on the joined piece. An experiment: regenerate the index with X-containing trigrams dropped, re-validate against the same 50-target baseline, ship only if recall increases. Cost: ~10 min.
 
-- [ ] **Try sign-variant normalization** — collapse `ABZ406v2` → `ABZ406`, `ABZ85/ABZ84` → split into two trigram variants. Could increase recall by matching across paleographic variants of the same sign. Same validation harness applies.
+- [x] **Try sign-variant normalization** — SHELVED 2026-05-14 (negative result). Wrote `scripts/validate-trigram-normalized.mjs` testing 6 variants (`vN`-collapse, slash-split, letter-suffix collapse, `nN`-variant collapse, all-conservative, all-aggressive) against the same 50 target / 87 sibling baseline. Pure-collapse rules (`vN`, letter-suffix, `nN`) produced **zero rank changes anywhere in the 87-sibling set** — the variant forms exist (~60K total occurrences) but don't co-occur in trigram windows that contain join evidence. Slash-split actively hurt: lost K.18780 → K.9041 from rank 14 to 16 because Cartesian-product expansion inflates the Jaccard denominator uniformly across candidates faster than it grows true-pair intersections. 25.3% baseline stands. Full writeup: `NORMALIZATION-EXPERIMENT-2026-05-14.md`. `find_parallel_text` ships without normalization.
 
 - [ ] **Tag eBL `joins[]` entries by physical-vs-parallel.** `Ist-A.7` ↔ `VAT.10383` is in `joins[]` but they're parallel manuscripts (literally identical opening signs), not physical pieces of one tablet. Filtering these out would let us measure pure-physical-join recall separately. Probably requires an Assyriologist's review of edge cases — not a hobby-scale project.
 
@@ -52,5 +52,6 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 - (P0) `get_fragment` fetch failure via undici Happy Eyeballs (`d9c1038` + `2a9d01c`)
 - (P1) `find_join_candidates` ranker semantics + genre/joins filters (`2a9d01c`)
+- (P4) Sign-variant normalization — shelved, negative result (`NORMALIZATION-EXPERIMENT-2026-05-14.md`)
 
 <!-- Add new items at the bottom of the appropriate priority section. Roll completed items into "Done" with commit sha. -->

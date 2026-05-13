@@ -1,0 +1,4370 @@
+{
+  "ranAt": "2026-05-13T23:11:22.629Z",
+  "topK": 15,
+  "corpusRecords": 36498,
+  "variants": [
+    {
+      "name": "baseline",
+      "opts": {},
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 22,
+      "recall": 0.25287356321839083,
+      "medianRank": 89,
+      "meanRank": 1951.8035714285713,
+      "buckets": {
+        "top15": 22,
+        "top50": 5,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 4,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 31
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 437
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 239
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 89
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": null
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 36
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 5
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 55
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7219
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8334
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6204
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1716
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15472
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4919
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11357
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 912
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10423
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7299
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3871
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 871
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 165
+            },
+            {
+              "mn": "K.11067",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 91
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 842
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 571
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 617
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4196
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6841
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10410
+            },
+            {
+              "mn": "K.3710",
+              "rank": 287
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 26
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 14
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 105
+            },
+            {
+              "mn": "K.17120",
+              "rank": 220
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5194
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "vN-collapse",
+      "opts": {
+        "applyVn": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 22,
+      "recall": 0.25287356321839083,
+      "medianRank": 89,
+      "meanRank": 1951.8035714285713,
+      "buckets": {
+        "top15": 22,
+        "top50": 5,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 4,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 31
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 437
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 239
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 89
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": null
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 36
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 5
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 55
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7219
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8334
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6204
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1716
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15472
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4919
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11357
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 912
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10423
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7299
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3871
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 871
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 165
+            },
+            {
+              "mn": "K.11067",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 91
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 842
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 571
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 617
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4196
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6841
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10410
+            },
+            {
+              "mn": "K.3710",
+              "rank": 287
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 26
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 14
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 105
+            },
+            {
+              "mn": "K.17120",
+              "rank": 220
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5194
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "slash-split",
+      "opts": {
+        "applySlash": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 21,
+      "recall": 0.2413793103448276,
+      "medianRank": 57,
+      "meanRank": 1936.0877192982457,
+      "buckets": {
+        "top15": 21,
+        "top50": 6,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 5,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 30
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 434
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 248
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 54
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": 503
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 33
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 57
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7092
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8335
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6744
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1608
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15648
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4790
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11515
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 911
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10397
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7185
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3726
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 1001
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 168
+            },
+            {
+              "mn": "K.11067",
+              "rank": 3
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 93
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 941
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 552
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 659
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4197
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6799
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10485
+            },
+            {
+              "mn": "K.3710",
+              "rank": 318
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 25
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 16
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 105
+            },
+            {
+              "mn": "K.17120",
+              "rank": 221
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5228
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "letter-suffix",
+      "opts": {
+        "applyLetterSuffix": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 22,
+      "recall": 0.25287356321839083,
+      "medianRank": 89,
+      "meanRank": 1952.3214285714287,
+      "buckets": {
+        "top15": 22,
+        "top50": 5,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 4,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 31
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 437
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 239
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 89
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": null
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 36
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 5
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 55
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7221
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8336
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6205
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1716
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15481
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4919
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11357
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 913
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10423
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7302
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3871
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 871
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 165
+            },
+            {
+              "mn": "K.11067",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 91
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 843
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 571
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 618
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4196
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6842
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10413
+            },
+            {
+              "mn": "K.3710",
+              "rank": 287
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 26
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 14
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 105
+            },
+            {
+              "mn": "K.17120",
+              "rank": 223
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5196
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nN-variant",
+      "opts": {
+        "applyNvariant": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 22,
+      "recall": 0.25287356321839083,
+      "medianRank": 89,
+      "meanRank": 1952.0357142857142,
+      "buckets": {
+        "top15": 22,
+        "top50": 5,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 4,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 31
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 437
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 239
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 89
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": null
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 36
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 5
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 55
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7220
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8335
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6204
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1716
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15472
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4919
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11359
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 912
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10424
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7301
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3872
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 871
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 165
+            },
+            {
+              "mn": "K.11067",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 91
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 842
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 571
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 618
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4196
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6841
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10412
+            },
+            {
+              "mn": "K.3710",
+              "rank": 287
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 26
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 14
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 105
+            },
+            {
+              "mn": "K.17120",
+              "rank": 221
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5195
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "all-conservative (vN+slash)",
+      "opts": {
+        "applyVn": true,
+        "applySlash": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 21,
+      "recall": 0.2413793103448276,
+      "medianRank": 57,
+      "meanRank": 1936.0526315789473,
+      "buckets": {
+        "top15": 21,
+        "top50": 6,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 5,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 30
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 434
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 248
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 54
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": 503
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 33
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 57
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7092
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8335
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6744
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1608
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15648
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4790
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11515
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 911
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10397
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7185
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3726
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 1001
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 168
+            },
+            {
+              "mn": "K.11067",
+              "rank": 3
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 93
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 941
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 552
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 659
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4197
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6799
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10485
+            },
+            {
+              "mn": "K.3710",
+              "rank": 318
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 25
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 16
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 104
+            },
+            {
+              "mn": "K.17120",
+              "rank": 220
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5228
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "all-aggressive (vN+slash+letter+nN)",
+      "opts": {
+        "applyVn": true,
+        "applySlash": true,
+        "applyLetterSuffix": true,
+        "applyNvariant": true
+      },
+      "corpusSize": 35579,
+      "totalSiblings": 87,
+      "inTopK": 21,
+      "recall": 0.2413793103448276,
+      "medianRank": 57,
+      "meanRank": 1936.8070175438597,
+      "buckets": {
+        "top15": 21,
+        "top50": 6,
+        "top100": 3,
+        "top500": 7,
+        "top1k": 5,
+        "top5k": 5,
+        "top10k": 6,
+        "beyond": 4,
+        "none": 30
+      },
+      "results": [
+        {
+          "target": "BM.35882",
+          "siblings": [
+            {
+              "mn": "BM.35544",
+              "rank": 434
+            },
+            {
+              "mn": "BM.35733",
+              "rank": 248
+            }
+          ]
+        },
+        {
+          "target": "BM.39639",
+          "siblings": [
+            {
+              "mn": "BM.38610",
+              "rank": 54
+            }
+          ]
+        },
+        {
+          "target": "1879,0708.334",
+          "siblings": [
+            {
+              "mn": "K.3151.A",
+              "rank": 504
+            },
+            {
+              "mn": "K.9501",
+              "rank": null
+            },
+            {
+              "mn": "K.19558",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.50958",
+          "siblings": [
+            {
+              "mn": "BM.51367",
+              "rank": 1
+            },
+            {
+              "mn": "BM.52326",
+              "rank": 7
+            },
+            {
+              "mn": "BM.53505",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "K.10669",
+          "siblings": [
+            {
+              "mn": "K.12066",
+              "rank": 2
+            }
+          ]
+        },
+        {
+          "target": "HS.2164",
+          "siblings": [
+            {
+              "mn": "HS.1326",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20845",
+          "siblings": [
+            {
+              "mn": "K.15177",
+              "rank": null
+            },
+            {
+              "mn": "K.20776",
+              "rank": null
+            },
+            {
+              "mn": "K.20874",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.6211",
+          "siblings": [
+            {
+              "mn": "Sm.1044",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "Sm.571.B",
+          "siblings": [
+            {
+              "mn": "K.8468",
+              "rank": 33
+            }
+          ]
+        },
+        {
+          "target": "K.20382",
+          "siblings": [
+            {
+              "mn": "K.17638",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "BM.41897",
+          "siblings": [
+            {
+              "mn": "BM.42214",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.12811",
+          "siblings": [
+            {
+              "mn": "K.10385",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.8064",
+          "siblings": [
+            {
+              "mn": "K.13974",
+              "rank": 57
+            }
+          ]
+        },
+        {
+          "target": "K.5423.B",
+          "siblings": [
+            {
+              "mn": "K.4221",
+              "rank": 7094
+            }
+          ]
+        },
+        {
+          "target": "HS.2747",
+          "siblings": [
+            {
+              "mn": "HS.2661",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2176",
+          "siblings": [
+            {
+              "mn": "K.2249",
+              "rank": 8336
+            }
+          ]
+        },
+        {
+          "target": "K.16981",
+          "siblings": [
+            {
+              "mn": "K.6760",
+              "rank": null
+            },
+            {
+              "mn": "K.10302",
+              "rank": 6747
+            },
+            {
+              "mn": "K.17871",
+              "rank": null
+            },
+            {
+              "mn": "K.18926",
+              "rank": 1608
+            }
+          ]
+        },
+        {
+          "target": "K.5834",
+          "siblings": [
+            {
+              "mn": "K.18594",
+              "rank": 15657
+            }
+          ]
+        },
+        {
+          "target": "Ist-A.7",
+          "siblings": [
+            {
+              "mn": "VAT.10383",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.46372",
+          "siblings": [
+            {
+              "mn": "BM.46338",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.8888",
+          "siblings": [
+            {
+              "mn": "K.4207",
+              "rank": 4791
+            }
+          ]
+        },
+        {
+          "target": "K.2568",
+          "siblings": [
+            {
+              "mn": "K.18253",
+              "rank": 20
+            }
+          ]
+        },
+        {
+          "target": "BM.37964",
+          "siblings": [
+            {
+              "mn": "BM.37494",
+              "rank": null
+            },
+            {
+              "mn": "BM.37616",
+              "rank": 11519
+            },
+            {
+              "mn": "BM.38076",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.14160",
+          "siblings": [
+            {
+              "mn": "K.2259",
+              "rank": 912
+            }
+          ]
+        },
+        {
+          "target": "K.16655",
+          "siblings": [
+            {
+              "mn": "K.20127",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.20251",
+          "siblings": [
+            {
+              "mn": "1879,0708.147",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.17143",
+          "siblings": [
+            {
+              "mn": "K.2352",
+              "rank": 10398
+            },
+            {
+              "mn": "K.14218",
+              "rank": null
+            },
+            {
+              "mn": "K.16762",
+              "rank": null
+            },
+            {
+              "mn": "K.9174",
+              "rank": null
+            },
+            {
+              "mn": "K.9895",
+              "rank": 7189
+            },
+            {
+              "mn": "K.13824",
+              "rank": 3727
+            }
+          ]
+        },
+        {
+          "target": "K.12296",
+          "siblings": [
+            {
+              "mn": "K.6427",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.16654",
+          "siblings": [
+            {
+              "mn": "K.8307",
+              "rank": null
+            },
+            {
+              "mn": "K.12524",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13973",
+          "siblings": [
+            {
+              "mn": "K.5900",
+              "rank": 4
+            }
+          ]
+        },
+        {
+          "target": "K.13775",
+          "siblings": [
+            {
+              "mn": "K.12634",
+              "rank": null
+            },
+            {
+              "mn": "K.17273",
+              "rank": null
+            },
+            {
+              "mn": "K.18289",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.2797",
+          "siblings": [
+            {
+              "mn": "K.15933",
+              "rank": 1001
+            }
+          ]
+        },
+        {
+          "target": "K.6206",
+          "siblings": [
+            {
+              "mn": "K.2416",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.20384",
+          "siblings": [
+            {
+              "mn": "K.17444",
+              "rank": null
+            },
+            {
+              "mn": "K.19257",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.5907.A",
+          "siblings": [
+            {
+              "mn": "K.3240",
+              "rank": 168
+            },
+            {
+              "mn": "K.11067",
+              "rank": 3
+            }
+          ]
+        },
+        {
+          "target": "BM.35842",
+          "siblings": [
+            {
+              "mn": "BM.34381",
+              "rank": 93
+            }
+          ]
+        },
+        {
+          "target": "HS.2739.B",
+          "siblings": [
+            {
+              "mn": "HS.2739.AH",
+              "rank": 2
+            },
+            {
+              "mn": "HS.2739.G",
+              "rank": 32
+            },
+            {
+              "mn": "HS.2739.H",
+              "rank": 31
+            },
+            {
+              "mn": "HS.2739.J",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "K.9637",
+          "siblings": [
+            {
+              "mn": "K.12414",
+              "rank": 943
+            }
+          ]
+        },
+        {
+          "target": "K.13521",
+          "siblings": [
+            {
+              "mn": "K.3647",
+              "rank": 1
+            },
+            {
+              "mn": "K.5124",
+              "rank": 552
+            },
+            {
+              "mn": "K.19487",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.10481",
+          "siblings": [
+            {
+              "mn": "K.6456",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.3213",
+          "siblings": [
+            {
+              "mn": "K.9592",
+              "rank": 660
+            }
+          ]
+        },
+        {
+          "target": "K.13507",
+          "siblings": [
+            {
+              "mn": "K.3517",
+              "rank": 132
+            },
+            {
+              "mn": "K.9172",
+              "rank": 4197
+            }
+          ]
+        },
+        {
+          "target": "K.10739",
+          "siblings": [
+            {
+              "mn": "K.2211",
+              "rank": 6
+            }
+          ]
+        },
+        {
+          "target": "K.7232",
+          "siblings": [
+            {
+              "mn": "K.1748",
+              "rank": 6799
+            },
+            {
+              "mn": "K.2678",
+              "rank": 10491
+            },
+            {
+              "mn": "K.3710",
+              "rank": 318
+            }
+          ]
+        },
+        {
+          "target": "K.18029",
+          "siblings": [
+            {
+              "mn": "K.17525",
+              "rank": null
+            },
+            {
+              "mn": "K.17648",
+              "rank": 7
+            },
+            {
+              "mn": "K.18117",
+              "rank": null
+            },
+            {
+              "mn": "K.18309",
+              "rank": null
+            },
+            {
+              "mn": "K.18440",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.11957",
+          "siblings": [
+            {
+              "mn": "K.16457",
+              "rank": 1
+            }
+          ]
+        },
+        {
+          "target": "BM.36269",
+          "siblings": [
+            {
+              "mn": "BM.36260",
+              "rank": 25
+            }
+          ]
+        },
+        {
+          "target": "K.18780",
+          "siblings": [
+            {
+              "mn": "K.9041",
+              "rank": 16
+            },
+            {
+              "mn": "K.18591",
+              "rank": null
+            },
+            {
+              "mn": "K.18654",
+              "rank": null
+            }
+          ]
+        },
+        {
+          "target": "K.13391",
+          "siblings": [
+            {
+              "mn": "K.8604",
+              "rank": 104
+            },
+            {
+              "mn": "K.17120",
+              "rank": 223
+            }
+          ]
+        },
+        {
+          "target": "K.12287",
+          "siblings": [
+            {
+              "mn": "K.2187",
+              "rank": 5231
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
