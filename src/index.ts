@@ -233,42 +233,122 @@ const server = new McpServer({
   version: VERSION,
 });
 
-// 1. lookup_sign — WORKING (OGSL labasi-signs.json, 239 signs).
+// 1. lookup_sign — LIVE (OGSL labasi warm-cache → eBL /signs/{NAME} fallback).
+//
+// OGSL labasi-signs.json (239 curated signs) gives a fast Borger ABZ + MZL
+// lookup once warm. For everything outside that subset, fall through to eBL's
+// /signs/{NAME} endpoint, which exposes the full canonical sign record:
+// 7 cross-list refs (ABZ, MZL, LAK, HZL, KWU, OBZL, SLLHA), the Unicode
+// code-point of the cuneiform glyph, all phonetic sound values with subindex,
+// and known logograms. eBL is case-sensitive — always uppercase before query.
+type EblSignResponse = {
+  name?: string;
+  unicode?: number[];
+  lists?: Array<{ name: string; number: string }>;
+  values?: Array<{ value: string; subIndex?: number }>;
+  logograms?: Array<{ logogram: string; wordId?: string[] }>;
+  LaBaSi?: string;
+};
+
+async function fetchEblSign(name: string): Promise<EblSignResponse | null> {
+  const url = `${URLS.EBL_BASE}/signs/${encodeURIComponent(name)}`;
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    if (res.status === 404) return null;
+    if (!res.ok) return null;
+    return (await res.json()) as EblSignResponse;
+  } catch {
+    return null;
+  }
+}
+
+function subscript(n: number | undefined): string {
+  if (n === undefined) return "";
+  const digits = "₀₁₂₃₄₅₆₇₈₉";
+  return String(n)
+    .split("")
+    .map((c) => (/\d/.test(c) ? digits[parseInt(c, 10)] : c))
+    .join("");
+}
+
 server.registerTool(
   "lookup_sign",
   {
     description:
-      "Look up a cuneiform sign by name. Returns Borger ABZ + MZL sign-list reference numbers. Source: ORACC OGSL labasi-signs.json (239 signs).",
+      "Look up a cuneiform sign by name. Returns Borger ABZ + MZL + LAK + HZL + KWU + OBZL + SLLHA cross-refs, the cuneiform glyph, phonetic sound values, and known logograms. Source: OGSL Labasi (239 curated signs, fast) with fall-through to eBL /api/signs (full canonical sign record).",
     inputSchema: {
       sign: z
         .string()
         .min(1)
-        .describe("Sign name, e.g. AN, EN, KI, GUD. Case-insensitive."),
+        .describe("Sign name, e.g. AN, EN, KI, GUD, LUGAL. Case-insensitive on input — normalized to upper-case for eBL."),
+      max_values: z
+        .number()
+        .int()
+        .positive()
+        .max(200)
+        .optional()
+        .describe("Cap on phonetic sound values shown when the eBL path returns them (default 30)."),
     },
   },
-  async ({ sign }) => {
+  async ({ sign, max_values }) => {
+    const cap = max_values ?? 30;
+    const NAME = sign.toUpperCase();
+
+    // 1) Warm-cache OGSL lookup first — fast path for the 239 most-studied signs.
     const signs = await loadSigns();
-    const hit = signs.get(sign.toUpperCase());
-    if (!hit) {
-      const candidates = [...signs.keys()]
-        .filter((k) => k.includes(sign.toUpperCase()))
-        .slice(0, 10);
+    const ogsl = signs.get(NAME);
+
+    if (ogsl) {
+      const out = [
+        `Sign: ${ogsl.sign_name}  (source: OGSL Labasi)`,
+        `Borger ABZ:  ${ogsl.abz_number ?? "—"}`,
+        `Borger MZL:  ${ogsl.meszl_number ?? "—"}`,
+        ogsl.image_1 ? `Image: ${ogsl.image_1}` : null,
+        ``,
+        `Tip: re-call with max_values to also fetch sound values + 7 list refs from eBL.`,
+      ];
+      return textResult(out.filter((l) => l !== null).join("\n"));
+    }
+
+    // 2) Fall through to eBL for the canonical sign record (covers ~600+ signs).
+    const ebl = await fetchEblSign(NAME);
+    if (!ebl) {
+      // 3) Helpful failure — show OGSL near-matches if any.
+      const ogslCandidates = [...signs.keys()].filter((k) => k.includes(NAME)).slice(0, 10);
+      const tail = ogslCandidates.length
+        ? `\nOGSL near-matches: ${ogslCandidates.join(", ")}`
+        : "";
       return textResult(
-        candidates.length
-          ? `Sign "${sign}" not found exactly. Candidates: ${candidates.join(", ")}`
-          : `Sign "${sign}" not found in OGSL labasi subset (239 signs). For full coverage see https://oracc.org/ogsl/`,
+        `Sign "${sign}" not found in OGSL Labasi (239 signs) or eBL /signs (full canonical list).${tail}`,
       );
     }
-    return textResult(
-      [
-        `Sign: ${hit.sign_name}`,
-        `Borger ABZ:  ${hit.abz_number ?? "—"}`,
-        `Borger MZL:  ${hit.meszl_number ?? "—"}`,
-        hit.image_1 ? `Image: ${hit.image_1}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    );
+
+    const lists = (ebl.lists ?? []).map((l) => `${l.name} ${l.number}`).join(" · ");
+    const glyph = (ebl.unicode ?? [])
+      .map((cp) => String.fromCodePoint(cp))
+      .join("");
+    const values = (ebl.values ?? [])
+      .map((v) => `${v.value}${subscript(v.subIndex)}`)
+      .slice(0, cap);
+    const valuesTrunc = (ebl.values?.length ?? 0) > cap;
+
+    const logograms = (ebl.logograms ?? [])
+      .slice(0, 5)
+      .map((l) => l.logogram.replace(/<[^>]+>/g, "").trim());
+
+    const lines: (string | null)[] = [
+      `Sign: ${ebl.name ?? NAME}${glyph ? `  ${glyph}` : ""}  (source: eBL /signs)`,
+      lists ? `Lists: ${lists}${ebl.LaBaSi ? ` · LaBaSi ${ebl.LaBaSi}` : ""}` : null,
+      values.length
+        ? `Sound values (${ebl.values?.length ?? 0}${valuesTrunc ? `, showing first ${cap}` : ""}): ${values.join(", ")}`
+        : null,
+      logograms.length
+        ? `Logograms (${ebl.logograms?.length ?? 0}, showing first 5): ${logograms.join(" · ")}`
+        : null,
+      ``,
+      `Source: ${URLS.EBL_BASE}/signs/${encodeURIComponent(NAME)}`,
+    ];
+    return textResult(lines.filter((l) => l !== null).join("\n"));
   },
 );
 
