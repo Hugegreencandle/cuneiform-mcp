@@ -552,21 +552,151 @@ server.registerTool(
   },
 );
 
-// 7. get_fragment — STUB.
+// 7. get_fragment — LIVE (eBL /fragments/<id>, no auth required).
 server.registerTool(
   "get_fragment",
   {
-    description: "[v0.1 stub] Get one eBL fragment by museum number (e.g. 'K.1').",
+    description:
+      "Fetch full eBL fragment record by museum number — publication, description, script, joins, transliteration, references.",
     inputSchema: {
-      museum_number: z.string().describe("eBL museum number, e.g. 'K.1', 'BM.42345'."),
+      museum_number: z
+        .string()
+        .min(1)
+        .describe(
+          "eBL museum number. Accepted forms: 'K.1', 'BM.42345', 'BM.41255C' (auto-normalized to 'BM.41255.C'), 'Ki.1904-10-9,1'.",
+        ),
+      max_lines: z
+        .number()
+        .int()
+        .positive()
+        .max(500)
+        .optional()
+        .describe("Cap transliteration lines shown (default 60)."),
     },
   },
-  async () =>
-    stubResult(
-      "get_fragment",
-      `${URLS.EBL_BASE}/fragments/`,
-      "v0.2 — Auth0-protected endpoints exist; need to verify which read paths are open vs scope-required.",
-    ),
+  async ({ museum_number, max_lines }) => {
+    const cap = max_lines ?? 60;
+    // eBL stores museum numbers as {prefix, number, suffix} and the URL form
+    // is "Prefix.Number.Suffix" with a dot before the suffix. Users frequently
+    // type "BM.41255C" (no dot) — normalize.
+    const normalize = (s: string): string => {
+      const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
+      return m ? `${m[1]}.${m[2]}.${m[3]}` : s;
+    };
+    const id = normalize(museum_number.trim());
+    const url = `${URLS.EBL_BASE}/fragments/${encodeURIComponent(id)}`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    } catch (err) {
+      return textResult(
+        `eBL fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+      );
+    }
+    if (res.status === 404) {
+      return textResult(
+        `No fragment "${museum_number}" (tried ${id}). Use search_fragments to discover valid IDs.`,
+      );
+    }
+    if (!res.ok) {
+      return textResult(`eBL returned HTTP ${res.status} for ${url}.`);
+    }
+    type Dim = { value: number; note?: string } | null;
+    type Frag = {
+      museumNumber: { prefix: string; number: string; suffix: string };
+      publication?: string;
+      description?: string;
+      collection?: string;
+      museum?: string;
+      script?: { period?: string; periodModifier?: string };
+      genres?: Array<{ category: string[] }>;
+      externalNumbers?: { cdliNumber?: string; bmIdNumber?: string; oraccNumbers?: string[] };
+      length?: Dim;
+      width?: Dim;
+      thickness?: Dim;
+      joins?: Array<Array<{ museumNumber: { prefix: string; number: string; suffix: string } }>>;
+      references?: Array<{ id: string; type?: string; pages?: string }>;
+      cdliImages?: string[];
+      hasPhoto?: boolean;
+      text?: {
+        numberOfLines: number;
+        lines: Array<{ prefix?: string; content?: Array<{ value: string }> }>;
+      };
+    };
+    const f = (await res.json()) as Frag;
+
+    const fmtMuseum = (mn: Frag["museumNumber"]) =>
+      `${mn.prefix}.${mn.number}${mn.suffix ? "." + mn.suffix : ""}`;
+    const fmtDim = (d: Dim | undefined) =>
+      d && typeof d.value === "number" ? `${d.value}${d.note ? " " + d.note : ""}` : null;
+
+    const lines: string[] = [];
+    lines.push(`${fmtMuseum(f.museumNumber)}${f.museum ? ` — ${f.museum.replace(/_/g, " ")}` : ""}${f.collection ? ` / ${f.collection}` : ""}`);
+    if (f.publication) lines.push(`Publication: ${f.publication.split("\n")[0].trim()}`);
+    if (f.description) lines.push(`Description: ${f.description}`);
+
+    const scriptBits = [
+      f.script?.period && f.script.period !== "None" ? f.script.period : "",
+      f.script?.periodModifier && f.script.periodModifier !== "None" ? f.script.periodModifier : "",
+    ].filter(Boolean);
+    if (scriptBits.length) lines.push(`Script: ${scriptBits.join(" / ")}`);
+
+    if (f.genres?.length) {
+      lines.push(`Genres: ${f.genres.map((g) => g.category.join(" → ")).join("; ")}`);
+    }
+
+    const ext = f.externalNumbers ?? {};
+    const extBits: string[] = [];
+    if (ext.cdliNumber) extBits.push(`CDLI ${ext.cdliNumber}`);
+    if (ext.oraccNumbers?.length) extBits.push(`ORACC ${ext.oraccNumbers.join(",")}`);
+    if (ext.bmIdNumber) extBits.push(`BM-ID ${ext.bmIdNumber}`);
+    if (extBits.length) lines.push(`External: ${extBits.join(" · ")}`);
+
+    const dims = [fmtDim(f.length), fmtDim(f.width), fmtDim(f.thickness)].filter(Boolean) as string[];
+    if (dims.length) lines.push(`Dimensions: ${dims.join(" × ")} cm`);
+
+    if (f.joins?.length) {
+      const joinStr = f.joins
+        .map((group) => group.map((j) => fmtMuseum(j.museumNumber)).join(" + "))
+        .join("; ");
+      lines.push(`Joins: ${joinStr}`);
+    }
+
+    if (f.hasPhoto || f.cdliImages?.length) {
+      const photoBits = [];
+      if (f.hasPhoto) photoBits.push("photo on file");
+      if (f.cdliImages?.length) photoBits.push(`CDLI assets: ${f.cdliImages.join(", ")}`);
+      lines.push(`Images: ${photoBits.join("; ")}`);
+    }
+
+    lines.push("");
+    const nLines = f.text?.numberOfLines ?? 0;
+    if (nLines > 0 && f.text?.lines?.length) {
+      const shown = f.text.lines.slice(0, cap);
+      const truncated = f.text.lines.length > cap;
+      lines.push(`— TRANSLITERATION (${nLines} lines${truncated ? `, showing first ${cap}` : ""}) —`);
+      for (const line of shown) {
+        const body = (line.content ?? []).map((c) => c.value).join(" ").trim();
+        lines.push(`  ${line.prefix ?? ""} ${body}`.trimEnd());
+      }
+    } else {
+      lines.push(`— TRANSLITERATION — (none recorded on this fragment)`);
+    }
+
+    if (f.references?.length) {
+      lines.push("");
+      const shownRefs = f.references.slice(0, 5);
+      lines.push(`— REFERENCES (${f.references.length}${f.references.length > 5 ? ", showing first 5" : ""}) —`);
+      for (const r of shownRefs) {
+        lines.push(`  · ${r.id}${r.type ? ` [${r.type}]` : ""}${r.pages ? ` p. ${r.pages}` : ""}`);
+      }
+    }
+
+    lines.push("");
+    lines.push(`Source: ${url}`);
+    return textResult(lines.join("\n"));
+  },
 );
 
 // 8. find_join_candidates — STUB (Fragmentarium).
@@ -590,7 +720,7 @@ server.registerTool(
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (4 live: lookup_sign, search_oracc, get_oracc_text, search_fragments)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (5 live: lookup_sign, search_oracc, get_oracc_text, search_fragments, get_fragment)\n`,
     );
     process.exit(0);
   }
