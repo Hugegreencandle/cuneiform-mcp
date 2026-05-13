@@ -484,21 +484,167 @@ server.registerTool(
   },
 );
 
-// 3. get_tablet — STUB.
+// 3. get_tablet — LIVE (CDLI /artifacts/{integer-id}).
+//
+// /artifacts/{id} takes the INTEGER DB id, NOT the P/Q-number — that's
+// the #1 naive-client landmine documented in the deep-dive brief. We
+// accept both forms from the caller: integer strings pass through;
+// P/Q-numbers are resolved via /search?simple-field[]=id&simple-value[]=<P>
+// to get the integer id, then we fetch.
+//
+// Response shape: a single-item ARRAY (not an object) — same row format as
+// /search. The ATF transliteration lives at item[0].inscription.atf as a
+// string (NOT served by the content-negotiated text/x-c-atf route — that
+// route returns 200 + empty body for these artifacts on the live server).
+async function resolveCdliId(input: string): Promise<{ id: number | null; error: string | null }> {
+  const trimmed = input.trim();
+  if (/^\d+$/.test(trimmed)) return { id: parseInt(trimmed, 10), error: null };
+  if (!/^[PQ]\d+$/i.test(trimmed)) {
+    return {
+      id: null,
+      error: `Input "${input}" is neither an integer id nor a P/Q-number (e.g. P237754 or Q000364).`,
+    };
+  }
+  const params = new URLSearchParams();
+  params.append("simple-field[]", "id");
+  params.append("simple-value[]", trimmed.toUpperCase());
+  params.append("simple-op[]", "AND");
+  params.append("limit", "1");
+  const url = `${URLS.CDLI_BASE}/search?${params.toString()}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+    });
+    if (!res.ok) return { id: null, error: `CDLI search returned HTTP ${res.status} resolving ${input}.` };
+    const arr = (await res.json()) as Array<{ id?: number }>;
+    if (!Array.isArray(arr) || arr.length === 0 || typeof arr[0].id !== "number") {
+      return { id: null, error: `No CDLI artifact matches ${input}.` };
+    }
+    return { id: arr[0].id, error: null };
+  } catch (err) {
+    return {
+      id: null,
+      error: `CDLI search failed resolving ${input}: ${err instanceof Error ? err.message : String(err)}`,
+    };
+  }
+}
+
 server.registerTool(
   "get_tablet",
   {
-    description: "[v0.1 stub] Fetch full metadata + transliteration for one CDLI artifact.",
+    description:
+      "Fetch full CDLI artifact record — metadata (designation, museum, period, languages, publications) plus the ATF transliteration when one has been entered. Accepts either the CDLI integer DB id (e.g. '469670') or a P/Q-number (e.g. 'P237754', 'Q000364').",
     inputSchema: {
-      cdli_id: z.string().describe("CDLI P-number, e.g. 'P000001'."),
+      cdli_id: z
+        .string()
+        .min(1)
+        .describe(
+          "Integer DB id (e.g. '469670') OR P/Q-number (e.g. 'P237754', 'Q000364'). P/Q form is auto-resolved.",
+        ),
+      max_atf_lines: z
+        .number()
+        .int()
+        .positive()
+        .max(2000)
+        .optional()
+        .describe("Cap on ATF lines surfaced (default 80). ATF can be 30 KB+ for long compositions."),
     },
   },
-  async () =>
-    stubResult(
-      "get_tablet",
-      `${URLS.CDLI_BASE}/artifacts/`,
-      "v0.2 — same blocker as search_tablets. Inscriptions endpoint returns C-ATF / CoNLL-U; will surface both raw transliteration and structured form.",
-    ),
+  async ({ cdli_id, max_atf_lines }) => {
+    const cap = max_atf_lines ?? 80;
+    const { id, error } = await resolveCdliId(cdli_id);
+    if (id === null) return textResult(error ?? `Could not resolve "${cdli_id}".`);
+
+    const url = `${URLS.CDLI_BASE}/artifacts/${id}`;
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+      });
+    } catch (err) {
+      return textResult(
+        `CDLI fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+      );
+    }
+    if (res.status === 404) {
+      return textResult(
+        `No CDLI artifact with id=${id}.${cdli_id !== String(id) ? ` (resolved from "${cdli_id}")` : ""}`,
+      );
+    }
+    if (!res.ok) {
+      return textResult(`CDLI returned HTTP ${res.status} for ${url}.`);
+    }
+
+    type Artifact = {
+      id: number;
+      designation?: string;
+      museum_no?: string;
+      cdli_comments?: string;
+      composites?: Array<{ composite_no?: string }>;
+      period?: { name?: string; period?: string };
+      provenience?: { provenience?: string };
+      artifact_type?: { artifact_type?: string };
+      languages?: Array<{ language?: { language?: string } }>;
+      genres?: Array<{ genre?: { genre?: string } }>;
+      publications?: Array<{ publication?: { publication?: string } }>;
+      external_resources?: Array<{ external_resource?: { external_resource?: string }; external_resource_key?: string }>;
+      inscription?: { atf?: string };
+    };
+    const body = (await res.json()) as Artifact[] | Artifact;
+    const x: Artifact | undefined = Array.isArray(body) ? body[0] : body;
+    if (!x) return textResult(`Empty response from ${url}.`);
+
+    const pNum = x.composites?.[0]?.composite_no;
+    const langs = (x.languages ?? [])
+      .map((l) => l.language?.language)
+      .filter(Boolean) as string[];
+    const genres = (x.genres ?? [])
+      .map((g) => g.genre?.genre)
+      .filter(Boolean) as string[];
+
+    const lines: (string | null)[] = [
+      `CDLI artifact id=${x.id}${pNum && pNum !== "needed" ? `  (P/Q=${pNum})` : ""}`,
+      x.designation ? `Designation: ${x.designation}` : null,
+      x.museum_no ? `Museum: ${x.museum_no}` : null,
+      x.period?.name ? `Period: ${x.period.name}` : null,
+      x.provenience?.provenience && !/^uncertain/i.test(x.provenience.provenience)
+        ? `Provenience: ${x.provenience.provenience}`
+        : null,
+      x.artifact_type?.artifact_type ? `Type: ${x.artifact_type.artifact_type}` : null,
+      langs.length ? `Languages: ${langs.join(", ")}` : null,
+      genres.length ? `Genres: ${genres.join("; ")}` : null,
+    ];
+
+    const pubs = (x.publications ?? [])
+      .map((p) => p.publication?.publication)
+      .filter(Boolean) as string[];
+    if (pubs.length) {
+      const top = pubs.slice(0, 3);
+      lines.push(`Publications (${pubs.length}${pubs.length > 3 ? ", showing first 3" : ""}): ${top.join(" · ")}`);
+    }
+
+    const atf = x.inscription?.atf?.trim() ?? "";
+    if (atf) {
+      const atfLines = atf.split(/\r?\n/);
+      const shown = atfLines.slice(0, cap);
+      const truncated = atfLines.length > cap;
+      lines.push("");
+      lines.push(`— ATF (${atfLines.length} lines${truncated ? `, showing first ${cap}` : ""}) —`);
+      for (const l of shown) lines.push(`  ${l}`);
+    } else {
+      lines.push("");
+      lines.push(`— ATF — (not transliterated in CDLI)`);
+    }
+
+    if (x.cdli_comments) {
+      lines.push("");
+      lines.push(`Comments: ${x.cdli_comments.slice(0, 300)}`);
+    }
+
+    lines.push("");
+    lines.push(`Source: ${url}`);
+    return textResult(lines.filter((l) => l !== null).join("\n"));
+  },
 );
 
 // 4. search_oracc — LIVE (UPenn pager HTML scrape).
@@ -911,7 +1057,7 @@ server.registerTool(
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (6 live: lookup_sign, search_oracc, get_oracc_text, search_fragments, get_fragment, search_tablets)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (7 live, 1 parked: find_join_candidates [Auth0])\n`,
     );
     process.exit(0);
   }
