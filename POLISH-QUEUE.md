@@ -4,7 +4,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P0 — bugs / correctness
 
-- [x] **`get_fragment` failed on some fragments — undici IPv6 timeout, NOT body size.** Fixed via `dns.setDefaultResultOrder("ipv4first")` at top of `src/index.ts` (commit TBD).
+- [x] **`get_fragment` failed on some fragments — undici IPv6 timeout, NOT body size.** Fixed via `dns.setDefaultResultOrder("ipv4first")` at top of `src/index.ts` (`d9c1038`, 2026-05-14).
 
   Original symptom (2026-05-14): `IM.77027` and `IM.67587` returned `"eBL fetch failed: fetch failed (...)"` while same-day `curl` succeeded. Initial hypothesis was payload bloat (IM.77027 returned ~1 MB with a 41-entry `record[]`). **Wrong.** Probing the error cause exposed `UND_ERR_CONNECT_TIMEOUT` against `2001:4ca0:800::8af6:e1c7:443:443` after 10 s — eBL publishes AAAA records but its IPv6 listener is intermittent. curl does Happy Eyeballs and falls back to IPv4; undici does not by default. IM.67587 actually has a 4-entry `record[]` — the "bloated record" theory disintegrates when you check.
 
