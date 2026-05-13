@@ -28,10 +28,19 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P2 — research / outreach (Dane-driven, non-code)
 
-- [ ] **Auth0 outreach for eBL** — draft at `AUTH0-OUTREACH-DRAFT.md`. Would unlock cross-validation of `find_join_candidates` against eBL's hosted `/fragments/<id>/match` endpoint. Not blocking; local implementation works.
+- [ ] **Auth0 outreach for eBL** — draft at `AUTH0-OUTREACH-DRAFT.md`. Would unlock cross-validation of `find_join_candidates` against eBL's hosted `/fragments/<id>/match` endpoint. Not blocking; local implementation works. **Validation 2026-05-14 raises this from "nice-to-have" to "useful":** if hosted `/match` returns the same ~3% recall@15 we measured, the algorithm is the ceiling; if it returns higher, there's a TS port bug to find. See `VALIDATION-2026-05-14.md`.
+
+## P3 — findings worth deciding on
+
+- [ ] **Surface the matcher's measured recall in user-facing text.** N=50 validation (2026-05-14) shows recall@15 = 3.4% on known joins where both pieces have `lineToVec`. Current tool description says "not all hits are joins" (true) but doesn't quantify. Options: add a one-paragraph "Performance" section to `README.md`, append a note to the tool description, or leave as-is. See `VALIDATION-2026-05-14.md` for the full rank distribution and the three successful hits.
+
+- [ ] **Second crawl pass covering the `/fragments/all-signs` gap.** K.2862's three known siblings (K.2868, K.5065.A, Rm.111) have transliteration content at eBL but are missing from `/fragments/all-signs` and have empty `lineToVec` on `/fragments/<id>`. eBL stats: 36,583 transliterated, 36,493 in all-signs, 36,328 in our cache with non-empty `lineToVec` — gap of ~250 fragments, concentrated in joined ones. Pass would crawl every museum number declared in any cached fragment's `joins[]`; most will return empty, but some will fill the gap. Cost: ~1,000 extra HTTPs, ~3 min.
+
+- [x] **Retract yesterday's "BM.122625 ↔ 1881,0204.196 → multi-piece join group" claim** in the project memory + session log. At full corpus, `1881,0204.196` is not in BM.122625's top-5. The result was a small-corpus artifact (1,419 fragments). Done as part of this writeup (no separate commit — see `VALIDATION-2026-05-14.md` § "Why recall is this low" item 3).
 
 ## Done
 
-(none yet)
+- (P0) `get_fragment` fetch failure via undici Happy Eyeballs (`d9c1038` + `2a9d01c`)
+- (P1) `find_join_candidates` ranker semantics + genre/joins filters (`2a9d01c`)
 
 <!-- Add new items at the bottom of the appropriate priority section. Roll completed items into "Done" with commit sha. -->
