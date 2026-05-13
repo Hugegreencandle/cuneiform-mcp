@@ -1,0 +1,964 @@
+{
+  "ranAt": "2026-05-13T22:31:34.491Z",
+  "corpusSize": 35579,
+  "topK": 15,
+  "totalSiblings": 87,
+  "inTopKTrigram": 22,
+  "inTopKLineToVec": 3,
+  "inEither": 22,
+  "inBoth": 3,
+  "meanRankTrigram": 1951.8035714285713,
+  "medianRankTrigram": 89,
+  "buckets": {
+    "top15": 22,
+    "top50": 5,
+    "top100": 3,
+    "top500": 7,
+    "top1k": 5,
+    "top5k": 4,
+    "top10k": 6,
+    "beyond": 4,
+    "none": 31
+  },
+  "winsTrigram": [
+    {
+      "target": "BM.50958",
+      "sibling": "BM.51367",
+      "rankTri": 1,
+      "rankLTV": 870
+    },
+    {
+      "target": "BM.50958",
+      "sibling": "BM.52326",
+      "rankTri": 7,
+      "rankLTV": 3712
+    },
+    {
+      "target": "BM.50958",
+      "sibling": "BM.53505",
+      "rankTri": 2,
+      "rankLTV": 152
+    },
+    {
+      "target": "HS.2164",
+      "sibling": "HS.1326",
+      "rankTri": 1,
+      "rankLTV": 19849
+    },
+    {
+      "target": "K.6211",
+      "sibling": "Sm.1044",
+      "rankTri": 1,
+      "rankLTV": 40
+    },
+    {
+      "target": "BM.41897",
+      "sibling": "BM.42214",
+      "rankTri": 4,
+      "rankLTV": 2884
+    },
+    {
+      "target": "K.12811",
+      "sibling": "K.10385",
+      "rankTri": 5,
+      "rankLTV": 192
+    },
+    {
+      "target": "BM.46372",
+      "sibling": "BM.46338",
+      "rankTri": 1,
+      "rankLTV": 193
+    },
+    {
+      "target": "K.20251",
+      "sibling": "1879,0708.147",
+      "rankTri": 1,
+      "rankLTV": 2031
+    },
+    {
+      "target": "K.12296",
+      "sibling": "K.6427",
+      "rankTri": 1,
+      "rankLTV": 6257
+    },
+    {
+      "target": "K.13973",
+      "sibling": "K.5900",
+      "rankTri": 4,
+      "rankLTV": 34477
+    },
+    {
+      "target": "K.5907.A",
+      "sibling": "K.11067",
+      "rankTri": 4,
+      "rankLTV": 3859
+    },
+    {
+      "target": "HS.2739.B",
+      "sibling": "HS.2739.AH",
+      "rankTri": 2,
+      "rankLTV": 31599
+    },
+    {
+      "target": "HS.2739.B",
+      "sibling": "HS.2739.J",
+      "rankTri": 1,
+      "rankLTV": 31602
+    },
+    {
+      "target": "K.13521",
+      "sibling": "K.3647",
+      "rankTri": 1,
+      "rankLTV": 3649
+    },
+    {
+      "target": "K.10739",
+      "sibling": "K.2211",
+      "rankTri": 6,
+      "rankLTV": 11878
+    },
+    {
+      "target": "K.18029",
+      "sibling": "K.17648",
+      "rankTri": 7,
+      "rankLTV": 22476
+    },
+    {
+      "target": "K.11957",
+      "sibling": "K.16457",
+      "rankTri": 1,
+      "rankLTV": 697
+    },
+    {
+      "target": "K.18780",
+      "sibling": "K.9041",
+      "rankTri": 14,
+      "rankLTV": 23199
+    }
+  ],
+  "winsLineToVec": [],
+  "results": [
+    {
+      "target": "BM.35882",
+      "totalScored": 14217,
+      "siblings": [
+        {
+          "mn": "BM.35544",
+          "rankTrigram": 437,
+          "rankRawLineToVec": 2399,
+          "rankWeightedLineToVec": 2399
+        },
+        {
+          "mn": "BM.35733",
+          "rankTrigram": 239,
+          "rankRawLineToVec": 6784,
+          "rankWeightedLineToVec": 4317
+        }
+      ]
+    },
+    {
+      "target": "BM.39639",
+      "totalScored": 17313,
+      "siblings": [
+        {
+          "mn": "BM.38610",
+          "rankTrigram": 89,
+          "rankRawLineToVec": 19,
+          "rankWeightedLineToVec": 19
+        }
+      ]
+    },
+    {
+      "target": "1879,0708.334",
+      "totalScored": 321,
+      "siblings": [
+        {
+          "mn": "K.3151.A",
+          "rankTrigram": null,
+          "rankRawLineToVec": 163,
+          "rankWeightedLineToVec": 163
+        },
+        {
+          "mn": "K.9501",
+          "rankTrigram": null,
+          "rankRawLineToVec": 793,
+          "rankWeightedLineToVec": 926
+        },
+        {
+          "mn": "K.19558",
+          "rankTrigram": null,
+          "rankRawLineToVec": 28922,
+          "rankWeightedLineToVec": 29733
+        }
+      ]
+    },
+    {
+      "target": "BM.50958",
+      "totalScored": 22472,
+      "siblings": [
+        {
+          "mn": "BM.51367",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 870,
+          "rankWeightedLineToVec": 907
+        },
+        {
+          "mn": "BM.52326",
+          "rankTrigram": 7,
+          "rankRawLineToVec": 3712,
+          "rankWeightedLineToVec": 4379
+        },
+        {
+          "mn": "BM.53505",
+          "rankTrigram": 2,
+          "rankRawLineToVec": 152,
+          "rankWeightedLineToVec": 183
+        }
+      ]
+    },
+    {
+      "target": "K.10669",
+      "totalScored": 376,
+      "siblings": [
+        {
+          "mn": "K.12066",
+          "rankTrigram": 2,
+          "rankRawLineToVec": 11,
+          "rankWeightedLineToVec": 11
+        }
+      ]
+    },
+    {
+      "target": "HS.2164",
+      "totalScored": 10120,
+      "siblings": [
+        {
+          "mn": "HS.1326",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 19849,
+          "rankWeightedLineToVec": 20301
+        }
+      ]
+    },
+    {
+      "target": "K.20845",
+      "totalScored": 186,
+      "siblings": [
+        {
+          "mn": "K.15177",
+          "rankTrigram": null,
+          "rankRawLineToVec": 7892,
+          "rankWeightedLineToVec": 7892
+        },
+        {
+          "mn": "K.20776",
+          "rankTrigram": null,
+          "rankRawLineToVec": 29477,
+          "rankWeightedLineToVec": 29477
+        },
+        {
+          "mn": "K.20874",
+          "rankTrigram": null,
+          "rankRawLineToVec": 26192,
+          "rankWeightedLineToVec": 26192
+        }
+      ]
+    },
+    {
+      "target": "K.6211",
+      "totalScored": 12322,
+      "siblings": [
+        {
+          "mn": "Sm.1044",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 40,
+          "rankWeightedLineToVec": 44
+        }
+      ]
+    },
+    {
+      "target": "Sm.571.B",
+      "totalScored": 529,
+      "siblings": [
+        {
+          "mn": "K.8468",
+          "rankTrigram": 36,
+          "rankRawLineToVec": 2472,
+          "rankWeightedLineToVec": 2472
+        }
+      ]
+    },
+    {
+      "target": "K.20382",
+      "totalScored": 145,
+      "siblings": [
+        {
+          "mn": "K.17638",
+          "rankTrigram": null,
+          "rankRawLineToVec": 13221,
+          "rankWeightedLineToVec": 13221
+        }
+      ]
+    },
+    {
+      "target": "BM.41897",
+      "totalScored": 18075,
+      "siblings": [
+        {
+          "mn": "BM.42214",
+          "rankTrigram": 4,
+          "rankRawLineToVec": 2884,
+          "rankWeightedLineToVec": 1277
+        }
+      ]
+    },
+    {
+      "target": "K.12811",
+      "totalScored": 369,
+      "siblings": [
+        {
+          "mn": "K.10385",
+          "rankTrigram": 5,
+          "rankRawLineToVec": 192,
+          "rankWeightedLineToVec": 197
+        }
+      ]
+    },
+    {
+      "target": "K.8064",
+      "totalScored": 2234,
+      "siblings": [
+        {
+          "mn": "K.13974",
+          "rankTrigram": 55,
+          "rankRawLineToVec": 2320,
+          "rankWeightedLineToVec": 2320
+        }
+      ]
+    },
+    {
+      "target": "K.5423.B",
+      "totalScored": 13888,
+      "siblings": [
+        {
+          "mn": "K.4221",
+          "rankTrigram": 7219,
+          "rankRawLineToVec": 1059,
+          "rankWeightedLineToVec": 1059
+        }
+      ]
+    },
+    {
+      "target": "HS.2747",
+      "totalScored": 13411,
+      "siblings": [
+        {
+          "mn": "HS.2661",
+          "rankTrigram": null,
+          "rankRawLineToVec": 22209,
+          "rankWeightedLineToVec": 22265
+        }
+      ]
+    },
+    {
+      "target": "K.2176",
+      "totalScored": 13577,
+      "siblings": [
+        {
+          "mn": "K.2249",
+          "rankTrigram": 8334,
+          "rankRawLineToVec": 1771,
+          "rankWeightedLineToVec": 1771
+        }
+      ]
+    },
+    {
+      "target": "K.16981",
+      "totalScored": 12988,
+      "siblings": [
+        {
+          "mn": "K.6760",
+          "rankTrigram": null,
+          "rankRawLineToVec": 15915,
+          "rankWeightedLineToVec": 15915
+        },
+        {
+          "mn": "K.10302",
+          "rankTrigram": 6204,
+          "rankRawLineToVec": 8240,
+          "rankWeightedLineToVec": 8240
+        },
+        {
+          "mn": "K.17871",
+          "rankTrigram": null,
+          "rankRawLineToVec": 11527,
+          "rankWeightedLineToVec": 11527
+        },
+        {
+          "mn": "K.18926",
+          "rankTrigram": 1716,
+          "rankRawLineToVec": 12166,
+          "rankWeightedLineToVec": 12166
+        }
+      ]
+    },
+    {
+      "target": "K.5834",
+      "totalScored": 23530,
+      "siblings": [
+        {
+          "mn": "K.18594",
+          "rankTrigram": 15472,
+          "rankRawLineToVec": 15008,
+          "rankWeightedLineToVec": 14161
+        }
+      ]
+    },
+    {
+      "target": "Ist-A.7",
+      "totalScored": 13591,
+      "siblings": [
+        {
+          "mn": "VAT.10383",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 1,
+          "rankWeightedLineToVec": 1
+        }
+      ]
+    },
+    {
+      "target": "BM.46372",
+      "totalScored": 18415,
+      "siblings": [
+        {
+          "mn": "BM.46338",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 193,
+          "rankWeightedLineToVec": 203
+        }
+      ]
+    },
+    {
+      "target": "K.8888",
+      "totalScored": 13732,
+      "siblings": [
+        {
+          "mn": "K.4207",
+          "rankTrigram": 4919,
+          "rankRawLineToVec": 420,
+          "rankWeightedLineToVec": 301
+        }
+      ]
+    },
+    {
+      "target": "K.2568",
+      "totalScored": 14576,
+      "siblings": [
+        {
+          "mn": "K.18253",
+          "rankTrigram": 20,
+          "rankRawLineToVec": 20529,
+          "rankWeightedLineToVec": 21180
+        }
+      ]
+    },
+    {
+      "target": "BM.37964",
+      "totalScored": 13861,
+      "siblings": [
+        {
+          "mn": "BM.37494",
+          "rankTrigram": null,
+          "rankRawLineToVec": 15141,
+          "rankWeightedLineToVec": 15141
+        },
+        {
+          "mn": "BM.37616",
+          "rankTrigram": 11357,
+          "rankRawLineToVec": 1799,
+          "rankWeightedLineToVec": 1799
+        },
+        {
+          "mn": "BM.38076",
+          "rankTrigram": null,
+          "rankRawLineToVec": 1825,
+          "rankWeightedLineToVec": 1825
+        }
+      ]
+    },
+    {
+      "target": "K.14160",
+      "totalScored": 2121,
+      "siblings": [
+        {
+          "mn": "K.2259",
+          "rankTrigram": 912,
+          "rankRawLineToVec": 4808,
+          "rankWeightedLineToVec": 4834
+        }
+      ]
+    },
+    {
+      "target": "K.16655",
+      "totalScored": 580,
+      "siblings": [
+        {
+          "mn": "K.20127",
+          "rankTrigram": null,
+          "rankRawLineToVec": 19013,
+          "rankWeightedLineToVec": 19013
+        }
+      ]
+    },
+    {
+      "target": "K.20251",
+      "totalScored": 13940,
+      "siblings": [
+        {
+          "mn": "1879,0708.147",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 2031,
+          "rankWeightedLineToVec": 2222
+        }
+      ]
+    },
+    {
+      "target": "K.17143",
+      "totalScored": 13571,
+      "siblings": [
+        {
+          "mn": "K.2352",
+          "rankTrigram": 10423,
+          "rankRawLineToVec": 19307,
+          "rankWeightedLineToVec": 19438
+        },
+        {
+          "mn": "K.14218",
+          "rankTrigram": null,
+          "rankRawLineToVec": 2992,
+          "rankWeightedLineToVec": 3207
+        },
+        {
+          "mn": "K.16762",
+          "rankTrigram": null,
+          "rankRawLineToVec": 344,
+          "rankWeightedLineToVec": 365
+        },
+        {
+          "mn": "K.9174",
+          "rankTrigram": null,
+          "rankRawLineToVec": 2444,
+          "rankWeightedLineToVec": 2444
+        },
+        {
+          "mn": "K.9895",
+          "rankTrigram": 7299,
+          "rankRawLineToVec": 3445,
+          "rankWeightedLineToVec": 3660
+        },
+        {
+          "mn": "K.13824",
+          "rankTrigram": 3871,
+          "rankRawLineToVec": 2985,
+          "rankWeightedLineToVec": 3200
+        }
+      ]
+    },
+    {
+      "target": "K.12296",
+      "totalScored": 11574,
+      "siblings": [
+        {
+          "mn": "K.6427",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 6257,
+          "rankWeightedLineToVec": 6257
+        }
+      ]
+    },
+    {
+      "target": "K.16654",
+      "totalScored": 111,
+      "siblings": [
+        {
+          "mn": "K.8307",
+          "rankTrigram": null,
+          "rankRawLineToVec": 29873,
+          "rankWeightedLineToVec": 29873
+        },
+        {
+          "mn": "K.12524",
+          "rankTrigram": null,
+          "rankRawLineToVec": 7154,
+          "rankWeightedLineToVec": 7154
+        }
+      ]
+    },
+    {
+      "target": "K.13973",
+      "totalScored": 390,
+      "siblings": [
+        {
+          "mn": "K.5900",
+          "rankTrigram": 4,
+          "rankRawLineToVec": 34477,
+          "rankWeightedLineToVec": 34477
+        }
+      ]
+    },
+    {
+      "target": "K.13775",
+      "totalScored": 1612,
+      "siblings": [
+        {
+          "mn": "K.12634",
+          "rankTrigram": null,
+          "rankRawLineToVec": 2779,
+          "rankWeightedLineToVec": 2779
+        },
+        {
+          "mn": "K.17273",
+          "rankTrigram": null,
+          "rankRawLineToVec": 31790,
+          "rankWeightedLineToVec": 31790
+        },
+        {
+          "mn": "K.18289",
+          "rankTrigram": null,
+          "rankRawLineToVec": 35615,
+          "rankWeightedLineToVec": 35615
+        }
+      ]
+    },
+    {
+      "target": "K.2797",
+      "totalScored": 12748,
+      "siblings": [
+        {
+          "mn": "K.15933",
+          "rankTrigram": 871,
+          "rankRawLineToVec": 7791,
+          "rankWeightedLineToVec": 11496
+        }
+      ]
+    },
+    {
+      "target": "K.6206",
+      "totalScored": 20204,
+      "siblings": [
+        {
+          "mn": "K.2416",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 1,
+          "rankWeightedLineToVec": 1
+        }
+      ]
+    },
+    {
+      "target": "K.20384",
+      "totalScored": 336,
+      "siblings": [
+        {
+          "mn": "K.17444",
+          "rankTrigram": null,
+          "rankRawLineToVec": 22244,
+          "rankWeightedLineToVec": 22244
+        },
+        {
+          "mn": "K.19257",
+          "rankTrigram": null,
+          "rankRawLineToVec": 19225,
+          "rankWeightedLineToVec": 19225
+        }
+      ]
+    },
+    {
+      "target": "K.5907.A",
+      "totalScored": 400,
+      "siblings": [
+        {
+          "mn": "K.3240",
+          "rankTrigram": 165,
+          "rankRawLineToVec": 5356,
+          "rankWeightedLineToVec": 5356
+        },
+        {
+          "mn": "K.11067",
+          "rankTrigram": 4,
+          "rankRawLineToVec": 3859,
+          "rankWeightedLineToVec": 3859
+        }
+      ]
+    },
+    {
+      "target": "BM.35842",
+      "totalScored": 1214,
+      "siblings": [
+        {
+          "mn": "BM.34381",
+          "rankTrigram": 91,
+          "rankRawLineToVec": 1742,
+          "rankWeightedLineToVec": 1742
+        }
+      ]
+    },
+    {
+      "target": "HS.2739.B",
+      "totalScored": 1208,
+      "siblings": [
+        {
+          "mn": "HS.2739.AH",
+          "rankTrigram": 2,
+          "rankRawLineToVec": 31599,
+          "rankWeightedLineToVec": 31599
+        },
+        {
+          "mn": "HS.2739.G",
+          "rankTrigram": 32,
+          "rankRawLineToVec": 31607,
+          "rankWeightedLineToVec": 31607
+        },
+        {
+          "mn": "HS.2739.H",
+          "rankTrigram": 31,
+          "rankRawLineToVec": 28396,
+          "rankWeightedLineToVec": 28396
+        },
+        {
+          "mn": "HS.2739.J",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 31602,
+          "rankWeightedLineToVec": 31602
+        }
+      ]
+    },
+    {
+      "target": "K.9637",
+      "totalScored": 21108,
+      "siblings": [
+        {
+          "mn": "K.12414",
+          "rankTrigram": 842,
+          "rankRawLineToVec": 10846,
+          "rankWeightedLineToVec": 9784
+        }
+      ]
+    },
+    {
+      "target": "K.13521",
+      "totalScored": 7766,
+      "siblings": [
+        {
+          "mn": "K.3647",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 3649,
+          "rankWeightedLineToVec": 3649
+        },
+        {
+          "mn": "K.5124",
+          "rankTrigram": 571,
+          "rankRawLineToVec": 4001,
+          "rankWeightedLineToVec": 4001
+        },
+        {
+          "mn": "K.19487",
+          "rankTrigram": null,
+          "rankRawLineToVec": 28362,
+          "rankWeightedLineToVec": 28627
+        }
+      ]
+    },
+    {
+      "target": "K.10481",
+      "totalScored": 337,
+      "siblings": [
+        {
+          "mn": "K.6456",
+          "rankTrigram": null,
+          "rankRawLineToVec": 12406,
+          "rankWeightedLineToVec": 12827
+        }
+      ]
+    },
+    {
+      "target": "K.3213",
+      "totalScored": 10620,
+      "siblings": [
+        {
+          "mn": "K.9592",
+          "rankTrigram": 617,
+          "rankRawLineToVec": 12310,
+          "rankWeightedLineToVec": 13292
+        }
+      ]
+    },
+    {
+      "target": "K.13507",
+      "totalScored": 6271,
+      "siblings": [
+        {
+          "mn": "K.3517",
+          "rankTrigram": 132,
+          "rankRawLineToVec": 8428,
+          "rankWeightedLineToVec": 8428
+        },
+        {
+          "mn": "K.9172",
+          "rankTrigram": 4196,
+          "rankRawLineToVec": 10176,
+          "rankWeightedLineToVec": 10176
+        }
+      ]
+    },
+    {
+      "target": "K.10739",
+      "totalScored": 17866,
+      "siblings": [
+        {
+          "mn": "K.2211",
+          "rankTrigram": 6,
+          "rankRawLineToVec": 11878,
+          "rankWeightedLineToVec": 11878
+        }
+      ]
+    },
+    {
+      "target": "K.7232",
+      "totalScored": 13705,
+      "siblings": [
+        {
+          "mn": "K.1748",
+          "rankTrigram": 6841,
+          "rankRawLineToVec": 9344,
+          "rankWeightedLineToVec": 9344
+        },
+        {
+          "mn": "K.2678",
+          "rankTrigram": 10410,
+          "rankRawLineToVec": 2264,
+          "rankWeightedLineToVec": 2264
+        },
+        {
+          "mn": "K.3710",
+          "rankTrigram": 287,
+          "rankRawLineToVec": 2533,
+          "rankWeightedLineToVec": 2533
+        }
+      ]
+    },
+    {
+      "target": "K.18029",
+      "totalScored": 210,
+      "siblings": [
+        {
+          "mn": "K.17525",
+          "rankTrigram": null,
+          "rankRawLineToVec": 22461,
+          "rankWeightedLineToVec": 22461
+        },
+        {
+          "mn": "K.17648",
+          "rankTrigram": 7,
+          "rankRawLineToVec": 22476,
+          "rankWeightedLineToVec": 22476
+        },
+        {
+          "mn": "K.18117",
+          "rankTrigram": null,
+          "rankRawLineToVec": 8678,
+          "rankWeightedLineToVec": 8678
+        },
+        {
+          "mn": "K.18309",
+          "rankTrigram": null,
+          "rankRawLineToVec": 8757,
+          "rankWeightedLineToVec": 8757
+        },
+        {
+          "mn": "K.18440",
+          "rankTrigram": null,
+          "rankRawLineToVec": 25839,
+          "rankWeightedLineToVec": 25839
+        }
+      ]
+    },
+    {
+      "target": "K.11957",
+      "totalScored": 8146,
+      "siblings": [
+        {
+          "mn": "K.16457",
+          "rankTrigram": 1,
+          "rankRawLineToVec": 697,
+          "rankWeightedLineToVec": 697
+        }
+      ]
+    },
+    {
+      "target": "BM.36269",
+      "totalScored": 1095,
+      "siblings": [
+        {
+          "mn": "BM.36260",
+          "rankTrigram": 26,
+          "rankRawLineToVec": 2475,
+          "rankWeightedLineToVec": 2475
+        }
+      ]
+    },
+    {
+      "target": "K.18780",
+      "totalScored": 146,
+      "siblings": [
+        {
+          "mn": "K.9041",
+          "rankTrigram": 14,
+          "rankRawLineToVec": 23199,
+          "rankWeightedLineToVec": 23199
+        },
+        {
+          "mn": "K.18591",
+          "rankTrigram": null,
+          "rankRawLineToVec": 8811,
+          "rankWeightedLineToVec": 8811
+        },
+        {
+          "mn": "K.18654",
+          "rankTrigram": null,
+          "rankRawLineToVec": 29176,
+          "rankWeightedLineToVec": 29176
+        }
+      ]
+    },
+    {
+      "target": "K.13391",
+      "totalScored": 5467,
+      "siblings": [
+        {
+          "mn": "K.8604",
+          "rankTrigram": 105,
+          "rankRawLineToVec": 154,
+          "rankWeightedLineToVec": 154
+        },
+        {
+          "mn": "K.17120",
+          "rankTrigram": 220,
+          "rankRawLineToVec": 5735,
+          "rankWeightedLineToVec": 5735
+        }
+      ]
+    },
+    {
+      "target": "K.12287",
+      "totalScored": 8687,
+      "siblings": [
+        {
+          "mn": "K.2187",
+          "rankTrigram": 5194,
+          "rankRawLineToVec": 664,
+          "rankWeightedLineToVec": 664
+        }
+      ]
+    }
+  ]
+}

@@ -2,20 +2,21 @@
 
 MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents.
 
-## v0.1.0 — harness validated
+## v0.4.0 — 9 tools live
 
-| Tool | Status | Source |
-|---|---|---|
-| `lookup_sign` | **working** | OGSL `labasi-signs.json` (239 signs, ABZ + MZL refs) |
-| `search_tablets` | stub | CDLI Framework API |
-| `get_tablet` | stub | CDLI Framework API |
-| `search_oracc` | stub | ORACC corpusjson exports |
-| `get_oracc_text` | stub | ORACC corpusjson exports |
-| `search_fragments` | stub | eBL `/api/fragments` |
-| `get_fragment` | stub | eBL `/api/fragments/{id}` |
-| `find_join_candidates` | stub | eBL Fragmentarium |
+| Tool | Source |
+|---|---|
+| `lookup_sign` | OGSL `labasi-signs.json` warm cache → eBL `/api/signs/{NAME}` fallback (glyph + 8 sign-list refs + sound values) |
+| `search_tablets` | CDLI `/search` (simple-field/value/op triplet, closed-enum field validation) |
+| `get_tablet` | CDLI `/artifacts/{int-id}` with P/Q-number → integer id shim |
+| `search_oracc` | ORACC `pager?q=…` HTML scrape (handles translation + transliteration result shapes) |
+| `get_oracc_text` | ORACC TEI XML at `/<project>/tei/<text_id>.xml` (UPenn mirror) |
+| `search_fragments` | eBL `/api/fragments/query` with museum-number / transliteration auto-detection |
+| `get_fragment` | eBL `/api/fragments/{id}` (`BM.41255C` → `BM.41255.C` normalized) |
+| `find_join_candidates` | local lineToVec scorer — faithful port of eBL's `LineToVecRanker`. Validation 2026-05-14: **3.4% recall@15** on known joins. Useful for cross-validating against eBL's `/match`. |
+| `find_parallel_text` | local sign-trigram Jaccard. Validation 2026-05-14: **25% recall@15** on known joins (~7.5× the lineToVec scorer). Primary parallel/join discovery tool. |
 
-Each stub returns a structured response naming the live source URL and the v0.2 plan.
+See `VALIDATION-2026-05-14.md` + `TRIGRAM-EXPERIMENT-2026-05-14.md` for the benchmark methodology and per-target results.
 
 ## Install
 
@@ -36,14 +37,31 @@ Add to `~/.claude/settings.json` under `mcpServers`:
 }
 ```
 
-Restart Claude Code. The 8 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 9 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "8 tools registered" and exits
+npm run smoke   # prints "9 tools registered" and exits
 ```
 
-## Next (v0.2)
+## One-time cache builds (for the local matchers)
 
-Wire each stub to its live source. Order: `search_tablets` + `get_tablet` (CDLI) → `search_fragments` + `get_fragment` (eBL) → ORACC pair → `find_join_candidates`.
+Both `find_join_candidates` and `find_parallel_text` read from local caches under `~/.cache/cuneiform-mcp/`. Build them before using either tool:
+
+```bash
+# lineToVec cache (~24 min, populates fragments.jsonl)
+node dist/index.js --prefetch
+
+# sign-trigram cache (one ~26 s request, ~33 MB)
+node scripts/build-signs-index.mjs
+```
+
+## Validation
+
+Both matchers were benchmarked against eBL's `joins[]` ground truth on 2026-05-14 (full 36K-fragment corpus). Headline numbers:
+
+- `find_join_candidates` (lineToVec): **3.4% recall@15**, median rank 7,154 / 36,328.
+- `find_parallel_text` (sign-trigram Jaccard): **25.3% recall@15**, median rank 89.
+
+Trigram strictly dominates — no lineToVec-only wins on the test set. ~35% of known siblings score zero by either method (the broken pieces share no overlapping content). See `VALIDATION-2026-05-14.md` and `TRIGRAM-EXPERIMENT-2026-05-14.md` for full methodology, rank distributions, and notable cases.

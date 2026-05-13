@@ -104,7 +104,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.2.0";
+const VERSION = "0.4.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -114,7 +114,7 @@ const URLS = {
   OGSL_SIGNS: "https://raw.githubusercontent.com/oracc/osl/master/00etc/labasi-signs.json",
 } as const;
 
-const USER_AGENT = `cuneiform-mcp/${"0.2.0"}`;
+const USER_AGENT = `cuneiform-mcp/${VERSION}`;
 
 type LabasiSign = {
   sign_name: string;
@@ -1311,6 +1311,181 @@ server.registerTool(
   },
 );
 
+// 9. find_parallel_text — LIVE (sign-trigram Jaccard, no Auth0).
+//
+// Same shape as find_join_candidates, different signal. Where the lineToVec
+// matcher scores fragments on prefix/suffix overlap of a 6-symbol
+// line-structure encoding (recall@15 = 3.4% on known eBL joins, measured
+// 2026-05-14), this tool scores Jaccard similarity on the actual sign
+// sequences — within-line trigrams over eBL's `signs` field. Same harness,
+// same 50 targets, same 87 in-corpus siblings: recall@15 = 25.3%, median
+// rank dropped from 7,154 → 89. The trigram approach strictly dominates
+// (zero lineToVec-only wins) and is ~170× faster to score.
+//
+// Why the lift: lineToVec encodes only START/TEXT_LINE/SINGLE_RULING/
+// DOUBLE_RULING/TRIPLE_RULING/END markers — useful for catching joins that
+// align on rulings, blind to anything else. Sign trigrams use the actual
+// cuneiform sign-list tokens (~thousands of distinct values) and so
+// discriminate at far higher resolution. The tradeoff: trigrams excel at
+// parallel manuscripts (any two copies of Šurpu share many trigrams), so
+// some hits are textual parallels rather than physical joins. The genres
+// + joins enrichment lines help the reader disambiguate, same as in
+// find_join_candidates.
+//
+// See VALIDATION-2026-05-14.md + TRIGRAM-EXPERIMENT-2026-05-14.md for the
+// full benchmark.
+server.registerTool(
+  "find_parallel_text",
+  {
+    description:
+      "Rank fragments by sign-sequence parallel-text similarity to a target (within-line trigram Jaccard over eBL's `signs` field). Validation 2026-05-14: ~25% recall@15 on known eBL joins — ~7.5× the lineToVec-based `find_join_candidates`. Surfaces parallel manuscripts AND probable physical joins. Use as the primary parallel/join discovery tool; reserve `find_join_candidates` for cross-validating against eBL's published algorithm.",
+    inputSchema: {
+      museum_number: z
+        .string()
+        .min(1)
+        .describe("eBL museum number, e.g. 'K.1', 'BM.41255C' (auto-normalized)."),
+      top_k: z
+        .number()
+        .int()
+        .positive()
+        .max(50)
+        .optional()
+        .describe("Number of candidates returned (default 15)."),
+      filter_known_joins: z
+        .boolean()
+        .optional()
+        .describe(
+          "When true, drop candidates already listed in the target's joins[] (the matcher will otherwise re-surface them). Default false.",
+        ),
+      require_genre_overlap: z
+        .boolean()
+        .optional()
+        .describe(
+          "When true, drop candidates that don't share at least one genre category with the target (CANONICAL is excluded since it leaks to every pair). Helpful for separating same-composition parallels from coincidentally text-similar fragments. Default false.",
+        ),
+    },
+  },
+  async ({ museum_number, top_k, filter_known_joins, require_genre_overlap }) => {
+    const k = top_k ?? 15;
+    const filterJoins = filter_known_joins === true;
+    const requireGenre = require_genre_overlap === true;
+    const normalize = (s: string): string => {
+      const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
+      return m ? `${m[1]}.${m[2]}.${m[3]}` : s;
+    };
+    const targetId = normalize(museum_number.trim());
+
+    const { loadSignsIndex, trigramsFromSigns, jaccard } = await import(
+      "./signsIndex.js"
+    );
+    const idx = await loadSignsIndex();
+    if (idx.missing) {
+      return textResult(
+        `Sign-trigram index missing. Run \`node scripts/build-signs-index.mjs\` ` +
+          `to fetch eBL /fragments/all-signs and write the cache at ` +
+          `${idx.cachePath} (one ~26 s request, ~33 MB on disk).`,
+      );
+    }
+
+    // Resolve target trigrams. Prefer the cached index (saves an HTTP
+    // request); fall back to a live /fragments/<id> fetch which gives us
+    // both the up-to-date `signs` AND the genres/joins we need anyway.
+    const targetEnriched = await fetchEnrichment(targetId);
+    if (!targetEnriched) {
+      return textResult(
+        `Couldn't fetch eBL record for "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
+      );
+    }
+    let targetTrigrams = idx.fragments.get(targetEnriched.museumNumber);
+    if (!targetTrigrams || targetTrigrams.size === 0) {
+      // Re-fetch live signs in case the index is stale for this fragment.
+      const liveRes = await fetch(
+        `${URLS.EBL_BASE}/fragments/${encodeURIComponent(targetEnriched.museumNumber)}`,
+        { headers: { "User-Agent": USER_AGENT } },
+      );
+      if (liveRes.ok) {
+        const liveBody = (await liveRes.json()) as { signs?: string };
+        if (typeof liveBody.signs === "string") {
+          targetTrigrams = trigramsFromSigns(liveBody.signs);
+        }
+      }
+    }
+    if (!targetTrigrams || targetTrigrams.size === 0) {
+      return textResult(
+        `${targetEnriched.museumNumber} has no sign-trigram fingerprint (likely untransliterated or too few signs). The parallel-text matcher cannot score it.`,
+      );
+    }
+
+    type Hit = { museumNumber: string; jaccard: number };
+    const hits: Hit[] = [];
+    for (const [mn, candSet] of idx.fragments) {
+      if (mn === targetEnriched.museumNumber) continue;
+      const j = jaccard(targetTrigrams, candSet);
+      if (j > 0) hits.push({ museumNumber: mn, jaccard: j });
+    }
+    hits.sort((a, b) => b.jaccard - a.jaccard);
+
+    const poolMns: string[] = [];
+    for (const h of hits.slice(0, k * 3)) {
+      poolMns.push(h.museumNumber);
+      if (poolMns.length >= k * 3) break;
+    }
+    await fetchEnrichmentBatch(poolMns, 5);
+
+    const matchesFilters = (mn: string): boolean => {
+      if (filterJoins && targetEnriched.joinMembers.has(mn)) return false;
+      if (requireGenre) {
+        const cand = enrichmentCache.get(mn);
+        if (!cand) return false;
+        let overlap = false;
+        for (const c of cand.genreSet) {
+          if (targetEnriched.genreSet.has(c)) {
+            overlap = true;
+            break;
+          }
+        }
+        if (!overlap) return false;
+      }
+      return true;
+    };
+
+    const top = hits.filter((h) => matchesFilters(h.museumNumber)).slice(0, k);
+
+    const renderHit = (h: Hit, i: number): string[] => {
+      const cand = enrichmentCache.get(h.museumNumber);
+      const out: string[] = [];
+      out.push(
+        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} jaccard=${h.jaccard.toFixed(4)}` +
+          (cand?.designation ? `   ${cand.designation}` : ""),
+      );
+      if (cand?.genres.length) out.push(`     genres: ${cand.genres.join("; ")}`);
+      if (cand?.joinGroupsStr) out.push(`     joins:  ${cand.joinGroupsStr}`);
+      return out;
+    };
+
+    const targetHeaderBits: string[] = [];
+    if (targetEnriched.genres.length) targetHeaderBits.push(`Target genres: ${targetEnriched.genres.join("; ")}`);
+    if (targetEnriched.joinGroupsStr) targetHeaderBits.push(`Target known joins: ${targetEnriched.joinGroupsStr}`);
+
+    const filterNotes: string[] = [];
+    if (filterJoins) filterNotes.push(`filter_known_joins=true (${targetEnriched.joinMembers.size} fragments excluded)`);
+    if (requireGenre) filterNotes.push(`require_genre_overlap=true (${targetEnriched.genreSet.size} target categories)`);
+
+    const ageMin = idx.ageMs ? (idx.ageMs / 60_000).toFixed(1) : "?";
+    const lines: string[] = [
+      `Parallel-text candidates for ${targetEnriched.museumNumber}${targetEnriched.designation ? `  (${targetEnriched.designation})` : ""}`,
+      `Scored against ${idx.fragments.size} cached fragments by sign-trigram Jaccard. Cache age: ${ageMin}m. Target fingerprint: ${targetTrigrams.size} unique trigrams.`,
+      `Note: hits include parallel manuscripts + probable physical joins + coincidentally text-similar fragments — disambiguate with the genres/joins below each hit.`,
+      ...targetHeaderBits,
+      ...(filterNotes.length ? [`Filters: ${filterNotes.join(" · ")}`] : []),
+      ``,
+      `— TOP ${top.length} BY JACCARD —`,
+      ...top.flatMap((h, i) => renderHit(h, i)),
+    ];
+    return textResult(lines.join("\n"));
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -1331,7 +1506,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered, all live (find_join_candidates uses local lineToVec cache, no Auth0 required)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 9 tools registered, all live (find_join_candidates = lineToVec scorer, find_parallel_text = sign-trigram Jaccard; both local, no Auth0)\n`,
     );
     process.exit(0);
   }
@@ -1341,7 +1516,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (8 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (9 tools)\n`);
 }
 
 main().catch((err) => {

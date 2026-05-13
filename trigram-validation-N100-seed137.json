@@ -1,0 +1,408 @@
+{
+  "ranAt": "2026-05-13T22:44:55.495Z",
+  "sampleN": 100,
+  "seed": 137,
+  "topK": 15,
+  "targetsEvaluated": 26,
+  "totalSiblings": 57,
+  "inTopK": 11,
+  "meanRank": 699.2857142857143,
+  "medianRank": 120,
+  "buckets": {
+    "top15": 11,
+    "top50": 3,
+    "top100": 0,
+    "top500": 6,
+    "top1k": 2,
+    "top5k": 6,
+    "top10k": 0,
+    "beyond": 0,
+    "none": 29
+  },
+  "results": [
+    {
+      "target": "K.20384",
+      "totalScored": 336,
+      "siblings": [
+        {
+          "mn": "K.17444",
+          "rank": null
+        },
+        {
+          "mn": "K.19257",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.17000",
+      "totalScored": 1158,
+      "siblings": [
+        {
+          "mn": "K.23126",
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "target": "K.17301",
+      "totalScored": 4574,
+      "siblings": [
+        {
+          "mn": "K.9938",
+          "rank": 2152
+        },
+        {
+          "mn": "K.17592",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "Rm-II.403",
+      "totalScored": 56,
+      "siblings": [
+        {
+          "mn": "Rm-II.251",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.10778",
+      "totalScored": 5042,
+      "siblings": [
+        {
+          "mn": "K.17335",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.17638",
+      "totalScored": 474,
+      "siblings": [
+        {
+          "mn": "K.20382",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.18864",
+      "totalScored": 97,
+      "siblings": [
+        {
+          "mn": "K.14753",
+          "rank": null
+        },
+        {
+          "mn": "K.16225",
+          "rank": null
+        },
+        {
+          "mn": "K.16880",
+          "rank": null
+        },
+        {
+          "mn": "K.17081",
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "target": "K.21421",
+      "totalScored": 3744,
+      "siblings": [
+        {
+          "mn": "K.4562",
+          "rank": 2
+        },
+        {
+          "mn": "K.7652",
+          "rank": 1882
+        },
+        {
+          "mn": "Sm.1604",
+          "rank": 1484
+        }
+      ]
+    },
+    {
+      "target": "K.10316",
+      "totalScored": 741,
+      "siblings": [
+        {
+          "mn": "K.5934",
+          "rank": 1
+        }
+      ]
+    },
+    {
+      "target": "K.13238",
+      "totalScored": 7861,
+      "siblings": [
+        {
+          "mn": "K.3823",
+          "rank": 719
+        },
+        {
+          "mn": "K.17112",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.8619",
+      "totalScored": 1839,
+      "siblings": [
+        {
+          "mn": "K.5951",
+          "rank": null
+        },
+        {
+          "mn": "K.6767",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "HS.2749",
+      "totalScored": 2107,
+      "siblings": [
+        {
+          "mn": "HS.2750",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.5706",
+      "totalScored": 436,
+      "siblings": [
+        {
+          "mn": "K.47",
+          "rank": 344
+        },
+        {
+          "mn": "K.5654",
+          "rank": null
+        },
+        {
+          "mn": "K.13881",
+          "rank": null
+        },
+        {
+          "mn": "K.15344",
+          "rank": 49
+        },
+        {
+          "mn": "K.17494",
+          "rank": null
+        },
+        {
+          "mn": "K.19326",
+          "rank": null
+        },
+        {
+          "mn": "K.20300",
+          "rank": null
+        },
+        {
+          "mn": "K.22269",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "K.6477",
+      "totalScored": 7486,
+      "siblings": [
+        {
+          "mn": "K.16389",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "BM.134521",
+      "totalScored": 17638,
+      "siblings": [
+        {
+          "mn": "K.4347.A",
+          "rank": 1
+        },
+        {
+          "mn": "K.8290",
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "target": "K.11645",
+      "totalScored": 18697,
+      "siblings": [
+        {
+          "mn": "K.2133",
+          "rank": 3
+        }
+      ]
+    },
+    {
+      "target": "BM.131656",
+      "totalScored": 13531,
+      "siblings": [
+        {
+          "mn": "K.9095",
+          "rank": 120
+        }
+      ]
+    },
+    {
+      "target": "Ashm-1924.2047",
+      "totalScored": 6537,
+      "siblings": [
+        {
+          "mn": "Ashm-1924.1819",
+          "rank": null
+        },
+        {
+          "mn": "Ashm-1924.1821",
+          "rank": 137
+        }
+      ]
+    },
+    {
+      "target": "Sm.419",
+      "totalScored": 22,
+      "siblings": [
+        {
+          "mn": "K.5176",
+          "rank": 4
+        }
+      ]
+    },
+    {
+      "target": "K.11686",
+      "totalScored": 14984,
+      "siblings": [
+        {
+          "mn": "K.3070",
+          "rank": 135
+        },
+        {
+          "mn": "K.12891",
+          "rank": 2
+        }
+      ]
+    },
+    {
+      "target": "K.14008",
+      "totalScored": 15731,
+      "siblings": [
+        {
+          "mn": "K.3944",
+          "rank": 5
+        },
+        {
+          "mn": "K.20196",
+          "rank": 3875
+        }
+      ]
+    },
+    {
+      "target": "K.2293",
+      "totalScored": 9499,
+      "siblings": [
+        {
+          "mn": "K.2048",
+          "rank": 11
+        },
+        {
+          "mn": "K.12404",
+          "rank": 3643
+        }
+      ]
+    },
+    {
+      "target": "K.20300",
+      "totalScored": 8003,
+      "siblings": [
+        {
+          "mn": "K.47",
+          "rank": 657
+        },
+        {
+          "mn": "K.5654",
+          "rank": null
+        },
+        {
+          "mn": "K.5706",
+          "rank": null
+        },
+        {
+          "mn": "K.13881",
+          "rank": null
+        },
+        {
+          "mn": "K.15344",
+          "rank": null
+        },
+        {
+          "mn": "K.17494",
+          "rank": 3509
+        },
+        {
+          "mn": "K.19326",
+          "rank": null
+        },
+        {
+          "mn": "K.22269",
+          "rank": null
+        }
+      ]
+    },
+    {
+      "target": "BM.34809",
+      "totalScored": 19318,
+      "siblings": [
+        {
+          "mn": "BM.33403",
+          "rank": 471
+        }
+      ]
+    },
+    {
+      "target": "BM.36269",
+      "totalScored": 1095,
+      "siblings": [
+        {
+          "mn": "BM.36260",
+          "rank": 26
+        }
+      ]
+    },
+    {
+      "target": "K.7962",
+      "totalScored": 14305,
+      "siblings": [
+        {
+          "mn": "K.3531",
+          "rank": null
+        },
+        {
+          "mn": "K.14159",
+          "rank": null
+        },
+        {
+          "mn": "K.17895",
+          "rank": 309
+        },
+        {
+          "mn": "K.12810",
+          "rank": 32
+        }
+      ]
+    }
+  ]
+}

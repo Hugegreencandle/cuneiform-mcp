@@ -32,9 +32,19 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P3 — findings worth deciding on
 
-- [ ] **Surface the matcher's measured recall in user-facing text.** N=50 validation (2026-05-14) shows recall@15 = 3.4% on known joins where both pieces have `lineToVec`. Current tool description says "not all hits are joins" (true) but doesn't quantify. Options: add a one-paragraph "Performance" section to `README.md`, append a note to the tool description, or leave as-is. See `VALIDATION-2026-05-14.md` for the full rank distribution and the three successful hits.
+- [x] **Surface the matcher's measured recall in user-facing text.** Shipped 2026-05-14 with the v0.4 ship: README and both tool descriptions now quote the validated numbers (3.4% for lineToVec, 25% for trigram).
 
 - [ ] **Second crawl pass covering the `/fragments/all-signs` gap.** K.2862's three known siblings (K.2868, K.5065.A, Rm.111) have transliteration content at eBL but are missing from `/fragments/all-signs` and have empty `lineToVec` on `/fragments/<id>`. eBL stats: 36,583 transliterated, 36,493 in all-signs, 36,328 in our cache with non-empty `lineToVec` — gap of ~250 fragments, concentrated in joined ones. Pass would crawl every museum number declared in any cached fragment's `joins[]`; most will return empty, but some will fill the gap. Cost: ~1,000 extra HTTPs, ~3 min.
+
+## P4 — sign-trigram follow-ups (post-v0.4)
+
+- [ ] **Run a clean N=100 trigram validation when eBL is healthy.** The 2026-05-14 stress test (seed=137, N=100 target) was truncated at N=26 by an eBL outage (HTTP 000 from fetch=550 onwards). N=26 still confirmed recall@15 = 19.3%, but a full N=100 would tighten the confidence interval. Cost: ~10 min when eBL is up.
+
+- [ ] **Try filtering `X` (unreadable) tokens from trigrams.** ~35% of known siblings score zero by trigram — partly because damaged pieces have many `X`-trigrams that don't match the corresponding readable signs on the joined piece. An experiment: regenerate the index with X-containing trigrams dropped, re-validate against the same 50-target baseline, ship only if recall increases. Cost: ~10 min.
+
+- [ ] **Try sign-variant normalization** — collapse `ABZ406v2` → `ABZ406`, `ABZ85/ABZ84` → split into two trigram variants. Could increase recall by matching across paleographic variants of the same sign. Same validation harness applies.
+
+- [ ] **Tag eBL `joins[]` entries by physical-vs-parallel.** `Ist-A.7` ↔ `VAT.10383` is in `joins[]` but they're parallel manuscripts (literally identical opening signs), not physical pieces of one tablet. Filtering these out would let us measure pure-physical-join recall separately. Probably requires an Assyriologist's review of edge cases — not a hobby-scale project.
 
 - [x] **Retract yesterday's "BM.122625 ↔ 1881,0204.196 → multi-piece join group" claim** in the project memory + session log. At full corpus, `1881,0204.196` is not in BM.122625's top-5. The result was a small-corpus artifact (1,419 fragments). Done as part of this writeup (no separate commit — see `VALIDATION-2026-05-14.md` § "Why recall is this low" item 3).
 
