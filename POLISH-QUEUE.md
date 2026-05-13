@@ -4,30 +4,13 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P0 — bugs / correctness
 
-- [ ] **`get_fragment` fails on bloated fragment records (~1MB+).**
-  Diagnosed 2026-05-14 while chasing the BM.122625 ↔ K.2862 join candidate. **NOT a stale-cache issue** — retry on the same day distinguished two cases:
-  - `VAT.9304` — failed first try, succeeded on retry. Transient eBL blip. Ignore.
-  - `IM.77027` — failed both tries. Direct `curl` succeeded with **HTTP 200, 1,064,737 bytes (~1 MB), 7.54 s**. The fragment has a massive `record[]` revision array (dozens of entries from one editor "Simkó" in early Feb 2026) bloating the JSON payload.
-  - `IM.67587` — also fails through MCP. Same pattern: likely a similarly bloated record.
+- [x] **`get_fragment` failed on some fragments — undici IPv6 timeout, NOT body size.** Fixed via `dns.setDefaultResultOrder("ipv4first")` at top of `src/index.ts` (commit TBD).
 
-  Repro:
-  ```
-  find_join_candidates BM.122625 → top hits include IM.77027 + IM.67587
-  get_fragment IM.77027 → "eBL fetch failed: fetch failed (...)"
-  curl https://www.ebl.lmu.de/api/fragments/IM.77027 → HTTP 200, ~1 MB, ~7-8 s
-  ```
+  Original symptom (2026-05-14): `IM.77027` and `IM.67587` returned `"eBL fetch failed: fetch failed (...)"` while same-day `curl` succeeded. Initial hypothesis was payload bloat (IM.77027 returned ~1 MB with a 41-entry `record[]`). **Wrong.** Probing the error cause exposed `UND_ERR_CONNECT_TIMEOUT` against `2001:4ca0:800::8af6:e1c7:443:443` after 10 s — eBL publishes AAAA records but its IPv6 listener is intermittent. curl does Happy Eyeballs and falls back to IPv4; undici does not by default. IM.67587 actually has a 4-entry `record[]` — the "bloated record" theory disintegrates when you check.
 
-  Code surface: `src/index.ts:928` does bare `await fetch(url, { headers: { "User-Agent": USER_AGENT } })` with no timeout, no abort signal, no body-size handling. The `fetch failed` string is undici's internal error — thrown from inside `fetch` or `res.json()` before the catch on line 929 can hit (the catch only wraps the initial `fetch` call, not the `await res.json()` on line 964, so JSON-parse failures on big bodies escape).
+  Validation: same 5-fragment sweep that previously failed on IM.77027 + IM.67587 now passes on all five (IM.77027 3.5 s, IM.67587 0.9 s, VAT.9304 1.6 s, K.2862 1.5 s, BM.122625 2.3 s) with `ipv4first` enabled. The fix is process-wide — every host the MCP touches (ORACC, CDLI, eBL) now prefers IPv4. ORACC and CDLI never used IPv6 anyway; only eBL was affected.
 
-  Likely root cause: undici quirk on responses with very large `record[]` arrays — possibly TLS connection-reset under slow body-read, possibly a streaming-parse issue. Same machine handles 1 MB curl fine.
-
-  Fix options (cheap → robust):
-  1. Wrap the JSON parse in its own try/catch so the error message is honest (`JSON parse failed: …`) instead of pretending it's a network failure.
-  2. Strip the `record[]` field server-side: switch to `${URL}?fields=museumNumber,publication,description,...` (verify eBL accepts a `fields` filter — `FragmentQuery.ts` doesn't list one; may need projection at parse time instead).
-  3. After fetching, immediately drop `record[]`, `lineToVec`, `signs`, `notes[]`, and any other heavy fields from `f` before formatting. The current formatter only uses ~12 top-level keys anyway.
-  4. Use `node:https` with explicit timeout + retries, like the ORACC path already does for the InCommon TLS quirk.
-
-  Recommended sequence: **(1) first** (always-on, takes 5 min, surfaces the real error), then **(3)** as the actual fix (~30 min — projection at parse time costs nothing and shrinks memory pressure across all calls).
+  Trade-off: future IPv6-only infrastructure becomes invisible. Not a concern for the current source set (eBL, ORACC, CDLI all have functional IPv4). Revisit if any source drops IPv4.
 
 ## P1 — UX / labeling
 

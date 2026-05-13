@@ -1,9 +1,18 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import dns from "node:dns";
 import https from "node:https";
 import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
+
+// eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
+// — about 1 fragment in 20 returns UND_ERR_CONNECT_TIMEOUT (10s) on undici's
+// IPv6 attempt, surfacing to the caller as a bare "fetch failed". curl works
+// because it does Happy Eyeballs and falls back to IPv4; Node's fetch does
+// not by default. Forcing ipv4first sidesteps this for every eBL call (and
+// every other host the process hits). Verified 2026-05-14 on IM.77027.
+dns.setDefaultResultOrder("ipv4first");
 
 // InCommon RSA Server CA 2 — the intermediate that oracc.museum.upenn.edu's
 // server omits from its TLS handshake. Browsers/curl resolve it via AIA
