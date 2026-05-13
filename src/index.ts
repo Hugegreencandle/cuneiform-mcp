@@ -1036,22 +1036,139 @@ server.registerTool(
   },
 );
 
-// 8. find_join_candidates — STUB (Fragmentarium).
+// 8. find_join_candidates — LIVE (local lineToVec scorer, no Auth0).
+//
+// eBL's /fragments/{n}/match endpoint is Auth0-gated. Rather than block on
+// the `transliterate:fragments` scope, we reproduce its algorithm locally:
+//   1. Pre-crawled corpus of {museumNumber, lineToVec} for all ~36K
+//      transliterated fragments (run `node dist/index.js --prefetch`).
+//   2. For a target museum_number, fetch its full record (or pull from
+//      cache), then call scoreBoth() against every other fragment.
+//   3. Return top 15 by raw score AND top 15 by ruling-weighted score —
+//      the same NUMBER_OF_RESULTS_TO_RETURN = 15 as LineToVecRanker.
 server.registerTool(
   "find_join_candidates",
   {
     description:
-      "[v0.1 stub] Get computed Fragmentarium join candidates for an eBL fragment.",
+      "Find fragments that may physically join a target eBL fragment by running the same lineToVec prefix/suffix overlap algorithm as eBL's /match endpoint (reproduced locally, no Auth0). Returns top 15 by raw score and top 15 by ruling-weighted score.",
     inputSchema: {
-      museum_number: z.string().describe("eBL museum number to find joins for."),
+      museum_number: z
+        .string()
+        .min(1)
+        .describe("eBL museum number, e.g. 'K.1', 'BM.41255C' (auto-normalized)."),
+      top_k: z
+        .number()
+        .int()
+        .positive()
+        .max(50)
+        .optional()
+        .describe("Number of candidates returned per ranking (default 15, matches eBL)."),
     },
   },
-  async () =>
-    stubResult(
-      "find_join_candidates",
-      `${URLS.EBL_BASE}/fragments/`,
-      "v0.2 — wraps eBL ngram-matcher output; depends on get_fragment integration first.",
-    ),
+  async ({ museum_number, top_k }) => {
+    const k = top_k ?? 15;
+    // Normalize "BM.41255C" → "BM.41255.C" same as get_fragment.
+    const normalize = (s: string): string => {
+      const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
+      return m ? `${m[1]}.${m[2]}.${m[3]}` : s;
+    };
+    const targetId = normalize(museum_number.trim());
+
+    const { loadCorpus } = await import("./cache.js");
+    const { scoreBoth } = await import("./lineToVecScore.js");
+    const corpus = await loadCorpus();
+
+    if (corpus.missing) {
+      return textResult(
+        `Local corpus cache is empty. Run \`node ${process.argv[1]} --prefetch\` ` +
+          `to crawl /fragments/all-signs (~24 minutes, ~7 MB JSONL written to ` +
+          `${corpus.cachePath}). Then call find_join_candidates again.`,
+      );
+    }
+
+    // Locate the target in the corpus. If it's not present (e.g. cache
+    // doesn't yet cover this prefix), fetch it on-demand from eBL.
+    let target = corpus.fragments.find((f) => f.museumNumber === targetId);
+    if (!target) {
+      const url = `${URLS.EBL_BASE}/fragments/${encodeURIComponent(targetId)}`;
+      let res: Response;
+      try {
+        res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      } catch (err) {
+        return textResult(
+          `Target "${targetId}" not in local cache (${corpus.fragments.length} fragments) ` +
+            `and live fetch failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+      if (res.status === 404) {
+        return textResult(
+          `No fragment "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
+        );
+      }
+      if (!res.ok) {
+        return textResult(`eBL returned HTTP ${res.status} fetching ${targetId}.`);
+      }
+      const body = (await res.json()) as {
+        museumNumber?: { prefix: string; number: string; suffix: string };
+        lineToVec?: number[][];
+        designation?: string;
+      };
+      const mn = body.museumNumber
+        ? `${body.museumNumber.prefix}.${body.museumNumber.number}${body.museumNumber.suffix ? "." + body.museumNumber.suffix : ""}`
+        : targetId;
+      target = {
+        museumNumber: mn,
+        lineToVec: Array.isArray(body.lineToVec) ? body.lineToVec : [],
+        designation: body.designation,
+      };
+    }
+
+    if (!target.lineToVec || target.lineToVec.length === 0) {
+      return textResult(
+        `${targetId} has no lineToVec encoding (likely untransliterated). The join matcher cannot score it.`,
+      );
+    }
+
+    // Score every OTHER fragment in the corpus against the target.
+    type RankedHit = { museumNumber: string; designation?: string; score: number; weighted: number };
+    const hits: RankedHit[] = [];
+    for (const cand of corpus.fragments) {
+      if (cand.museumNumber === target.museumNumber) continue;
+      if (!cand.lineToVec || cand.lineToVec.length === 0) continue;
+      const { score, scoreWeighted } = scoreBoth(target.lineToVec, cand.lineToVec);
+      if (score === 0 && scoreWeighted === 0) continue;
+      hits.push({
+        museumNumber: cand.museumNumber,
+        designation: cand.designation,
+        score,
+        weighted: scoreWeighted,
+      });
+    }
+
+    const topRaw = [...hits].sort((a, b) => b.score - a.score).slice(0, k);
+    const topWeighted = [...hits].sort((a, b) => b.weighted - a.weighted).slice(0, k);
+
+    const ageMin = corpus.ageMs ? (corpus.ageMs / 60_000).toFixed(1) : "?";
+    const lines: string[] = [
+      `Join candidates for ${target.museumNumber}${target.designation ? `  (${target.designation})` : ""}`,
+      `Scored against ${corpus.fragments.length} cached fragments. Cache age: ${ageMin}m. Local algorithm (eBL lineToVec overlap), no Auth0.`,
+      ``,
+      `— TOP ${topRaw.length} BY RAW SCORE (suffix/prefix overlap length) —`,
+      ...topRaw.map(
+        (h, i) =>
+          `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} score=${h.score}` +
+          (h.designation ? `   ${h.designation}` : ""),
+      ),
+      ``,
+      `— TOP ${topWeighted.length} BY WEIGHTED SCORE (rulings count 3-10×, text lines 1×) —`,
+      ...topWeighted.map(
+        (h, i) =>
+          `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} weighted=${h.weighted}` +
+          (h.designation ? `   ${h.designation}` : ""),
+      ),
+    ];
+    return textResult(lines.join("\n"));
+  },
 );
 
 async function runPrefetch(): Promise<void> {
@@ -1074,7 +1191,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (7 live, 1 parked: find_join_candidates [Auth0])\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered, all live (find_join_candidates uses local lineToVec cache, no Auth0 required)\n`,
     );
     process.exit(0);
   }

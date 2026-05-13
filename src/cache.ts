@@ -170,6 +170,46 @@ export type CrawlResult = {
   errors: number;
 };
 
+// Load the JSONL cache into memory. Used by find_join_candidates to run
+// the lineToVec scorer over the full corpus per request. ~7 MB for the
+// full ~35K transliterated set, comfortable in memory.
+export type CorpusLoadResult = {
+  fragments: CachedFragment[];
+  cachePath: string;
+  ageMs: number | null;          // null if file doesn't exist yet
+  missing: boolean;              // true if there's no cache at all
+};
+
+export async function loadCorpus(): Promise<CorpusLoadResult> {
+  const dir = await ensureCacheDir();
+  const cachePath = path.join(dir, FRAGMENTS_JSONL);
+  let stat: Awaited<ReturnType<typeof fs.stat>> | null = null;
+  try {
+    stat = await fs.stat(cachePath);
+  } catch {
+    return { fragments: [], cachePath, ageMs: null, missing: true };
+  }
+  const raw = await fs.readFile(cachePath, "utf8");
+  const fragments: CachedFragment[] = [];
+  for (const line of raw.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    try {
+      const obj = JSON.parse(line) as CachedFragment;
+      if (obj && obj.museumNumber && Array.isArray(obj.lineToVec)) {
+        fragments.push(obj);
+      }
+    } catch {
+      // Skip malformed lines (partial writes during a live crawl).
+    }
+  }
+  return {
+    fragments,
+    cachePath,
+    ageMs: Date.now() - stat.mtimeMs,
+    missing: fragments.length === 0,
+  };
+}
+
 export async function crawlFragments(options: CrawlOptions = {}): Promise<CrawlResult> {
   const concurrency = options.concurrency ?? 5;
   const resume = options.resume ?? true;
