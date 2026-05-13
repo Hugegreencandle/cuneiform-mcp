@@ -16,12 +16,18 @@ import os from "node:os";
 const EBL_BASE = "https://www.ebl.lmu.de/api";
 const USER_AGENT = "cuneiform-mcp/0.3.0";
 
-// /fragments/all is a verified-fast endpoint that returns the full list
-// of museum numbers as a plain JSON array (~3.8 MB, one request, no auth).
-// /fragments/retrieve-all looked tempting in the route table but is not in
-// production use — empirically it doesn't return TTFB within 30+ s, so we
-// avoid it entirely and do a two-pass crawl off /fragments/all instead.
-const ENDPOINT_ALL = `${EBL_BASE}/fragments/all`;
+// /fragments/all-signs returns ONLY the ~36,500 transliterated fragments
+// (vs /fragments/all which returns all ~311K, of which 88% are catalogued-
+// only and have empty lineToVec). One 26-second request, ~35 MB of
+// {_id, signs} records. We use just the _id as the worklist for the
+// per-fragment lineToVec fetch. This avoids the 9.5-hour 88%-waste crawl
+// implied by /fragments/all.
+//
+// Why not /fragments/retrieve-all? It's in the route table but returns
+// the full transliterated-fragment payload in one shot (no implicit
+// page size in source), so it never TTFBs within 30+ s. Frontend
+// doesn't use it either. Dead in practice.
+const ENDPOINT_ALL_SIGNS = `${EBL_BASE}/fragments/all-signs`;
 const fragmentUrl = (museumNumber: string) =>
   `${EBL_BASE}/fragments/${encodeURIComponent(museumNumber)}`;
 
@@ -36,7 +42,7 @@ export function getCacheDir(): string {
 
 export const FRAGMENTS_JSONL = "fragments.jsonl";
 export const WATERMARK_FILE = ".watermark";
-export const ALL_IDS_FILE = ".all-ids.json";
+export const TRANSLITERATED_IDS_FILE = ".transliterated-ids.json";
 
 export type CachedFragment = {
   museumNumber: string;             // canonical "Prefix.Number.Suffix" form
@@ -54,15 +60,15 @@ function fmtMuseumNumber(mn: { prefix: string; number: string; suffix: string })
   return `${mn.prefix}.${mn.number}${mn.suffix ? "." + mn.suffix : ""}`;
 }
 
-// /fragments/all returns a flat JSON array of pre-formatted strings like
-// "K.1", "BM.41255.C", "Ki.1904-10-9,1". We cache the list to disk so a
-// resumed crawl doesn't re-fetch it.
-async function fetchAllIds(): Promise<string[]> {
+// /fragments/all-signs returns a JSON array of {_id, signs} for every
+// transliterated fragment. We only need the _id list for the worklist;
+// the signs field is incidental. Cache the extracted ID list to disk so
+// a resumed crawl doesn't have to re-download 35 MB.
+async function fetchTransliteratedIds(): Promise<string[]> {
   const dir = await ensureCacheDir();
-  const cachedPath = path.join(dir, ALL_IDS_FILE);
+  const cachedPath = path.join(dir, TRANSLITERATED_IDS_FILE);
   try {
     const stat = await fs.stat(cachedPath);
-    // Re-use cached ID list if <24h old. Crawl entirely from this snapshot.
     if (Date.now() - stat.mtimeMs < 24 * 60 * 60 * 1000) {
       const raw = await fs.readFile(cachedPath, "utf8");
       const ids = JSON.parse(raw) as unknown;
@@ -73,12 +79,13 @@ async function fetchAllIds(): Promise<string[]> {
   } catch {
     // No cached list — fetch fresh.
   }
-  const res = await fetch(ENDPOINT_ALL, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) throw new Error(`eBL /fragments/all returned HTTP ${res.status}`);
-  const ids = (await res.json()) as string[];
-  if (!Array.isArray(ids) || ids.length === 0) {
-    throw new Error("eBL /fragments/all returned an unexpected payload (not a non-empty array).");
+  const res = await fetch(ENDPOINT_ALL_SIGNS, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) throw new Error(`eBL /fragments/all-signs returned HTTP ${res.status}`);
+  const records = (await res.json()) as Array<{ _id: string; signs?: string }>;
+  if (!Array.isArray(records) || records.length === 0) {
+    throw new Error("eBL /fragments/all-signs returned an unexpected payload.");
   }
+  const ids = records.map((r) => r._id).filter((x): x is string => typeof x === "string");
   await fs.writeFile(cachedPath, JSON.stringify(ids), "utf8");
   return ids;
 }
@@ -173,9 +180,9 @@ export async function crawlFragments(options: CrawlOptions = {}): Promise<CrawlR
   const watermarkPath = path.join(dir, WATERMARK_FILE);
 
   log(`[prefetch] cache dir: ${dir}`);
-  log(`[prefetch] fetching /fragments/all (~3.8 MB) ...`);
-  let allIds = await fetchAllIds();
-  log(`[prefetch] ${allIds.length} fragments to consider`);
+  log(`[prefetch] fetching /fragments/all-signs (transliterated-only, ~35 MB, ~26 s) ...`);
+  let allIds = await fetchTransliteratedIds();
+  log(`[prefetch] ${allIds.length} transliterated fragments to consider`);
   if (options.maxFragments && options.maxFragments < allIds.length) {
     allIds = allIds.slice(0, options.maxFragments);
     log(`[prefetch] maxFragments cap applied — processing ${allIds.length}`);

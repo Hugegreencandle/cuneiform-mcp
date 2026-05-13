@@ -111,10 +111,29 @@ walking forward by adjusting any returned cursor/`search_after` token
 `{museumNumber, lineToVec, designation}` as a JSONL line. Throttle
 to ~5 req/s. Resumable via the last-seen museum number on disk.
 
-**Initial cost:** ~21,200 fragments / 200 per page = ~106 requests.
-At 5 req/s that's ~21 seconds of network + however long eBL takes
-per page (recall transliteration queries can be ~8 s; expect 30–90 s
-total for a cold crawl).
+**Initial cost (REVISED 2026-05-13 from P1 smoke test):** The actual
+corpus is **309,928 fragments**, not the ~21,200 the deep-dive brief
+estimated. And `/fragments/retrieve-all` doesn't TTFB within 30 s —
+it's not production-grade. So the working strategy is two-pass:
+
+1. GET `/fragments/all` → flat JSON array of 309,928 museum numbers
+   (~3.5 MB, single fast request, cached for 24 h via `.all-ids.json`).
+2. Parallel GET `/fragments/{n}` with 5 concurrent workers.
+
+Empirical rate from P1: ~9 req/s with 5 workers. At that rate a
+full cold crawl is ~9.5 hours, of which ~98% is wasted on
+fragments without `lineToVec`. Three speedups to evaluate in P2
+before committing to a full crawl:
+
+- Bump concurrency to 10-15 workers (~3-5 h cold).
+- Find a transliterated-only-list endpoint. `/fragments/query?
+  latest=true` returns 500 items per page — verify whether
+  `latest=true` actually means "has transliteration" rather than
+  "recently added". Source says the matching engine only ranks
+  transliterated fragments, so the catalogue clearly distinguishes
+  internally.
+- Prefix-filter to BM / K / VAT / Sm / Ki / IM which captures most
+  of the published material. Lossy but pragmatic.
 
 **Incremental sync:** on each run, hit `/fragments/latest`. If any
 returned fragment isn't in the local cache (by museum number), pull
@@ -123,7 +142,10 @@ N days — see Open Q4.
 
 **Storage size estimate:** each line is `{museumNumber: "Prefix.Number
 .Suffix", lineToVec: [...], designation: "..."}`. Mean line ≤ 300 B.
-Total: ~6 MB JSONL on disk. Negligible.
+At ~6,000 transliterated fragments (1.9% of 309,928, from the P1
+sample — likely an over-estimate of the skip rate), total is ≤ 2 MB
+of useful JSONL plus the 3.5 MB `.all-ids.json` cache. Still
+negligible.
 
 ### 2b. In-memory representation
 
