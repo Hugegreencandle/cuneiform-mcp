@@ -133,6 +133,42 @@ function stripXmlTags(s: string): string {
   return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
+// Wrap each <span class="w selected ...">...</span> with ** markers,
+// handling nested <span>...</span> children (the transliteration shape has
+// inner <span class="sign sux">KUR</span>.<span>mus</span>-… that a flat
+// non-greedy regex would close on prematurely).
+function markSelectedSpans(html: string): string {
+  const openRe = /<span\s[^>]*class="w selected[^"]*"[^>]*>/g;
+  let out = "";
+  let i = 0;
+  for (const open of html.matchAll(openRe)) {
+    const openIdx = open.index!;
+    out += html.slice(i, openIdx) + "**";
+    let depth = 1;
+    let j = openIdx + open[0].length;
+    const tagRe = /<(\/?)span\b[^>]*>/g;
+    tagRe.lastIndex = j;
+    let m: RegExpExecArray | null;
+    while ((m = tagRe.exec(html)) !== null) {
+      out += html.slice(j, m.index);
+      j = m.index + m[0].length;
+      if (m[1] === "/") {
+        depth--;
+        if (depth === 0) {
+          out += "**";
+          break;
+        }
+      } else {
+        depth++;
+      }
+    }
+    if (depth !== 0) out += "**";
+    i = j;
+  }
+  out += html.slice(i);
+  return out;
+}
+
 type ParsedTei = {
   title: string;
   cdliId: string | null;
@@ -274,23 +310,86 @@ server.registerTool(
     ),
 );
 
-// 4. search_oracc — STUB.
+// 4. search_oracc — LIVE (UPenn pager HTML scrape).
 server.registerTool(
   "search_oracc",
   {
     description:
-      "[v0.1 stub] Search annotated text editions across ORACC sub-corpora (saa01, dcclt, blms, etc.).",
+      "Full-text search within one ORACC project. Returns matched text IDs, canonical citations, and snippets with the hit term marked **like this**.",
     inputSchema: {
-      query: z.string().describe("Free-text query."),
-      project: z.string().optional().describe("ORACC project code, e.g. 'saa01'."),
+      query: z.string().min(1).describe("Free-text query, e.g. 'king', 'Phrygian', 'Aššur'."),
+      project: z
+        .string()
+        .min(1)
+        .describe(
+          "ORACC project code. Top-level (e.g. 'dcclt') or nested (e.g. 'saao/saa01', 'rinap/rinap4'). Cross-project search is not yet supported.",
+        ),
+      max_results: z
+        .number()
+        .int()
+        .positive()
+        .max(200)
+        .optional()
+        .describe("Cap match blocks returned (default 25)."),
     },
   },
-  async () =>
-    stubResult(
-      "search_oracc",
-      `${URLS.ORACC_BASE}/`,
-      "v0.2 — ORACC publishes per-project corpusjson exports; need to mirror locally for fast search since the live site has TLS issues on its UPenn mirror.",
-    ),
+  async ({ query, project, max_results }) => {
+    const cap = max_results ?? 25;
+    const proj = project.replace(/^\/+|\/+$/g, "");
+    const url = `${URLS.ORACC_BASE}/${proj}/pager?q=${encodeURIComponent(query)}`;
+    const res = await oraccHttpsGet(url);
+    if (!res.ok) {
+      return textResult(
+        `ORACC search failed (${res.status ?? "no-status"}): ${res.error} — ${url}.`,
+      );
+    }
+    const html = res.body;
+    if (!html.includes("p4Pager")) {
+      return textResult(
+        `Unexpected response shape (no p4Pager) from ${url}. The UPenn mirror may have changed format.`,
+      );
+    }
+    const imaxMatch = html.match(/data-imax="(\d+)"/);
+    const totalHits = imaxMatch ? parseInt(imaxMatch[1], 10) : 0;
+    if (totalHits === 0 || html.includes("No results were found for this search")) {
+      return textResult(
+        `No results for "${query}" in ${proj}.\nSource: ${url}`,
+      );
+    }
+
+    // Two result shapes:
+    //   translation hit  -> <p class="label">...</p>     + <p class="refline tr">…<span class="cell">…</span></p>
+    //   transliteration  -> <p class="ce-label">...</p>  + <p class="ce-result">…</p>
+    const pairRegex =
+      /<p class="(?:label|ce-label)">\s*<a[^>]*data-iref="([^"]+)"[^>]*>([^<]+)<\/a>\s*<\/p>\s*<p class="(?:refline[^"]*|ce-result)"[^>]*>([\s\S]*?)<\/p>/g;
+
+    type Hit = { textId: string; iref: string; cite: string; snippet: string };
+    const hits: Hit[] = [];
+    for (const m of html.matchAll(pairRegex)) {
+      const iref = m[1];
+      const cite = m[2].trim();
+      const markedBody = markSelectedSpans(m[3]);
+      const snippet = stripXmlTags(markedBody);
+      const textIdMatch = iref.match(/^([PQX]\d+)/);
+      const textId = textIdMatch ? textIdMatch[1] : iref;
+      hits.push({ textId, iref, cite, snippet });
+    }
+
+    const uniqueTexts = new Set(hits.map((h) => h.textId)).size;
+    const shown = hits.slice(0, cap);
+    const truncated = hits.length > cap;
+
+    const out = [
+      `ORACC search: "${query}" in ${proj}`,
+      `${totalHits} hit${totalHits === 1 ? "" : "s"} across ${uniqueTexts} text${uniqueTexts === 1 ? "" : "s"}${
+        truncated ? ` (showing first ${cap} of ${hits.length} parsed)` : ` (${hits.length} parsed)`
+      }`,
+      `Source: ${url}`,
+      ``,
+      ...shown.map((h, i) => `${String(i + 1).padStart(3, " ")}. [${h.textId}] ${h.cite}\n     ${h.snippet}`),
+    ];
+    return textResult(out.join("\n"));
+  },
 );
 
 // 5. get_oracc_text — LIVE (TEI XML from UPenn mirror).
@@ -410,7 +509,7 @@ server.registerTool(
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (2 live: lookup_sign, get_oracc_text)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (3 live: lookup_sign, search_oracc, get_oracc_text)\n`,
     );
     process.exit(0);
   }
