@@ -454,21 +454,102 @@ server.registerTool(
   },
 );
 
-// 6. search_fragments — STUB (eBL).
+// 6. search_fragments — LIVE (eBL /fragments/query, no auth required).
 server.registerTool(
   "search_fragments",
   {
-    description: "[v0.1 stub] Search the eBL fragment catalog (~21,200 fragments).",
+    description:
+      "Search the eBL fragment catalog (~21,200 fragments) by museum number or transliteration. Returns museum numbers + matching line numbers; call get_fragment for full details.",
     inputSchema: {
-      query: z.string().describe("Free-text or museum number prefix."),
+      query: z
+        .string()
+        .min(1)
+        .describe(
+          "Free text. Museum number (e.g. 'K.1', 'BM.42345') or transliteration sign string (e.g. 'lugal', 'an.ki').",
+        ),
+      mode: z
+        .enum(["auto", "number", "transliteration", "lemmas"])
+        .optional()
+        .describe(
+          "Override auto-detection: 'number' (museum no.), 'transliteration' (sign reading), 'lemmas' (normalized headword).",
+        ),
+      limit: z
+        .number()
+        .int()
+        .positive()
+        .max(100)
+        .optional()
+        .describe("Max items returned (default 20, max 100)."),
     },
   },
-  async () =>
-    stubResult(
-      "search_fragments",
-      `${URLS.EBL_BASE}/fragments`,
-      "v0.2 — endpoint is live but returned 422 on a parameter-less GET; need to reverse-engineer required query params from ebl-frontend repo.",
-    ),
+  async ({ query, mode, limit }) => {
+    const cap = limit ?? 20;
+    // Museum numbers in eBL look like K.1, BM.42345, VAT.4936, Sm.1, Ki.1904-10-9,1.
+    // Heuristic: starts with 1-5 capital letters, then a dot, then a digit.
+    const looksLikeMuseumNumber = /^[A-Z][A-Za-z]{0,4}\.\d/.test(query);
+    const resolved = mode ?? "auto";
+    const paramName: "number" | "transliteration" | "lemmas" =
+      resolved === "auto"
+        ? looksLikeMuseumNumber
+          ? "number"
+          : "transliteration"
+        : resolved;
+
+    const params = new URLSearchParams();
+    params.set(paramName, query);
+    params.set("limit", String(cap));
+    const url = `${URLS.EBL_BASE}/fragments/query?${params.toString()}`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+    } catch (err) {
+      return textResult(
+        `eBL fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+      );
+    }
+    if (!res.ok) {
+      const hint =
+        res.status === 422
+          ? " The server rejected the parameter — try setting mode explicitly."
+          : "";
+      return textResult(`eBL search returned HTTP ${res.status} for ${url}.${hint}`);
+    }
+    type Hit = {
+      matchingLines: number[];
+      museumNumber: { prefix: string; number: string; suffix: string };
+      matchCount: number;
+    };
+    const data = (await res.json()) as { matchCountTotal: number; items: Hit[] };
+
+    const fmtMuseum = (mn: Hit["museumNumber"]) =>
+      `${mn.prefix}.${mn.number}${mn.suffix ? mn.suffix : ""}`;
+
+    if (!data.items || data.items.length === 0) {
+      return textResult(`No fragments matched ${paramName}="${query}".\nSource: ${url}`);
+    }
+
+    const out = [
+      `eBL fragment search: ${paramName}="${query}" (limit ${cap})`,
+      `${data.items.length} fragment${data.items.length === 1 ? "" : "s"} returned, ${
+        data.matchCountTotal
+      } line match${data.matchCountTotal === 1 ? "" : "es"} on this page.`,
+      `Source: ${url}`,
+      ``,
+      ...data.items.map((it, i) => {
+        const id = fmtMuseum(it.museumNumber);
+        const lines = it.matchingLines.length
+          ? ` — matching lines: ${it.matchingLines.join(", ")}`
+          : "";
+        return `${String(i + 1).padStart(3, " ")}. ${id}  (${it.matchCount} match${
+          it.matchCount === 1 ? "" : "es"
+        })${lines}`;
+      }),
+      ``,
+      `Tip: call get_fragment(museum_number="<id>") for full publication + description.`,
+    ];
+    return textResult(out.join("\n"));
+  },
 );
 
 // 7. get_fragment — STUB.
@@ -509,7 +590,7 @@ server.registerTool(
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (3 live: lookup_sign, search_oracc, get_oracc_text)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (4 live: lookup_sign, search_oracc, get_oracc_text, search_fragments)\n`,
     );
     process.exit(0);
   }
