@@ -352,25 +352,136 @@ server.registerTool(
   },
 );
 
-// 2. search_tablets — STUB (CDLI live API needs param mapping; v0.2).
+// 2. search_tablets — LIVE (CDLI /search with simple-field triplet).
+//
+// Param shape verified from cdli-gh/framework-api-client/master/src/search.js:
+//   simple-field[]=<category>   one of: keyword | publication | collection |
+//                                provenience | period | transliteration |
+//                                translation | id
+//   simple-value[]=<query>
+//   simple-op[]=<AND|OR>        boolean joiner BETWEEN multiple terms — NOT
+//                                a comparison operator. The brief that called
+//                                it "contains/equals/starts_with" was wrong.
+// Response is a JSON array of artifact records; pagination via Link header
+// (rel="next"/"last"). Each artifact has an integer `id` (used by
+// /artifacts/{id} — NOT the P-number) and an optional
+// composites[0].composite_no holding the P/Q-number when assigned.
+const CDLI_QUERY_CATEGORIES = [
+  "keyword",
+  "publication",
+  "collection",
+  "provenience",
+  "period",
+  "transliteration",
+  "translation",
+  "id",
+] as const;
+type CdliCategory = (typeof CDLI_QUERY_CATEGORIES)[number];
+
 server.registerTool(
   "search_tablets",
   {
     description:
-      "[v0.1 stub] Search the CDLI catalog by free text and filters (period, genre, language).",
+      "Search the CDLI artifact catalog (~350K tablets) by keyword, publication, transliteration, period, etc. Returns CDLI integer ID + P/Q-number + designation + museum no + period + provenience.",
     inputSchema: {
-      query: z.string().describe("Free-text query, e.g. 'gilgamesh' or 'temple inventory'."),
-      period: z.string().optional().describe("e.g. 'Old Babylonian', 'Neo-Assyrian'."),
-      genre: z.string().optional().describe("e.g. 'Literary', 'Administrative'."),
-      language: z.string().optional().describe("e.g. 'Sumerian', 'Akkadian'."),
+      query: z.string().min(1).describe("Search term, e.g. 'gilgamesh' or 'lugal'."),
+      category: z
+        .enum(CDLI_QUERY_CATEGORIES)
+        .optional()
+        .describe(
+          "Which field to search. Default 'keyword' searches across everything. Use 'transliteration' for sign-string queries, 'publication' for citations.",
+        ),
+      limit: z
+        .number()
+        .int()
+        .positive()
+        .max(100)
+        .optional()
+        .describe("Max results returned (default 25)."),
     },
   },
-  async () =>
-    stubResult(
-      "search_tablets",
-      `${URLS.CDLI_BASE}/docs/api`,
-      "v0.2 — wire to CDLI Framework /artifacts with content negotiation. Live probes during scaffolding returned 500 on naive GETs; need to inspect cdli-gh/framework-api-client for actual request shape.",
-    ),
+  async ({ query, category, limit }) => {
+    const cap = limit ?? 25;
+    const cat: CdliCategory = category ?? "keyword";
+
+    const params = new URLSearchParams();
+    params.append("simple-field[]", cat);
+    params.append("simple-value[]", query);
+    params.append("simple-op[]", "AND");
+    params.append("limit", String(cap));
+    const url = `${URLS.CDLI_BASE}/search?${params.toString()}`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
+      });
+    } catch (err) {
+      return textResult(
+        `CDLI fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+      );
+    }
+    if (!res.ok) {
+      return textResult(`CDLI search returned HTTP ${res.status} for ${url}.`);
+    }
+
+    // Parse Link header to estimate total result count from rel="last".
+    const linkHeader = res.headers.get("link") ?? "";
+    const lastMatch = linkHeader.match(/<[^>]*[?&]page=(\d+)[^>]*>;\s*rel="last"/);
+    const lastPage = lastMatch ? parseInt(lastMatch[1], 10) : null;
+    const totalEstimate = lastPage !== null ? `${(lastPage - 1) * cap + 1}-${lastPage * cap}` : null;
+
+    type Artifact = {
+      id: number;
+      designation?: string;
+      museum_no?: string;
+      composites?: Array<{ composite_no?: string }>;
+      period?: { name?: string; period?: string };
+      provenience?: { provenience?: string };
+      artifact_type?: { artifact_type?: string };
+      // CDLI's join shape: languages[i].language is itself an object
+      // {id, sequence, language: "Sumerian", protocol_code, inline_code}.
+      languages?: Array<{ language?: { language?: string } }>;
+    };
+
+    const items = (await res.json()) as Artifact[];
+    if (!Array.isArray(items) || items.length === 0) {
+      return textResult(`No CDLI artifacts matched ${cat}="${query}".\nSource: ${url}`);
+    }
+
+    const lines: string[] = [
+      `CDLI search: ${cat}="${query}" (limit ${cap})`,
+      `${items.length} item${items.length === 1 ? "" : "s"} on this page${
+        totalEstimate ? ` · ${lastPage} pages total (≈${totalEstimate} matches)` : ""
+      }.`,
+      `Source: ${url}`,
+      ``,
+    ];
+    for (let i = 0; i < items.length; i++) {
+      const x = items[i];
+      const pNum = x.composites?.[0]?.composite_no;
+      const metaBits: string[] = [];
+      if (x.period?.name) metaBits.push(x.period.name);
+      if (x.artifact_type?.artifact_type) metaBits.push(x.artifact_type.artifact_type);
+      if (x.provenience?.provenience && !/^uncertain/i.test(x.provenience.provenience))
+        metaBits.push(x.provenience.provenience);
+      const langs = (x.languages ?? [])
+        .map((l) => l.language?.language)
+        .filter(Boolean) as string[];
+      if (langs.length) metaBits.push(langs.join(", "));
+
+      const line1 = `${String(i + 1).padStart(3, " ")}. ${
+        pNum && pNum !== "needed" ? `P=${pNum}` : "(no P-num)"
+      }   id=${x.id}${metaBits.length ? "   " + metaBits.join(" · ") : ""}`;
+      const line2 = `     ${x.designation ?? "(no designation)"}${
+        x.museum_no ? `   [${x.museum_no}]` : ""
+      }`;
+      lines.push(line1, line2);
+    }
+    lines.push("");
+    lines.push(`Tip: call get_tablet(cdli_id=<integer id>) — CDLI /artifacts/{id} expects the integer, not the P-number.`);
+    return textResult(lines.join("\n"));
+  },
 );
 
 // 3. get_tablet — STUB.
@@ -800,7 +911,7 @@ server.registerTool(
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (5 live: lookup_sign, search_oracc, get_oracc_text, search_fragments, get_fragment)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (6 live: lookup_sign, search_oracc, get_oracc_text, search_fragments, get_fragment, search_tablets)\n`,
     );
     process.exit(0);
   }
