@@ -16,7 +16,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P1 — UX / labeling
 
-- [x] **`find_join_candidates` is a structural-similarity ranker, not a join finder.** Shipped in P1-batch commit (2026-05-14). All four sub-items landed:
+- [x] **`find_join_candidates` is a structural-similarity ranker, not a join finder.** Shipped in `2a9d01c` (2026-05-14). All four sub-items landed:
   1. Tool description rewritten to "Rank eBL fragments by line-structure fingerprint similarity… surfaces parallel manuscripts + structurally similar bilinguals + possible physical joins (not all hits are joins)."
   2. Each candidate now renders its `genres` (full category path) and `joins` (known join-group siblings) inline so the reader can disambiguate same-composition vs structurally-similar-but-unrelated at a glance.
   3. `filter_known_joins` flag (default false) drops candidates already listed in the target's `joins[]`.
