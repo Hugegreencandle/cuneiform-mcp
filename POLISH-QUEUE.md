@@ -40,7 +40,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 - [ ] **Run a clean N=100 trigram validation when eBL is healthy.** The 2026-05-14 stress test (seed=137, N=100 target) was truncated at N=26 by an eBL outage (HTTP 000 from fetch=550 onwards). N=26 still confirmed recall@15 = 19.3%, but a full N=100 would tighten the confidence interval. Cost: ~10 min when eBL is up.
 
-- [ ] **Try filtering `X` (unreadable) tokens from trigrams.** ~35% of known siblings score zero by trigram — partly because damaged pieces have many `X`-trigrams that don't match the corresponding readable signs on the joined piece. An experiment: regenerate the index with X-containing trigrams dropped, re-validate against the same 50-target baseline, ship only if recall increases. Cost: ~10 min.
+- [x] **Try filtering `X` (unreadable) tokens from trigrams.** SHIPPED `drop ≥2 X` 2026-05-14. Tested 5 strengths against the 50/87 baseline. **Recall@15 unchanged at 22/87 (25.3%)** — no filter strength rescues a sibling into top-15. But median rank of known siblings compresses dramatically: 89 → 26 (3.4×), mean 1,952 → 575. One sibling (`BM.39639 → BM.38610`) rescued into top-30 (rank 89 → 22 under drop-≥2X). Seven siblings lose any-rank visibility, all baseline rank ≥1,716 (invisible regardless). `drop ≥2 X` picked over the polish-queue's literal `drop anyX` spec because it produces the same K=30 rescue at a better landing rank (22 vs 28) and preserves "1×X" trigrams (two real signs + one damaged position = real evidence, not noise). Live in `src/signsIndex.ts:trigramsFromSigns`. Full writeup: `X-FILTER-EXPERIMENT-2026-05-14.md`.
 
 - [x] **Try sign-variant normalization** — SHELVED 2026-05-14 (negative result). Wrote `scripts/validate-trigram-normalized.mjs` testing 6 variants (`vN`-collapse, slash-split, letter-suffix collapse, `nN`-variant collapse, all-conservative, all-aggressive) against the same 50 target / 87 sibling baseline. Pure-collapse rules (`vN`, letter-suffix, `nN`) produced **zero rank changes anywhere in the 87-sibling set** — the variant forms exist (~60K total occurrences) but don't co-occur in trigram windows that contain join evidence. Slash-split actively hurt: lost K.18780 → K.9041 from rank 14 to 16 because Cartesian-product expansion inflates the Jaccard denominator uniformly across candidates faster than it grows true-pair intersections. 25.3% baseline stands. Full writeup: `NORMALIZATION-EXPERIMENT-2026-05-14.md`. `find_parallel_text` ships without normalization.
 
@@ -53,5 +53,6 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 - (P0) `get_fragment` fetch failure via undici Happy Eyeballs (`d9c1038` + `2a9d01c`)
 - (P1) `find_join_candidates` ranker semantics + genre/joins filters (`2a9d01c`)
 - (P4) Sign-variant normalization — shelved, negative result (`NORMALIZATION-EXPERIMENT-2026-05-14.md`)
+- (P4) X-trigram filter (`drop ≥2 X`) — shipped, median rank 89 → 26 (`X-FILTER-EXPERIMENT-2026-05-14.md`)
 
 <!-- Add new items at the bottom of the appropriate priority section. Roll completed items into "Done" with commit sha. -->

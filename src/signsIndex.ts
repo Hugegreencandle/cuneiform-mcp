@@ -10,9 +10,11 @@
 //
 // Trigram tokenization is within-line (no boundary crossing). Tokens are
 // space-separated entries like "ABZ151", "ABZ406v2", "ABZ85/ABZ84" (uncertain
-// alternates), "X" (unreadable). We keep X-trigrams — they're real evidence
-// that "something stood here in a recognizable position" — but if a future
-// experiment shows they hurt recall, this is the layer to filter.
+// alternates), "X" (unreadable). Trigrams containing ≥2 X are skipped — the
+// X-FILTER-EXPERIMENT-2026-05-14 benchmark showed this rescues one known
+// sibling into top-30, compresses median rank of known siblings from 89→26
+// (3.4×), and only costs visibility on siblings already ranked ≥1700
+// (effectively unreachable). Recall@15 is unchanged at 22/87.
 
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -32,7 +34,12 @@ export function trigramsFromSigns(signs: string): Set<string> {
   for (const line of signs.split(/\r?\n/)) {
     const toks = line.trim().split(/\s+/).filter(Boolean);
     for (let i = 0; i + 2 < toks.length; i++) {
-      out.add(toks[i] + " " + toks[i + 1] + " " + toks[i + 2]);
+      const a = toks[i],
+        b = toks[i + 1],
+        c = toks[i + 2];
+      const xCount = (a === "X" ? 1 : 0) + (b === "X" ? 1 : 0) + (c === "X" ? 1 : 0);
+      if (xCount >= 2) continue;
+      out.add(a + " " + b + " " + c);
     }
   }
   return out;

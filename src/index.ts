@@ -1333,7 +1333,9 @@ server.registerTool(
 // find_join_candidates.
 //
 // See VALIDATION-2026-05-14.md + TRIGRAM-EXPERIMENT-2026-05-14.md for the
-// full benchmark.
+// full benchmark. X-FILTER-EXPERIMENT-2026-05-14.md documents the follow-up
+// that landed the ≥2-X trigram filter — same recall@15, but median rank of
+// known siblings compressed from 89 to 26.
 server.registerTool(
   "find_parallel_text",
   {
