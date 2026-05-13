@@ -1054,11 +1054,32 @@ server.registerTool(
     ),
 );
 
+async function runPrefetch(): Promise<void> {
+  // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
+  const { crawlFragments, getCacheDir } = await import("./cache.js");
+  process.stderr.write(`cuneiform-mcp v${VERSION} --prefetch starting\n`);
+  process.stderr.write(`cache dir: ${getCacheDir()}\n`);
+  const maxRaw = process.env.CUNEIFORM_MCP_MAX_FETCH;
+  const maxFragments = maxRaw ? parseInt(maxRaw, 10) : undefined;
+  const result = await crawlFragments({
+    concurrency: 5,
+    resume: !process.argv.includes("--no-resume"),
+    maxFragments: Number.isFinite(maxFragments) ? maxFragments : undefined,
+  });
+  process.stderr.write(
+    `summary: ${result.written} written, ${result.skipped} skipped, ${result.errors} errors over ${result.totalIds} ids\n`,
+  );
+}
+
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
       `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (7 live, 1 parked: find_join_candidates [Auth0])\n`,
     );
+    process.exit(0);
+  }
+  if (process.argv.includes("--prefetch")) {
+    await runPrefetch();
     process.exit(0);
   }
   const transport = new StdioServerTransport();
