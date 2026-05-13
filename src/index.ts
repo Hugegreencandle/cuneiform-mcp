@@ -1,15 +1,106 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import https from "node:https";
+import tls from "node:tls";
+import { URL as NodeURL } from "node:url";
 
-const VERSION = "0.1.0";
+// InCommon RSA Server CA 2 — the intermediate that oracc.museum.upenn.edu's
+// server omits from its TLS handshake. Browsers/curl resolve it via AIA
+// chasing; Node does not. Chains to USERTrust RSA Certification Authority,
+// which IS in Node's bundled root set. Valid 2022-11-16 → 2032-11-15.
+// Sourced from http://crt.sectigo.com/InCommonRSAServerCA2.crt
+const INCOMMON_RSA_SERVER_CA_2 = `-----BEGIN CERTIFICATE-----
+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
+-----END CERTIFICATE-----
+`;
+
+const ORACC_CA_BUNDLE = [...tls.rootCertificates, INCOMMON_RSA_SERVER_CA_2];
+
+type FetchOutcome =
+  | { ok: true; status: number; body: string }
+  | { ok: false; status: number | null; error: string };
+
+function oraccHttpsGet(url: string): Promise<FetchOutcome> {
+  return new Promise((resolve) => {
+    let u: NodeURL;
+    try {
+      u = new NodeURL(url);
+    } catch (err) {
+      resolve({ ok: false, status: null, error: `Invalid URL: ${url}` });
+      return;
+    }
+    const req = https.request(
+      {
+        protocol: u.protocol,
+        hostname: u.hostname,
+        port: u.port || 443,
+        path: u.pathname + u.search,
+        method: "GET",
+        headers: { "User-Agent": USER_AGENT, Accept: "application/xml,text/xml,*/*" },
+        ca: ORACC_CA_BUNDLE,
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (c) => chunks.push(Buffer.from(c)));
+        res.on("end", () => {
+          const body = Buffer.concat(chunks).toString("utf8");
+          const status = res.statusCode ?? 0;
+          if (status >= 200 && status < 300) resolve({ ok: true, status, body });
+          else resolve({ ok: false, status, error: `HTTP ${status}` });
+        });
+        res.on("error", (err) => resolve({ ok: false, status: null, error: err.message }));
+      },
+    );
+    req.on("error", (err) => resolve({ ok: false, status: null, error: err.message }));
+    req.end();
+  });
+}
+
+const VERSION = "0.2.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
-  ORACC_BASE: "https://oracc.org",
+  // Bare oracc.org has been unreachable since at least 2026-Q1; UPenn mirror is the live host.
+  ORACC_BASE: "https://oracc.museum.upenn.edu",
   EBL_BASE: "https://www.ebl.lmu.de/api",
   OGSL_SIGNS: "https://raw.githubusercontent.com/oracc/osl/master/00etc/labasi-signs.json",
 } as const;
+
+const USER_AGENT = `cuneiform-mcp/${"0.2.0"}`;
 
 type LabasiSign = {
   sign_name: string;
@@ -36,6 +127,57 @@ async function loadSigns(): Promise<Map<string, LabasiSign>> {
 
 function textResult(text: string) {
   return { content: [{ type: "text" as const, text }] };
+}
+
+function stripXmlTags(s: string): string {
+  return s.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+type ParsedTei = {
+  title: string;
+  cdliId: string | null;
+  transliteration: string[];
+  translation: string[];
+};
+
+function parseOraccTei(xml: string, fallbackId: string): ParsedTei {
+  const titleMatch = xml.match(
+    /<name[^>]*type="cdlicat:primary_publication"[^>]*>([^<]+)<\/name>/,
+  );
+  const cdliMatch = xml.match(
+    /<name[^>]*type="cdlicat:id_text"[^>]*>([^<]+)<\/name>/,
+  );
+  const title = titleMatch ? titleMatch[1].trim() : fallbackId;
+  const cdliId = cdliMatch ? cdliMatch[1].trim() : null;
+
+  // Transliteration: TEI emits <lb n="N"/> then a run of <w lemma="..."><...>txt</w>
+  // up to the next <lb>, </p>, <milestone>, or </body>.
+  const parts = xml.split(/<lb\s+n="([^"]+)"\s*\/>/);
+  const transliteration: string[] = [];
+  for (let i = 1; i < parts.length; i += 2) {
+    const lineNum = parts[i];
+    const body = (parts[i + 1] ?? "").split(
+      /<\/p>|<milestone\b|<div\d|<\/body>/,
+    )[0];
+    const words = [...body.matchAll(/<w\b[^>]*>([\s\S]*?)<\/w>/g)]
+      .map((m) => stripXmlTags(m[1]))
+      .filter(Boolean);
+    if (words.length) {
+      transliteration.push(`${lineNum.padStart(4, " ")}  ${words.join(" ")}`);
+    }
+  }
+
+  // Translation: <div3 type="tr" ... xtr:label="N">English text</div3>
+  const trRegex =
+    /<div3\b[^>]*type="tr"[^>]*xtr:label="([^"]+)"[^>]*>([\s\S]*?)<\/div3>/g;
+  const translation: string[] = [];
+  for (const m of xml.matchAll(trRegex)) {
+    const label = m[1];
+    const text = stripXmlTags(m[2]);
+    if (text) translation.push(`${label.padStart(4, " ")}  ${text}`);
+  }
+
+  return { title, cdliId, transliteration, translation };
 }
 
 function stubResult(toolName: string, sourceUrl: string, roadmap: string) {
@@ -151,22 +293,66 @@ server.registerTool(
     ),
 );
 
-// 5. get_oracc_text — STUB.
+// 5. get_oracc_text — LIVE (TEI XML from UPenn mirror).
 server.registerTool(
   "get_oracc_text",
   {
-    description: "[v0.1 stub] Fetch one ORACC edition with translation + lemmatization.",
+    description:
+      "Fetch one ORACC edition (transliteration + English translation) from the UPenn ORACC mirror's TEI XML.",
     inputSchema: {
-      project: z.string().describe("ORACC project code."),
-      text_id: z.string().describe("Text identifier within the project."),
+      project: z
+        .string()
+        .min(1)
+        .describe(
+          "ORACC project code. Top-level (e.g. 'dcclt') or nested (e.g. 'saao/saa01', 'rinap/rinap4').",
+        ),
+      text_id: z
+        .string()
+        .min(1)
+        .describe("Text identifier within the project, e.g. 'P224485' or 'Q003456'."),
+      max_lines: z
+        .number()
+        .int()
+        .positive()
+        .max(2000)
+        .optional()
+        .describe("Cap transliteration + translation lines returned (default 300)."),
     },
   },
-  async () =>
-    stubResult(
-      "get_oracc_text",
-      `${URLS.ORACC_BASE}/`,
-      "v0.2 — fetches /<project>/corpusjson/<text_id>.json once URL pattern is confirmed.",
-    ),
+  async ({ project, text_id, max_lines }) => {
+    const cap = max_lines ?? 300;
+    const proj = project.replace(/^\/+|\/+$/g, "");
+    const url = `${URLS.ORACC_BASE}/${proj}/tei/${text_id}.xml`;
+    const res = await oraccHttpsGet(url);
+    if (!res.ok) {
+      return textResult(
+        `ORACC fetch failed (${res.status ?? "no-status"}): ${res.error} — ${url}. Check project + text_id (e.g. saao/saa01 + P224485).`,
+      );
+    }
+    const xml = res.body;
+    if (!xml || !xml.includes("<TEI")) {
+      return textResult(
+        `No TEI edition found at ${url}. The UPenn mirror returns 200 + empty body for unknown paths — verify project nesting (e.g. 'saao/saa01' not 'saa01') and text_id casing.`,
+      );
+    }
+    const parsed = parseOraccTei(xml, text_id);
+    const xlit = parsed.transliteration.slice(0, cap);
+    const xlitTruncated = parsed.transliteration.length > cap;
+    const trans = parsed.translation.slice(0, cap);
+    const transTruncated = parsed.translation.length > cap;
+
+    const out = [
+      `${parsed.title}  (${proj} / ${text_id}${parsed.cdliId && parsed.cdliId !== text_id ? ` ↔ ${parsed.cdliId}` : ""})`,
+      `Source: ${url}`,
+      ``,
+      `— TRANSLITERATION (${parsed.transliteration.length} line${parsed.transliteration.length === 1 ? "" : "s"}${xlitTruncated ? `, showing first ${cap}` : ""}) —`,
+      ...(xlit.length ? xlit : ["  (no lines parsed)"]),
+      ``,
+      `— TRANSLATION (${parsed.translation.length} block${parsed.translation.length === 1 ? "" : "s"}${transTruncated ? `, showing first ${cap}` : ""}) —`,
+      ...(trans.length ? trans : ["  (no translation blocks)"]),
+    ];
+    return textResult(out.join("\n"));
+  },
 );
 
 // 6. search_fragments — STUB (eBL).
@@ -223,7 +409,9 @@ server.registerTool(
 
 async function main() {
   if (process.argv.includes("--smoke")) {
-    process.stderr.write(`cuneiform-mcp v${VERSION} smoke OK — 8 tools registered\n`);
+    process.stderr.write(
+      `cuneiform-mcp v${VERSION} smoke OK — 8 tools registered (2 live: lookup_sign, get_oracc_text)\n`,
+    );
     process.exit(0);
   }
   const transport = new StdioServerTransport();
