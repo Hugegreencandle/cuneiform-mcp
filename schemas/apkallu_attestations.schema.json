@@ -103,6 +103,10 @@
           "type": "string",
           "description": "Modern critical edition or study. E.g. `Reiner 1961, p.4-6` for Bīt Mēseri III. `Lenzi 2008, p.106-109` for Uruk List."
         },
+        "secondary_anchor": {
+          "type": "string",
+          "description": "Additional load-bearing modern reference where one exists. E.g. for Utuabzu's heaven-ascent: `Borger 1974, JNES 33:183-196 — established the Enoch parallel`. Optional."
+        },
         "excerpt": {
           "type": "string",
           "description": "Translation excerpt of the relevant passage. Length capped at ~6 lines. Present only for textual attestations."
@@ -110,6 +114,14 @@
         "translator": {
           "type": "string",
           "description": "Translator for the excerpt. E.g. `Reiner 1961`, `Lenzi 2008`, `Foster 2005`."
+        },
+        "epithet": {
+          "type": "string",
+          "description": "Specific epithet attached to the sage in this attestation. E.g. for Uanna in Bīt Mēseri III: `who accomplishes the plans of heaven and earth`. Optional but high-value for the canonical Bīt Mēseri III attestations where the formula-epithets are diagnostic."
+        },
+        "tablet_position": {
+          "type": "string",
+          "description": "Structural position within the source-text. E.g. `Tablet III, lines 1-7 (sage 1 of 7)`, `Tablet III, lines 22-28 (postdiluvian sage 1 of 4)`. Optional — useful for queryability of position-indexed corpora like Bīt Mēseri."
         }
       }
     },

@@ -4,7 +4,8 @@
     "compiled": "2026-05-15",
     "curator_note": "Akkadian sage names are spelled per Reiner 1961's transliteration. Variant spellings under alt_names. Each sage's paired antediluvian king follows the Uruk List of Kings and Sages (W.20030,7); the Sumerian King List names some kings differently — those variants are not normalized here since the apkallu pairing tradition is specifically the Uruk List's.",
     "iconography_note": "Iconographic attestations are catalogued by museum object. The fish-cloaked Oannes-form is the most-attested visual type and is associated specifically with Uanna in textual sources; bird-headed and human-form variants are not textually pinned to specific named sages and are grouped under the `Apkallū (visual tradition)` collective entry. Wiggermann 1992 provides the foundational three-type taxonomy (purādu / bird-apkallū / ūmu-apkallū). Iconography schema-v0.7 fields: wiggermann_type, palace_room, bucket_and_cone_present.",
-    "iconography_dataset_source": "Specific museum-object identifications added 2026-05-15 from `/Users/danebrown/Desktop/Research/Apkallu_Iconography.md` candidate list (15 verified accessions across 9 institutions)."
+    "iconography_dataset_source": "Specific museum-object identifications added 2026-05-15 from `/Users/danebrown/Desktop/Research/Apkallu_Iconography.md` candidate list (15 verified accessions across 9 institutions).",
+    "bit_meseri_enrichment_source": "Bīt Mēseri III enrichments (epithets, tablet_position, secondary_anchor to Borger 1974, postdiluvian-sage attestations) added 2026-05-15 from `/Users/danebrown/Desktop/Research/Bit_Meseri.md` (276-line brief)."
   },
   "sages": [
     {
@@ -21,8 +22,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, pp.4-5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] Uanna, who completed the plans of heaven and earth, paired with King Ayalu, the first of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "who accomplishes the plans of heaven and earth",
+          "tablet_position": "Tablet III, lines 1-7 (sage 1 of 7 antediluvian)"
         },
         {
           "source": "Berossus, Babyloniaca (preserved in Syncellus)",
@@ -94,8 +98,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, p.5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] Uanduga, paired with King Alalgar, second of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "given broad understanding",
+          "tablet_position": "Tablet III, lines 8-9 (sage 2 of 7 antediluvian)"
         }
       ]
     },
@@ -113,8 +120,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, p.5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] Enmeduga, paired with King Ammelu'anna, third of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "to whom a good fate was decreed",
+          "tablet_position": "Tablet III, lines 10-11 (sage 3 of 7 antediluvian)"
         }
       ]
     },
@@ -132,8 +142,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, p.5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] Enmegalama, paired with King Amegalanna, fourth of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "who was born in a house",
+          "tablet_position": "Tablet III, lines 12-13 (sage 4 of 7 antediluvian)"
         }
       ]
     },
@@ -151,8 +164,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, p.5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] Enmebulugga, paired with King Enmeušumgalanna, fifth of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "who grew up in pasture-land",
+          "tablet_position": "Tablet III, lines 14-15 (sage 5 of 7 antediluvian)"
         }
       ]
     },
@@ -170,8 +186,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, p.5",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
           "excerpt": "[paraphrase] An-Enlilda, the conjurer of Eridu, paired with King Dumuzi the Shepherd, sixth of the antediluvian kings.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "the conjurer of Eridu",
+          "tablet_position": "Tablet III, lines 16-17 (sage 6 of 7 antediluvian)"
         }
       ]
     },
@@ -189,8 +208,11 @@
           "language": "Akkadian",
           "approximate_date": "Neo-Assyrian (c. 700 BCE)",
           "scholarly_anchor": "Reiner 1961, pp.5-6",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196 — 'Die Beschwörungsserie Bīt mēseri und die Himmelfahrt Henochs'; the foundational article establishing the Utuabzu-Enoch parallel by reading Bīt Mēseri III.18-21 alongside Genesis 5:24 + 1 Enoch's heavenly-ascent material",
           "excerpt": "[paraphrase] Utuabzu, who ascended to heaven, paired with King Enmeduranki of Sippar, seventh and last of the antediluvian kings. The ascent-to-heaven motif at this position is one of two seventh-figure correspondences with Enoch (Genesis 5:24); see find_antediluvian_parallel for the comparative scholarship.",
-          "translator": "paraphrase based on Reiner 1961"
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "who ascended to heaven",
+          "tablet_position": "Tablet III, lines 18-21 (sage 7 of 7 antediluvian — load-bearing for Enoch parallel)"
         },
         {
           "source": "Enmeduranki text (Lambert 1967 critical edition)",
@@ -206,11 +228,24 @@
     },
     {
       "name": "Nungalpirigal",
-      "alt_names": [],
+      "alt_names": ["Nungalpiriggaldim"],
       "tier": "postdiluvian",
-      "paired_king": "",
+      "paired_king": "Enmerkar (Uruk dynasty I, post-flood)",
       "discipline_specialization": ["scholarly transmission"],
       "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 22-23",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.6",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
+          "excerpt": "[paraphrase] Nungalpiriggaldim, the first postdiluvian sage, paired with King Enmerkar of Uruk. The text marks the transition: 'After the Flood, the kings were ruled by sages of human descent.'",
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "the first postdiluvian apkallu",
+          "tablet_position": "Tablet III, lines 22-23 (postdiluvian sage 1 of 4)"
+        },
         {
           "source": "Uruk List of Kings and Sages",
           "source_type": "scholarly_list",
@@ -231,6 +266,18 @@
       "discipline_specialization": [],
       "attestations": [
         {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 24-25",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.6",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
+          "excerpt": "[paraphrase] Piriggalnungal, second postdiluvian sage in the Bīt Mēseri sequence.",
+          "translator": "paraphrase based on Reiner 1961",
+          "tablet_position": "Tablet III, lines 24-25 (postdiluvian sage 2 of 4)"
+        },
+        {
           "source": "Uruk List of Kings and Sages",
           "source_type": "scholarly_list",
           "citation": "W.20030,7 obv. col.i.13-15",
@@ -244,11 +291,23 @@
     },
     {
       "name": "Piriggalabsu",
-      "alt_names": [],
+      "alt_names": ["Piriggalabzu"],
       "tier": "postdiluvian",
       "paired_king": "",
       "discipline_specialization": [],
       "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 26-27",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.6",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
+          "excerpt": "[paraphrase] Piriggalabsu/Piriggalabzu, third postdiluvian sage in the Bīt Mēseri sequence — name etymologically 'great seer of the abyss.'",
+          "translator": "paraphrase based on Reiner 1961",
+          "tablet_position": "Tablet III, lines 26-27 (postdiluvian sage 3 of 4)"
+        },
         {
           "source": "Uruk List of Kings and Sages",
           "source_type": "scholarly_list",
@@ -265,9 +324,22 @@
       "name": "Lu-Nanna",
       "alt_names": ["Lu-Nanna 'two-thirds apkallu'"],
       "tier": "postdiluvian",
-      "paired_king": "",
+      "paired_king": "Shulgi (Ur III, post-flood)",
       "discipline_specialization": ["scholarly transmission"],
       "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 28-29",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.6",
+          "secondary_anchor": "Borger 1974, JNES 33:183-196",
+          "excerpt": "[paraphrase] Lu-Nanna, last postdiluvian sage in the Bīt Mēseri sequence — paired with Shulgi of Ur III. Explicitly described as 'two-thirds apkallu, one-third human.' Annus 2010 connects this hybrid status to the Nephilim of Genesis 6:4 / 1 Enoch 7:2 — divine-human descent transmitted into the postdiluvian world.",
+          "translator": "paraphrase based on Reiner 1961",
+          "epithet": "two-thirds apkallu, one-third human",
+          "tablet_position": "Tablet III, lines 28-29 (postdiluvian sage 4 of 4 — load-bearing for Nephilim parallel)"
+        },
         {
           "source": "Uruk List of Kings and Sages",
           "source_type": "scholarly_list",

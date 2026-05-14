@@ -113,8 +113,11 @@ export type Attestation = {
     museum_number?: string;
   };
   scholarly_anchor?: string;
+  secondary_anchor?: string;
   excerpt?: string;
   translator?: string;
+  epithet?: string;
+  tablet_position?: string;
 };
 
 export type Sage = {
