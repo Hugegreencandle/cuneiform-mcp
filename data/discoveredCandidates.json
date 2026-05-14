@@ -28,17 +28,25 @@
     },
     "validation_totals": {
       "total_candidates": 33,
-      "validated": 15,
-      "rejected": 12,
-      "pending": 6,
-      "rounds_completed": 2,
-      "total_reviewed": 36
+      "validated": 18,
+      "rejected": 15,
+      "pending": 0,
+      "rounds_completed": 3,
+      "total_reviewed": 33
     },
     "v0_7_3_promotion": {
       "date": "2026-05-15",
       "promoted_to_antediluvian": 10,
       "remaining_validated_unpromoted": 5,
       "reason_unpromoted": "Mesopotamian-internal parallels (Mesopotamian↔Mesopotamian, Hurrian↔Akkadian, Mesopotamian↔Ugaritic) — no Jewish-passage query maps. Planned: v0.8 find_mesopotamian_parallel tool."
+    },
+    "reformulation_pass": {
+      "pass_date": "2026-05-15",
+      "pass_label": "Round 3 — Reformulation of 6 pending candidates",
+      "candidates_reformulated": 6,
+      "validated_after_reformulation": 3,
+      "rejected_after_reformulation": 3,
+      "reformulation_method": "For each pending candidate, attempted reformulation per the validation_log.inconclusive_notes hints. Reformulations that align to a published scholar's actual argument were validated; reformulations that failed to find a peer-reviewed anchor were rejected; one candidate was rejected as a duplicate of an existing v0.6 dataset entry."
     }
   },
   "candidates": [
@@ -109,7 +117,7 @@
     },
     {
       "entity_a": {
-        "name": "Inanna's Descent through seven gates",
+        "name": "Inanna's Descent (cosmological descent narrative)",
         "type": "narrative",
         "primary_brief": "Inanna_Ishtar.md",
         "tradition": "sumerian",
@@ -118,7 +126,7 @@
         ]
       },
       "entity_b": {
-        "name": "Adapa's ascent through Anu's gate-keepers",
+        "name": "Adapa's ascent (cosmological ascent narrative)",
         "type": "narrative",
         "primary_brief": "Adapa.md",
         "tradition": "akkadian",
@@ -126,8 +134,8 @@
       },
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
-      "confidence_score": 0.74,
-      "validation_status": "pending",
+      "confidence_score": 0.65,
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Inanna_Ishtar.md",
@@ -150,7 +158,7 @@
           "garments (Inanna sheds; Adapa accepts)"
         ],
         "transmission_route": "intra-Mesopotamian, both texts well-attested in OB-Akkadian scribal curriculum; structural inverse rather than direct dependence",
-        "reasoning_summary": "Both narratives turn on a protagonist passing controlled thresholds into a divine zone (Ereshkigal's underworld; Anu's heaven), with the journey's outcome determined by how the protagonist handles the gate-keepers and what they offer or demand. Inanna descends and loses regalia at each gate; Adapa ascends and is offered garments (which he accepts) along with the bread of life (which he refuses). Inverted direction (down vs up), inverted method (divestment vs investiture), but identical structural mechanic: gates + gatekeepers + intercession + offered substance."
+        "reasoning_summary": "REFORMULATED 2026-05-15. Original framing (7 gates ↔ 2 gatekeepers as structural inversion) was too architecturally precise. Reformulated framing: Inanna and Adapa as paired-motif representatives of the Mesopotamian descent-and-ascent cosmological framework. Annus 2016 The Overturned Boat Part Two treats them as such — descent into the underworld/sea was structurally necessary precursor to heavenly ascent in Mesopotamian thought."
       },
       "suggested_anchor": "Check Izre'el 2001 Adapa and the South Wind for any structural-parallel discussion. Check Sladek 1974 Inanna's Descent to the Netherworld for the seven-gate mechanic. Cooper 1990 articles on astronomical-mythological dimension may cover the Venus-cycle gate-passage reading.",
       "transmission_direction": "structural_only",
@@ -159,8 +167,17 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "Eisenbrauns publisher description + Artemov OLZ review + Equinox JCH review + academia.edu literature extracts on Annus 2016.",
-        "inconclusive_notes": "Round-2: Annus 2016 *The Overturned Boat* Part Two has a 'Descent and Ascent' chapter that pairs Inanna and Adapa as shared/paired motifs in Mesopotamian cosmological frame. HOWEVER, the candidate's specific 'seven gates ↔ Anu's gatekeepers (Dumuzi/Gishzida) as structural inversion' framing is a more architectural claim than what surfaces in publisher summaries and reviews of Annus 2016. Annus appears to argue cosmological continuity (descent enables ascent), not specifically a 7-gates-vs-2-gatekeepers inversion of narrative units. Recommend: obtain full chapter text + promote to validated OR rephrase candidate to match Annus's actual framing."
-      }
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Original 7-gates-vs-gatekeepers inversion framing dropped in favor of Annus 2016's actual broader paired-motif argument. Mesopotamian-internal — does not promote to antediluvianParallels.json. Promote target: planned v0.8 find_mesopotamian_parallel."
+      },
+      "scholarly_attribution": [
+        {
+          "author_year": "Annus 2016",
+          "publication": "Amar Annus, The Overturned Boat: Intertextuality of the Adapa Myth and Exorcist Literature, State Archives of Assyria Studies 24 (Helsinki: Neo-Assyrian Text Corpus Project, 2016). Part Two: 'Descent and Ascent.'",
+          "argument_summary": "Devotes Part Two to 'Descent and Ascent' treating Inanna's journey and Adapa's ascent as shared/paired motifs central to Mesopotamian religious experience. Argues that descent into the underworld (sea, netherworld) was a structurally necessary precursor to heavenly ascent in the Mesopotamian cosmological frame — not as 7-gates-vs-2-gatekeepers inversion but as paired cosmological motif."
+        }
+      ]
     },
     {
       "entity_a": {
@@ -259,7 +276,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.71,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Erra_Epic.md",
@@ -291,7 +308,10 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "WebFetch of Annus 2010 PDF (full-text grep for 'Kabti', 'colophon', 'pseudepigraph'); Drawnel 2012 review of Kvanvig 2011; Britannica + Encyclopedia.com on Kabti-ilāni-Marduk.",
-        "inconclusive_notes": "Round-2 verification confirms inconclusive. Full-text search of Annus 2010 PDF found no Kabti-colophon ↔ Enoch-frame structural argument. Drawnel 2012 review of Kvanvig 2011 *Primeval History* confirms Kvanvig devotes a full Erra section but argues Watcher-Story ↔ Babylonian-imperial-ideology, not Erra-colophon ↔ Enoch-frame. Adjacent published arguments (VanderKam 1984 Enmeduranki↔Enoch; Borger 1971 Marduk/Shulgi Prophecies↔Daniel) use different Mesopotamian sources. Recommend re-anchoring against Enmeduranki↔Enoch or parking."
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Reformulation attempted: re-anchor to Enmeduranki↔Enoch. Outcome: that argument is already in v0.6 dataset, making this candidate effectively a duplicate. The Erra-specific framing does not add new scholarly content.",
+        "rejection_reason": "REJECTED after reformulation attempt: the Mesopotamian↔Jewish authorial-frame structural parallel IS already in the v0.6 dataset under Genesis 5:21-24 (Enmeduranki↔Enoch via Lambert 1967 + VanderKam 1984 + Kvanvig 1988 + Annus 2010). The Erra colophon (Kabti-ilāni-Marduk dream-revelation) is a STRUCTURALLY SIMILAR Mesopotamian authorial-frame, but its 1 Enoch reception is via the same Enmeduranki↔Enoch transmission that's already captured. The candidate as stated would be a third citation pointing to the same underlying parallel — duplicate by substance even though entities differ."
       }
     },
     {
@@ -596,14 +616,14 @@
     },
     {
       "entity_a": {
-        "name": "Anunnaki/Igigi binary tier-structure",
+        "name": "Pre-flood humans of Atra-ḫasīs (cosmological role-slot)",
         "type": "group",
         "primary_brief": "Igigi.md",
         "tradition": "sumerian",
         "alt_names": []
       },
       "entity_b": {
-        "name": "Anunnaki labor → Igigi rebellion → Watchers transgression",
+        "name": "Watchers of 1 Enoch's Book of the Watchers (occupying the same role-slot)",
         "type": "narrative",
         "primary_brief": "The_Watchers.md",
         "tradition": "aramaic_jewish",
@@ -611,8 +631,8 @@
       },
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
-      "confidence_score": 0.55,
-      "validation_status": "pending",
+      "confidence_score": 0.68,
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Igigi.md",
@@ -633,7 +653,7 @@
           "lesser celestials"
         ],
         "transmission_route": "common Ancient Near Eastern substrate; Atrahasis was well-known in Late Bronze cosmopolitan scribal world (Ḫattuša/Megiddo/Emar/Ugarit fragments). The Watchers narrative inverts: where Igigi rebellion is resolved without judgment, Watchers transgression triggers judgment",
-        "reasoning_summary": "The Igigi's collective labor-rebellion in Atrahasis is the structural inverse of the Watchers' collective transgressive descent. Igigi go on strike against legitimate cosmic labor → assembly accommodates by creating humans. Watchers conspire to descend and transgress legitimate divine-human boundary → judgment + Flood. Same structural slot (junior-celestial collective acts against established order) with theologically inverted outcomes. The Watchers narrative is structurally the Igigi narrative with the moral valence flipped — and with the resolution moved from accommodation to punishment."
+        "reasoning_summary": "REFORMULATED 2026-05-15. Original 'Anunnaki/Igigi binary ↔ Watchers' framing was wrong — Kvanvig 2011's actual claim positions Watchers in the role-slot of Atrahasis's PRE-FLOOD HUMANS, not in the role-slot of rebelling junior gods (Igigi). Reformulated: 'Watchers as structural successors to Atrahasis's pre-flood humans' — both are pre-flood beings whose existence creates the conditions for divine flood-intervention."
       },
       "suggested_anchor": "Annus 2010 on apkallu→Watchers parallel may cover this. Kvanvig 1988 Roots of Apocalyptic on the Atrahasis-substrate. Reed 2005 Fallen Angels for the punitive-inversion theology.",
       "transmission_direction": "common_substrate",
@@ -642,8 +662,19 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "Full-text search of Annus 2010 PDF for 'Igigi'/'Anunnaki'; review of intertextual.bible citing Kvanvig 2011:403-404; Drawnel 2012 review; Annus 2024 MDPI Religions article keywords.",
-        "inconclusive_notes": "Round-2 verification: Annus 2010 contains zero hits for 'Igigi' or 'Anunnaki' in any context. Kvanvig 2011 *Primeval History* makes the closest published argument but his framing (Watchers ↔ Atrahasis humans in the role-slot of pre-flood humanity, NOT Watchers ↔ Igigi in the role-slot of rebelling junior gods) is structurally different from the candidate. The Anunnaki/Igigi tier-binary ↔ Watchers framing appears as editorial gloss on intertextual.bible but no peer-reviewed scholar makes it explicitly. Recommend reformulation against Kvanvig 2011's actual claim (Watchers ↔ humans) or parking."
-      }
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Original 'Igigi tier-binary' framing rejected; reformulation aligns to Kvanvig 2011's actual claim. PROMOTES to antediluvianParallels.json under 1 Enoch 6:1-8 (Watchers descent) as an additional result.",
+        "promotion_target": "antediluvianParallels.json 1 Enoch 6:1-8 (appended as 4th result)",
+        "promoted_on": "2026-05-15"
+      },
+      "scholarly_attribution": [
+        {
+          "author_year": "Kvanvig 2011",
+          "publication": "Helge S. Kvanvig, Primeval History: Babylonian, Biblical, and Enochic. An Intertextual Reading, Supplements to the Journal for the Study of Judaism 149 (Leiden: Brill, 2011), pp. 403-404",
+          "argument_summary": "Argues that the Watchers and giants 'as antediluvian beings, are cast in the same role as the antediluvian human race' in the Mesopotamian Atrahasis framework. Watchers do not parallel the Igigi (rebelling junior gods); they occupy the cosmological role-slot of pre-flood humanity. This is a structural-role parallel, not a tier-class parallel."
+        }
+      ]
     },
     {
       "entity_a": {
@@ -1268,7 +1299,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.32,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Sumerian_Me.md",
@@ -1296,7 +1327,10 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "Niditch 1987 Underdogs and Tricksters Internet Archive + Journal for Semitics + Baylor dissertation references.",
-        "inconclusive_notes": "Both halves individually well-established: Inanna obtains the me from a drunk Enki (Kramer 1972, Sumerian myth Inanna and Enki / Transfer of Arts of Civilization); Jacob as biblical trickster is central in Niditch 1987 Underdogs and Tricksters. HOWEVER, Niditch 1987's actual content does NOT bridge to Mesopotamia explicitly with Inanna-Enki paired with Jacob-Isaac. Folklore-typology arguments may surface widely (Inanna-trickster archetype in Journal for Semitics; Jacob-as-divine-trickster Baylor dissertation) but no peer-reviewed publication verified pairing Inanna's me-theft with Jacob's deception of Isaac as parallel trickster-obtains-divine-benediction. The trickster archetype is published; THIS pairing is not. Per Round-2 discipline: inconclusive (lean reject)."
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Reformulation attempted 3 ways: (1) broader trickster typology; (2) intoxication-trickery topos; (3) parent-mediated benediction-theft typology. None yields a peer-reviewed pair-specific scholarly anchor. The parallel may be defensible in comparative folklore but is not anchored in current scholarship.",
+        "rejection_reason": "REJECTED after reformulation attempt. The trickster archetype is widely deployed in folklore studies (Niditch 1987 Underdogs and Tricksters for Hebrew Bible; Inanna-trickster scholarship in Journal for Semitics for Mesopotamia) — but Niditch 1987 stays internal to Hebrew Bible folklore and Inanna-trickster work stays internal to Mesopotamian myth. NO peer-reviewed scholar verified to pair Inanna's me-theft with Jacob's deception of Isaac specifically. Reformulations attempted: (a) broader trickster typology — Niditch doesn't bridge Mesopotamia; (b) broader intoxication-trickery topos (Inanna-Enki + Noah's drunkenness Gen 9 + Lot Gen 19) — different pair, doesn't help; (c) parent-mediated benediction-theft typology — too generic. Mark rejected; the candidate is irreducibly unanchored despite intuitive appeal."
       }
     },
     {
@@ -1673,14 +1707,14 @@
     },
     {
       "entity_a": {
-        "name": "Sumerian flood seven-day duration",
+        "name": "Mesopotamian flood duration (7-and-7 across Sumerian, Atra-ḫasīs, Gilgamesh XI)",
         "type": "motif",
         "primary_brief": "Sumerian_Flood_Story.md",
         "tradition": "sumerian",
         "alt_names": []
       },
       "entity_b": {
-        "name": "Genesis 7 forty-day rain duration",
+        "name": "Genesis 7 flood duration (40-day rain + 150-day prevailing waters per P/J)",
         "type": "motif",
         "primary_brief": "Atrahasis.md",
         "tradition": "hebrew",
@@ -1689,7 +1723,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.62,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Sumerian_Flood_Story.md",
@@ -1709,7 +1743,7 @@
           "flood duration"
         ],
         "transmission_route": "Israelite redactor inherits Mesopotamian flood narrative but substitutes longer durations (J: 40; P: 150)",
-        "reasoning_summary": "All three Mesopotamian flood witnesses (Sumerian Ziusudra, OB Atra-ḫasīs, SB Gilgamesh XI) preserve a seven-day flood. Genesis 7:12 (J) gives 40 days of rain; Genesis 7:24 (P) gives 150 days of prevailing waters. The divergence is one of the cleanest single-detail Mesopotamian → Hebrew theological transformations — the Israelite tradition explicitly extends the duration, possibly to align with calendar-significant numbers (40 = wilderness wandering / Sinai; 150 = five months of P source). Already partially documented in floodAlignment.json but worth flagging as its own discovered candidate for the asymmetric-divergence pattern."
+        "reasoning_summary": "REFORMULATED 2026-05-15. Original 'Hebrew tradition as DELIBERATE INNOVATION' framing dropped (Chen 2013's actual directionality is opposite). Reformulated: documented structural difference between Mesopotamian seven-and-seven (preserved across all three witnesses) and Hebrew 40-day rain + 150-day prevailing waters (Gen 7:12 + 7:24). Wenham 1987 WBC catalogues this as one of 17 points of contact-and-divergence; P/J source-critical analysis treats the dual durations as redactional layering of distinct flood-account sources."
       },
       "suggested_anchor": "Lambert & Millard 1969 commentary on flood durations. Westermann 1984 Genesis 1-11 on Gen 7:11-24. Chen 2013 Primeval Flood Catastrophe.",
       "transmission_direction": "unidirectional_a_to_b",
@@ -1718,8 +1752,24 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "Chen 2013 OUP product page + Lambert & Millard 1969 Internet Archive + Wenham WBC Internet Archive + Wikipedia Genesis flood narrative.",
-        "inconclusive_notes": "Round-2: The structural contrast (Mesopotamian 7-and-7 across all 3 witnesses vs Hebrew 40-day rain + 150-day prevailing waters) IS standard scholarly consensus (Lambert & Millard 1969 + Wenham 1987 + standard P/J source criticism). HOWEVER, the candidate's specific 'Hebrew tradition as DELIBERATE INNOVATION over Mesopotamian' framing was attributed to Chen 2013 — but Chen 2013's actual thesis is the OPPOSITE directionality: he argues the Mesopotamian flood motif itself was an OB-period innovation in Sumerian literature, not that Hebrew authors innovated over Mesopotamian models. The deliberate-extension interpretive claim needs Wenham 1987 (WBC Genesis 1-15) as anchor, not Chen 2013. Recommend re-anchoring + re-running validation."
-      }
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Original 'deliberate Hebrew innovation' interpretive framing softened to 'documented structural divergence per Wenham 1987 catalogue.' Anchor change: Chen 2013 (whose directionality is opposite — argues Mesopotamian innovation in Sumerian OB literature) is removed. PROMOTES to antediluvianParallels.json under a new Genesis 7 query.",
+        "promotion_target": "antediluvianParallels.json Genesis 7:11-24 (new query)",
+        "promoted_on": "2026-05-15"
+      },
+      "scholarly_attribution": [
+        {
+          "author_year": "Wenham 1987",
+          "publication": "Gordon J. Wenham, Genesis 1-15, Word Biblical Commentary 1 (Waco: Word Books, 1987)",
+          "argument_summary": "Catalogues 17 points of contact between Genesis 1-11 and Mesopotamian flood traditions, with flood-duration as one of the documented divergences (Mesopotamian seven-and-seven days vs Hebrew 40-day rain + 150-day prevailing waters). Treats the Hebrew duration scheme as redactional layering of P and J flood sources."
+        },
+        {
+          "author_year": "Lambert & Millard 1969",
+          "publication": "W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford: Clarendon, 1969)",
+          "argument_summary": "Establishes the seven-and-seven Mesopotamian flood-duration canonical across the Sumerian Flood Story, Atra-ḫasīs, and Gilgamesh XI. The Hebrew variant duration is therefore a documented divergence from the otherwise stable Mesopotamian witness."
+        }
+      ]
     },
     {
       "entity_a": {
@@ -1961,7 +2011,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.64,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Enki_Ea.md",
@@ -1991,7 +2041,10 @@
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
         "validation_method": "JSTOR Lambert 2013 listing + Internet Archive Kramer & Maier 1989 + secondary literature review.",
-        "inconclusive_notes": "Round-2: Both texts are well-studied. Lambert 2013 discusses the 50 names extensively + Marduk's absorption of Enlil's prerogatives; Kramer & Maier 1989 translate 'Enki and the World Order.' Neither explicitly compares the two as parallel divine-administrative narratives in materials accessed. The Enki→Marduk theological succession (father-son framing) IS attested in scholarship — but that is a different claim than the structural-parallel framing of the candidate. Recommend full-book access review before validating."
+        "reformulated_on": "2026-05-15",
+        "reformulated_by": "claude-reformulation-pass 2026-05-15",
+        "reformulation_note": "Reformulation attempted: 'Enki-Marduk theological succession via 50 names' or 'Marduk inherits Ea's wisdom-administrative role.' Outcome: Lambert 2013's actual argument is Marduk inheriting ENLIL's role (validated under C1), not Enki's specifically. No clean anchor for the reformulated parallel. The candidate may resurface in a future v0.8 if a specific Lambert/Sommerfeld/Annus argument is located, but as of 2026-05-15 it has no peer-reviewed anchor.",
+        "rejection_reason": "REJECTED after reformulation attempt. Lambert 2013 Babylonian Creation Myths argues Marduk's 50 names absorb ENLIL'S prerogatives (already validated as C1 Ninurta↔Marduk substitution — Lambert 1986 explicit). The reformulation as 'Marduk-as-inheritor-of-Enki's-domain-organization-role' is not in Lambert 2013 directly. Marduk is Ea's son in Enūma Eliš I.79-86 and inherits some wisdom-aspects, but the specific 'Enki and the World Order' ↔ 'Marduk 50 names' structural parallel is not anchored in the verified scholarship. Sommerfeld 1982 discusses Marduk's rise but does not make this specific dual-text comparison."
       }
     }
   ]

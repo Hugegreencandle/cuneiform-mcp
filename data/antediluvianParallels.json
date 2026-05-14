@@ -12,6 +12,13 @@
       "existing_queries_appended": 1,
       "candidates_remaining_in_discovered": 5,
       "candidates_remaining_reason": "5 validated candidates are Mesopotamian-internal (Mesopotamian↔Mesopotamian, Hurrian↔Akkadian, or Mesopotamian↔Ugaritic) and don't fit the v0.6 tool's Jewish-passage-query structure. They are: Marduk-Tiamat ↔ Baal-Yam; Enheduanna ↔ Kabti-ilāni-Marduk; Hannahanna ↔ Bēlet-ilī; Lagash KL ↔ SKL; Ninurta-Asag ↔ Marduk-Tiamat. Planned home: v0.8 find_mesopotamian_parallel tool with a Mesopotamian-internal query structure."
+    },
+    "v0_7_4_reformulation": {
+      "date": "2026-05-15",
+      "source": "data/discoveredCandidates.json reformulation pass",
+      "new_results_added": 2,
+      "new_queries_added": 1,
+      "existing_queries_appended": 1
     }
   },
   "parallels": [
@@ -271,6 +278,25 @@
           ],
           "transmission_hypothesis": "common_ancient_near_eastern_substrate",
           "notes": "Weak in the Mesopotamian sense — this is a West Semitic / Levantine input to the Watchers narrative, not a Mesopotamian one. Included for completeness."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Atra-ḫasīs pre-flood humanity (the labor-bearing antediluvian race)",
+            "citation": "Atra-ḫasīs I.1-339 + III.i-vii (Lambert & Millard 1969)",
+            "language": "Akkadian",
+            "approximate_date": "Old Babylonian recension c. 1700 BCE"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Kvanvig 2011",
+              "publication": "Helge S. Kvanvig, Primeval History: Babylonian, Biblical, and Enochic. An Intertextual Reading, Supplements to the Journal for the Study of Judaism 149 (Leiden: Brill, 2011), pp. 403-404",
+              "argument_summary": "Argues that the Watchers and giants 'as antediluvian beings, are cast in the same role as the antediluvian human race' in the Mesopotamian Atrahasis framework. Watchers do not parallel the Igigi (rebelling junior gods); they occupy the cosmological role-slot of pre-flood humanity. This is a structural-role parallel, not a tier-class parallel."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Promoted from Discovery Engine v0.7 reformulation pass (2026-05-15). Kvanvig 2011 Primeval History pp.403-404 argues the Watchers + giants are cast in the SAME COSMOLOGICAL ROLE-SLOT as Atrahasis's pre-flood humans — not as parallel to the rebelling Igigi. Both groups are pre-flood beings whose existence creates the conditions for divine flood-intervention. This structural-role parallel adds a third dimension to the apkallu↔Watchers and Gilgamesh-hybridity↔Watchers parallels already in this query — Watchers as inheritors of the pre-flood-human role."
         }
       ]
     },
@@ -595,6 +621,47 @@
           ],
           "transmission_hypothesis": "common_ancient_near_eastern_substrate",
           "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Bodi 1991 OBO 104 'The Book of Ezekiel and the Poem of Erra' is the foundational treatment — explicitly identifies 'absence of the divinity from its shrine' as one of TWELVE shared motifs between the Erra Epic and Ezekiel. Block 2000 'The Gods of the Nations' + 'Divine Abandonment' article extends to broader Hebrew Bible. The hester panim (post-biblical rabbinic term) is technically distinct from Bodi's 'divine absence' but the underlying motif is the same."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Genesis 7:11-24"
+        ],
+        "topics": [
+          "flood_duration",
+          "mesopotamian_flood_witness_comparison",
+          "P_J_source_layering"
+        ]
+      },
+      "passage_text": "In the six hundredth year of Noah's life, in the second month, on the seventeenth day of the month, the same day were all the fountains of the great deep broken up, and the windows of heaven were opened. And the rain was upon the earth forty days and forty nights... And the waters prevailed upon the earth a hundred and fifty days.",
+      "passage_translator": "ASV 1901 (Genesis 7:11-12, 7:24)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Mesopotamian flood-duration tradition (Sumerian Flood Story + Atra-ḫasīs III.iv + Gilgamesh XI.128-131)",
+            "citation": "Civil 1969 in Lambert & Millard 1969 pp. 138-145 (Sumerian Flood Story); Atra-ḫasīs III.iv (Lambert & Millard 1969); Gilgamesh XI.128-131 (George 2003)",
+            "language": "Sumerian, Akkadian",
+            "approximate_date": "Sumerian OB (c. 1700 BCE); Atra-ḫasīs OB (c. 1700 BCE); Gilgamesh SB (c. 1200 BCE)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Wenham 1987",
+              "publication": "Gordon J. Wenham, Genesis 1-15, Word Biblical Commentary 1 (Waco: Word Books, 1987)",
+              "argument_summary": "Catalogues 17 points of contact between Genesis 1-11 and Mesopotamian flood traditions, with flood-duration as one of the documented divergences (Mesopotamian seven-and-seven days vs Hebrew 40-day rain + 150-day prevailing waters). Treats the Hebrew duration scheme as redactional layering of P and J flood sources."
+            },
+            {
+              "author_year": "Lambert & Millard 1969",
+              "publication": "W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford: Clarendon, 1969)",
+              "argument_summary": "Establishes the seven-and-seven Mesopotamian flood-duration canonical across the Sumerian Flood Story, Atra-ḫasīs, and Gilgamesh XI. The Hebrew variant duration is therefore a documented divergence from the otherwise stable Mesopotamian witness."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 reformulation pass (2026-05-15). Wenham 1987 catalogues 17 points of contact-and-divergence between Genesis and the Mesopotamian flood tradition, with flood-duration as one of the documented divergences. Mesopotamian witnesses preserve a stable seven-and-seven-day duration across all three sources; the Hebrew variant (40-day rain in Gen 7:12 attributed to J; 150-day prevailing waters in Gen 7:24 attributed to P) represents redactional layering of distinct flood-account sources. Lambert & Millard 1969 establishes the Mesopotamian canonical duration."
         }
       ]
     }
