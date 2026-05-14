@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_tablet.schema.json",
+  "title": "get_tablet data payload",
+  "description": "Structured payload for the `get_tablet` tool. CDLI artifact record by integer DB id (P/Q-number inputs are auto-resolved via /search). `atf` is absent when CDLI has no transliteration recorded — note that many composites/duplicates have ATF elsewhere (ORACC) even when CDLI's `inscription.atf` is empty.",
+  "type": "object",
+  "required": ["cdli_id", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "cdli_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Resolved CDLI integer database id."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "True if CDLI returned an artifact record. False for 404 / resolution errors; see `error` for the reason."
+    },
+    "resolved_from": {
+      "type": "string",
+      "description": "Present only when the caller passed a P/Q-number that was resolved to `cdli_id` via /search."
+    },
+    "error": {
+      "type": "string",
+      "description": "Human-readable reason when `found=false`."
+    },
+    "p_number": { "type": "string" },
+    "designation": { "type": "string" },
+    "museum_number": { "type": "string" },
+    "period": { "type": "string" },
+    "provenience": { "type": "string" },
+    "artifact_type": { "type": "string" },
+    "languages": { "type": "array", "items": { "type": "string" } },
+    "genres": { "type": "array", "items": { "type": "string" } },
+    "publications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count", "shown"],
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "shown": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "First 3 publication strings; full list lives on the upstream record."
+        }
+      }
+    },
+    "comments": {
+      "type": "string",
+      "description": "CDLI cataloguer comments (truncated to 300 chars in the rendered view; full text here)."
+    },
+    "atf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line_count", "lines", "truncated"],
+      "description": "Transliteration in ATF format. `lines` is capped by `max_atf_lines`; `line_count` is the full count.",
+      "properties": {
+        "line_count": { "type": "integer", "minimum": 0 },
+        "lines": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "truncated": { "type": "boolean" }
+      }
+    }
+  }
+}

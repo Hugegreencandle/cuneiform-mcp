@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/search_tablets.schema.json",
+  "title": "search_tablets data payload",
+  "description": "Structured payload for the `search_tablets` tool. CDLI catalog search results paged by `limit`. `page_estimate` is derived from the Link header `rel=\"last\"` cursor; absent when CDLI does not return one.",
+  "type": "object",
+  "required": ["query", "category", "limit", "count_returned", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["keyword", "publication", "collection", "provenience", "period", "transliteration", "translation", "id"]
+    },
+    "limit": { "type": "integer", "minimum": 1 },
+    "count_returned": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of artifact records on this response page."
+    },
+    "page_estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["last_page", "estimate_lower", "estimate_upper"],
+      "properties": {
+        "last_page": { "type": "integer", "minimum": 1 },
+        "estimate_lower": { "type": "integer", "minimum": 0 },
+        "estimate_upper": { "type": "integer", "minimum": 0 }
+      },
+      "description": "Approximate total match count derived from the Link header. The range bounds the last-page-fill uncertainty."
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cdli_id"],
+        "additionalProperties": false,
+        "properties": {
+          "cdli_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "CDLI integer database id. Use this with `get_tablet`, NOT the P/Q-number — the /artifacts/{id} route 404s on P-numbers."
+          },
+          "p_number": {
+            "type": "string",
+            "description": "CDLI P/Q composite number when assigned (some artifacts have `composite_no: \"needed\"`, which we surface as absent)."
+          },
+          "designation": { "type": "string" },
+          "museum_number": { "type": "string" },
+          "period": { "type": "string" },
+          "artifact_type": { "type": "string" },
+          "provenience": {
+            "type": "string",
+            "description": "Findspot. Omitted when CDLI labels it `uncertain` — see the source response if you need the raw value."
+          },
+          "languages": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

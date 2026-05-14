@@ -549,6 +549,7 @@ server.registerTool(
   async ({ query, category, limit }) => {
     const cap = limit ?? 25;
     const cat: CdliCategory = category ?? "keyword";
+    const SCHEMA = schemaId("search_tablets");
 
     const params = new URLSearchParams();
     params.append("simple-field[]", cat);
@@ -563,19 +564,32 @@ server.registerTool(
         headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
       });
     } catch (err) {
-      return textResult(
-        `CDLI fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
-      );
+      const msg = `CDLI fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`;
+      return structuredResult(msg, {
+        schema: SCHEMA,
+        data: { query, category: cat, limit: cap, count_returned: 0, results: [] },
+        provenance: provenance("CDLI", url, VERSION),
+        warnings: [`upstream-fetch-failed: ${err instanceof Error ? err.message : String(err)}`],
+      });
     }
     if (!res.ok) {
-      return textResult(`CDLI search returned HTTP ${res.status} for ${url}.`);
+      return structuredResult(`CDLI search returned HTTP ${res.status} for ${url}.`, {
+        schema: SCHEMA,
+        data: { query, category: cat, limit: cap, count_returned: 0, results: [] },
+        provenance: provenance("CDLI", url, VERSION),
+        warnings: [`upstream-http-${res.status}`],
+      });
     }
 
     // Parse Link header to estimate total result count from rel="last".
     const linkHeader = res.headers.get("link") ?? "";
     const lastMatch = linkHeader.match(/<[^>]*[?&]page=(\d+)[^>]*>;\s*rel="last"/);
     const lastPage = lastMatch ? parseInt(lastMatch[1], 10) : null;
-    const totalEstimate = lastPage !== null ? `${(lastPage - 1) * cap + 1}-${lastPage * cap}` : null;
+    const pageEstimate =
+      lastPage !== null
+        ? { last_page: lastPage, estimate_lower: (lastPage - 1) * cap + 1, estimate_upper: lastPage * cap }
+        : null;
+    const totalEstimate = pageEstimate ? `${pageEstimate.estimate_lower}-${pageEstimate.estimate_upper}` : null;
 
     type Artifact = {
       id: number;
@@ -592,8 +606,31 @@ server.registerTool(
 
     const items = (await res.json()) as Artifact[];
     if (!Array.isArray(items) || items.length === 0) {
-      return textResult(`No CDLI artifacts matched ${cat}="${query}".\nSource: ${url}`);
+      return structuredResult(`No CDLI artifacts matched ${cat}="${query}".\nSource: ${url}`, {
+        schema: SCHEMA,
+        data: { query, category: cat, limit: cap, count_returned: 0, results: [] },
+        provenance: provenance("CDLI", url, VERSION),
+      });
     }
+
+    const structuredResults = items.map((x) => {
+      const pNum = x.composites?.[0]?.composite_no;
+      const langs = (x.languages ?? [])
+        .map((l) => l.language?.language)
+        .filter((s): s is string => typeof s === "string");
+      const prov = x.provenience?.provenience;
+      const useProv = prov && !/^uncertain/i.test(prov);
+      return {
+        cdli_id: x.id,
+        ...(pNum && pNum !== "needed" ? { p_number: pNum } : {}),
+        ...(x.designation ? { designation: x.designation } : {}),
+        ...(x.museum_no ? { museum_number: x.museum_no } : {}),
+        ...(x.period?.name ? { period: x.period.name } : {}),
+        ...(x.artifact_type?.artifact_type ? { artifact_type: x.artifact_type.artifact_type } : {}),
+        ...(useProv ? { provenience: prov } : {}),
+        ...(langs.length > 0 ? { languages: langs } : {}),
+      };
+    });
 
     const lines: string[] = [
       `CDLI search: ${cat}="${query}" (limit ${cap})`,
@@ -626,7 +663,18 @@ server.registerTool(
     }
     lines.push("");
     lines.push(`Tip: call get_tablet(cdli_id=<integer id>) — CDLI /artifacts/{id} expects the integer, not the P-number.`);
-    return textResult(lines.join("\n"));
+    return structuredResult(lines.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        query,
+        category: cat,
+        limit: cap,
+        ...(pageEstimate ? { page_estimate: pageEstimate } : {}),
+        count_returned: items.length,
+        results: structuredResults,
+      },
+      provenance: provenance("CDLI", url, VERSION),
+    });
   },
 );
 
@@ -698,8 +746,21 @@ server.registerTool(
   },
   async ({ cdli_id, max_atf_lines }) => {
     const cap = max_atf_lines ?? 80;
+    const SCHEMA = schemaId("get_tablet");
     const { id, error } = await resolveCdliId(cdli_id);
-    if (id === null) return textResult(error ?? `Could not resolve "${cdli_id}".`);
+    if (id === null) {
+      return structuredResult(error ?? `Could not resolve "${cdli_id}".`, {
+        schema: SCHEMA,
+        data: {
+          cdli_id: 0,
+          found: false,
+          error: error ?? `Could not resolve "${cdli_id}".`,
+        },
+        provenance: provenance("CDLI", `${URLS.CDLI_BASE}/search?simple-value[]=${encodeURIComponent(cdli_id)}`, VERSION),
+        warnings: ["resolution-failed"],
+      });
+    }
+    const wasResolved = cdli_id !== String(id);
 
     const url = `${URLS.CDLI_BASE}/artifacts/${id}`;
     let res: Response;
@@ -708,17 +769,48 @@ server.registerTool(
         headers: { "User-Agent": USER_AGENT, Accept: "application/json" },
       });
     } catch (err) {
-      return textResult(
+      return structuredResult(
         `CDLI fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+        {
+          schema: SCHEMA,
+          data: {
+            cdli_id: id,
+            found: false,
+            ...(wasResolved ? { resolved_from: cdli_id } : {}),
+            error: err instanceof Error ? err.message : String(err),
+          },
+          provenance: provenance("CDLI", url, VERSION),
+          warnings: ["upstream-fetch-failed"],
+        },
       );
     }
     if (res.status === 404) {
-      return textResult(
-        `No CDLI artifact with id=${id}.${cdli_id !== String(id) ? ` (resolved from "${cdli_id}")` : ""}`,
+      return structuredResult(
+        `No CDLI artifact with id=${id}.${wasResolved ? ` (resolved from "${cdli_id}")` : ""}`,
+        {
+          schema: SCHEMA,
+          data: {
+            cdli_id: id,
+            found: false,
+            ...(wasResolved ? { resolved_from: cdli_id } : {}),
+            error: `CDLI 404 for id=${id}`,
+          },
+          provenance: provenance("CDLI", url, VERSION),
+        },
       );
     }
     if (!res.ok) {
-      return textResult(`CDLI returned HTTP ${res.status} for ${url}.`);
+      return structuredResult(`CDLI returned HTTP ${res.status} for ${url}.`, {
+        schema: SCHEMA,
+        data: {
+          cdli_id: id,
+          found: false,
+          ...(wasResolved ? { resolved_from: cdli_id } : {}),
+          error: `CDLI returned HTTP ${res.status}`,
+        },
+        provenance: provenance("CDLI", url, VERSION),
+        warnings: [`upstream-http-${res.status}`],
+      });
     }
 
     type Artifact = {
@@ -738,7 +830,18 @@ server.registerTool(
     };
     const body = (await res.json()) as Artifact[] | Artifact;
     const x: Artifact | undefined = Array.isArray(body) ? body[0] : body;
-    if (!x) return textResult(`Empty response from ${url}.`);
+    if (!x) {
+      return structuredResult(`Empty response from ${url}.`, {
+        schema: SCHEMA,
+        data: {
+          cdli_id: id,
+          found: false,
+          ...(wasResolved ? { resolved_from: cdli_id } : {}),
+          error: "empty-response",
+        },
+        provenance: provenance("CDLI", url, VERSION),
+      });
+    }
 
     const pNum = x.composites?.[0]?.composite_no;
     const langs = (x.languages ?? [])
@@ -770,10 +873,12 @@ server.registerTool(
     }
 
     const atf = x.inscription?.atf?.trim() ?? "";
+    let atfStructured: { line_count: number; lines: string[]; truncated: boolean } | undefined;
     if (atf) {
       const atfLines = atf.split(/\r?\n/);
       const shown = atfLines.slice(0, cap);
       const truncated = atfLines.length > cap;
+      atfStructured = { line_count: atfLines.length, lines: shown, truncated };
       lines.push("");
       lines.push(`— ATF (${atfLines.length} lines${truncated ? `, showing first ${cap}` : ""}) —`);
       for (const l of shown) lines.push(`  ${l}`);
@@ -789,7 +894,40 @@ server.registerTool(
 
     lines.push("");
     lines.push(`Source: ${url}`);
-    return textResult(lines.filter((l) => l !== null).join("\n"));
+
+    const warnings: string[] = [];
+    if (atfStructured?.truncated) {
+      warnings.push(`atf truncated to first ${cap} of ${atfStructured.line_count}; re-query with a larger max_atf_lines.`);
+    }
+    if (pubs.length > 3) {
+      warnings.push(`publications truncated to first 3 of ${pubs.length}; full list available upstream.`);
+    }
+
+    return structuredResult(lines.filter((l) => l !== null).join("\n"), {
+      schema: SCHEMA,
+      data: {
+        cdli_id: x.id,
+        found: true,
+        ...(wasResolved ? { resolved_from: cdli_id } : {}),
+        ...(pNum && pNum !== "needed" ? { p_number: pNum } : {}),
+        ...(x.designation ? { designation: x.designation } : {}),
+        ...(x.museum_no ? { museum_number: x.museum_no } : {}),
+        ...(x.period?.name ? { period: x.period.name } : {}),
+        ...(x.provenience?.provenience && !/^uncertain/i.test(x.provenience.provenience)
+          ? { provenience: x.provenience.provenience }
+          : {}),
+        ...(x.artifact_type?.artifact_type ? { artifact_type: x.artifact_type.artifact_type } : {}),
+        ...(langs.length > 0 ? { languages: langs } : {}),
+        ...(genres.length > 0 ? { genres } : {}),
+        ...(pubs.length > 0
+          ? { publications: { count: pubs.length, shown: pubs.slice(0, 3) } }
+          : {}),
+        ...(x.cdli_comments ? { comments: x.cdli_comments } : {}),
+        ...(atfStructured ? { atf: atfStructured } : {}),
+      },
+      provenance: provenance("CDLI", url, VERSION),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   },
 );
 
