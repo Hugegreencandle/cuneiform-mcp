@@ -1317,10 +1317,12 @@ server.registerTool(
 // matcher scores fragments on prefix/suffix overlap of a 6-symbol
 // line-structure encoding (recall@15 = 3.4% on known eBL joins, measured
 // 2026-05-14), this tool scores Jaccard similarity on the actual sign
-// sequences — within-line trigrams over eBL's `signs` field. Same harness,
-// same 50 targets, same 87 in-corpus siblings: recall@15 = 25.3%, median
-// rank dropped from 7,154 → 89. The trigram approach strictly dominates
-// (zero lineToVec-only wins) and is ~170× faster to score.
+// sequences — within-line trigrams over eBL's `signs` field. Combined
+// across two seeds (seed=42 N=50 baseline + seed=137 N=101 stress test):
+// 60/267 = 22.5% recall@15, 95% CI [17%, 28%]. The trigram approach
+// strictly dominates (zero lineToVec-only wins) and is ~170× faster to
+// score. The seed=42 number alone (25.3%) sat on the optimistic end of
+// the distribution.
 //
 // Why the lift: lineToVec encodes only START/TEXT_LINE/SINGLE_RULING/
 // DOUBLE_RULING/TRIPLE_RULING/END markers — useful for catching joins that
@@ -1340,7 +1342,7 @@ server.registerTool(
   "find_parallel_text",
   {
     description:
-      "Rank fragments by sign-sequence parallel-text similarity to a target (within-line trigram Jaccard over eBL's `signs` field). Validation 2026-05-14: ~25% recall@15 on known eBL joins — ~7.5× the lineToVec-based `find_join_candidates`. Surfaces parallel manuscripts AND probable physical joins. Use as the primary parallel/join discovery tool; reserve `find_join_candidates` for cross-validating against eBL's published algorithm.",
+      "Rank fragments by sign-sequence parallel-text similarity to a target (within-line trigram Jaccard over eBL's `signs` field). Validation 2026-05-14 (combined N=151 across two seeds, 267 known siblings): ~22% recall@15 on known eBL joins, 95% CI [17%, 28%] — ~6.5× the lineToVec-based `find_join_candidates`. Surfaces parallel manuscripts AND probable physical joins. Use as the primary parallel/join discovery tool; reserve `find_join_candidates` for cross-validating against eBL's published algorithm.",
     inputSchema: {
       museum_number: z
         .string()

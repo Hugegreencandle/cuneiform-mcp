@@ -14,9 +14,9 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora t
 | `search_fragments` | eBL `/api/fragments/query` with museum-number / transliteration auto-detection |
 | `get_fragment` | eBL `/api/fragments/{id}` (`BM.41255C` → `BM.41255.C` normalized) |
 | `find_join_candidates` | local lineToVec scorer — faithful port of eBL's `LineToVecRanker`. Validation 2026-05-14: **3.4% recall@15** on known joins. Useful for cross-validating against eBL's `/match`. |
-| `find_parallel_text` | local sign-trigram Jaccard. Validation 2026-05-14: **25% recall@15** on known joins (~7.5× the lineToVec scorer). Primary parallel/join discovery tool. |
+| `find_parallel_text` | local sign-trigram Jaccard. Validation 2026-05-14 (combined N=151, 267 known siblings): **22% recall@15** on known joins, 95% CI [17%, 28%] (~6.5× the lineToVec scorer). Primary parallel/join discovery tool. |
 
-See `VALIDATION-2026-05-14.md` + `TRIGRAM-EXPERIMENT-2026-05-14.md` for the benchmark methodology and per-target results.
+See `VALIDATION-2026-05-14.md` + `TRIGRAM-EXPERIMENT-2026-05-14.md` + `VALIDATION-N100-2026-05-14.md` for the benchmark methodology and per-target results.
 
 ## Install
 
@@ -59,9 +59,9 @@ node scripts/build-signs-index.mjs
 
 ## Validation
 
-Both matchers were benchmarked against eBL's `joins[]` ground truth on 2026-05-14 (full 36K-fragment corpus). Headline numbers:
+Both matchers were benchmarked against eBL's `joins[]` ground truth on 2026-05-14 (full 36K-fragment corpus). Headline numbers (combined across seed=42 N=50 and seed=137 N=101, 267 known siblings):
 
-- `find_join_candidates` (lineToVec): **3.4% recall@15**, median rank 7,154 / 36,328.
-- `find_parallel_text` (sign-trigram Jaccard): **25.3% recall@15**, median rank 89.
+- `find_join_candidates` (lineToVec): **3.4% recall@15**, median rank 7,154 / 36,328 (seed=42 only).
+- `find_parallel_text` (sign-trigram Jaccard): **22.5% recall@15**, 95% CI [17%, 28%]. Per-seed: 25.3% (N=50, seed=42) and 21.1% (N=101, seed=137).
 
-Trigram strictly dominates — no lineToVec-only wins on the test set. ~35% of known siblings score zero by either method (the broken pieces share no overlapping content). See `VALIDATION-2026-05-14.md` and `TRIGRAM-EXPERIMENT-2026-05-14.md` for full methodology, rank distributions, and notable cases.
+Trigram strictly dominates — no lineToVec-only wins on the test set. ~35% of known siblings score zero by either method (the broken pieces share no overlapping content). See `VALIDATION-2026-05-14.md`, `TRIGRAM-EXPERIMENT-2026-05-14.md`, and `VALIDATION-N100-2026-05-14.md` for full methodology, rank distributions, and notable cases.
