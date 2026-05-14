@@ -2,7 +2,7 @@
   "_meta": {
     "description": "Episode × witness alignment matrix for the four major Ancient Near Eastern flood narratives. Curated from Research/Atrahasis.md plus Lambert & Millard 1969, George 2003, Westermann 1984. Excerpts are paraphrased summaries authored for this dataset to avoid copyright concerns with the cited critical editions; consult the named scholarly_anchor for the verbatim translation.",
     "compiled": "2026-05-15",
-    "curator_note": "Sumerian Ziusudra cells are flagged philological_uncertainty: partial or fragmentary; the Nippur manuscript has substantial gaps. Genesis cells use the consensus scholarly framework — Westermann's Genesis 1-11 commentary for J/P source-critical points where the witnesses overlap or diverge."
+    "curator_note": "Sumerian Ziusudra cells are flagged philological_uncertainty: partial or fragmentary; the Nippur manuscript (CBS 10673) preserves roughly the lower one-third of the original text in five surviving blocks (lines 37-50, 84-100, 135-162, 195-217, 240-261 per ETCSL 1.7.4). Genesis cells use the consensus scholarly framework — Westermann's Genesis 1-11 commentary for J/P source-critical points where the witnesses overlap or diverge. Sumerian Ziusudra enrichment from Research/Sumerian_Flood_Story.md curator-brief added 2026-05-15."
   },
   "witnesses": ["sumerian_ziusudra", "atrahasis", "gilgamesh_xi", "genesis_6_9"],
   "rows": [
@@ -10,7 +10,17 @@
       "episode": "creation_of_humanity",
       "summary": "Humans are made to relieve the gods (or the lesser gods) of labor.",
       "cells": {
-        "sumerian_ziusudra": null,
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story lines 84-100 (city-founding section; anthropogenesis proper is in lost lines 1-36)",
+          "excerpt": "[paraphrase, fragmentary] The five antediluvian cities are established — Eridu, Bad-tibira, Larak, Sippar, Shuruppak — each with its tutelary deity, the cosmic order of the cultivated world is laid out. The specific anthropogenesis narrative is LOST in CBS 10673 (lines 1-36 are missing); only the civilization-founding consequence survives.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.138-145; cf. Peterson 2008 (N 3514, Schøyen) for an additional Old Babylonian fragment expanding the civilization-founding section",
+          "divergence_notes": [
+            "Unique Sumerian feature — the five antediluvian cities are explicitly named (Eridu, Bad-tibira, Larak, Sippar, Shuruppak); Atra-ḫasīs lacks this enumeration",
+            "Genesis 4's pre-flood civilization references (Cain's city, the Jubal/Tubal-Cain bronze-and-iron line) are typologically parallel to this section but not directly genealogically related"
+          ],
+          "philological_uncertainty": "fragmentary"
+        },
         "atrahasis": {
           "citation": "Atra-ḫasīs I.1-339",
           "excerpt": "The Igigi do the labor of canals and rivers; after forty years they rebel and burn their tools. The Anunnaki accept Enki's plan: a god (Wē-ila) is slaughtered, his blood and flesh mixed with clay by the mother-goddess Bēlet-ilī. Fourteen portions are gestated; humanity emerges to carry the labor.",
@@ -63,15 +73,15 @@
       "summary": "A god (or the divine assembly) decides to destroy humanity by flood.",
       "cells": {
         "sumerian_ziusudra": {
-          "citation": "Sumerian Flood Story ~140",
-          "excerpt": "[fragmentary] The assembly of An and Enlil decree that humanity be destroyed.",
-          "translator": "paraphrase based on Civil in Lambert & Millard 1969 appendix",
-          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.138-145",
+          "citation": "Sumerian Flood Story lines 37-50 (surviving partial block)",
+          "excerpt": "[paraphrase, partial] The assembly of An and Enlil decrees that humanity be destroyed by flood. The collective-assembly framing is preserved despite the textual gaps; the surviving lines confirm that the decision is corporate, not unilateral.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.138-141 (lines 37-50)",
           "divergence_notes": [
-            "Only fragmentary lines survive at this decision point",
-            "Decision is collective (assembly), as in Atra-ḫasīs"
+            "Decision is collective (An + Enlil assembly), as in Atra-ḫasīs and Gilgamesh XI",
+            "The pre-decision deliberation (why the flood was decreed — overpopulation? noise? wickedness?) is LOST in CBS 10673; cannot be recovered"
           ],
-          "philological_uncertainty": "fragmentary"
+          "philological_uncertainty": "partial"
         },
         "atrahasis": {
           "citation": "Atra-ḫasīs II.vii-viii, III.i",
@@ -113,12 +123,13 @@
       "summary": "The deity friendly to humanity warns the chosen survivor of the coming Flood.",
       "cells": {
         "sumerian_ziusudra": {
-          "citation": "Sumerian Flood Story ~150-160",
-          "excerpt": "[partial] Enki speaks at the side of a wall; Ziusudra stands beside the wall and hears the warning to build a great boat.",
-          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
-          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.140-145",
+          "citation": "Sumerian Flood Story lines 135-162 (the wall-loophole block)",
+          "excerpt": "[paraphrase, partial] Enki speaks at the side of a wall; Ziusudra stands beside the wall and hears the warning to build a great boat. The wall-loophole motif is preserved in essentially the same form as in Atra-ḫasīs III.i.11-50 and Gilgamesh XI.20-31 — establishing this as the EARLIEST surviving attestation of one of the most distinctive Mesopotamian theological motifs.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.140-145 (lines 135-162)",
           "divergence_notes": [
-            "The wall-as-medium for the warning is already present in the Sumerian — establishing the motif as pre-Akkadian"
+            "EARLIEST attestation of the wall-loophole motif — pre-Akkadian, establishing the motif as foundational rather than an Atra-ḫasīs innovation",
+            "Same Enki-speaks-to-wall mechanism as Atra-ḫasīs and Gilgamesh XI; the Sumerian original confirms the loophole is not a later Akkadian addition"
           ],
           "philological_uncertainty": "partial"
         },
@@ -204,12 +215,13 @@
       "summary": "The Flood comes; humanity is destroyed except for those on the ark.",
       "cells": {
         "sumerian_ziusudra": {
-          "citation": "Sumerian Flood Story ~201-205",
-          "excerpt": "[partial] The flood rages for seven days and seven nights; the wind howls across the land.",
-          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
-          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "citation": "Sumerian Flood Story lines 195-217 (the flood proper)",
+          "excerpt": "[paraphrase, partial] The flood rages for seven days and seven nights; the wind howls across the land. The seven-and-seven duration matches Atra-ḫasīs (III.iv.25) and Gilgamesh XI (six days and seven nights — a one-day variant in the Standard Babylonian recension). The seven-and-seven figure is thus the canonical Mesopotamian flood-duration across all three witnesses, and Genesis's 40-day rain + 150-day prevailing-waters scheme is a substantial Hebrew innovation.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145 (lines 195-217)",
           "divergence_notes": [
-            "Seven days and seven nights matches Atra-ḫasīs/Gilgamesh"
+            "Seven days and seven nights — converges with Atra-ḫasīs; close to Gilgamesh XI's six-and-seven; sharply distinct from Genesis 7:12 (40 days) and 7:24 (150 days)",
+            "Establishes the Mesopotamian seven-and-seven as cross-period canonical"
           ],
           "philological_uncertainty": "partial"
         },
@@ -254,7 +266,17 @@
       "episode": "landfall",
       "summary": "The ark grounds on a mountain; the survivor sends out birds to test for dry land.",
       "cells": {
-        "sumerian_ziusudra": null,
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story (gap at ~lines 218-239; CBS 10673 lost)",
+          "excerpt": "[absent] The landfall episode is NOT preserved in the Sumerian flood story. The textual gap between the flood-proper (lines 195-217) and the sacrifice block (lines 240+) covers what would have been the landfall episode. The bird-release motif found in Gilgamesh XI and Genesis 8 is therefore NOT confirmed for the Sumerian layer — it may be a Gilgamesh-recension innovation, or it may have been present in the lost Sumerian section.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145 (gap-analysis only)",
+          "divergence_notes": [
+            "Bird-release motif's earliest preserved attestation is Gilgamesh XI (Standard Babylonian, c. 1200 BCE); the Sumerian witness cannot confirm or deny pre-Akkadian presence",
+            "If the bird-release IS originally Gilgamesh-recension, Genesis's olive-leaf-and-dove tradition derives from the Gilgamesh layer specifically, not from the broader pre-Akkadian flood tradition"
+          ],
+          "philological_uncertainty": "reconstructed"
+        },
         "atrahasis": null,
         "gilgamesh_xi": {
           "citation": "Gilgamesh XI.141-156",
@@ -288,12 +310,14 @@
       "summary": "The survivor offers sacrifice; the gods (or God) respond.",
       "cells": {
         "sumerian_ziusudra": {
-          "citation": "Sumerian Flood Story ~210-215",
-          "excerpt": "[partial] Ziusudra slaughters an ox and a sheep before An and Enlil.",
-          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
-          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "citation": "Sumerian Flood Story lines 240-250 (the sacrifice + Utu epiphany block)",
+          "excerpt": "[paraphrase, partial] Ziusudra opens the great boat and sees Utu the sun-god, who has risen and flooded the world with light. He prostrates himself before Utu, slaughters an ox and a sheep as sacrifice before An and Enlil. The SUN-GOD UTU EPIPHANY at this episode is UNIQUE to the Sumerian witness — neither Atra-ḫasīs nor Gilgamesh XI preserves a sun-god appearance at the sacrifice scene.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145 (lines 240-250)",
           "divergence_notes": [
-            "Establishes the sacrifice-after-flood motif at the Sumerian layer"
+            "UNIQUE to Sumerian: the sun-god Utu's epiphany after the flood — possibly the visual marker of the cosmic order being restored",
+            "Atra-ḫasīs and Gilgamesh XI both have the post-flood sacrifice ('gods like flies' image) but neither preserves Utu's appearance",
+            "Genesis 8:22 ('seedtime and harvest, cold and heat, summer and winter, day and night shall not cease') is a partial theological parallel: the sun's order is restored after the flood, framed as covenantal not epiphanic"
           ],
           "philological_uncertainty": "partial"
         },
@@ -339,12 +363,14 @@
       "summary": "A new theological order is established to prevent recurrence.",
       "cells": {
         "sumerian_ziusudra": {
-          "citation": "Sumerian Flood Story ~252-260",
-          "excerpt": "[partial] Ziusudra is granted eternal life and dwells in Dilmun, the place where the sun rises.",
-          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
-          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "citation": "Sumerian Flood Story lines 251-261 (the eternal-life-in-Dilmun resolution)",
+          "excerpt": "[paraphrase, partial] An and Enlil grant Ziusudra *nam-tilla* ('life like a god's,' eternal life) and settle him in DILMUN, 'where the sun rises' — the paradisal land at the eastern edge of the cosmos. This Dilmun-specific resolution is DISTINCTIVE TO THE SUMERIAN witness: Atra-ḫasīs has the birth-control-by-theological-design framework; Gilgamesh XI relocates Ut-napishti to 'the mouth of the rivers' (a vaguer location); only the Sumerian places the survivor specifically in Dilmun.",
+          "translator": "paraphrase based on Civil 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145 (lines 251-261)",
           "divergence_notes": [
-            "Ziusudra alone receives immortality — different resolution from Atra-ḫasīs's birth-control framework"
+            "Ziusudra alone receives explicit eternal life (*nam-tilla*) — different resolution from Atra-ḫasīs's birth-control-by-theological-design framework",
+            "DILMUN specifically — the paradisal eastern land also mentioned in *Enki and Ninhursag* — is the unique Sumerian setting; not Gilgamesh XI's 'mouth of the rivers'",
+            "The sun-rising-eastern-paradise framework has been suggested as a possible influence on Genesis 2's Eden 'in the east' (Genesis 2:8), though the connection is speculative and not load-bearing for current scholarship"
           ],
           "philological_uncertainty": "partial"
         },
