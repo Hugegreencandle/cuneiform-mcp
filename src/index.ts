@@ -11,10 +11,12 @@ import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
+  discoverParallelCandidates,
   listAntediluvianQueries,
   renderFloodMatrix,
   renderParallelEntry,
   renderApkalluSages,
+  renderDiscoveredCandidates,
 } from "./tools/comparative.js";
 
 // eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
@@ -114,7 +116,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.6.0";
+const VERSION = "0.7.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2397,6 +2399,69 @@ server.registerTool(
   },
 );
 
+// ---------------------------------------------------------------------------
+// v0.7 Discovery Engine — the generative comparative-religion tool
+//
+// Inverts the v0.6 discipline: where find_antediluvian_parallel REQUIRES
+// named scholarly attribution, discover_parallel_candidates RETURNS
+// machine-discovered parallels with `discovered_by: 'ai_traversal'` and
+// `validation_status: 'pending'`. Each candidate carries a discovery_trace
+// (supporting briefs, structural features, reasoning summary) so the
+// proposed parallel is auditable back to the corpus.
+//
+// Underlying dataset: data/discoveredCandidates.json — produced by a
+// one-time AI traversal of the 24-brief corpus + 3 curated v0.6 datasets
+// on 2026-05-15. Pre-existing curated parallels are filtered out at
+// discovery time; only NEW candidates surface.
+// ---------------------------------------------------------------------------
+
+server.registerTool(
+  "discover_parallel_candidates",
+  {
+    description:
+      "Return machine-discovered comparative-religion parallel candidates from the cuneiform-mcp curated corpus, with full provenance trace. The v0.7 Discovery Engine: inverts the v0.6 discipline by RETURNING parallels WITHOUT named scholarly attribution — each candidate carries `discovered_by: 'ai_traversal'`, `validation_status: 'pending'`, and a structural-reasoning trace. Use this for hypothesis-generation; promote validated candidates to find_antediluvian_parallel once a human scholar confirms the parallel. Backed by 230-entity inventory across 24 briefs.",
+    inputSchema: {
+      min_confidence: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum confidence threshold (0-1). Default 0.3 surfaces all confidently-scored candidates; raise to 0.6+ for only the strongest."),
+      parallel_type: z
+        .enum(["structural", "lexical", "narrative", "topos", "onomastic", "iconographic", "all"])
+        .optional()
+        .describe("Filter by parallel type. Default 'all'."),
+      validation_status: z
+        .enum(["pending", "validated", "rejected", "all"])
+        .optional()
+        .describe("Filter by validation status. Default 'pending' (the new candidates queue)."),
+      max_results: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Cap on results. Default 25."),
+    },
+  },
+  async ({ min_confidence, parallel_type, validation_status, max_results }) => {
+    const SCHEMA = schemaId("discover_parallel_candidates");
+    const result = discoverParallelCandidates({
+      min_confidence,
+      parallel_type,
+      validation_status,
+      max_results,
+    });
+    return structuredResult(renderDiscoveredCandidates(result), {
+      schema: SCHEMA,
+      data: result,
+      provenance: provenance("local", "local:discoveredCandidatesIndex", VERSION, {
+        citation: "Machine-discovered via cuneiform-mcp v0.7.0 traversal of 24-brief corpus 2026-05-15. ALL CANDIDATES PENDING HUMAN-SCHOLAR VALIDATION.",
+      }),
+    });
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2417,7 +2482,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 12 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion tools v0.6: compare_flood_narratives, find_antediluvian_parallel, apkallu_attestations)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 13 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion retrieval tools v0.6; 1 generative Discovery Engine tool v0.7: discover_parallel_candidates)\n`,
     );
     process.exit(0);
   }
@@ -2427,7 +2492,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (12 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (13 tools)\n`);
 }
 
 main().catch((err) => {

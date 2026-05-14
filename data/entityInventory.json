@@ -1,0 +1,2310 @@
+{
+  "_meta": {
+    "compiled": "2026-05-15",
+    "brief_count": 24,
+    "dataset_count": 3,
+    "description": "Structured inventory of distinct entities surfaced across the 24-brief Mesopotamian-theology corpus + 3 curated v0.6 datasets. Compiled by Phase-2 Discovery Engine subagent at v0.7.0 release. Each entity carries a primary_brief pointer plus cross_references to other briefs in which it is materially discussed. Used as the entity layer underneath discoveredCandidates.json — see SPEC-v0.7.0-discovery-engine.md."
+  },
+  "entities": [
+    {
+      "id": "anu",
+      "name": "Anu",
+      "type": "deity",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": ["An", "Sumerian An"],
+      "tradition": "sumerian",
+      "key_attributes": ["sky-god", "supreme father", "ultimate authority", "remote/passive", "father of pantheon", "creator of Sebitti", "sacred number 60"],
+      "cross_references": ["Enuma_Elish.md", "Enki_Ea.md", "Enlil.md", "Adapa.md", "Erra_Epic.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "enlil",
+      "name": "Enlil",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["Ellil", "Elil", "Nunamnir", "Kur-gal", "Bēl mātāti"],
+      "tradition": "sumerian",
+      "key_attributes": ["storm-god", "decreer of fates", "head of Anunnaki assembly", "lord of LÍL (wind/breath/spirit)", "Nippur/E-kur", "sacred number 50", "flood-instigator in Atrahasis", "father of Ninurta", "consort of Ninlil"],
+      "cross_references": ["Anunnaki.md", "Enki_Ea.md", "Atrahasis.md", "Enuma_Elish.md", "Marduk.md", "Igigi.md", "Ninhursag.md", "Sumerian_King_List.md"]
+    },
+    {
+      "id": "enki_ea",
+      "name": "Enki / Ea",
+      "type": "deity",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": ["Ea", "Nudimmud", "Bēl-šipti", "Šassūru", "ummânu rabû"],
+      "tradition": "sumerian",
+      "key_attributes": ["god of freshwater (abzu/apsû)", "wisdom", "craft", "magic/incantation", "trickster-sage", "patron of apkallū", "savior of humanity in Atrahasis", "master of the me", "sacred number 40", "Eridu/E-Abzu"],
+      "cross_references": ["Anunnaki.md", "Apkallu.md", "Apkallu_Knowledge.md", "Sumerian_Me.md", "Atrahasis.md", "Adapa.md", "Enuma_Elish.md", "Enlil.md", "Ninhursag.md"]
+    },
+    {
+      "id": "ninhursag",
+      "name": "Ninhursag",
+      "type": "deity",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": ["Bēlet-ilī", "Nintu", "Ninmah", "Mami", "Aruru"],
+      "tradition": "sumerian",
+      "key_attributes": ["mother-goddess", "midwife of human-creation", "Lady of the Mountain", "co-creator with Enki", "omega-uterus iconography", "Keš cult", "fourth of supreme tetrad"],
+      "cross_references": ["Atrahasis.md", "Enki_Ea.md", "Anunnaki.md", "Gilgamesh_Epic.md", "Igigi.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "inanna_ishtar",
+      "name": "Inanna / Ishtar",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["Inana", "Innin", "Ninni", "Ištar", "Ishtar"],
+      "tradition": "sumerian",
+      "key_attributes": ["love-and-war goddess", "Venus planet", "Uruk/Eanna", "descent through seven gates", "eight-pointed star", "lion", "trickster (me-acquisition)", "Bull of Heaven antagonist", "sacred number 15"],
+      "cross_references": ["Sumerian_Me.md", "Anunnaki.md", "Gilgamesh_Epic.md", "Enki_Ea.md", "Enuma_Elish.md", "Igigi.md"]
+    },
+    {
+      "id": "marduk",
+      "name": "Marduk",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["AMAR.UTU", "Bēl", "Bel", "Asalluḫi", "Lugaldimmerankia"],
+      "tradition": "akkadian",
+      "key_attributes": ["chief god of Babylon", "creator (defeats Tiamat)", "Esagila/Etemenanki", "absorbs Enlil's 50", "fifty names", "Akitu festival", "Tablet of Destinies"],
+      "cross_references": ["Enuma_Elish.md", "Enki_Ea.md", "Enlil.md", "Atrahasis.md", "Anunnaki.md", "Erra_Epic.md", "Berossus.md"]
+    },
+    {
+      "id": "tiamat",
+      "name": "Tiamat",
+      "type": "deity",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": ["Thalatth (Berossus)"],
+      "tradition": "akkadian",
+      "key_attributes": ["primordial saltwater", "chaos-mother", "split by Marduk to form heaven/earth", "mother of eleven monsters", "consort of Apsû"],
+      "cross_references": ["Berossus.md", "Marduk.md"]
+    },
+    {
+      "id": "apsu",
+      "name": "Apsû",
+      "type": "deity",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": ["abzu (Sumerian, as place/deity)"],
+      "tradition": "akkadian",
+      "key_attributes": ["primordial freshwater male", "slain by Ea", "Ea builds temple atop corpse", "consort of Tiamat"],
+      "cross_references": ["Enki_Ea.md", "Apkallu.md"]
+    },
+    {
+      "id": "qingu",
+      "name": "Qingu",
+      "type": "deity",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["consort of Tiamat after Apsû's death", "holds Tablet of Destinies", "slain by Marduk", "blood used to create humanity in EE Tablet VI"],
+      "cross_references": ["Atrahasis.md", "Igigi.md"]
+    },
+    {
+      "id": "we_ila",
+      "name": "Wē-ila",
+      "type": "deity",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": ["Aw-ilu", "Geštugʾe"],
+      "tradition": "akkadian",
+      "key_attributes": ["god slaughtered in Atrahasis for human creation", "blood mixed with clay", "his eṭemmu (ghost) survives in human consciousness", "neutral sacrifice vs Qingu's guilty"],
+      "cross_references": ["Igigi.md", "Ninhursag.md", "Enuma_Elish.md"]
+    },
+    {
+      "id": "nanna_sin",
+      "name": "Nanna / Sin",
+      "type": "deity",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": ["Suen", "Nanna"],
+      "tradition": "sumerian",
+      "key_attributes": ["moon-god", "Ur cult", "father of Inanna/Utu", "sacred number 30", "conceived at Nippur canal (Enlil-Ninlil narrative)"],
+      "cross_references": ["Enlil.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "utu_shamash",
+      "name": "Utu / Šamaš",
+      "type": "deity",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": ["Shamash", "Utu"],
+      "tradition": "sumerian",
+      "key_attributes": ["sun-god", "justice", "lawgiver", "epiphany in Sumerian Flood Story", "Gilgamesh's patron", "father of Marduk (etymologically)", "sacred number 20"],
+      "cross_references": ["Sumerian_Flood_Story.md", "Gilgamesh_Epic.md", "Marduk.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "ereshkigal",
+      "name": "Ereshkigal",
+      "type": "deity",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["underworld queen", "Inanna's sister/rival", "in labor in the descent narrative", "candidate identity for the Burney Relief"],
+      "cross_references": ["Inanna_Ishtar.md"]
+    },
+    {
+      "id": "ninlil",
+      "name": "Ninlil",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["consort of Enlil", "raped at Nippur canal", "follows Enlil into exile/underworld", "mother of Sîn/Nergal/Ninazu/Enbilulu", "Tummal cult"],
+      "cross_references": ["Adapa.md"]
+    },
+    {
+      "id": "ninurta",
+      "name": "Ninurta",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["Ningirsu (at Lagash)"],
+      "tradition": "sumerian",
+      "key_attributes": ["warrior-son of Enlil", "defeats Asag in lugal-e", "recovers Tablet of Destinies from Anzû", "Lagash war-god as Ningirsu"],
+      "cross_references": ["Anunnaki.md", "Enuma_Elish.md", "Lagash_King_List.md", "Igigi.md"]
+    },
+    {
+      "id": "nergal",
+      "name": "Nergal",
+      "type": "deity",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["Erra", "Engidudu", "Meslamta-ea"],
+      "tradition": "akkadian",
+      "key_attributes": ["plague-god", "underworld", "Kutha cult", "war-bringer", "syncretized with Erra"],
+      "cross_references": ["Anunnaki.md", "Enlil.md", "Igigi.md"]
+    },
+    {
+      "id": "erra",
+      "name": "Erra",
+      "type": "deity",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["Nergal", "Engidudu"],
+      "tradition": "akkadian",
+      "key_attributes": ["war-god protagonist of the Erra Epic", "tricks Marduk into absence", "rampages with Sebitti", "Kabti-ilāni-Marduk's dream-revealer"],
+      "cross_references": ["Marduk.md", "Igigi.md"]
+    },
+    {
+      "id": "ishum",
+      "name": "Išum",
+      "type": "deity",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Erra's vizier", "fire-god", "redirects Erra's destruction outward to Suteans", "diplomatic counter-figure"],
+      "cross_references": []
+    },
+    {
+      "id": "nusku",
+      "name": "Nusku",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Enlil's vizier", "fire/light", "carries lamp", "invoked at Bīt Mēseri close (Tablet II)"],
+      "cross_references": ["Bit_Meseri.md", "Igigi.md"]
+    },
+    {
+      "id": "adad",
+      "name": "Adad",
+      "type": "deity",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": ["Iškur (Sumerian)", "Hadad (West Semitic)"],
+      "tradition": "akkadian",
+      "key_attributes": ["weather/rain-god", "thunderstorm", "subordinate to Enlil", "agricultural fertility", "Enmeduranki receives divination from Šamaš and Adad"],
+      "cross_references": ["Enlil.md", "Igigi.md", "Sumerian_King_List.md"]
+    },
+    {
+      "id": "asalluhi",
+      "name": "Asalluḫi",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["chief exorcism-god", "son of Ea", "absorbed into Marduk (one of 50 names)"],
+      "cross_references": ["Enki_Ea.md", "Igigi.md", "Enuma_Elish.md"]
+    },
+    {
+      "id": "nabu",
+      "name": "Nabu",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["Nebo"],
+      "tradition": "akkadian",
+      "key_attributes": ["god of writing", "Marduk's son", "Borsippa/Ezida cult", "in Isaiah 46:1 polemic"],
+      "cross_references": ["Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "dumuzi",
+      "name": "Dumuzi",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["Tammuz", "Daonos (Berossus)"],
+      "tradition": "sumerian",
+      "key_attributes": ["shepherd-husband of Inanna", "dying-and-rising god", "fifth antediluvian king (Bad-tibira)", "annual mourning (Tammuz lamentations)", "gate-keeper of Anu's heaven in Adapa"],
+      "cross_references": ["Adapa.md", "Sumerian_King_List.md", "Apkallu.md", "Gilgamesh_Epic.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "geshtinanna",
+      "name": "Geshtinanna",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Dumuzi's sister", "half-year underworld substitute", "grain/vine goddess"],
+      "cross_references": ["Ninhursag.md"]
+    },
+    {
+      "id": "gishzida",
+      "name": "Gishzida",
+      "type": "deity",
+      "primary_brief": "Adapa.md",
+      "alt_names": ["Ningishzida"],
+      "tradition": "akkadian",
+      "key_attributes": ["gatekeeper of Anu's heaven (with Dumuzi)", "vegetation-god", "tree-of-life associations"],
+      "cross_references": []
+    },
+    {
+      "id": "damkina",
+      "name": "Damkina",
+      "type": "deity",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["consort of Ea", "mother of Marduk in EE", "partially merged with Bēlet-ilī in late tradition"],
+      "cross_references": ["Ninhursag.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "sarpānītu",
+      "name": "Ṣarpānītu",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["consort of Marduk", "Esagila cult"],
+      "cross_references": []
+    },
+    {
+      "id": "ningirsu",
+      "name": "Ningirsu",
+      "type": "deity",
+      "primary_brief": "Lagash_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Lagash war-god", "local form of Ninurta", "patron of Eannatum", "Stele of Vultures"],
+      "cross_references": ["Enlil.md"]
+    },
+    {
+      "id": "anzu",
+      "name": "Anzû",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["monstrous bird", "steals Tablet of Destinies from Enlil", "defeated by Ninurta"],
+      "cross_references": ["Igigi.md"]
+    },
+    {
+      "id": "humbaba",
+      "name": "Humbaba",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": ["Ḫuwawa (Sumerian)"],
+      "tradition": "akkadian",
+      "key_attributes": ["guardian of the Cedar Forest", "monstrous", "captured by trickery (Sumerian) / killed (SB)", "divinely appointed"],
+      "cross_references": []
+    },
+    {
+      "id": "mummu",
+      "name": "Mummu",
+      "type": "deity",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Apsû's vizier", "bound by Ea after Apsû's killing"],
+      "cross_references": []
+    },
+    {
+      "id": "kothar_wa_khasis",
+      "name": "Kothar-wa-Khasis",
+      "type": "deity",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": [],
+      "tradition": "ugaritic",
+      "key_attributes": ["craftsman-god of Ugarit", "wisdom + craft + magic", "structural parallel to Ea"],
+      "cross_references": []
+    },
+    {
+      "id": "baal_hadad",
+      "name": "Baal-Hadad",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["Hadad", "Baal"],
+      "tradition": "ugaritic",
+      "key_attributes": ["storm-god of Ugarit", "defeats Yam (sea)", "enthroned on Mount Saphon", "structural parallel to Marduk"],
+      "cross_references": ["Enlil.md"]
+    },
+    {
+      "id": "el",
+      "name": "El",
+      "type": "deity",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "ugaritic",
+      "key_attributes": ["West Semitic supreme god", "head of Ugaritic assembly", "patriarchal chief", "decrees fates", "functionally parallel to Enlil (not etymologically related)"],
+      "cross_references": []
+    },
+    {
+      "id": "yam",
+      "name": "Yam",
+      "type": "deity",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "ugaritic",
+      "key_attributes": ["sea-god of Ugarit", "defeated by Baal", "chaos antagonist", "structural parallel to Tiamat"],
+      "cross_references": []
+    },
+    {
+      "id": "astarte",
+      "name": "Astarte",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["ʿAṯtart (Ugaritic)", "ʿAštart (Phoenician)", "ʿAštōret (Hebrew)", "ʿAṯtar (South Arabian masculine)"],
+      "tradition": "ugaritic",
+      "key_attributes": ["Venus goddess", "West Semitic continuation of Ishtar-cognate", "love/war attributes", "Sidon/Tyre cult", "bridges Ishtar → Aphrodite"],
+      "cross_references": []
+    },
+    {
+      "id": "aphrodite",
+      "name": "Aphrodite",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["Aphrodite Ourania", "Aphrodite Areia"],
+      "tradition": "greek_hellenistic",
+      "key_attributes": ["Greek goddess of erotic love", "Venus planet", "Cyprus cult origin", "descended from Astarte via Phoenician transmission", "rosette iconography preserved"],
+      "cross_references": []
+    },
+    {
+      "id": "yahweh",
+      "name": "YHWH",
+      "type": "deity",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": ["Yahweh", "the LORD"],
+      "tradition": "hebrew",
+      "key_attributes": ["Israelite chief god", "flood-decreer in Genesis", "creator", "covenant-maker", "single-deity decision-making (vs. assembly)"],
+      "cross_references": ["The_Watchers.md", "Enuma_Elish.md", "Marduk.md"]
+    },
+    {
+      "id": "shemyaza",
+      "name": "Shemyaza",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["Semjâzâ", "Semyaz", "Shemiḥazah"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["leader of the 200 Watchers", "swears oath at Mount Hermon", "fears penalty alone"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "asael",
+      "name": "Asael",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["Azazel"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["second Watcher leader", "teaches metallurgy/weapons/cosmetics", "bound under earth by Raphael"],
+      "cross_references": ["1Enoch_Other_Books.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "baraqel",
+      "name": "Baraqel",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Watcher who teaches astrology", "specific apkallu-style discipline-pairing"],
+      "cross_references": []
+    },
+    {
+      "id": "kokabel",
+      "name": "Kokabel",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Watcher who teaches courses of the stars"],
+      "cross_references": []
+    },
+    {
+      "id": "sariel",
+      "name": "Sariel",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["Uriel"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Watcher / archangel", "warns Noah", "revealer of astronomical secrets to Enoch (AB)"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "michael",
+      "name": "Michael",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["archangel", "imprisons Shemyaza"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "raphael",
+      "name": "Raphael",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["archangel", "binds Asael under earth"],
+      "cross_references": []
+    },
+    {
+      "id": "gabriel",
+      "name": "Gabriel",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["archangel", "sets giants warring against each other"],
+      "cross_references": []
+    },
+    {
+      "id": "son_of_man",
+      "name": "Son of Man (Parables)",
+      "type": "deity",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": ["Righteous One", "Chosen One", "Elect One", "Anointed One"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["pre-existent heavenly judge", "hidden before revelation", "eschatological agent", "1 Enoch 37-71", "identified with Enoch at 71:14", "Daniel 7 cognate"],
+      "cross_references": []
+    },
+    {
+      "id": "lord_of_spirits",
+      "name": "Lord of Spirits",
+      "type": "deity",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["divine name in 1 Enoch Parables", "enthrones the Son of Man"],
+      "cross_references": []
+    },
+    {
+      "id": "uanna",
+      "name": "Uanna",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["U-An", "U-Anna", "U'an", "Oannes (Berossus)"],
+      "tradition": "akkadian",
+      "key_attributes": ["first apkallu", "fish-cloaked", "civilization-founder", "paired with Ayalu/Alulim of Eridu", "Berossus rendering Oannes from Erythraean Sea"],
+      "cross_references": ["Apkallu_Knowledge.md", "Apkallu_Iconography.md", "Berossus.md", "Adapa.md", "Bit_Meseri.md"]
+    },
+    {
+      "id": "uanduga",
+      "name": "Uanduga",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["U-An-Dugga", "Uannedugga"],
+      "tradition": "akkadian",
+      "key_attributes": ["second apkallu", "given broad understanding", "paired with Alalgar"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "enmeduga",
+      "name": "Enmeduga",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["En-Me-Duga", "Enmedugga"],
+      "tradition": "akkadian",
+      "key_attributes": ["third apkallu", "good fate decreed", "paired with Ammelu'anna"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "enmegalama",
+      "name": "Enmegalama",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["En-Me-Galama", "Enmegalamma"],
+      "tradition": "akkadian",
+      "key_attributes": ["fourth apkallu", "born in a house", "paired with Amegalanna"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "enmebulugga",
+      "name": "Enmebulugga",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["En-Me-Bulugga"],
+      "tradition": "akkadian",
+      "key_attributes": ["fifth apkallu", "grew up in pasture-land", "paired with Enmeušumgalanna"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "an_enlilda",
+      "name": "An-Enlilda",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["sixth apkallu", "conjurer of Eridu", "paired with Dumuzi the Shepherd"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "utuabzu",
+      "name": "Utuabzu",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["Utuaabzu"],
+      "tradition": "akkadian",
+      "key_attributes": ["seventh apkallu", "ascended to heaven", "paired with Enmeduranki of Sippar", "Mesopotamian template for Enoch (Borger 1974)", "Bit Meseri III.18-21"],
+      "cross_references": ["Bit_Meseri.md", "Sumerian_King_List.md", "The_Watchers.md"]
+    },
+    {
+      "id": "nungalpirigal",
+      "name": "Nungalpirigal",
+      "type": "deity",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["Nungalpiriggaldim"],
+      "tradition": "akkadian",
+      "key_attributes": ["first postdiluvian sage", "paired with Enmerkar", "two-thirds apkallu / one-third human"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "piriggalnungal",
+      "name": "Piriggalnungal",
+      "type": "deity",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["second postdiluvian sage"],
+      "cross_references": ["Apkallu.md"]
+    },
+    {
+      "id": "piriggalabsu",
+      "name": "Piriggalabzu",
+      "type": "deity",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": ["Piriggalabsu"],
+      "tradition": "akkadian",
+      "key_attributes": ["third postdiluvian sage", "etymology 'great seer of the abyss'"],
+      "cross_references": ["Apkallu.md"]
+    },
+    {
+      "id": "lu_nanna",
+      "name": "Lu-Nanna",
+      "type": "deity",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["fourth postdiluvian sage", "paired with Shulgi", "two-thirds apkallu one-third human", "Nephilim parallel (Annus 2010)"],
+      "cross_references": ["Apkallu.md", "Apkallu_Knowledge.md", "The_Watchers.md"]
+    },
+    {
+      "id": "adapa",
+      "name": "Adapa",
+      "type": "deity",
+      "primary_brief": "Adapa.md",
+      "alt_names": ["U-An-Adapa", "Adapa the wise"],
+      "tradition": "akkadian",
+      "key_attributes": ["first sage (partially identified with Uanna)", "breaks south wind", "refuses bread of life", "Eridu priest of Ea", "model of men", "prototype scribal-patron", "Adam-parallel"],
+      "cross_references": ["Apkallu.md", "Apkallu_Knowledge.md", "Enki_Ea.md", "Berossus.md"]
+    },
+    {
+      "id": "enoch",
+      "name": "Enoch",
+      "type": "deity",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["Hanok", "the seventh from Adam"],
+      "tradition": "hebrew",
+      "key_attributes": ["seventh patriarch Genesis 5", "walked with God", "translated to heaven", "scribe of cosmic secrets", "Enmeduranki parallel (Lambert 1967)", "1 Enoch protagonist"],
+      "cross_references": ["1Enoch_Other_Books.md", "Sumerian_King_List.md", "Adapa.md"]
+    },
+    {
+      "id": "enmeduranki",
+      "name": "Enmeduranki",
+      "type": "deity",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": ["En-men-dur-ana", "Eudorachos (Berossus)"],
+      "tradition": "akkadian",
+      "key_attributes": ["seventh antediluvian king of Sippar", "ascended to heaven", "given divination", "paired with Utuabzu", "load-bearing Enoch parallel"],
+      "cross_references": ["The_Watchers.md", "Apkallu.md", "Berossus.md", "1Enoch_Other_Books.md", "Bit_Meseri.md"]
+    },
+    {
+      "id": "gilgamesh",
+      "name": "Gilgamesh",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": ["Bilgames"],
+      "tradition": "akkadian",
+      "key_attributes": ["two-thirds divine / one-third human", "king of Uruk", "Cedar Forest expedition", "seeks immortality", "fifth king of Uruk First Dynasty (SKL)", "He-who-saw-the-Deep"],
+      "cross_references": ["Sumerian_King_List.md", "Inanna_Ishtar.md", "Atrahasis.md", "The_Watchers.md"]
+    },
+    {
+      "id": "enkidu",
+      "name": "Enkidu",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["wild man", "created by Aruru from clay", "civilized by Shamhat", "Gilgamesh's friend/double", "dies as substitute"],
+      "cross_references": ["Ninhursag.md"]
+    },
+    {
+      "id": "atrahasis",
+      "name": "Atra-ḫasīs",
+      "type": "deity",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": ["Ut-napishti (SB)", "Ziusudra (Sumerian)", "Xisuthros (Greek)"],
+      "tradition": "akkadian",
+      "key_attributes": ["flood-survivor", "exceedingly wise", "warned through wall by Ea", "granted immortality", "carries knowledge across Flood"],
+      "cross_references": ["Sumerian_Flood_Story.md", "Gilgamesh_Epic.md", "Berossus.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "ut_napishti",
+      "name": "Ut-napishti",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": ["Atra-ḫasīs", "Ziusudra"],
+      "tradition": "akkadian",
+      "key_attributes": ["SB flood-survivor", "settled at the mouth of the rivers", "narrates flood to Gilgamesh in Tablet XI"],
+      "cross_references": ["Atrahasis.md", "Sumerian_Flood_Story.md"]
+    },
+    {
+      "id": "ziusudra",
+      "name": "Ziusudra",
+      "type": "deity",
+      "primary_brief": "Sumerian_Flood_Story.md",
+      "alt_names": ["Zi-u₄-sud-rá", "Zin-Suddu"],
+      "tradition": "sumerian",
+      "key_attributes": ["Sumerian flood-survivor", "Long-of-Days", "granted nam-tilla in Dilmun", "earliest flood-witness", "son of Ubar-Tutu"],
+      "cross_references": ["Atrahasis.md", "Gilgamesh_Epic.md", "Berossus.md", "Sumerian_King_List.md"]
+    },
+    {
+      "id": "xisuthros",
+      "name": "Xisuthros",
+      "type": "deity",
+      "primary_brief": "Berossus.md",
+      "alt_names": ["Ξίσουθρος"],
+      "tradition": "greek_hellenistic",
+      "key_attributes": ["Hellenized Ziusudra in Berossus", "tenth antediluvian king", "buries tablets at Sippar before Flood", "preserves wisdom"],
+      "cross_references": ["Sumerian_Flood_Story.md", "Atrahasis.md"]
+    },
+    {
+      "id": "noah",
+      "name": "Noah",
+      "type": "deity",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "hebrew",
+      "key_attributes": ["Hebrew flood-survivor", "tenth patriarch", "ark-builder", "covenant-recipient", "Genesis 6-9"],
+      "cross_references": ["Sumerian_King_List.md", "The_Watchers.md", "1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "adam",
+      "name": "Adam",
+      "type": "deity",
+      "primary_brief": "Adapa.md",
+      "alt_names": [],
+      "tradition": "hebrew",
+      "key_attributes": ["first human", "made of dust", "Adapa-parallel", "loses immortality at the tree", "Genesis 2-3"],
+      "cross_references": ["Atrahasis.md"]
+    },
+    {
+      "id": "eve",
+      "name": "Eve",
+      "type": "deity",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": [],
+      "tradition": "hebrew",
+      "key_attributes": ["mother of all living", "from Adam's rib", "Ninti-parallel (rib/life pun)", "Genesis 2-3"],
+      "cross_references": ["Enki_Ea.md"]
+    },
+    {
+      "id": "ninti",
+      "name": "Ninti",
+      "type": "deity",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": ["Lady of the Rib", "Lady of Life"],
+      "tradition": "sumerian",
+      "key_attributes": ["healing goddess in Enki-Ninhursag", "puns on ti = rib/life", "Eve-parallel"],
+      "cross_references": ["Enki_Ea.md"]
+    },
+    {
+      "id": "shamhat",
+      "name": "Shamhat",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["ḫarīmtu (cultic woman of Ishtar)", "civilizes Enkidu by sexual intercourse", "intermediary between wild and civilized"],
+      "cross_references": []
+    },
+    {
+      "id": "siduri",
+      "name": "Siduri",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["alewife at world's edge", "delivers carpe diem speech (OB)", "directs Gilgamesh to Ur-shanabi"],
+      "cross_references": []
+    },
+    {
+      "id": "ur_shanabi",
+      "name": "Ur-shanabi",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["ferryman", "crosses Waters of Death", "serves Ut-napishti"],
+      "cross_references": []
+    },
+    {
+      "id": "berossus",
+      "name": "Berossus",
+      "type": "deity",
+      "primary_brief": "Berossus.md",
+      "alt_names": ["Bēl-reʾû-šunu", "Bērōssos"],
+      "tradition": "greek_hellenistic",
+      "key_attributes": ["Babylonian priest of Marduk at Esagila", "wrote Babyloniaca for Antiochus I", "Hellenistic bridge", "š​atammu of Esagila"],
+      "cross_references": ["Apkallu.md", "Sumerian_King_List.md", "Atrahasis.md"]
+    },
+    {
+      "id": "enheduanna",
+      "name": "Enheduanna",
+      "type": "deity",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["first named author in human history", "high priestess of Nanna at Ur", "Sargon's daughter", "Nin-me-šara hymn", "Keš Temple Hymn"],
+      "cross_references": ["Ninhursag.md"]
+    },
+    {
+      "id": "kabti_ilani_marduk",
+      "name": "Kabti-ilāni-Marduk",
+      "type": "deity",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["son of Dabibi"],
+      "tradition": "akkadian",
+      "key_attributes": ["composer of Erra Epic", "dream-revelation claim", "named authorial signature"],
+      "cross_references": []
+    },
+    {
+      "id": "sin_leqi_unninni",
+      "name": "Sîn-lēqi-unninni",
+      "type": "deity",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["mašmaššu", "editor of SB Gilgamesh", "named in catalogue K.9717", "founder of named-scholar lineage at Uruk"],
+      "cross_references": ["Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "esagil_kin_apli",
+      "name": "Esagil-kīn-apli",
+      "type": "deity",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["compiler of Sakikkû (Diagnostic Handbook) ~1067 BCE", "claims apkallu/Adapa descent in colophon"],
+      "cross_references": ["Adapa.md"]
+    },
+    {
+      "id": "ashurbanipal",
+      "name": "Ashurbanipal",
+      "type": "deity",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Neo-Assyrian king", "literate", "library at Nineveh", "claims Adapa-knowledge", "load-bearing for manuscript transmission"],
+      "cross_references": ["Adapa.md", "Gilgamesh_Epic.md", "Bit_Meseri.md"]
+    },
+    {
+      "id": "anunnaki",
+      "name": "Anunnaki",
+      "type": "group",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": ["Anunna", "Anunnakū"],
+      "tradition": "sumerian",
+      "key_attributes": ["senior gods", "decision-making tier", "divine assembly", "fifty great Anunnaki / 600 of underworld in late texts", "decreers of fate"],
+      "cross_references": ["Igigi.md", "Atrahasis.md", "Enuma_Elish.md", "Enlil.md"]
+    },
+    {
+      "id": "igigi",
+      "name": "Igigi",
+      "type": "group",
+      "primary_brief": "Igigi.md",
+      "alt_names": ["Igigū", "nun-gal-e-ne", "géš-u (600)"],
+      "tradition": "akkadian",
+      "key_attributes": ["junior labor-tier of gods", "rebellion in Atrahasis (40 years)", "burn tools", "march on Enlil's house", "later inversion: heavenly gods"],
+      "cross_references": ["Atrahasis.md", "Anunnaki.md", "Enuma_Elish.md", "Erra_Epic.md"]
+    },
+    {
+      "id": "sebitti",
+      "name": "Sebitti",
+      "type": "group",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["Sebettu", "Sibitti", "the Seven"],
+      "tradition": "akkadian",
+      "key_attributes": ["seven warrior-gods", "weapons of Erra", "created by Anu", "personified violence", "individually nameless", "Pleiades identification (MUL.MUL/zappu)", "dual aspect (good/evil)"],
+      "cross_references": ["Bit_Meseri.md", "Igigi.md"]
+    },
+    {
+      "id": "apkallu_group",
+      "name": "Apkallū",
+      "type": "group",
+      "primary_brief": "Apkallu.md",
+      "alt_names": ["Abgal (Sumerian)", "the Seven Sages"],
+      "tradition": "akkadian",
+      "key_attributes": ["seven antediluvian sages", "fish-cloaked", "sent by Enki", "transmit civilization-knowledge", "individually named", "paired with seven kings"],
+      "cross_references": ["Apkallu_Knowledge.md", "Apkallu_Iconography.md", "Bit_Meseri.md", "Adapa.md", "Berossus.md"]
+    },
+    {
+      "id": "postdiluvian_apkallu",
+      "name": "Postdiluvian apkallū / ummânū",
+      "type": "group",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["four post-flood sages", "Nungalpirigal/Piriggalnungal/Piriggalabzu/Lu-Nanna", "two-thirds apkallu one-third human", "Nephilim-parallel"],
+      "cross_references": ["Bit_Meseri.md", "The_Watchers.md", "Apkallu.md"]
+    },
+    {
+      "id": "watchers",
+      "name": "Watchers",
+      "type": "group",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["sons of God", "bənê hāʾĕlōhîm", "angels of heaven"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["200 fallen angels", "descend on Mount Hermon", "take human wives", "teach forbidden arts", "bound under earth until judgment", "seven named leaders"],
+      "cross_references": ["1Enoch_Other_Books.md", "Apkallu.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "seven_watcher_leaders",
+      "name": "Seven Watcher Leaders",
+      "type": "group",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["named subset of the 200", "Asael/Shemyaza/Baraqel/Kokabel/Sariel/Hermoni and others", "each teaches a specific discipline", "structural seven-figure subset"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "nephilim",
+      "name": "Nephilim",
+      "type": "group",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["the Giants", "the mighty men of old"],
+      "tradition": "hebrew",
+      "key_attributes": ["offspring of Watchers + women", "giants 3000 ells tall", "devour humanity then each other", "demons after Flood", "Lu-Nanna parallel"],
+      "cross_references": ["1Enoch_Other_Books.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "four_archangels",
+      "name": "Four Archangels",
+      "type": "group",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Michael/Sariel/Raphael/Gabriel", "bring Watchers case to God", "intervene against transgression"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "anunnaki_underworld",
+      "name": "Anunnaki of the Underworld",
+      "type": "group",
+      "primary_brief": "Anunnaki.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["600 in number (late tradition)", "judges in Inanna's Descent", "underworld court"],
+      "cross_references": ["Inanna_Ishtar.md", "Igigi.md"]
+    },
+    {
+      "id": "seven_judges_underworld",
+      "name": "Seven Judges of the Underworld",
+      "type": "group",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["seven Anunnaki judges"],
+      "tradition": "sumerian",
+      "key_attributes": ["judge Inanna in the underworld", "turn 'eye of death' on her"],
+      "cross_references": ["Anunnaki.md"]
+    },
+    {
+      "id": "seven_evil_utukku",
+      "name": "Seven Evil Utukku",
+      "type": "group",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["seven demons in Utukkū Lemnūtu series", "destructive collective", "apotropaic-target group"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "five_antediluvian_cities",
+      "name": "Five Antediluvian Cities",
+      "type": "group",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Eridu/Bad-tibira/Larak/Sippar/Shuruppak", "pre-flood civilization seats", "appear in both SKL and Sumerian Flood Story"],
+      "cross_references": ["Sumerian_Flood_Story.md"]
+    },
+    {
+      "id": "seven_antediluvian_kings",
+      "name": "Seven Antediluvian Kings",
+      "type": "group",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Alulim/Alalgar/Enmenluana/Enmengalanna/Dumuzi/Ensipazianna/Enmeduranki/Ubartutu", "astronomical reign-lengths", "paired with apkallū"],
+      "cross_references": ["Apkallu.md", "Bit_Meseri.md", "Berossus.md"]
+    },
+    {
+      "id": "eleven_monsters_tiamat",
+      "name": "Eleven Monsters of Tiamat",
+      "type": "group",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Mušmaḫḫū/Ušumgallū/Bašmu/Mušḫuššu and others", "army against Marduk", "captured in his net"],
+      "cross_references": []
+    },
+    {
+      "id": "ummanu",
+      "name": "Ummânū (scholar-class)",
+      "type": "group",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["human scholar-experts", "claim apkallu descent", "court advisors", "transmit secret knowledge", "professional guild"],
+      "cross_references": ["Apkallu.md", "Adapa.md", "Bit_Meseri.md"]
+    },
+    {
+      "id": "asipu",
+      "name": "Āšipu (exorcist-priest)",
+      "type": "group",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["exorcism specialist", "performs Bīt Mēseri", "impersonates Marduk during rite", "fish-skin garments"],
+      "cross_references": ["Bit_Meseri.md", "Apkallu_Iconography.md"]
+    },
+    {
+      "id": "baru",
+      "name": "Bārû (diviner)",
+      "type": "group",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["divination specialist", "extispicy (liver-reading)", "celestial omens", "guild-knowledge"],
+      "cross_references": []
+    },
+    {
+      "id": "seven_count",
+      "name": "Seven-count canonical group",
+      "type": "motif",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["recurring numerological frame", "complete-set marker", "apkallū/Sebitti/Watcher-leaders/Pleiades/utukku/gates", "valence-agnostic"],
+      "cross_references": ["Apkallu.md", "Igigi.md", "Bit_Meseri.md", "The_Watchers.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "pre_flood_timing",
+      "name": "Pre-flood / antediluvian timing",
+      "type": "motif",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["temporal marker", "before catastrophe", "wisdom-transmission moment", "kings/sages/Watchers all so placed"],
+      "cross_references": ["Apkallu.md", "The_Watchers.md", "Atrahasis.md"]
+    },
+    {
+      "id": "wall_loophole",
+      "name": "Wall-loophole / speak-to-the-wall",
+      "type": "motif",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Enki/Ea's indirect warning", "legalistic subversion of oath", "Sumerian original (Ziusudra l.135-162)", "Atrahasis III.i.11-50", "Gilgamesh XI.20-31"],
+      "cross_references": ["Sumerian_Flood_Story.md", "Gilgamesh_Epic.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "bucket_and_cone",
+      "name": "Bucket-and-cone gesture",
+      "type": "motif",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["banduddû + mullilu"],
+      "tradition": "akkadian",
+      "key_attributes": ["apkallu attribute", "purification (Wiggermann) and/or date-palm pollination (Albenda)", "apotropaic gesture", "ūmu-apkallū canonical"],
+      "cross_references": []
+    },
+    {
+      "id": "sacred_tree",
+      "name": "Sacred Tree / kiškanû",
+      "type": "motif",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["Tree of Life"],
+      "tradition": "akkadian",
+      "key_attributes": ["stylized date-palm", "flanked by apkallū", "cosmic-axis symbol", "comparator to Genesis tree-of-life"],
+      "cross_references": []
+    },
+    {
+      "id": "fish_cloak",
+      "name": "Fish-cloak (purādu-form)",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["fish-cloaked apkallu", "Oannes-type"],
+      "tradition": "akkadian",
+      "key_attributes": ["carp-fish skin worn as cape", "Uanna/Oannes iconography", "abzu/freshwater origin marker", "real āšipu garment"],
+      "cross_references": ["Apkallu.md", "Berossus.md", "Bit_Meseri.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "bird_headed_apkallu",
+      "name": "Bird-headed apkallu",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["eagle-headed griffin", "kuribu"],
+      "tradition": "akkadian",
+      "key_attributes": ["eagle's head on human body", "four wings", "Wiggermann's bird-apkallū", "etymological parent of Hebrew kĕrūḇ/cherub (Annus 2010)"],
+      "cross_references": []
+    },
+    {
+      "id": "umu_apkallu",
+      "name": "Ūmu-apkallū",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["winged genius", "human-form apkallu"],
+      "tradition": "akkadian",
+      "key_attributes": ["bearded human-form", "winged", "horned crown", "bucket-and-cone bearer", "Throne Room B canonical type"],
+      "cross_references": []
+    },
+    {
+      "id": "omega_uterus",
+      "name": "Omega-uterus symbol",
+      "type": "iconographic_form",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": ["Ω-symbol", "bicornuate uterus"],
+      "tradition": "akkadian",
+      "key_attributes": ["Ninhursag's signature on kudurru/seals", "stylized cow's uterus per Stol 2000", "birth-deity marker", "Old Babylonian and Kassite period"],
+      "cross_references": []
+    },
+    {
+      "id": "eight_pointed_star",
+      "name": "Eight-pointed star",
+      "type": "iconographic_form",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["eight-rayed rosette"],
+      "tradition": "sumerian",
+      "key_attributes": ["Inanna/Ishtar's primary symbol", "represents Venus", "kudurru stones", "Ishtar Gate"],
+      "cross_references": []
+    },
+    {
+      "id": "rosette",
+      "name": "Rosette",
+      "type": "iconographic_form",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["MUŠ₃-sign rosette"],
+      "tradition": "sumerian",
+      "key_attributes": ["Inanna secondary symbol", "the cuneiform sign for Inanna", "carried into Aphrodite iconography"],
+      "cross_references": []
+    },
+    {
+      "id": "lion_iconography",
+      "name": "Lion (divine attendant)",
+      "type": "iconographic_form",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Inanna's animal", "warrior-aspect marker", "Old Akkadian foot-on-lion pose", "Ishtar Gate"],
+      "cross_references": []
+    },
+    {
+      "id": "horned_crown",
+      "name": "Multi-tiered horned crown",
+      "type": "iconographic_form",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["divinity-marker", "up to seven horn-pairs", "rank-indicator", "shared across senior gods"],
+      "cross_references": ["Apkallu_Iconography.md"]
+    },
+    {
+      "id": "mushhushshu",
+      "name": "Mušḫuššu",
+      "type": "iconographic_form",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": ["serpent-dragon hybrid"],
+      "tradition": "akkadian",
+      "key_attributes": ["serpent-dragon", "associated with Ea then Marduk", "Ishtar Gate panel-creature"],
+      "cross_references": ["Marduk.md", "Enuma_Elish.md"]
+    },
+    {
+      "id": "lamassu",
+      "name": "Lamassu / Šēdu",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["winged bull"],
+      "tradition": "akkadian",
+      "key_attributes": ["protective spirit", "human-headed winged bull/lion", "palace gate-guards", "doorway-apotropaic"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "inannas_descent",
+      "name": "Inanna's Descent to the Underworld",
+      "type": "narrative",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["seven-gate descent", "garment-shedding at each gate", "death-and-revival", "Dumuzi as substitute", "ETCSL 1.4.1"],
+      "cross_references": ["Anunnaki.md"]
+    },
+    {
+      "id": "inanna_and_enki",
+      "name": "Inanna and Enki",
+      "type": "narrative",
+      "primary_brief": "Sumerian_Me.md",
+      "alt_names": ["Inanna and the me"],
+      "tradition": "sumerian",
+      "key_attributes": ["me-transfer narrative", "Inanna gets Enki drunk", "Boat of Heaven", "Eridu to Uruk", "ETCSL 1.3.1"],
+      "cross_references": ["Inanna_Ishtar.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "enki_world_order",
+      "name": "Enki and the World Order",
+      "type": "narrative",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["cosmological-administrative manifesto", "Enki assigns gods to domains", "distributes me", "ETCSL 1.1.3"],
+      "cross_references": ["Sumerian_Me.md"]
+    },
+    {
+      "id": "enki_ninhursag",
+      "name": "Enki and Ninhursag",
+      "type": "narrative",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Dilmun paradise setting", "four-generation incest descent", "eight diseases / eight cures", "Ninti pun", "Genesis-Eden parallel candidate"],
+      "cross_references": ["Enki_Ea.md", "Sumerian_Flood_Story.md"]
+    },
+    {
+      "id": "adapa_myth",
+      "name": "Adapa myth",
+      "type": "narrative",
+      "primary_brief": "Adapa.md",
+      "alt_names": ["Adapa and the South Wind"],
+      "tradition": "akkadian",
+      "key_attributes": ["breaks south wind", "summoned to Anu's heaven", "refuses bread of life on Ea's coaching", "Amarna EA 356 + 5 Nineveh fragments"],
+      "cross_references": ["Enki_Ea.md", "Apkallu.md"]
+    },
+    {
+      "id": "flood_narrative",
+      "name": "The Flood",
+      "type": "narrative",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": ["abūbu", "the Deluge"],
+      "tradition": "sumerian",
+      "key_attributes": ["divine assembly decrees", "Enki warns at wall", "seven days and nights", "sacrifice 'like flies'", "four witnesses (Sumerian/OB-Akkadian/SB-Akkadian/Genesis)"],
+      "cross_references": ["Sumerian_Flood_Story.md", "Gilgamesh_Epic.md", "Berossus.md"]
+    },
+    {
+      "id": "cedar_forest_expedition",
+      "name": "Cedar Forest Expedition",
+      "type": "narrative",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Gilgamesh and Enkidu kill Humbaba", "divinely sacred precinct violated", "triggers Tablet VII judgment"],
+      "cross_references": []
+    },
+    {
+      "id": "bull_of_heaven",
+      "name": "Bull of Heaven episode",
+      "type": "narrative",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Ishtar's proposal refused", "Bull sent against Uruk", "Enkidu's blasphemy", "Gilgamesh Tablet VI"],
+      "cross_references": ["Inanna_Ishtar.md"]
+    },
+    {
+      "id": "erra_rampage",
+      "name": "Erra's rampage",
+      "type": "narrative",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Sebitti urge violence", "Erra tricks Marduk", "Babylon-Sippar-Uruk-Dur-Kurigalzu-Der sacked", "Išum mediates", "apotropaic colophon"],
+      "cross_references": ["Marduk.md", "Igigi.md"]
+    },
+    {
+      "id": "enlil_and_ninlil",
+      "name": "Enlil and Ninlil",
+      "type": "narrative",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Enlil rapes Ninlil at canal", "exiled to underworld", "four generations of underworld-related gods", "Behrens 1978"],
+      "cross_references": []
+    },
+    {
+      "id": "watchers_descent",
+      "name": "Watchers' Descent",
+      "type": "narrative",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["200 angels at Mount Hermon", "Shemyaza's oath", "marriage to women", "teaching of arts", "Nephilim birth", "judgment"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "animal_apocalypse",
+      "name": "Animal Apocalypse",
+      "type": "narrative",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": ["1 Enoch 85-90"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Maccabean-era ~165 BCE", "Israel history as animal procession", "Judas Maccabeus = great horn", "white bull eschaton"],
+      "cross_references": []
+    },
+    {
+      "id": "apocalypse_of_weeks",
+      "name": "Apocalypse of Weeks",
+      "type": "narrative",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": ["1 Enoch 93+91"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["ten weeks of history", "pre-167 BCE", "periodized cosmic history", "Daniel 9 'seventy weeks' parallel"],
+      "cross_references": []
+    },
+    {
+      "id": "enki_kills_apsu",
+      "name": "Ea kills Apsû",
+      "type": "narrative",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["sleep-spell incantation", "Ea builds temple on corpse", "Tablet I of EE", "primordial cleansing"],
+      "cross_references": ["Enki_Ea.md"]
+    },
+    {
+      "id": "marduk_tiamat_combat",
+      "name": "Marduk vs Tiamat combat",
+      "type": "narrative",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": ["Chaoskampf"],
+      "tradition": "akkadian",
+      "key_attributes": ["net + Evil Wind + arrow", "splits Tiamat to form heavens/earth", "Tablet IV of EE", "Hesiod Typhon-parallel", "Baal vs Yam parallel"],
+      "cross_references": ["Marduk.md"]
+    },
+    {
+      "id": "kingship_descent",
+      "name": "Kingship descended from heaven",
+      "type": "motif",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": ["nam-lugal an-ta e₃-de₃-a-ba"],
+      "tradition": "sumerian",
+      "key_attributes": ["divine origin of royal office", "transferable across cities", "Nippur-Isin tradition", "absent in Lagash KL"],
+      "cross_references": ["Lagash_King_List.md"]
+    },
+    {
+      "id": "atrahasis_text",
+      "name": "Atra-ḫasīs (text)",
+      "type": "text",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Old Babylonian flood epic", "three tablets ~1245 lines", "Nūr-Aya scribe c.1646-1626 BCE", "Lambert & Millard 1969"],
+      "cross_references": []
+    },
+    {
+      "id": "gilgamesh_epic_text",
+      "name": "Gilgamesh Epic (SB)",
+      "type": "text",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": ["Standard Babylonian Gilgamesh"],
+      "tradition": "akkadian",
+      "key_attributes": ["12 tablets ~3000 lines", "Sîn-lēqi-unninni edit", "Tablet XI flood narrative", "George 2003 standard edition"],
+      "cross_references": []
+    },
+    {
+      "id": "enuma_elish_text",
+      "name": "Enūma Eliš",
+      "type": "text",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": ["When on high…"],
+      "tradition": "akkadian",
+      "key_attributes": ["seven tablets ~1100 lines", "Nebuchadnezzar I context (Lambert)", "Marduk supremacy charter", "Akitu recited"],
+      "cross_references": []
+    },
+    {
+      "id": "bit_meseri_text",
+      "name": "Bīt Mēseri",
+      "type": "text",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": ["Beschwörungsserie"],
+      "tradition": "akkadian",
+      "key_attributes": ["four-tablet apotropaic ritual", "names canonical seven apkallū (Tablet III)", "āšipu's manual", "Reiner 1961 + Borger 1974"],
+      "cross_references": []
+    },
+    {
+      "id": "erra_epic_text",
+      "name": "Erra Epic",
+      "type": "text",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["Erra and Išum", "Poem of Erra"],
+      "tradition": "akkadian",
+      "key_attributes": ["five tablets ~750 lines", "Kabti-ilāni-Marduk authorial signature", "36+ manuscript copies", "apotropaic colophon"],
+      "cross_references": []
+    },
+    {
+      "id": "sumerian_king_list_text",
+      "name": "Sumerian King List",
+      "type": "text",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": ["WB-444", "Weld-Blundell Prism"],
+      "tradition": "sumerian",
+      "key_attributes": ["antediluvian + postdiluvian kings", "kingship-from-heaven formula", "Isin recension c.1817 BCE", "Jacobsen 1939"],
+      "cross_references": []
+    },
+    {
+      "id": "lagash_king_list_text",
+      "name": "Lagash King List",
+      "type": "text",
+      "primary_brief": "Lagash_King_List.md",
+      "alt_names": ["Rulers of Lagaš", "ETCSL 2.1.2"],
+      "tradition": "sumerian",
+      "key_attributes": ["Lagash-centric counter-tradition", "no kingship-from-heaven", "agricultural-labor cosmology", "Sollberger 1967"],
+      "cross_references": ["Sumerian_King_List.md"]
+    },
+    {
+      "id": "sumerian_flood_text",
+      "name": "Sumerian Flood Story",
+      "type": "text",
+      "primary_brief": "Sumerian_Flood_Story.md",
+      "alt_names": ["Eridu Genesis", "ETCSL 1.7.4", "CBS 10673"],
+      "tradition": "sumerian",
+      "key_attributes": ["earliest flood-witness", "fragmentary", "Utu epiphany unique", "Dilmun resolution", "Civil 1969 in L&M"],
+      "cross_references": []
+    },
+    {
+      "id": "uruk_list_kings_sages",
+      "name": "Uruk List of Kings and Sages",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": ["W.20030,7"],
+      "tradition": "akkadian",
+      "key_attributes": ["Seleucid c.165 BCE", "antediluvian sage-king pairs + postdiluvian", "Lu-Nanna 'two-thirds apkallu' here", "Lenzi 2008"],
+      "cross_references": ["Bit_Meseri.md", "The_Watchers.md"]
+    },
+    {
+      "id": "babyloniaca",
+      "name": "Babyloniaca",
+      "type": "text",
+      "primary_brief": "Berossus.md",
+      "alt_names": ["Chaldaika"],
+      "tradition": "greek_hellenistic",
+      "key_attributes": ["three books in Greek", "Berossus c.278 BCE", "Oannes account", "ten antediluvian kings", "Xisuthros flood", "Sippar buried tablets"],
+      "cross_references": []
+    },
+    {
+      "id": "enmeduranki_text",
+      "name": "Enmeduranki text",
+      "type": "text",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": ["K.2486 + duplicates"],
+      "tradition": "akkadian",
+      "key_attributes": ["Neo-Assyrian c.700 BCE", "Enmeduranki summoned to heaven", "given divination", "Lambert 1967 critical edition"],
+      "cross_references": ["Apkallu.md", "The_Watchers.md", "1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "book_of_watchers",
+      "name": "Book of the Watchers",
+      "type": "text",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["1 Enoch 1-36", "BW"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["3rd c. BCE Aramaic", "Qumran 4Q201 etc.", "Aramaic original + Ge'ez complete", "Nickelsburg 2001"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "astronomical_book",
+      "name": "Astronomical Book / Heavenly Luminaries",
+      "type": "text",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": ["1 Enoch 72-82", "AB"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["3rd c. BCE or older", "364-day calendar", "Mul.Apin derivation (Neugebauer 1981)", "Uriel as revealer", "Qumran 4Q208-4Q211"],
+      "cross_references": []
+    },
+    {
+      "id": "book_of_parables",
+      "name": "Book of Parables",
+      "type": "text",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": ["Similitudes", "1 Enoch 37-71"],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["late 1st BCE - early 1st CE", "Son of Man passages", "absent from Qumran", "Daniel 7 cognate"],
+      "cross_references": []
+    },
+    {
+      "id": "jubilees",
+      "name": "Jubilees",
+      "type": "text",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["~150 BCE", "retells Watchers narrative", "364-day calendar polemic"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "genesis",
+      "name": "Genesis (Hebrew)",
+      "type": "text",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": ["Bereshit"],
+      "tradition": "hebrew",
+      "key_attributes": ["primeval history Gen 1-11", "creation/flood/Babel/patriarchs", "J/P sources", "comparative target across cluster"],
+      "cross_references": ["Atrahasis.md", "Enuma_Elish.md", "Sumerian_King_List.md", "Adapa.md", "Ninhursag.md"]
+    },
+    {
+      "id": "venus_tablet",
+      "name": "Venus Tablet of Ammisaduqa",
+      "type": "text",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["Enūma Anu Enlil Tablet 63"],
+      "tradition": "akkadian",
+      "key_attributes": ["21 years of Venus observations", "OB c.1646-1626 BCE", "morning-and-evening-star synodic cycle"],
+      "cross_references": []
+    },
+    {
+      "id": "ludlul_bel_nemeqi",
+      "name": "Ludlul bēl nēmeqi",
+      "type": "text",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["I will praise the lord of wisdom"],
+      "tradition": "akkadian",
+      "key_attributes": ["four-tablet poem of righteous sufferer", "Babylonian Job", "Marduk-deliverance", "Lambert 1960"],
+      "cross_references": []
+    },
+    {
+      "id": "cyrus_cylinder",
+      "name": "Cyrus Cylinder",
+      "type": "text",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["BM 90920"],
+      "tradition": "akkadian",
+      "key_attributes": ["538 BCE foundation deposit", "Marduk chooses Cyrus", "parallels Isaiah 45:1", "imperial-cult-policy archetype"],
+      "cross_references": []
+    },
+    {
+      "id": "enmerkar_aratta",
+      "name": "Enmerkar and the Lord of Aratta",
+      "type": "text",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["heroic epic of First Dynasty of Uruk", "Enmerkar = first postdiluvian king's paired sage figure"],
+      "cross_references": []
+    },
+    {
+      "id": "akitu",
+      "name": "Akitu festival",
+      "type": "ritual",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["New Year festival"],
+      "tradition": "akkadian",
+      "key_attributes": ["11-12 day Nisannu festival", "Enūma Eliš recited Day 4", "king's humiliation Day 5", "fixing of destinies", "cosmic renewal"],
+      "cross_references": ["Enuma_Elish.md"]
+    },
+    {
+      "id": "sacred_marriage",
+      "name": "Sacred marriage (hieros gamos)",
+      "type": "ritual",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["ḫieros gamos"],
+      "tradition": "sumerian",
+      "key_attributes": ["king-as-Dumuzi + priestess-as-Inanna", "Ur III peak", "Cooper 1993 reassessment", "Inanna-Dumuzi love-poetry corpus"],
+      "cross_references": []
+    },
+    {
+      "id": "bit_meseri_ritual",
+      "name": "Bīt Mēseri apotropaic ritual",
+      "type": "ritual",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["āšipu performs", "patient confined", "figurines at thresholds", "apkallu invocation", "Tašrītu/Araḫsamna calendar"],
+      "cross_references": []
+    },
+    {
+      "id": "bit_rimki",
+      "name": "Bīt Rimki",
+      "type": "ritual",
+      "primary_brief": "Bit_Meseri.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["royal purification ritual", "seven prepared spaces", "sunrise performance"],
+      "cross_references": []
+    },
+    {
+      "id": "asiputu_curriculum",
+      "name": "Āšipūtu curriculum",
+      "type": "ritual",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": ["Exorcist's Manual KAR 44"],
+      "tradition": "akkadian",
+      "key_attributes": ["professional discipline", "Maqlû/Šurpu/Bīt Mēseri/Lamaštu/Udug-ḫul series", "guild-internal transmission"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "mis_pi_pit_pi",
+      "name": "Mīs pî / pīt pî",
+      "type": "ritual",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["mouth-washing / mouth-opening"],
+      "tradition": "akkadian",
+      "key_attributes": ["cult-statue induction", "divinity transferred into wood/gold object", "ritual basis of Erra's deception"],
+      "cross_references": ["Erra_Epic.md"]
+    },
+    {
+      "id": "figurine_deposits",
+      "name": "Apotropaic figurine deposits",
+      "type": "ritual",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["seven figurines per box", "brick-sealed at thresholds", "Bīt Mēseri prescription frozen archaeologically", "Aššur house-of-priest Qd. kB 9I"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "me_concept",
+      "name": "Me (cosmic ordinances)",
+      "type": "concept",
+      "primary_brief": "Sumerian_Me.md",
+      "alt_names": ["parṣū (Akkadian)"],
+      "tradition": "sumerian",
+      "key_attributes": ["pre-existing divine ordinances", "94+ in canonical list", "transferable", "Enki-held", "civilization-as-divine-gift"],
+      "cross_references": ["Enki_Ea.md", "Inanna_Ishtar.md"]
+    },
+    {
+      "id": "nam_tar",
+      "name": "Nam-tar (fate-decree)",
+      "type": "concept",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["fate-cutting", "šīmtu"],
+      "tradition": "sumerian",
+      "key_attributes": ["irrevocable decree", "Enlil's signature function", "Tablet of Destinies", "fixed at appropriate moment"],
+      "cross_references": ["Sumerian_King_List.md", "Anunnaki.md"]
+    },
+    {
+      "id": "nam_tilla",
+      "name": "Nam-tilla (eternal life)",
+      "type": "concept",
+      "primary_brief": "Sumerian_Flood_Story.md",
+      "alt_names": ["life like a god's"],
+      "tradition": "sumerian",
+      "key_attributes": ["Ziusudra's reward in Dilmun", "denied to Adapa", "withheld from humans by structural necessity"],
+      "cross_references": ["Adapa.md", "Gilgamesh_Epic.md"]
+    },
+    {
+      "id": "nisirtu_pirishtu",
+      "name": "Niṣirtu / pirištu (secrecy)",
+      "type": "concept",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": ["secret of the gods"],
+      "tradition": "akkadian",
+      "key_attributes": ["restricted-knowledge marker", "Lenzi 2008 framework", "guild-internal", "apkallu-derived", "comparative target with Israelite priestly secrecy"],
+      "cross_references": ["Bit_Meseri.md", "The_Watchers.md"]
+    },
+    {
+      "id": "etemmu",
+      "name": "Eṭemmu (ghost / divine remnant)",
+      "type": "concept",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Wē-ila's surviving fragment in humans", "consciousness/thought capacity", "returned to ghost-realm at death"],
+      "cross_references": ["Igigi.md", "Gilgamesh_Epic.md"]
+    },
+    {
+      "id": "tablet_of_destinies",
+      "name": "Tablet of Destinies",
+      "type": "concept",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["dub-nam-tar", "tuppi šīmāti"],
+      "tradition": "akkadian",
+      "key_attributes": ["cosmic-authority object", "originally Enlil's", "stolen by Anzû", "fastened to Qingu then Marduk", "load-bearing for kingship-transfer narratives"],
+      "cross_references": ["Enuma_Elish.md", "Marduk.md"]
+    },
+    {
+      "id": "lil",
+      "name": "Líl (wind/breath/spirit/ghost)",
+      "type": "concept",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["zaqīqu (Akkadian)"],
+      "tradition": "sumerian",
+      "key_attributes": ["polysemic Sumerian root", "wind+breath+spirit+ghost", "Enlil's domain-element", "moves invisibly"],
+      "cross_references": []
+    },
+    {
+      "id": "divine_human_hybridity",
+      "name": "Divine-human hybridity",
+      "type": "concept",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["two-thirds god / one-third human (Gilgamesh)", "Lu-Nanna 'two-thirds apkallu'", "Nephilim", "structural cross-tradition pattern"],
+      "cross_references": ["Gilgamesh_Epic.md", "Apkallu.md"]
+    },
+    {
+      "id": "abzu_apsu_place",
+      "name": "Abzu / Apsû",
+      "type": "place",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["cosmic freshwater abyss", "below earth", "source of wisdom", "Eridu's signature feature", "apkallu origin point"],
+      "cross_references": ["Enuma_Elish.md"]
+    },
+    {
+      "id": "dilmun",
+      "name": "Dilmun",
+      "type": "place",
+      "primary_brief": "Sumerian_Flood_Story.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["paradisal island", "where the sun rises", "Ziusudra's eternal-life destination", "modern Bahrain", "Enki and Ninhursag setting"],
+      "cross_references": ["Ninhursag.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "eden",
+      "name": "Eden",
+      "type": "place",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "hebrew",
+      "key_attributes": ["Genesis paradise", "in the east (Gen 2:8)", "tree of life and tree of knowledge", "candidate Dilmun-parallel"],
+      "cross_references": []
+    },
+    {
+      "id": "mount_hermon",
+      "name": "Mount Hermon",
+      "type": "place",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Watchers' descent point", "West Semitic sacred mountain", "northern Israel-Lebanon border", "200-angel oath site"],
+      "cross_references": []
+    },
+    {
+      "id": "mount_nimush",
+      "name": "Mount Nimush",
+      "type": "place",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": ["Mount Niṣir", "Pira Magrun"],
+      "tradition": "akkadian",
+      "key_attributes": ["Ut-napishti's ark grounds here", "Iraqi Kurdistan", "Gilgamesh XI landfall"],
+      "cross_references": []
+    },
+    {
+      "id": "eridu",
+      "name": "Eridu",
+      "type": "place",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": ["modern Abu Shahrein"],
+      "tradition": "sumerian",
+      "key_attributes": ["oldest Sumerian city (Ubaid c.5400 BCE)", "Enki/E-Abzu", "kingship first descended here", "first antediluvian city"],
+      "cross_references": ["Sumerian_King_List.md", "Sumerian_Flood_Story.md", "Apkallu.md"]
+    },
+    {
+      "id": "uruk",
+      "name": "Uruk",
+      "type": "place",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["Unug", "modern Warka"],
+      "tradition": "sumerian",
+      "key_attributes": ["Inanna/Eanna", "first true city", "Uruk-period proto-cuneiform origin", "Gilgamesh's city", "Uruk List of K&S origin"],
+      "cross_references": ["Sumerian_King_List.md", "Gilgamesh_Epic.md", "Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "nippur",
+      "name": "Nippur",
+      "type": "place",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["modern Nuffar"],
+      "tradition": "sumerian",
+      "key_attributes": ["religious capital of Sumer", "Enlil/E-kur", "kingship-legitimation site", "no royal palace", "no political dynasty of its own"],
+      "cross_references": ["Sumerian_King_List.md"]
+    },
+    {
+      "id": "babylon",
+      "name": "Babylon",
+      "type": "place",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["Bāb-ili", "Bavel"],
+      "tradition": "akkadian",
+      "key_attributes": ["Marduk's city", "Esagila/Etemenanki", "late capital of Sumer-Akkad", "Akitu site", "Babel of Genesis"],
+      "cross_references": ["Enuma_Elish.md", "Erra_Epic.md"]
+    },
+    {
+      "id": "assur",
+      "name": "Aššur",
+      "type": "place",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": ["modern Qal'at Sharqat"],
+      "tradition": "akkadian",
+      "key_attributes": ["Assyrian religious capital", "Aššur god", "house-of-priest figurine deposit (Qd. kB 9I)", "VA Ass series"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "sippar",
+      "name": "Sippar",
+      "type": "place",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Šamaš's city", "fourth antediluvian capital", "Enmeduranki's seat", "Xisuthros buries tablets here (Berossus)"],
+      "cross_references": ["Apkallu.md", "Berossus.md"]
+    },
+    {
+      "id": "lagash",
+      "name": "Lagash / Girsu",
+      "type": "place",
+      "primary_brief": "Lagash_King_List.md",
+      "alt_names": ["modern Tello"],
+      "tradition": "sumerian",
+      "key_attributes": ["Ningirsu's city", "First Dynasty omitted from WB-444", "Stele of Vultures origin", "Urukagina's reforms", "Gudea's Second Dynasty"],
+      "cross_references": []
+    },
+    {
+      "id": "kes",
+      "name": "Keš",
+      "type": "place",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": ["Tulul al-Baqarat (modern ID)"],
+      "tradition": "sumerian",
+      "key_attributes": ["Ninhursag's primary cult city", "Early Dynastic", "Keš Temple Hymn origin", "Enheduanna's recension"],
+      "cross_references": ["Inanna_Ishtar.md"]
+    },
+    {
+      "id": "esagila",
+      "name": "Esagila",
+      "type": "place",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["House Whose Top Is High"],
+      "tradition": "akkadian",
+      "key_attributes": ["Marduk's temple at Babylon", "Akitu site", "Astronomical Diaries kept here", "Berossus' archive"],
+      "cross_references": ["Berossus.md"]
+    },
+    {
+      "id": "etemenanki",
+      "name": "Etemenanki",
+      "type": "place",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["House Foundation of Heaven and Earth"],
+      "tradition": "akkadian",
+      "key_attributes": ["Babylon ziggurat", "~91m × 91m base", "Tower of Babel candidate", "Koldewey excavation"],
+      "cross_references": []
+    },
+    {
+      "id": "e_abzu",
+      "name": "E-Abzu",
+      "type": "place",
+      "primary_brief": "Enki_Ea.md",
+      "alt_names": ["House of the Abzu"],
+      "tradition": "sumerian",
+      "key_attributes": ["Enki's temple at Eridu", "atop the freshwater abyss", "me-storage", "scribal-tradition heart"],
+      "cross_references": []
+    },
+    {
+      "id": "e_kur",
+      "name": "E-kur",
+      "type": "place",
+      "primary_brief": "Enlil.md",
+      "alt_names": ["House of the Mountain"],
+      "tradition": "sumerian",
+      "key_attributes": ["Enlil's temple at Nippur", "cosmic-axis identification", "continuously rebuilt across two millennia"],
+      "cross_references": []
+    },
+    {
+      "id": "eanna",
+      "name": "Eanna",
+      "type": "place",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["House of Heaven"],
+      "tradition": "sumerian",
+      "key_attributes": ["Inanna's temple at Uruk", "first writing-site (proto-cuneiform tablets)", "sacred-marriage location"],
+      "cross_references": []
+    },
+    {
+      "id": "cedar_forest",
+      "name": "Cedar Forest",
+      "type": "place",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Humbaba's domain", "divine precinct", "Gilgamesh-Enkidu expedition target", "Lebanese cedars referent"],
+      "cross_references": []
+    },
+    {
+      "id": "kutha",
+      "name": "Kutha",
+      "type": "place",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["Kutû", "Gudua"],
+      "tradition": "akkadian",
+      "key_attributes": ["Nergal/Erra's cult city", "northern Babylonian plain", "underworld-association"],
+      "cross_references": []
+    },
+    {
+      "id": "shuruppak",
+      "name": "Shuruppak",
+      "type": "place",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["fifth antediluvian city", "Ut-napishti's hometown", "Ubar-Tutu's seat", "Ziusudra's origin"],
+      "cross_references": ["Atrahasis.md", "Gilgamesh_Epic.md"]
+    },
+    {
+      "id": "tigris_euphrates",
+      "name": "Tigris and Euphrates",
+      "type": "place",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["dug by Igigi", "from Tiamat's eyes (EE)", "alluvial civilization", "cosmic infrastructure"],
+      "cross_references": ["Igigi.md", "Enuma_Elish.md"]
+    },
+    {
+      "id": "descent_through_gates",
+      "name": "Descent through seven gates",
+      "type": "motif",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["progressive divestment of regalia", "underworld threshold", "Inanna's signature narrative", "Venus-cycle astronomical reading"],
+      "cross_references": []
+    },
+    {
+      "id": "dying_and_rising",
+      "name": "Dying-and-rising god",
+      "type": "motif",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Dumuzi/Tammuz pattern", "half-year underworld", "Mettinger 2001 careful reassessment", "comparative-religion classic topos"],
+      "cross_references": []
+    },
+    {
+      "id": "noise_rigmu",
+      "name": "Noise as divine irritation (rigmu)",
+      "type": "motif",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["humanity's clamor disturbs Enlil", "Apsû's complaint also (EE)", "trigger for divine annihilation"],
+      "cross_references": ["Enuma_Elish.md"]
+    },
+    {
+      "id": "labor_rebellion",
+      "name": "Labor rebellion",
+      "type": "motif",
+      "primary_brief": "Igigi.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Igigi burn tools after 40 years", "march on Enlil's house", "successful negotiation", "humans created to substitute"],
+      "cross_references": ["Atrahasis.md"]
+    },
+    {
+      "id": "seventh_figure_ascends",
+      "name": "Seventh figure taken to heaven",
+      "type": "motif",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Enmeduranki (7th king)", "Utuabzu (7th apkallu)", "Enoch (7th patriarch)", "given divine knowledge", "Lambert 1967 load-bearing"],
+      "cross_references": ["The_Watchers.md", "Apkallu.md", "Bit_Meseri.md"]
+    },
+    {
+      "id": "eternal_life_grant",
+      "name": "Eternal life grant to flood-survivor",
+      "type": "motif",
+      "primary_brief": "Sumerian_Flood_Story.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Ziusudra in Dilmun", "Ut-napishti at mouth of rivers", "Adapa REFUSES it (inverted)", "humanity's lost chance"],
+      "cross_references": ["Gilgamesh_Epic.md", "Adapa.md"]
+    },
+    {
+      "id": "buried_tablets_motif",
+      "name": "Buried tablets / pre-flood knowledge survives",
+      "type": "motif",
+      "primary_brief": "Berossus.md",
+      "alt_names": [],
+      "tradition": "greek_hellenistic",
+      "key_attributes": ["Xisuthros buries 'first/middle/last writings' at Sippar", "no cuneiform precedent", "parallels Jubilees + 1 Enoch wisdom-preservation"],
+      "cross_references": ["1Enoch_Other_Books.md"]
+    },
+    {
+      "id": "forbidden_arts",
+      "name": "Forbidden arts taught by descended beings",
+      "type": "motif",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["metallurgy/astrology/cosmetics/magic", "Watchers' transgression", "inverts apkallu-positive-transmission"],
+      "cross_references": ["Apkallu_Knowledge.md"]
+    },
+    {
+      "id": "divine_trickery",
+      "name": "Divine trickery toward humanity",
+      "type": "motif",
+      "primary_brief": "Adapa.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Ea lies to Adapa about food", "Genesis serpent inverse", "Buccellati 1973 reading", "structural ambiguity"],
+      "cross_references": ["Enki_Ea.md"]
+    },
+    {
+      "id": "secrecy_oath",
+      "name": "Divine secrecy-oath",
+      "type": "motif",
+      "primary_brief": "Atrahasis.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["assembly binds itself", "Enki's loophole around it", "Shemyaza's binding oath inverts function (Watchers swear TO transgress)"],
+      "cross_references": ["The_Watchers.md", "Enki_Ea.md"]
+    },
+    {
+      "id": "civilization_as_gift",
+      "name": "Civilization-as-divine-gift",
+      "type": "motif",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["apkallū transmit arts", "writing/medicine/divination/exorcism", "comparator: Prometheus, Enochic Watchers (inverted)"],
+      "cross_references": ["Apkallu.md", "Sumerian_Me.md"]
+    },
+    {
+      "id": "chaoskampf",
+      "name": "Chaoskampf",
+      "type": "motif",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["supreme-god combat with chaos-monster", "Marduk-Tiamat / Baal-Yam / Zeus-Typhon / YHWH-Leviathan", "Eastern Mediterranean structural pattern"],
+      "cross_references": ["Marduk.md"]
+    },
+    {
+      "id": "cosmogonic_combat",
+      "name": "Cosmogonic combat → cosmos from corpse",
+      "type": "motif",
+      "primary_brief": "Enuma_Elish.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Tiamat split for heaven/earth", "Apsû's body becomes Ea's temple", "Wē-ila/Qingu blood becomes humans", "no clear Hebrew parallel"],
+      "cross_references": []
+    },
+    {
+      "id": "antediluvian_lifespans",
+      "name": "Antediluvian astronomical lifespans",
+      "type": "motif",
+      "primary_brief": "Sumerian_King_List.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["28800-43200 year reigns (SKL)", "777-969 year lifespans (Gen 5)", "sexagesimal numerology", "decreasing trend"],
+      "cross_references": []
+    },
+    {
+      "id": "mountain_of_gods",
+      "name": "Mountain of the Gods",
+      "type": "motif",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["E-kur as cosmic mountain", "hur-saĝ (Ninhursag)", "Mount Saphon (Baal)", "Mount Hermon (Watchers)", "Mount Sinai/Zion (Hebrew)"],
+      "cross_references": ["The_Watchers.md", "Ninhursag.md", "Marduk.md"]
+    },
+    {
+      "id": "dream_revelation",
+      "name": "Dream-revelation authorial frame",
+      "type": "motif",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Kabti-ilāni-Marduk recites Erra in single night", "Enoch's heavenly tour (BW)", "Marduk Prophecy", "fidelity-claim with denial-of-agency"],
+      "cross_references": ["The_Watchers.md", "1Enoch_Other_Books.md", "Marduk.md"]
+    },
+    {
+      "id": "364_day_calendar",
+      "name": "364-day calendar",
+      "type": "concept",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Enochic-Essene solar calendar", "12 × 30 + 4 epagomenal", "derived from Mul.Apin (Neugebauer 1981)", "= 52 × 7", "Qumran/Jubilees polemical"],
+      "cross_references": []
+    },
+    {
+      "id": "pleiades",
+      "name": "Pleiades",
+      "type": "concept",
+      "primary_brief": "Erra_Epic.md",
+      "alt_names": ["MUL.MUL", "zappu"],
+      "tradition": "akkadian",
+      "key_attributes": ["seven-star cluster in Taurus", "Sebitti's astral form", "Reiner 1995", "stellar seven-figure attestation"],
+      "cross_references": []
+    },
+    {
+      "id": "venus_planet",
+      "name": "Venus (planet)",
+      "type": "concept",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Inanna/Ishtar's astral form", "morning + evening star identity", "584-day synodic cycle", "Venus Tablet of Ammisaduqa"],
+      "cross_references": []
+    },
+    {
+      "id": "jupiter_planet",
+      "name": "Jupiter (planet / Nēberu)",
+      "type": "concept",
+      "primary_brief": "Marduk.md",
+      "alt_names": ["Nēberu"],
+      "tradition": "akkadian",
+      "key_attributes": ["Marduk's astral form", "one of the fifty names", "crossing/ferry point"],
+      "cross_references": []
+    },
+    {
+      "id": "carpe_diem",
+      "name": "Carpe diem (Siduri's speech)",
+      "type": "motif",
+      "primary_brief": "Gilgamesh_Epic.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["OB Sippar tablet attestation", "omitted in SB redaction", "Siduri the alewife", "mortality-acceptance counter-thesis"],
+      "cross_references": []
+    },
+    {
+      "id": "pre_existence",
+      "name": "Pre-existence of heavenly figure",
+      "type": "concept",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["Son of Man 'before sun and signs were created'", "Hidden before revelation", "Parables-specific"],
+      "cross_references": []
+    },
+    {
+      "id": "fifty_names",
+      "name": "Fifty Names of Marduk",
+      "type": "concept",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["EE Tablet VII", "each name absorbs older god's prerogative", "Enlil's number 50", "scholarly commentary literature (CCP)"],
+      "cross_references": ["Enuma_Elish.md", "Enlil.md"]
+    },
+    {
+      "id": "ratio_complementary_pair",
+      "name": "Complementary divine pair (decree + workaround)",
+      "type": "concept",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["Enlil ↔ Enki", "Marduk ↔ Ea (post-EE)", "structural opposition", "neither alone is sufficient"],
+      "cross_references": ["Enki_Ea.md"]
+    },
+    {
+      "id": "valence_inversion",
+      "name": "Valence inversion in transmission",
+      "type": "concept",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["apkallū+ → Watchers-", "civilization-gift → forbidden-arts", "Mesopotamian → Jewish reframing", "Annus 2010 / Reed 2005"],
+      "cross_references": []
+    },
+    {
+      "id": "scribal_lineage_authorization",
+      "name": "Scribal-lineage authorization (claim of apkallu descent)",
+      "type": "concept",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Esagil-kīn-apli's Sakikkû colophon", "Sîn-lēqi-unninni clan", "Ashurbanipal's Adapa-claim", "guild-internal authorization"],
+      "cross_references": ["Adapa.md", "Gilgamesh_Epic.md"]
+    },
+    {
+      "id": "kingship_legitimation",
+      "name": "Kingship legitimation by divine decree",
+      "type": "concept",
+      "primary_brief": "Enlil.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["king travels to Nippur for Enlil's recognition", "SKL kingship-transfer formula", "Marduk substitution late", "Cyrus Cylinder Achaemenid extension"],
+      "cross_references": ["Sumerian_King_List.md", "Marduk.md"]
+    },
+    {
+      "id": "marduk_absence",
+      "name": "Marduk's absence as theological motif",
+      "type": "concept",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Erra Epic deception", "cult-statue captivities", "Marduk Prophecy first-person travelogue", "theology of disaster"],
+      "cross_references": ["Erra_Epic.md"]
+    },
+    {
+      "id": "kuribu_cherub",
+      "name": "Kuribu / cherub etymology",
+      "type": "concept",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["bird-headed apkallu lineage", "Hebrew kĕrūḇ descent (Annus 2010)", "Mesopotamian griffin-demon ancestor", "Eden cherub guardians"],
+      "cross_references": ["The_Watchers.md"]
+    },
+    {
+      "id": "watchers_transmission_route",
+      "name": "Babylonian Exile transmission route",
+      "type": "concept",
+      "primary_brief": "The_Watchers.md",
+      "alt_names": [],
+      "tradition": "aramaic_jewish",
+      "key_attributes": ["586-539 BCE Judahite elites in Babylon", "Hellenistic-period continuing access", "Aramaic as bridge language", "Annus/Kvanvig framework"],
+      "cross_references": ["Berossus.md"]
+    },
+    {
+      "id": "burney_relief",
+      "name": "Burney Relief (Queen of the Night)",
+      "type": "iconographic_form",
+      "primary_brief": "Inanna_Ishtar.md",
+      "alt_names": ["BM 2003,0718.1"],
+      "tradition": "akkadian",
+      "key_attributes": ["Old Babylonian winged nude goddess", "owls + lions", "current ID: Ereshkigal", "older: Lilith (now rejected)"],
+      "cross_references": []
+    },
+    {
+      "id": "shedu_lamassu",
+      "name": "Šēdu / Lamassu (winged bull)",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["human-headed winged bull", "palace gate-guardian", "doorway apotropaic"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "kishkanu_tree",
+      "name": "Kiškanû (sacred tree)",
+      "type": "iconographic_form",
+      "primary_brief": "Apkallu_Iconography.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["stylized date palm in Assyrian reliefs", "between apkallū", "cosmic-axis emblem"],
+      "cross_references": []
+    },
+    {
+      "id": "stele_of_vultures",
+      "name": "Stele of Vultures",
+      "type": "text",
+      "primary_brief": "Lagash_King_List.md",
+      "alt_names": ["AO 16109 etc."],
+      "tradition": "sumerian",
+      "key_attributes": ["c. 2450 BCE Eannatum monument", "Lagash-Umma border war", "earliest pictorial infantry tactics", "Ningirsu-supported victory"],
+      "cross_references": []
+    },
+    {
+      "id": "marduk_prophecy",
+      "name": "Marduk Prophecy",
+      "type": "text",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["first-person Marduk account of journeys", "voluntary-absence reframing", "Nebuchadnezzar I propaganda"],
+      "cross_references": ["Erra_Epic.md"]
+    },
+    {
+      "id": "code_of_hammurabi",
+      "name": "Code of Hammurabi",
+      "type": "text",
+      "primary_brief": "Marduk.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["c. 1755 BCE", "Marduk elevated 'among the Igigi'", "Louvre basalt stele"],
+      "cross_references": ["Igigi.md"]
+    },
+    {
+      "id": "kes_temple_hymn",
+      "name": "Keš Temple Hymn",
+      "type": "text",
+      "primary_brief": "Ninhursag.md",
+      "alt_names": [],
+      "tradition": "sumerian",
+      "key_attributes": ["~2600 BCE Abu Salabikh fragments", "Enheduanna recension", "eight 'house' sections", "earliest Sumerian liturgical text"],
+      "cross_references": ["Inanna_Ishtar.md"]
+    },
+    {
+      "id": "catalogue_of_texts_authors",
+      "name": "Catalogue of Texts and Authors",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["Late Babylonian list", "assigns authorship of major works to apkallū + ummânū", "Lambert published"],
+      "cross_references": []
+    },
+    {
+      "id": "enuma_anu_enlil",
+      "name": "Enūma Anu Enlil",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["~70-tablet celestial omen series", "apkallu-derived discipline", "Venus Tablet (Tablet 63)", "Mul.Apin neighbor"],
+      "cross_references": []
+    },
+    {
+      "id": "mul_apin",
+      "name": "Mul.Apin",
+      "type": "text",
+      "primary_brief": "1Enoch_Other_Books.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["~1000 BCE astronomical compendium", "Mesopotamian source of Astronomical Book (Neugebauer 1981)", "360-day base year"],
+      "cross_references": []
+    },
+    {
+      "id": "sakikku",
+      "name": "Sakikkû (Diagnostic Handbook)",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": ["SA.GIG"],
+      "tradition": "akkadian",
+      "key_attributes": ["40-tablet medical-diagnostic series", "Esagil-kīn-apli ~1067 BCE compiler", "claims Adapa descent"],
+      "cross_references": ["Adapa.md"]
+    },
+    {
+      "id": "maqlu",
+      "name": "Maqlû",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["nine-tablet anti-witchcraft ritual", "figurine-burning", "āšipūtu curriculum"],
+      "cross_references": ["Bit_Meseri.md"]
+    },
+    {
+      "id": "urra_hubullu",
+      "name": "Urra = ḫubullu",
+      "type": "text",
+      "primary_brief": "Apkallu_Knowledge.md",
+      "alt_names": [],
+      "tradition": "akkadian",
+      "key_attributes": ["24-tablet bilingual lexical list", "scribal curriculum spine", "starts with 'interest-bearing loan'"],
+      "cross_references": []
+    }
+  ]
+}

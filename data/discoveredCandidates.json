@@ -1,0 +1,1212 @@
+{
+  "_meta": {
+    "discovery_pass_date": "2026-05-15",
+    "engine_version": "v0.7.0",
+    "brief_count": 24,
+    "dataset_count": 3,
+    "entities_traversed": 230,
+    "pairs_evaluated": 720,
+    "candidates_surfaced": 32,
+    "description": "Machine-discovered comparative-religion parallel candidates produced by Phase-2 Discovery Engine traversal of the 24-brief Mesopotamian corpus + 3 v0.6 datasets. EXCLUDES parallels already curated in antediluvianParallels.json (Genesis 5:21-24 ↔ Enmeduranki/Utuabzu; Genesis 6:1-4 ↔ apkallū+ummânū; 1 Enoch 6 ↔ apkallū fish-cloaked descent). All candidates are pending human-scholar validation. Schema: schemas/discover_parallel_candidates.schema.json."
+  },
+  "candidates": [
+    {
+      "entity_a": {
+        "name": "Sebitti",
+        "type": "group",
+        "primary_brief": "Erra_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": ["Sebettu", "Sibitti", "the Seven"]
+      },
+      "entity_b": {
+        "name": "Seven Watcher Leaders",
+        "type": "group",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": ["Asael", "Shemyaza", "Baraqel", "Kokabel", "Sariel", "Hermoni"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.82,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Erra_Epic.md", "The_Watchers.md", "Apkallu.md", "Igigi.md", "Bit_Meseri.md"],
+        "structural_features": [
+          "seven-count canonical group of destructive divine agents",
+          "pre-flood / pre-eschatological timing",
+          "subordinate to a chief god (Erra / Shemyaza)",
+          "created by sky-god / heavenly origin",
+          "destructive valence (vs. apkallū's positive valence)",
+          "associated with the Pleiades / astral identification (Sebitti) and with Mount Hermon descent / astronomical revelation (Watchers)"
+        ],
+        "lexical_overlap": ["seven", "host", "weapons", "destruction"],
+        "transmission_route": "common Mesopotamian → Aramaic-Jewish substrate via Babylonian-exile transmission of seven-figure topoi; Erra Epic at 36+ copies was a widely-circulating text in the Neo-Assyrian/Neo-Babylonian period",
+        "reasoning_summary": "Both groups are canonical sevens of destructive divine agents subordinate to a higher figure (Erra / Shemyaza). The Sebitti's apotropaic ritual function inverts on absorption into the Aramaic-Jewish tradition into the Watchers' transgressive-narrative function. Same structural pattern — seven-figure destructive collective with named-leader hierarchy — opposite valence relative to apkallū. The dual-aspect Sebitti (good seven in Bīt Mēseri, evil seven in eclipse rituals) is precisely the kind of pattern that a Jewish receiver would resolve by selecting the malevolent reading."
+      },
+      "suggested_anchor": "Check Annus 2010 JSP 19.4 (already cited for Watchers/apkallū) for any explicit Sebitti discussion. Check Reiner 1995 Astral Magic in Babylonia for Sebitti-as-Pleiades. Check Stuckenbruck 2014 Myth of Rebellious Angels for Watchers-numerology context.",
+      "transmission_direction": "common_substrate",
+      "notes": "Could be added as a third query under 1 Enoch 6:1-8 in find_antediluvian_parallel once validated, complementing the apkallū-positive-seven parallel already curated. The Sebitti are the destructive-seven counterpart to the apkallū's wisdom-seven, making them a structurally cleaner direct precedent for the Watchers' negative valence than the apkallū themselves."
+    },
+    {
+      "entity_a": {
+        "name": "Inanna's Descent through seven gates",
+        "type": "narrative",
+        "primary_brief": "Inanna_Ishtar.md",
+        "tradition": "sumerian",
+        "alt_names": ["seven-gate underworld journey"]
+      },
+      "entity_b": {
+        "name": "Adapa's ascent through Anu's gate-keepers",
+        "type": "narrative",
+        "primary_brief": "Adapa.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.74,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Inanna_Ishtar.md", "Adapa.md", "Enki_Ea.md", "Anunnaki.md"],
+        "structural_features": [
+          "threshold-gated cosmic journey",
+          "encounter with named gate-keeper deities (Neti / Dumuzi+Gishzida)",
+          "progressive divestment-or-investiture at boundary",
+          "intercession by minor deities determines outcome (Ninshubur for Inanna; Dumuzi+Gishzida for Adapa)",
+          "test of the protagonist's wisdom-or-status",
+          "downward (Inanna) vs upward (Adapa) direction"
+        ],
+        "lexical_overlap": ["gates", "gatekeeper", "intercession", "garments (Inanna sheds; Adapa accepts)"],
+        "transmission_route": "intra-Mesopotamian, both texts well-attested in OB-Akkadian scribal curriculum; structural inverse rather than direct dependence",
+        "reasoning_summary": "Both narratives turn on a protagonist passing controlled thresholds into a divine zone (Ereshkigal's underworld; Anu's heaven), with the journey's outcome determined by how the protagonist handles the gate-keepers and what they offer or demand. Inanna descends and loses regalia at each gate; Adapa ascends and is offered garments (which he accepts) along with the bread of life (which he refuses). Inverted direction (down vs up), inverted method (divestment vs investiture), but identical structural mechanic: gates + gatekeepers + intercession + offered substance."
+      },
+      "suggested_anchor": "Check Izre'el 2001 Adapa and the South Wind for any structural-parallel discussion. Check Sladek 1974 Inanna's Descent to the Netherworld for the seven-gate mechanic. Cooper 1990 articles on astronomical-mythological dimension may cover the Venus-cycle gate-passage reading.",
+      "transmission_direction": "structural_only",
+      "notes": "Would extend the cluster's narrative-comparison surface beyond the apkallu/Watchers thread. If validated, a new query topic 'threshold-gated divine journey' could anchor a comparative parallel-set including these two plus Gilgamesh's Mashu pass + 1 Enoch Tour-of-Heaven."
+    },
+    {
+      "entity_a": {
+        "name": "Eridu / Dilmun paradise framework",
+        "type": "place",
+        "primary_brief": "Sumerian_Flood_Story.md",
+        "tradition": "sumerian",
+        "alt_names": ["Dilmun where the sun rises"]
+      },
+      "entity_b": {
+        "name": "Eden (Genesis 2)",
+        "type": "place",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": ["paradise in the east"]
+      },
+      "parallel_type": "topos",
+      "correspondence_strength": "moderate",
+      "confidence_score": 0.70,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Sumerian_Flood_Story.md", "Ninhursag.md", "Enki_Ea.md", "Atrahasis.md"],
+        "structural_features": [
+          "paradisal place 'in the east' / 'where the sun rises'",
+          "pre-disease, pre-aging idyll (Enki and Ninhursag explicitly)",
+          "watered by divine intervention",
+          "site of immortality-grant or original immortal-state",
+          "associated with the first-man figure's outcome (Ziusudra granted nam-tilla there; Adam expelled from there)",
+          "tree-of-life motif (Genesis explicit; Mesopotamian implicit via the Dilmun setting of Enki-Ninhursag with Ninti)"
+        ],
+        "lexical_overlap": ["east", "sun rising", "garden / paradise", "life"],
+        "transmission_route": "common Ancient Near Eastern paradise-geography substrate; the Israelite tradition inherited the eastern-paradise topos already widely diffused",
+        "reasoning_summary": "Dilmun is the Sumerian paradise where the sun rises and where the flood-survivor Ziusudra receives eternal life; it is also the setting of Enki-Ninhursag's pre-disease idyll, where eight healing goddesses including Ninti ('Lady of Rib/Life') are created. Genesis 2 places Eden 'in the east' with a tree of life and creates Eve from Adam's rib (Hebrew tselaʿ; ʿishshah from Heb ʾish). The structural pattern (eastern paradise, immortality, rib/life pun, first-mother creation) recurs. The connection is speculative for any direct genealogy but the topos-level parallel is real."
+      },
+      "suggested_anchor": "Check Kramer 1979 Myths of Enki for the Ninti/Eve discussion. Check Westermann 1984 Genesis 1-11 commentary on 2:8 for the eastern-paradise topos. Civil 1969 in Lambert & Millard 1969 on Sumerian Flood Story lines 251-261 (the Dilmun resolution).",
+      "transmission_direction": "common_substrate",
+      "notes": "Would extend find_antediluvian_parallel coverage to Genesis 2 (currently the dataset only covers Gen 5:21-24 and Gen 6:1-4). The Ninti-Eve rib-life pun is the strongest single-detail anchor; the broader Dilmun-Eden topos is more diffuse but real."
+    },
+    {
+      "entity_a": {
+        "name": "Erra Epic authorship-frame (Kabti-ilāni-Marduk)",
+        "type": "narrative",
+        "primary_brief": "Erra_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": ["dream-revelation authorial signature"]
+      },
+      "entity_b": {
+        "name": "1 Enoch pseudepigraphic Enoch-frame",
+        "type": "narrative",
+        "primary_brief": "1Enoch_Other_Books.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": ["Enoch's heavenly tour revelation"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.71,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Erra_Epic.md", "1Enoch_Other_Books.md", "The_Watchers.md", "Marduk.md"],
+        "structural_features": [
+          "named human author claims revelation from divine source",
+          "dream / heavenly-tour mechanism for textual content",
+          "fidelity-claim formula ('did not add or subtract')",
+          "the text itself is theologically authoritative because of the frame",
+          "produced in periods of cosmic-political crisis (8th c. Sutean invasions; Hellenistic crisis)",
+          "apotropaic/eschatological function of the textual product"
+        ],
+        "lexical_overlap": ["revelation", "vision", "received", "did not alter"],
+        "transmission_route": "broader Ancient Near Eastern apocalyptic-pseudepigraphic frame; Mesopotamian-style dream-revelation (also Marduk Prophecy, Shulgi Prophecy) is a documented genre Jewish apocalyptic inherits",
+        "reasoning_summary": "The Erra Epic closes with Kabti-ilāni-Marduk's first-person signature: Erra revealed the whole 750-line poem in a single night's dream, recited verbatim at dawn, no line added or omitted. 1 Enoch's frame: Enoch received the cosmic secrets through heavenly tour and angelic revelation, transmits them faithfully to Methuselah. Both texts produce theological authority by routing the human author through a divine revealer, with explicit fidelity-claims. The Marduk Prophecy and Shulgi Prophecy (Borger 1971) document the genre in Mesopotamia; 1 Enoch operates the same mechanism in Aramaic-Jewish dress."
+      },
+      "suggested_anchor": "Check Annus 2010 for discussion of Mesopotamian prophecy-genres as source for Jewish apocalyptic frames. Borger 1971 BiOr 28 on Marduk Prophecy and Shulgi Prophecy. Kvanvig 2011 Primeval History on the dream-revelation-as-authorization pattern in 1 Enoch.",
+      "transmission_direction": "common_substrate",
+      "notes": "Could anchor a new entry in antediluvianParallels.json on the pseudepigraphic-authorial-frame as a Mesopotamian → Jewish transmission. Not a parallel of content but of compositional-frame technology — which is its own kind of comparative-religion data."
+    },
+    {
+      "entity_a": {
+        "name": "Bird-headed apkallu (kuribu)",
+        "type": "iconographic_form",
+        "primary_brief": "Apkallu_Iconography.md",
+        "tradition": "akkadian",
+        "alt_names": ["eagle-headed griffin"]
+      },
+      "entity_b": {
+        "name": "Cherub (Hebrew kĕrūḇ)",
+        "type": "iconographic_form",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "iconographic",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.85,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Apkallu_Iconography.md", "The_Watchers.md", "Apkallu.md"],
+        "structural_features": [
+          "winged composite protective spirit",
+          "stationed at doorway / threshold (Mesopotamian palace gates ↔ Eden's east gate)",
+          "guards a sacred space",
+          "ambivalent valence (apotropaic but liminal)",
+          "Akkadian → Hebrew loan etymology proposed by Annus 2010"
+        ],
+        "lexical_overlap": ["kuribu", "kĕrūḇ", "winged guardian", "doorway/gate"],
+        "transmission_route": "direct etymological loan: Akkadian *kuribu* → Hebrew *kĕrūḇ* via Aramaic intermediation; iconographic continuity from Mesopotamian palace reliefs to Hebrew Bible textual imagery",
+        "reasoning_summary": "The bird-headed apkallu (kuribu) is the most-attested form in Neo-Assyrian palace iconography (Nimrud, Khorsabad, Nineveh), depicted as a four-winged eagle-headed humanoid stationed at doorways. The Hebrew Bible's cherubim guard the east gate of Eden (Gen 3:24), flank the ark of the covenant, and appear in Ezekiel's throne-vision as four-faced four-winged beings. Annus 2010 makes the etymological case Akkadian kuribu → Aramaic *kĕrūbā* → Hebrew kĕrūḇ. The form-and-function alignment is so close that this should arguably be a high-confidence direct-transmission parallel."
+      },
+      "suggested_anchor": "Check Annus 2010 JSP 19.4 for the kuribu→kĕrūḇ etymology explicitly. Wiggermann 1992 Mesopotamian Protective Spirits for the bird-apkallū iconography. Mettinger 1982 Dethronement of Sabaoth for cherub-throne discussion.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Strong-confidence direct-transmission candidate. Would extend antediluvianParallels.json into Genesis 3:24 territory (currently only Gen 5/Gen 6 covered). The iconographic specificity makes this one of the cleanest single-detail Mesopotamian → Hebrew correspondences."
+    },
+    {
+      "entity_a": {
+        "name": "Tablet of Destinies",
+        "type": "concept",
+        "primary_brief": "Enlil.md",
+        "tradition": "akkadian",
+        "alt_names": ["tuppi šīmāti", "dub-nam-tar"]
+      },
+      "entity_b": {
+        "name": "Heavenly Tablets (1 Enoch / Jubilees)",
+        "type": "concept",
+        "primary_brief": "1Enoch_Other_Books.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": ["heavenly tablets of the law"]
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.66,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Enlil.md", "Enuma_Elish.md", "1Enoch_Other_Books.md", "Apkallu_Knowledge.md"],
+        "structural_features": [
+          "cosmic-authority object in written/tablet form",
+          "determines fates / contains cosmic record",
+          "held by supreme deity (Enlil / God)",
+          "transferred or consulted at moments of cosmic reorganization",
+          "stolen/threatened triggers narrative crisis (Anzû / Watcher transgression)"
+        ],
+        "lexical_overlap": ["tablet", "destiny / fate", "written from of old", "decreed"],
+        "transmission_route": "Mesopotamian Tablet-of-Destinies topos (Anzû, Enuma Elish, EE Tablet IV) → Aramaic-Jewish 'heavenly tablets' framework, plausibly via Babylonian-exile scholarly transmission",
+        "reasoning_summary": "The Tablet of Destinies is Enlil's regalia (later Marduk's via EE Tablet IV) — a physical object encoding cosmic decree. The Anzû myth turns on its theft and recovery. 1 Enoch and Jubilees develop a parallel concept of 'heavenly tablets' on which all of history is pre-written (1 En 81:1-2, 93:2, 103:2-3; Jub 5:13). The shared frame: cosmic decree exists as a physical tablet, kept in the divine realm, occasionally revealed to mortals. The Mesopotamian Tablet is contested cosmic regalia; the Jewish heavenly tablets are revelatory cosmic record-keeping."
+      },
+      "suggested_anchor": "Check Garcia Martinez 1997 work on the heavenly tablets motif. Check Hempel 2006 on Qumran heavenly-tablet discourse. Annus 2010 (apkallu transmission) may touch on this.",
+      "transmission_direction": "common_substrate",
+      "notes": "Moderate-confidence topos parallel. The Jewish heavenly tablets are predestinarian rather than royal-regalial, but the source-object of cosmic decree in tablet form is the structural commonality. Worth validating; would expand find_antediluvian_parallel into a 1 Enoch 81 query."
+    },
+    {
+      "entity_a": {
+        "name": "Astronomical Book 364-day calendar",
+        "type": "text",
+        "primary_brief": "1Enoch_Other_Books.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": ["AB calendar"]
+      },
+      "entity_b": {
+        "name": "Mul.Apin schematic year",
+        "type": "text",
+        "primary_brief": "Apkallu_Knowledge.md",
+        "tradition": "akkadian",
+        "alt_names": ["Babylonian 360-day base + intercalation"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.88,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["1Enoch_Other_Books.md", "Apkallu_Knowledge.md"],
+        "structural_features": [
+          "schematic (non-observational) calendar",
+          "12 months with constant lengths",
+          "epagomenal day-additions at quarter-points",
+          "twelve solar gates / paths cosmology",
+          "lunar visibility tables derived from Mul.Apin patterns",
+          "angelic / divine stewardship of celestial cycles"
+        ],
+        "lexical_overlap": ["gates of heaven", "twelve months", "course of the stars"],
+        "transmission_route": "direct Mesopotamian → Aramaic-Jewish transmission of astronomical schemes, established by Neugebauer 1981 with mathematical specificity",
+        "reasoning_summary": "Neugebauer 1981 established that the AB's 30-day months, 360-day base year, twelve solar gates, and lunar visibility tables are derived directly from Mul.Apin and the Enuma Anu Enlil omen series. The 364-day modification is the Jewish add-on (52 × 7 harmonizes calendar with week-structure). This is the cleanest non-Watchers Mesopotamian-source argument in the entire Enochic corpus and arguably the strongest single piece of evidence for direct cuneiform → Aramaic-Jewish transmission anywhere in this cluster."
+      },
+      "suggested_anchor": "Neugebauer 1981 The Astronomical Chapters of the Ethiopic Book of Enoch (the foundational reference). Drawnel 2019 Qumran Cave 4: The Aramaic Books of Enoch. Ratzon recent work on AB-Mul.Apin specifics.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "This is the cluster's highest-confidence non-trivially-NEW parallel. It is well-established in specialist scholarship (Neugebauer 1981 is fifty years old) but is NOT currently in antediluvianParallels.json — the v0.6 dataset focuses on narrative/figure parallels and omits the astronomical-content parallel that is arguably the strongest one. Validating this would let find_antediluvian_parallel return a 1 Enoch 72-82 ↔ Mul.Apin query."
+    },
+    {
+      "entity_a": {
+        "name": "Apsû slain by Ea",
+        "type": "narrative",
+        "primary_brief": "Enuma_Elish.md",
+        "tradition": "akkadian",
+        "alt_names": ["Ea kills Apsû"]
+      },
+      "entity_b": {
+        "name": "Tehom of Genesis 1:2",
+        "type": "concept",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": ["the deep"]
+      },
+      "parallel_type": "lexical",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.68,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Enuma_Elish.md", "Enki_Ea.md", "Atrahasis.md"],
+        "structural_features": [
+          "primordial watery state preceding ordered cosmos",
+          "feminine personification (Tiamat) → demythologized abstraction (tehom)",
+          "split / separated to form heaven and earth (EE Tablet IV ↔ Gen 1:6-8)",
+          "divine combat (EE) → divine speech (Gen) — the Hebrew demythologization is the move"
+        ],
+        "lexical_overlap": ["tiāmtu (Akkadian 'sea')", "tehom (Hebrew 'deep')", "common Semitic *thm root", "primordial waters"],
+        "transmission_route": "direct common Semitic root + Mesopotamian theological tradition demythologized in Hebrew Priestly source (Gunkel 1895 framework)",
+        "reasoning_summary": "Akkadian Tiamat (the primordial saltwater chaos-mother of Enuma Elish) and Hebrew tehom (the deep of Gen 1:2) share a common Semitic root. The Genesis Priestly source preserves the demythologized lexeme while dropping the personification; the underlying chaos-water-preceding-ordered-cosmos structure survives. Gunkel 1895 established this; Westermann 1984 refined it. The full Marduk-vs-Tiamat combat doesn't transfer to Genesis 1, but the lexical-and-structural core does."
+      },
+      "suggested_anchor": "Gunkel 1895 Schöpfung und Chaos (foundational). Westermann 1984 Genesis 1-11 commentary on Gen 1:2. Walton 2011 Genesis 1 as Ancient Cosmology.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Well-known in specialist scholarship but not in antediluvianParallels.json. Would extend the dataset to Genesis 1 cosmogony (currently only Gen 5/Gen 6). High candidate for promotion to validated."
+    },
+    {
+      "entity_a": {
+        "name": "Bīt Mēseri apotropaic textual claim (text as charm)",
+        "type": "ritual",
+        "primary_brief": "Bit_Meseri.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Erra Epic apotropaic colophon (text as charm)",
+        "type": "text",
+        "primary_brief": "Erra_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.78,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Bit_Meseri.md", "Erra_Epic.md", "Apkallu_Iconography.md"],
+        "structural_features": [
+          "text claims its own physical possession or recitation as apotropaic",
+          "named protective figures invoked within text",
+          "ritual function bound to textual transmission",
+          "preserves text both as wisdom-content and as working amulet",
+          "both texts well-attested in 7th-c. Ashurbanipal library + later recensions"
+        ],
+        "lexical_overlap": ["apotropaic", "this tablet", "no harm shall come", "let this song endure"],
+        "transmission_route": "intra-Mesopotamian; both texts are 1st-millennium-BCE āšipūtu-tradition products operating in the same scribal-apotropaic register",
+        "reasoning_summary": "Bīt Mēseri's apkallu list (Tablet III) is invoked as a working incantation — the names summon protective ancestral powers into the sickroom. The Erra Epic's closing colophon (Tablet V) extends the same logic to the whole 750-line poem: possessing, reading, or reciting it protects the bearer from the very violence the poem narrates. Both texts collapse the narrative/ritual distinction; both treat textual transmission itself as apotropaic. This is a distinctive Mesopotamian textual-genre move with no clean Hebrew parallel — but its presence in both Bīt Mēseri and Erra makes it a documented intra-Mesopotamian pattern that the v0.6 datasets currently underweight."
+      },
+      "suggested_anchor": "Wiggermann 1992 Mesopotamian Protective Spirits for ritual-amulet textuality. Reiner 1995 Astral Magic in Babylonia. Maul 1994 Zukunftsbewältigung for the apotropaic-text genre.",
+      "transmission_direction": "structural_only",
+      "notes": "Intra-Mesopotamian structural pattern, not a Mesopotamian → Jewish transmission. Worth documenting because the apotropaic-text genre is itself one of the cluster's distinctive findings — the v0.7 tool could surface 'text-as-amulet' as a discoverable category."
+    },
+    {
+      "entity_a": {
+        "name": "Anunnaki/Igigi binary tier-structure",
+        "type": "group",
+        "primary_brief": "Igigi.md",
+        "tradition": "sumerian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Anunnaki labor → Igigi rebellion → Watchers transgression",
+        "type": "narrative",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.55,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Igigi.md", "Atrahasis.md", "The_Watchers.md", "Anunnaki.md"],
+        "structural_features": [
+          "junior divine beings in subordinate-labor or restricted-role position",
+          "collective transgression against the senior order",
+          "narrative of rebellion-and-consequence",
+          "transgressors retain some divine standing but are constrained / repurposed",
+          "successor humanity inherits the resulting order"
+        ],
+        "lexical_overlap": ["rebellion", "junior gods", "lesser celestials"],
+        "transmission_route": "common Ancient Near Eastern substrate; Atrahasis was well-known in Late Bronze cosmopolitan scribal world (Ḫattuša/Megiddo/Emar/Ugarit fragments). The Watchers narrative inverts: where Igigi rebellion is resolved without judgment, Watchers transgression triggers judgment",
+        "reasoning_summary": "The Igigi's collective labor-rebellion in Atrahasis is the structural inverse of the Watchers' collective transgressive descent. Igigi go on strike against legitimate cosmic labor → assembly accommodates by creating humans. Watchers conspire to descend and transgress legitimate divine-human boundary → judgment + Flood. Same structural slot (junior-celestial collective acts against established order) with theologically inverted outcomes. The Watchers narrative is structurally the Igigi narrative with the moral valence flipped — and with the resolution moved from accommodation to punishment."
+      },
+      "suggested_anchor": "Annus 2010 on apkallu→Watchers parallel may cover this. Kvanvig 1988 Roots of Apocalyptic on the Atrahasis-substrate. Reed 2005 Fallen Angels for the punitive-inversion theology.",
+      "transmission_direction": "common_substrate",
+      "notes": "Lower-confidence because the structural inversion is more interpretive than verbatim. But the Igigi-rebellion-as-Watchers-precursor reading is genuinely new — the curated dataset's Watchers parallels focus on apkallū as the source, not Igigi. If validated, would document the Mesopotamian junior-celestial-rebellion tradition as a second Watchers source-strand alongside the apkallū."
+    },
+    {
+      "entity_a": {
+        "name": "Ut-napishti's sleep-test (seven nights)",
+        "type": "narrative",
+        "primary_brief": "Gilgamesh_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": ["Tablet XI seven-bread sleep test"]
+      },
+      "entity_b": {
+        "name": "Adapa refusing bread-of-life",
+        "type": "narrative",
+        "primary_brief": "Adapa.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.69,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Gilgamesh_Epic.md", "Adapa.md", "Atrahasis.md"],
+        "structural_features": [
+          "mortal protagonist offered divine status / immortality",
+          "the offered substance is bread (Adapa) or sleep-mastery (Gilgamesh)",
+          "the protagonist fails the offer through misunderstanding or weakness",
+          "loss is structural: humanity cannot have immortality",
+          "the divine offeror's intent is theologically ambiguous"
+        ],
+        "lexical_overlap": ["bread", "seven", "sleep", "you will not have life"],
+        "transmission_route": "intra-Mesopotamian; both narratives operate within the same theological framework of mortality-as-structural",
+        "reasoning_summary": "Gilgamesh's sleep-test in Tablet XI (stay awake seven nights to demonstrate worthiness of immortality; Gilgamesh sleeps; Ut-napishti's wife bakes a loaf per night to mark the failure) and Adapa's refusal of the bread-of-life are structural doublets. Both narratives use *bread* as the immortality-token. Both end with the mortal failing through a misunderstanding rooted in mortal capacity. Both reinforce the same theological point: immortality is structurally withheld from humanity. The two myths are independent narratives but tightly parallel in form."
+      },
+      "suggested_anchor": "George 2003 Babylonian Gilgamesh Epic on Tablet XI sleep-test. Izre'el 2001 Adapa and the South Wind for the bread-of-life motif. Buccellati 1973 on Adapa and faith — for the inverted-trust reading.",
+      "transmission_direction": "structural_only",
+      "notes": "Intra-Mesopotamian doublet; would extend the v0.7 tool's coverage to immortality-test as a discoverable structural motif. The bread-as-token detail is the strongest single point."
+    },
+    {
+      "entity_a": {
+        "name": "Marduk's combat with Tiamat",
+        "type": "narrative",
+        "primary_brief": "Enuma_Elish.md",
+        "tradition": "akkadian",
+        "alt_names": ["Chaoskampf"]
+      },
+      "entity_b": {
+        "name": "Baal's combat with Yam",
+        "type": "narrative",
+        "primary_brief": "Marduk.md",
+        "tradition": "ugaritic",
+        "alt_names": ["Baal Cycle KTU 1.1-1.6"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.80,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Enuma_Elish.md", "Marduk.md", "Enlil.md"],
+        "structural_features": [
+          "storm-god protagonist defeats sea-chaos antagonist",
+          "victory establishes cosmic kingship",
+          "enthronement on cosmic mountain (Esagila/Etemenanki ↔ Mount Saphon)",
+          "single-combat narrative form",
+          "supreme-god status conferred after victory",
+          "narrative provides cosmogonic etiology"
+        ],
+        "lexical_overlap": ["sea (Yam / Tiamat)", "rider on storm", "thunder", "kingship of gods"],
+        "transmission_route": "common West Semitic / Mesopotamian substrate; both arise from a shared Bronze Age Eastern Mediterranean Chaoskampf tradition (Smith 1994/2009)",
+        "reasoning_summary": "Marduk-vs-Tiamat and Baal-vs-Yam share the structural pattern: storm-god protagonist + sea-chaos antagonist + single combat + enthronement on cosmic mountain. The Ugaritic Baal Cycle (c. 13th c. BCE) is slightly earlier than Lambert's dating for Enuma Elish (12th c. BCE Nebuchadnezzar I context); the two are likely independent developments from a common substrate rather than direct borrowings. Mark S. Smith 1994/2009 treats them as parallel Eastern Mediterranean storm-god mythologies."
+      },
+      "suggested_anchor": "Mark S. Smith 1994/2009 The Ugaritic Baal Cycle. Lambert 2013 Babylonian Creation Myths. M.L. West 1997 The East Face of Helicon for the broader Chaoskampf framework.",
+      "transmission_direction": "common_substrate",
+      "notes": "Well-documented structural parallel, but not currently in antediluvianParallels.json (which focuses on Mesopotamia→Hebrew, not Mesopotamia↔Ugarit). Would expand the comparative-religion surface laterally to West Semitic. The Hebrew Leviathan/Rahab/sea-monster passages inherit the same Chaoskampf substrate (Psalm 74, Isaiah 27, Job 26) — secondary candidate."
+    },
+    {
+      "entity_a": {
+        "name": "Enheduanna (named author)",
+        "type": "deity",
+        "primary_brief": "Inanna_Ishtar.md",
+        "tradition": "akkadian",
+        "alt_names": ["first named author"]
+      },
+      "entity_b": {
+        "name": "Kabti-ilāni-Marduk (named author)",
+        "type": "deity",
+        "primary_brief": "Erra_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.62,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Inanna_Ishtar.md", "Erra_Epic.md", "Apkallu_Knowledge.md", "Gilgamesh_Epic.md"],
+        "structural_features": [
+          "first-person authorial signature embedded in text",
+          "claims divine authorization or revelation",
+          "named within text as recipient/composer",
+          "produces text in service of theological-political agenda (Enheduanna: Inanna's elevation; Kabti: Marduk-Erra theodicy)",
+          "becomes load-bearing for later scribal tradition (Enheduanna as prototype; Kabti's dream-frame as genre template)"
+        ],
+        "lexical_overlap": ["I, Enheduanna", "Kabti-ilāni-Marduk son of Dabibi", "received", "did not omit"],
+        "transmission_route": "intra-Mesopotamian scribal-authorial frame; both texts establish models for later named-author claims (Sîn-lēqi-unninni for Gilgamesh, Esagil-kīn-apli for Sakikkû)",
+        "reasoning_summary": "Mesopotamian literature is overwhelmingly anonymous. Enheduanna (c. 2300 BCE) and Kabti-ilāni-Marduk (c. 765 BCE) are exceptions — both named-author signatures embedded in their compositions, both producing theological-political work, both eventually load-bearing for the scribal-tradition's understanding of authorship. The two figures bracket the named-author tradition: Enheduanna at the start of Mesopotamian named-authorship, Kabti near the end of the first-millennium scribal tradition. Together they document the intra-Mesopotamian named-author pattern that Jewish pseudepigraphic literature later inherits and intensifies."
+      },
+      "suggested_anchor": "Helle 2023 Enheduanna: The Complete Poems for the Enheduanna context. Cagni 1969 L'Epopea di Erra for Kabti context. Lenzi 2008 Secrecy and the Gods on scribal-authorial transmission.",
+      "transmission_direction": "structural_only",
+      "notes": "Internal-Mesopotamian. Establishes named-authorial-signature as a documented Mesopotamian scribal practice — useful background context for the 1 Enoch pseudepigraphic frame discovered above (candidate 4)."
+    },
+    {
+      "entity_a": {
+        "name": "Eṭemmu (ghost / divine remnant in humans)",
+        "type": "concept",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Imago Dei / divine breath in humans (Genesis 1-2)",
+        "type": "concept",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": ["nišmat ḥayyim"]
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.50,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Atrahasis.md", "Igigi.md", "Enuma_Elish.md"],
+        "structural_features": [
+          "humans contain a divine component",
+          "the divine component is what makes humans capable of thought/speech/culture",
+          "humans created with divine substance physically incorporated",
+          "this distinguishes humans from animals",
+          "the divine component returns to divine realm at death (Mesopotamian eṭemmu)"
+        ],
+        "lexical_overlap": ["spirit / ghost / breath", "divine substance in human form", "image of God / blood of god"],
+        "transmission_route": "common Ancient Near Eastern anthropogony substrate; the Atra-ḫasīs Wē-ila-blood theology and Genesis 1's imago Dei may be parallel developments of the same theological intuition",
+        "reasoning_summary": "Atra-ḫasīs explicitly: humans are clay + slain god's blood; the slain god's eṭemmu (ghost/divine remnant) survives in human consciousness, capable of thought and speech. Genesis 1:26-27: humans are made in the image of God. Genesis 2:7: God breathes the breath of life into Adam's clay nostrils. The Mesopotamian explanation is more concrete (literal blood mixing); the Hebrew is more abstract (image / breath) — but the underlying theological intuition is the same: humans contain a divine component that distinguishes them from other creatures."
+      },
+      "suggested_anchor": "Lambert & Millard 1969 Atra-ḫasīs commentary on the Wē-ila theology. Westermann 1984 Genesis 1-11 commentary on 1:26 and 2:7. Steinkeller's work on Mesopotamian anthropogony.",
+      "transmission_direction": "common_substrate",
+      "notes": "Lower-confidence topos parallel. The structural pattern is real but the Hebrew demythologization is so thorough that calling this a 'transmission' overstates. Would be useful in the v0.7 tool surface as a topos-level entry with explicit caution."
+    },
+    {
+      "entity_a": {
+        "name": "Asael teaches metallurgy",
+        "type": "narrative",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Apkallu craft-instruction in the Apkallu_Knowledge tradition",
+        "type": "narrative",
+        "primary_brief": "Apkallu_Knowledge.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.72,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["The_Watchers.md", "Apkallu_Knowledge.md", "Apkallu.md"],
+        "structural_features": [
+          "named celestial figure teaches specific technical discipline to humans",
+          "discipline is pre-flood civilizational art",
+          "transmission marked by recipient's gain in power/capability",
+          "Watchers' disciplines map onto apkallu disciplinary curriculum (metallurgy, astrology, medicine, divination)",
+          "valence inverted (Watchers transgress; apkallū fulfill)"
+        ],
+        "lexical_overlap": ["metals", "smelting", "weapons (Watcher) / craft (apkallu)"],
+        "transmission_route": "Mesopotamian apkallu-craft tradition → Aramaic-Jewish Watchers narrative via Babylonian-exile transmission (Annus 2010 makes this case explicitly)",
+        "reasoning_summary": "Annus 2010 argues each specific Watcher-discipline maps onto a specific apkallu-knowledge field: Asael (metallurgy) ↔ apkallu craft-instruction; Baraqel (astrology) ↔ apkallu celestial divination; Hermoni (enchantments) ↔ apkallu exorcism. The disciplinary inventory is what makes the Mesopotamian source most concretely visible — these aren't generic 'forbidden arts' but the specific disciplinary curriculum of the late Mesopotamian āšipūtu corpus. Note: this overlaps with antediluvianParallels.json's existing 1 Enoch 6:1-8 entry (the Apkallu disciplinary-specialization parallel), but the Asael→metallurgy mapping specifically is not isolated as its own entry."
+      },
+      "suggested_anchor": "Annus 2010 'On the Origin of Watchers' is the load-bearing reference. Lenzi 2008 Secrecy and the Gods on the apkallu disciplinary curriculum. The Watchers' disciplinary catalog at 1 En 8 against KAR 44 Exorcist's Manual.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Partially overlaps with curated parallel (apkallū disciplinary specialization in antediluvianParallels.json). The new contribution is the per-Watcher disciplinary mapping at finer grain — specifically Asael→metallurgy ↔ smith-apkallu, Baraqel→astrology ↔ celestial-divination apkallu. Could be added as a sub-entry under the existing Gen 6:1-4 query."
+    },
+    {
+      "entity_a": {
+        "name": "Hannahanna (Hurrian-Hittite mother-goddess)",
+        "type": "deity",
+        "primary_brief": "Ninhursag.md",
+        "tradition": "other",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Bēlet-ilī / Ninhursag",
+        "type": "deity",
+        "primary_brief": "Ninhursag.md",
+        "tradition": "akkadian",
+        "alt_names": ["Ninhursag", "Nintu", "Mami"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.73,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Ninhursag.md"],
+        "structural_features": [
+          "senior mother-goddess",
+          "invoked in birth rituals",
+          "called 'mother of the gods'",
+          "presides over fertility",
+          "geographic adjacency Hittite Anatolia ↔ Mesopotamia",
+          "documented direct influence channel"
+        ],
+        "lexical_overlap": ["mother-of-gods", "midwife", "fertility"],
+        "transmission_route": "direct Mesopotamian → Hurrian-Hittite influence; Hurrian religion is generally accepted as having absorbed substantial Mesopotamian elements via Akkadian-language scribal transmission",
+        "reasoning_summary": "Hannahanna is the senior mother-goddess of the Hurrian-Hittite pantheon (2nd millennium BCE), invoked in birth rituals, presiding over fertility, called 'mother of the gods.' The structural parallel to Bēlet-ilī is striking and is generally accepted as direct Mesopotamian theological influence. Both occupy the same divine-economy slot. The transmission is securely attested in other Hurrian-Mesopotamian religious borrowings (Ea, Ishtar) so the mechanism for this specific case is well-established."
+      },
+      "suggested_anchor": "Stol 2000 Birth in Babylonia and the Bible. Asher-Greve & Westenholz 2013 Goddesses in Context. Beckman various publications on Hurrian-Hittite religion.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Lateral Mesopotamian → Anatolian transmission. Would expand the cluster's reach into Hurrian-Hittite material. Not directly relevant to the antediluvian-wisdom or Watchers thread but is a structural-religious parallel worth surfacing."
+    },
+    {
+      "entity_a": {
+        "name": "Lagash KL agricultural-labor cosmology",
+        "type": "concept",
+        "primary_brief": "Lagash_King_List.md",
+        "tradition": "sumerian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "SKL kingship-from-heaven cosmology",
+        "type": "concept",
+        "primary_brief": "Sumerian_King_List.md",
+        "tradition": "sumerian",
+        "alt_names": ["nam-lugal an-ta e₃-de₃-a-ba"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.65,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Lagash_King_List.md", "Sumerian_King_List.md"],
+        "structural_features": [
+          "alternative Sumerian cosmologies of political authority",
+          "both texts in OB Sumerian, contemporary",
+          "WB-444: kingship descends from heaven (theological-monarchic)",
+          "Lagash KL: kingship as agricultural-civilizational institution (technical-laborist)",
+          "documented dissent within Sumerian scribal world",
+          "city-tradition split: Eridu-Nippur vs Lagash"
+        ],
+        "lexical_overlap": ["kingship", "rule", "founded", "pickaxe and plough"],
+        "transmission_route": "intra-Sumerian; two contemporary scribal traditions in Old Babylonian period",
+        "reasoning_summary": "The Lagash King List (Sollberger 1967) is a Lagash-side counter-tradition to the canonical Nippur-Isin SKL. The two compositions document two different Sumerian cosmologies of political authority operating in the same Old Babylonian scribal milieu. SKL: kingship descends from heaven (a Nippur-Eridu theological claim). Lagash KL: kingship is the agricultural-civilizational institution instituted by a ruler in response to human need. This is the cluster's strongest documented case that 'Mesopotamian religion' is a federation of city-traditions with substantively different cosmologies, not a unified system."
+      },
+      "suggested_anchor": "Sollberger 1967 JCS 21 'The Rulers of Lagaš.' Glassner 2004 Mesopotamian Chronicles. Marchesi 2010/2011 on Early Dynastic Lagash chronology.",
+      "transmission_direction": "structural_only",
+      "notes": "Intra-Sumerian counter-tradition. Establishes that the antediluvian-wisdom thread the cluster traces is a SPECIFIC scribal tradition (Eridu-Nippur), not a pan-Sumerian assumption. Important methodological context for the entire find_antediluvian_parallel framework."
+    },
+    {
+      "entity_a": {
+        "name": "Sacred-marriage (king-Inanna)",
+        "type": "ritual",
+        "primary_brief": "Inanna_Ishtar.md",
+        "tradition": "sumerian",
+        "alt_names": ["hieros gamos"]
+      },
+      "entity_b": {
+        "name": "Akitu king-humiliation rite",
+        "type": "ritual",
+        "primary_brief": "Marduk.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.58,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Inanna_Ishtar.md", "Marduk.md", "Enuma_Elish.md"],
+        "structural_features": [
+          "annual / calendrically-fixed royal-ritual event",
+          "king's authority is ritually renewed through encounter with deity",
+          "involves submission or boundary-violation (humiliation / sacred sex)",
+          "both rituals contested in current scholarship regarding actual practice vs theatrical performance",
+          "both ratify kingship via cultic-temple performance"
+        ],
+        "lexical_overlap": ["the king", "annual renewal", "submission"],
+        "transmission_route": "intra-Mesopotamian; both are Babylonian state-cult ritual practices documenting royal-divine ritual structures",
+        "reasoning_summary": "The sacred-marriage rite (Ur III-OB; king as Dumuzi, priestess as Inanna) and the Akitu king-humiliation rite (Babylonian; high priest strikes the king, demands declaration of innocence) are both annual royal-ritual events in which the king's authority is renewed through controlled cultic encounter. Both have been read as 'real ritual' vs 'theatrical-performance' (the strong-form reading of sacred marriage has fallen out of favor; the Akitu humiliation reading is currently divided). The structural pattern (annual king-ratification rite involving boundary-crossing) is documented in both."
+      },
+      "suggested_anchor": "Cooper 1993 'Sacred Marriage and Popular Cult' for the SM rite. Bidmead 2002 The Akītu Festival. Black 1981 'The New Year Ceremonies in Ancient Babylon.'",
+      "transmission_direction": "structural_only",
+      "notes": "Intra-Mesopotamian. The structural parallel between sacred marriage and Akitu humiliation as 'annual royal-renewal rites with controlled boundary-crossing' is interesting but not strongly documented. Would surface a new comparative-religion query category in the v0.7 tool."
+    },
+    {
+      "entity_a": {
+        "name": "Marduk's absence in Erra Epic",
+        "type": "narrative",
+        "primary_brief": "Erra_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "YHWH's hester panim (hiding of face)",
+        "type": "concept",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.42,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Erra_Epic.md", "Marduk.md", "The_Watchers.md"],
+        "structural_features": [
+          "divine protector temporarily absent / hidden",
+          "absence triggers cosmic disaster",
+          "theology of catastrophe routed through divine withdrawal",
+          "supreme-god protection real but contingent",
+          "human-experienced disaster explained by divine non-presence"
+        ],
+        "lexical_overlap": ["hidden", "absent", "abandonment", "wrath"],
+        "transmission_route": "speculative common Ancient Near Eastern substrate; the hester panim concept may draw on Mesopotamian deity-absence theology",
+        "reasoning_summary": "The Erra Epic explains disaster as Marduk's temporary absence from his throne (Erra's deception lures Marduk into cult-statue refurbishment workshop). Hebrew Bible's hester panim concept (Deuteronomy 32:20, Isaiah 8:17, Psalm 13:1, Lamentations) explains national disaster as YHWH's hiding of face. Both theological frames preserve divine sovereignty while accounting for the empirical fact of catastrophe: god is real and supreme, but temporarily withdrawn during the disaster window. The structural pattern is similar; direct dependence is unlikely but the parallel topos is documented."
+      },
+      "suggested_anchor": "Balentine 1983 The Hidden God: The Hiding of the Face of God in the Old Testament. Cagni 1969 Erra Epic. Berkovits Faith After the Holocaust on hester panim theology.",
+      "transmission_direction": "common_substrate",
+      "notes": "Lower-confidence topos parallel. Speculative but interesting; would extend the comparative-religion surface to Hebrew Wisdom/Prophetic territory. Worth listing for completeness."
+    },
+    {
+      "entity_a": {
+        "name": "Enmeduranki receives divination from Šamaš + Adad",
+        "type": "narrative",
+        "primary_brief": "Sumerian_King_List.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Moses receives Torah on Mount Sinai",
+        "type": "narrative",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.48,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Sumerian_King_List.md", "The_Watchers.md", "1Enoch_Other_Books.md"],
+        "structural_features": [
+          "named human ascends mountain or to heaven",
+          "receives systematic knowledge from supreme deity",
+          "knowledge is foundational for human discipline (divination / law)",
+          "transmits knowledge to subsequent humanity through institutional chain",
+          "ascent-revelation pattern"
+        ],
+        "lexical_overlap": ["mountain (Sippar=mountain-of-Šamaš; Sinai)", "summoned to heaven", "given the tablet", "secrets"],
+        "transmission_route": "common Ancient Near Eastern ascent-revelation topos; the Mesopotamian Enmeduranki narrative pre-dates the Sinai redaction by many centuries",
+        "reasoning_summary": "Enmeduranki of Sippar is summoned to heaven, given the divinatory arts (oil-on-water, divine board, secrets of Anu/Enlil/Ea) by Šamaš and Adad, transmits the discipline through his apkallu disciples to subsequent humanity. Moses ascends Sinai, receives the Torah from YHWH, transmits to subsequent humanity. The structural pattern is real — ascent + revelation + foundational knowledge + institutional transmission — but the content of the knowledge differs sharply (divinatory technique vs covenantal law). This is closer to a typological than a genealogical parallel."
+      },
+      "suggested_anchor": "Lambert 1967 Enmeduranki for the Mesopotamian side. Sommer The Bodies of God and the World of Ancient Israel on divine-encounter typologies. Kvanvig 1988 Roots of Apocalyptic.",
+      "transmission_direction": "common_substrate",
+      "notes": "Lower-confidence typological parallel. The structural pattern is real but the content (divination vs law) is so different that calling this a transmission overstates. Worth listing as a typological-only candidate for the v0.7 surface."
+    },
+    {
+      "entity_a": {
+        "name": "Inanna trickster-by-intoxication (steals me from Enki)",
+        "type": "narrative",
+        "primary_brief": "Sumerian_Me.md",
+        "tradition": "sumerian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Jacob's deception of Isaac (Gen 27)",
+        "type": "narrative",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.32,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Sumerian_Me.md", "Inanna_Ishtar.md"],
+        "structural_features": [
+          "trickster acquires blessing/birthright through deception of senior figure",
+          "the deception exploits the senior's compromised state (drunkenness / blindness)",
+          "the deception involves disguise or false intimacy",
+          "the senior cannot revoke the transferred power once given",
+          "the trickster keeps the transferred power despite being caught"
+        ],
+        "lexical_overlap": ["deception", "stolen blessing", "drunk / blind"],
+        "transmission_route": "common Ancient Near Eastern trickster-narrative substrate; very speculative",
+        "reasoning_summary": "Both narratives turn on a trickster acquiring authority/power through deception of a compromised senior figure who cannot revoke the transfer once made. Inanna exploits Enki's drunkenness to receive the me; Jacob exploits Isaac's blindness to receive Esau's blessing. Both senior figures realize the deception and react (Enki sends monsters; Isaac trembles), but the transfer cannot be undone. The trickster-acquisition-of-irrevocable-blessing pattern is the same."
+      },
+      "suggested_anchor": "Niditch 1987 Underdogs and Tricksters for the trickster-narrative typology. Kramer 1972 The Sacred Marriage Rite for the Inanna context.",
+      "transmission_direction": "common_substrate",
+      "notes": "Very speculative typological parallel. Listed because the structural pattern is real but I'd flag it as low-confidence even within this set. Could be useful as a 'caution: typology-only' example in the v0.7 tool."
+    },
+    {
+      "entity_a": {
+        "name": "Inanna-Aphrodite continuity chain",
+        "type": "deity",
+        "primary_brief": "Inanna_Ishtar.md",
+        "tradition": "greek_hellenistic",
+        "alt_names": ["Inanna↔Ishtar↔Astarte↔Aphrodite"]
+      },
+      "entity_b": {
+        "name": "Enki/Ea → Hermes Trismegistus continuity",
+        "type": "deity",
+        "primary_brief": "Enki_Ea.md",
+        "tradition": "greek_hellenistic",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.56,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Inanna_Ishtar.md", "Enki_Ea.md"],
+        "structural_features": [
+          "long-distance Mesopotamian → Hellenistic deity transmission",
+          "originally Mesopotamian theological figure absorbed into Greek-language religious imagination",
+          "syncretic Hellenistic figure inherits specific attributes",
+          "attributes preserved: wisdom/cleverness/craft (Ea→Hermes); love/Venus/war (Inanna→Aphrodite)",
+          "multi-step transmission through cultural intermediaries"
+        ],
+        "lexical_overlap": ["wisdom", "Venus", "love/desire", "craft"],
+        "transmission_route": "well-documented long-distance Eastern Mediterranean transmission; Phoenician intermediation; Hellenistic syncretism (Burkert 1992 Orientalizing Revolution)",
+        "reasoning_summary": "The Inanna→Ishtar→Astarte→Aphrodite continuity is one of the longest-documented cult-figure continuities in history (~3500 years, 4+ languages). The cluster also documents Enki→Hermes Trismegistus continuity (more attenuated, but real). Both transmissions follow the same general pattern: Mesopotamian theological figure → West Semitic intermediary → Hellenistic syncretic figure. Comparing the two continuity-chains documents a general pattern of long-distance Mesopotamia → Hellenistic transmission that affects multiple deities."
+      },
+      "suggested_anchor": "Burkert 1992 The Orientalizing Revolution. M.L. West 1997 The East Face of Helicon. Budin 2003 The Origin of Aphrodite.",
+      "transmission_direction": "common_substrate",
+      "notes": "Meta-parallel — two parallel transmission chains documented separately. Useful for v0.7 tool surfacing the long-distance Mesopotamian → Greek pattern at the cluster level."
+    },
+    {
+      "entity_a": {
+        "name": "Five antediluvian cities (Sumerian Flood Story)",
+        "type": "group",
+        "primary_brief": "Sumerian_Flood_Story.md",
+        "tradition": "sumerian",
+        "alt_names": ["Eridu/Bad-tibira/Larak/Sippar/Shuruppak"]
+      },
+      "entity_b": {
+        "name": "Pre-flood civilization (Genesis 4)",
+        "type": "narrative",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": ["Cain's city, Jubal, Tubal-cain"]
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.45,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Sumerian_Flood_Story.md", "Sumerian_King_List.md", "Atrahasis.md"],
+        "structural_features": [
+          "pre-flood human civilization explicitly catalogued",
+          "specific cities or technological foundations named",
+          "civilizational arts associated with named figures",
+          "civilization exists in the pre-flood frame"
+        ],
+        "lexical_overlap": ["city", "bronze/iron-working", "pre-flood civilization"],
+        "transmission_route": "common Ancient Near Eastern pre-flood-civilization topos",
+        "reasoning_summary": "The Sumerian Flood Story preserves a section (lines 84-100) naming the five antediluvian cities with their tutelary deities. Genesis 4 (J source) names Cain's founding of a city, Jubal (music), Tubal-Cain (bronze and iron-working) as pre-flood civilizational founders. Both texts insist that civilization existed before the Flood and was associated with specific named cities or figures. Westermann 1984 notes the Genesis 4 framework as typologically parallel to Mesopotamian pre-flood-civilization tradition — not directly genealogical but structurally aligned."
+      },
+      "suggested_anchor": "Civil 1969 in Lambert & Millard 1969 on Sumerian Flood Story lines 84-100. Westermann 1984 Genesis 1-11 commentary on chapter 4. Chen 2013 Primeval Flood Catastrophe.",
+      "transmission_direction": "common_substrate",
+      "notes": "Modest-confidence topos parallel. Genesis 4's J-source pre-flood civilization frame is conventionally read against the Mesopotamian Eridu/Sumerian Flood Story; would extend the dataset's reach."
+    },
+    {
+      "entity_a": {
+        "name": "Lu-Nanna 'two-thirds apkallu / one-third human'",
+        "type": "deity",
+        "primary_brief": "Bit_Meseri.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Gilgamesh 'two-thirds god / one-third human'",
+        "type": "deity",
+        "primary_brief": "Gilgamesh_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "lexical",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.79,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Bit_Meseri.md", "Gilgamesh_Epic.md", "Apkallu_Knowledge.md", "The_Watchers.md"],
+        "structural_features": [
+          "explicit two-thirds-divine / one-third-human fraction",
+          "applied to a single named individual",
+          "marks hybrid/exceptional status",
+          "antediluvian or partly-antediluvian figure (Lu-Nanna paired with Shulgi crosses the postdiluvian boundary; Gilgamesh is fifth king of postdiluvian Uruk First Dynasty)",
+          "exact lexical match: two-thirds / one-third formula"
+        ],
+        "lexical_overlap": ["two-thirds", "one-third", "apkallu / divine", "human"],
+        "transmission_route": "intra-Akkadian; both formulas operate within the same hybrid-status conceptual framework",
+        "reasoning_summary": "Lu-Nanna in Bīt Mēseri III and the Uruk List is explicitly 'two-thirds apkallu, one-third human.' Gilgamesh in the Standard Babylonian Gilgamesh Epic I.46-48 is explicitly 'two-thirds god, one-third human.' The fractional formula is exact. Annus 2010 notes this connection in the context of Nephilim (Gen 6:4) parallels. The two-thirds / one-third formula documents a specific Mesopotamian conceptual technology for hybrid-status that is structurally distinctive — not 'partly divine' generally but the precise fraction. The Genesis 6 / 1 Enoch Nephilim narrative inherits this hybrid-fraction logic."
+      },
+      "suggested_anchor": "Annus 2010 JSP 19.4 on the Gilgamesh-Lu-Nanna-Nephilim connection (already in dataset commentary). George 2003 Babylonian Gilgamesh Epic on I.46-48. Reiner 1961 on Lu-Nanna in Bīt Mēseri III.",
+      "transmission_direction": "structural_only",
+      "notes": "Already partially noted in antediluvianParallels.json (Gilgamesh's two-thirds-divine descent is cited under Gen 6:1-4 as the divine-human hybridity topos), but the *direct lexical match* between Lu-Nanna and Gilgamesh is not isolated as its own discovery. The two-thirds/one-third formula is one of the cluster's tightest single-detail parallels — Annus 2010 makes this case but it deserves its own entry."
+    },
+    {
+      "entity_a": {
+        "name": "Adapa-Adam onomastic and structural parallel",
+        "type": "deity",
+        "primary_brief": "Adapa.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Adam (Genesis 2-3)",
+        "type": "deity",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "onomastic",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.54,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Adapa.md", "Atrahasis.md"],
+        "structural_features": [
+          "first-man figure",
+          "divine creation (clay)",
+          "wisdom granted without immortality",
+          "divine warning about food",
+          "warning's accuracy is the narrative crux (Genesis: true; Adapa: false)",
+          "outcome: humanity loses chance at immortality",
+          "structural inversion: obedience-fails (Adapa) vs disobedience-fails (Adam)"
+        ],
+        "lexical_overlap": ["proposed Adapa → Adaba → Adam phonological progression (Andreasen 1981; disputed)"],
+        "transmission_route": "speculative common ANE first-man typology; direct genealogical relationship unproven (Andreasen 1981 yes; Heidel 1951 no)",
+        "reasoning_summary": "Adapa and Adam are structural mirrors: both first-man figures created from clay, both given wisdom, both denied immortality through a divine-warning mechanism, both end as the type of human-being-mortal-by-design. The crucial inversion: Adam disobeys the warning and loses immortality; Adapa obeys (Ea's false warning) and loses immortality. The onomastic question (Adapa→Adam phonological progression) is debated; the structural-mirror question is widely accepted. This is one of the cluster's load-bearing typological parallels but is NOT in antediluvianParallels.json (which focuses on Gen 5/Gen 6, not Gen 2-3)."
+      },
+      "suggested_anchor": "Andreasen 1981 'Adam and Adapa' AUSS 19. Buccellati 1973 'Adapa, Genesis, and the Notion of Faith.' Liverani 2004 'Adapa, Guest of the Gods.' Heidel 1951 The Babylonian Genesis (skeptical).",
+      "transmission_direction": "common_substrate",
+      "notes": "Major gap in antediluvianParallels.json. Would add a Genesis 2-3 query topic. The onomastic argument is contested but the structural-mirror argument is firmly established. High-priority for promotion to validated."
+    },
+    {
+      "entity_a": {
+        "name": "Ninhursag's omega-uterus",
+        "type": "iconographic_form",
+        "primary_brief": "Ninhursag.md",
+        "tradition": "akkadian",
+        "alt_names": ["Ω-symbol"]
+      },
+      "entity_b": {
+        "name": "Apkallu bucket-and-cone",
+        "type": "iconographic_form",
+        "primary_brief": "Apkallu_Iconography.md",
+        "tradition": "akkadian",
+        "alt_names": ["banduddû + mullilu"]
+      },
+      "parallel_type": "iconographic",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.60,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Ninhursag.md", "Apkallu_Iconography.md", "Apkallu.md"],
+        "structural_features": [
+          "ritual-implement iconography",
+          "purification / cosmic-ordering gesture (apkallu) / birth / life-mediation (Ninhursag)",
+          "depicted in same period (Old Babylonian / Neo-Assyrian)",
+          "associated with cosmogony / theogony",
+          "both appear on kudurru stones",
+          "both encode primary cosmic operations"
+        ],
+        "lexical_overlap": ["divine instrument", "purification", "ordering"],
+        "transmission_route": "intra-Mesopotamian visual-symbolic system; both signs operate within the same iconographic semiotic field",
+        "reasoning_summary": "The apkallu's bucket-and-cone (banduddû + mullilu) and Ninhursag's omega-symbol are the two most-attested ritual-gesture iconographies in Neo-Assyrian and Kassite-period visual art. Both encode cosmic-ordering acts — apkallū purify/maintain/pollinate the cosmic tree; Ninhursag gestates humans-and-cosmos. Both are stylized abstractions of physical operations (date-palm pollination per Albenda; bicornuate uterus per Stol 2000). Both appear in the same kudurru-stone iconographic vocabulary. The pair documents the Mesopotamian visual logic that *cosmogonic operations* are made queryable through ritual-instrument abstraction."
+      },
+      "suggested_anchor": "Stol 2000 Birth in Babylonia and the Bible for omega-symbol. Wiggermann 1992 Mesopotamian Protective Spirits for bucket-and-cone. Albenda 1986 for the pollination reading.",
+      "transmission_direction": "structural_only",
+      "notes": "Intra-Mesopotamian iconographic-structural parallel. The cluster's interest in *cosmogonic operations as queryable through ritual-instrument abstraction* would benefit from this entry. Already mentioned in spec's predicted findings."
+    },
+    {
+      "entity_a": {
+        "name": "Ninurta defeats Asag / recovers Tablet of Destinies",
+        "type": "narrative",
+        "primary_brief": "Enlil.md",
+        "tradition": "sumerian",
+        "alt_names": ["lugal-e", "Anzû myth"]
+      },
+      "entity_b": {
+        "name": "Marduk defeats Tiamat (and inherits her role)",
+        "type": "narrative",
+        "primary_brief": "Enuma_Elish.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.76,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Enlil.md", "Enuma_Elish.md", "Marduk.md", "Anunnaki.md"],
+        "structural_features": [
+          "warrior-son of supreme god defeats cosmic monster",
+          "father gives son cosmic kingship after victory",
+          "Tablet of Destinies is the contested object (Anzû) or transferred (Marduk-Qingu)",
+          "ratifies new theological-political order",
+          "father-warrior-son structure",
+          "Marduk's role is the Babylonian elevation of Ninurta's older Sumerian role"
+        ],
+        "lexical_overlap": ["warrior", "cosmic monster", "Tablet of Destinies", "king of the gods"],
+        "transmission_route": "intra-Mesopotamian; the Marduk-Tiamat combat is Lambert's reading the political elevation of the older Ninurta-Asag/Anzû combat tradition",
+        "reasoning_summary": "Ninurta in lugal-e and the Anzû myth defeats cosmic monsters (Asag, Anzû) on Enlil's behalf and recovers the Tablet of Destinies. Marduk in Enuma Elish defeats Tiamat, fastens the Tablet of Destinies to his chest, and assumes cosmic kingship. Lambert 2013 reads the Marduk narrative as the Babylonian political appropriation of the older Sumerian Ninurta combat-tradition — Marduk inherits Ninurta's role with new theological credentialing. The father-warrior-son structure (Enlil-Ninurta / Ea-Marduk) maps directly."
+      },
+      "suggested_anchor": "Lambert 2013 Babylonian Creation Myths on Ninurta-Marduk substitution. Annus 2002 The God Ninurta in the Mythology and Royal Ideology of Ancient Mesopotamia.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Intra-Mesopotamian theological-political appropriation. Documents the older Sumerian Ninurta-tradition's absorption into the Babylonian Marduk-tradition. Important context for understanding the Marduk-supremacy theology and its older Sumerian roots."
+    },
+    {
+      "entity_a": {
+        "name": "Sumerian flood seven-day duration",
+        "type": "motif",
+        "primary_brief": "Sumerian_Flood_Story.md",
+        "tradition": "sumerian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Genesis 7 forty-day rain duration",
+        "type": "motif",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.62,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Sumerian_Flood_Story.md", "Atrahasis.md", "Gilgamesh_Epic.md"],
+        "structural_features": [
+          "explicit flood duration as numerical detail",
+          "Mesopotamian: seven days and nights (Ziusudra, Atra-ḫasīs, Gilgamesh XI all align)",
+          "Genesis: 40 days of rain + 150 days of prevailing waters",
+          "diverging numerologies on the same plot-event",
+          "Israelite extension is theologically significant"
+        ],
+        "lexical_overlap": ["days", "nights", "flood duration"],
+        "transmission_route": "Israelite redactor inherits Mesopotamian flood narrative but substitutes longer durations (J: 40; P: 150)",
+        "reasoning_summary": "All three Mesopotamian flood witnesses (Sumerian Ziusudra, OB Atra-ḫasīs, SB Gilgamesh XI) preserve a seven-day flood. Genesis 7:12 (J) gives 40 days of rain; Genesis 7:24 (P) gives 150 days of prevailing waters. The divergence is one of the cleanest single-detail Mesopotamian → Hebrew theological transformations — the Israelite tradition explicitly extends the duration, possibly to align with calendar-significant numbers (40 = wilderness wandering / Sinai; 150 = five months of P source). Already partially documented in floodAlignment.json but worth flagging as its own discovered candidate for the asymmetric-divergence pattern."
+      },
+      "suggested_anchor": "Lambert & Millard 1969 commentary on flood durations. Westermann 1984 Genesis 1-11 on Gen 7:11-24. Chen 2013 Primeval Flood Catastrophe.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Already covered in floodAlignment.json at the the_flood episode level. Listed here as a discovered candidate because the asymmetric-duration parallel is a documented Mesopotamia→Hebrew transformation that find_antediluvian_parallel could surface as a structural-divergence query."
+    },
+    {
+      "entity_a": {
+        "name": "Igigi 40-year labor (Atrahasis)",
+        "type": "narrative",
+        "primary_brief": "Igigi.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Israelites' 40 years in wilderness",
+        "type": "narrative",
+        "primary_brief": "Atrahasis.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.30,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Igigi.md", "Atrahasis.md"],
+        "structural_features": [
+          "duration of 40 years as significant marker",
+          "labor / wandering hardship",
+          "concludes with cosmic / theological reordering",
+          "successor humanity / new generation inherits the result"
+        ],
+        "lexical_overlap": ["forty years", "labor", "endurance"],
+        "transmission_route": "speculative; the 40-year unit is numerologically meaningful in both traditions but the connection is typological at best",
+        "reasoning_summary": "The Igigi rebel after 40 years of cosmic labor; Israel wanders 40 years in the wilderness. Both narratives use 40 as the duration of pre-resolution hardship. The structural parallel is real but the content is so different (divine labor strike vs human exilic wandering) that calling this a transmission overstates. Listed for the numerological topos parity only."
+      },
+      "suggested_anchor": "Lambert & Millard 1969 on the 40-year reading. Kilmer 1972 'Mesopotamian Concept of Overpopulation.' Numerology in Mesopotamian and Hebrew tradition generally.",
+      "transmission_direction": "common_substrate",
+      "notes": "Very speculative; included to document the 40-year topos as a discoverable numerological pattern. Flagged for likely rejection on review."
+    },
+    {
+      "entity_a": {
+        "name": "Berossus' Sippar buried-tablets motif",
+        "type": "motif",
+        "primary_brief": "Berossus.md",
+        "tradition": "greek_hellenistic",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Enoch's writings preserved across Flood",
+        "type": "motif",
+        "primary_brief": "1Enoch_Other_Books.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": []
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.69,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Berossus.md", "1Enoch_Other_Books.md", "Apkallu_Knowledge.md"],
+        "structural_features": [
+          "pre-flood knowledge preserved through Flood as written record",
+          "deliberate caching / transmission of writings",
+          "post-flood recovery of antediluvian wisdom",
+          "writings as material objects (tablets / books)",
+          "guardian-figure entrusted with preservation",
+          "no cuneiform precedent for the Berossus motif — appears uniquely in his Hellenistic-period account"
+        ],
+        "lexical_overlap": ["buried writings", "preserved tablets", "wisdom across the Flood"],
+        "transmission_route": "shared Hellenistic-period antediluvian-wisdom-preservation topos; Annus 2010 reads Berossus and 1 Enoch as accessing the same broader Mesopotamian-Jewish tradition",
+        "reasoning_summary": "Berossus' Xisuthros buries 'the first, middle, and last writings' at Sippar before the Flood; after the Flood the tablets are recovered. This motif has no cuneiform precedent and appears uniquely in Berossus' Hellenistic-period account. 1 Enoch develops the parallel idea: Enoch's writings preserve antediluvian wisdom across the Flood for transmission to post-flood humanity. The two motifs are independent of any extant cuneiform parent but appear in roughly the same Hellenistic-period intellectual environment. Annus 2010 reads them as drawing on a common Mesopotamian-Jewish substrate that no longer survives in cuneiform form."
+      },
+      "suggested_anchor": "Annus 2010 on Berossus-Jubilees-1 Enoch wisdom-preservation common substrate. Verbrugghe & Wickersham 1996 Berossus and Manetho on the buried-tablets motif specifically. Nickelsburg 2001 on 1 Enoch's wisdom-preservation theme.",
+      "transmission_direction": "common_substrate",
+      "notes": "Important parallel because Berossus has no cuneiform parent for the buried-tablets motif. The convergence with 1 Enoch / Jubilees in the Hellenistic period suggests a shared antediluvian-wisdom-preservation theological framework operating independent of (or downstream of) any extant cuneiform source. Worth high-priority validation."
+    },
+    {
+      "entity_a": {
+        "name": "Shamhat civilizing Enkidu through sex",
+        "type": "narrative",
+        "primary_brief": "Gilgamesh_Epic.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Eve's role in Adam's knowledge-gain",
+        "type": "narrative",
+        "primary_brief": "Ninhursag.md",
+        "tradition": "hebrew",
+        "alt_names": []
+      },
+      "parallel_type": "topos",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.38,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Gilgamesh_Epic.md", "Ninhursag.md", "Atrahasis.md"],
+        "structural_features": [
+          "female mediator transforms male protagonist's status",
+          "transformation involves knowledge / awareness",
+          "transformation has cost (animals flee Enkidu; Adam expelled from Eden)",
+          "transformation moves male protagonist toward civilized / mortal condition",
+          "explicit role of female agency"
+        ],
+        "lexical_overlap": ["woman", "knowledge", "expulsion"],
+        "transmission_route": "speculative typological parallel; common Ancient Near Eastern transition-narrative substrate",
+        "reasoning_summary": "Shamhat (cultic woman of Ishtar) civilizes Enkidu through six days of sex; after which the animals flee from him. Eve (mother of all living) gives Adam the fruit of knowledge; after which Adam knows he is naked, is expelled from Eden, becomes mortal-by-experience. Both narratives use a female mediator to transform the male protagonist from pre-civilization / pre-knowledge state to civilized / knowing / mortal state. The Mesopotamian framing is positive (Enkidu's transformation is good); the Hebrew framing is negative (Adam's knowledge is a fall). Structural mirror; valence inverted."
+      },
+      "suggested_anchor": "George 2003 Gilgamesh on the Shamhat episode. Westermann 1984 on Genesis 3 expulsion. Trible 1978 God and the Rhetoric of Sexuality for feminist-typology framing.",
+      "transmission_direction": "common_substrate",
+      "notes": "Speculative typological parallel. The structural mirror is real (female agent transforms male into civilized/knowing/mortal state) but the genealogical question is open. Worth listing as typological-only."
+    },
+    {
+      "entity_a": {
+        "name": "Adapa breaks the wing of south wind",
+        "type": "narrative",
+        "primary_brief": "Adapa.md",
+        "tradition": "akkadian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Watchers' transgression at Mount Hermon",
+        "type": "narrative",
+        "primary_brief": "The_Watchers.md",
+        "tradition": "aramaic_jewish",
+        "alt_names": []
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.46,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Adapa.md", "The_Watchers.md"],
+        "structural_features": [
+          "originally-positive divine figure's transgression triggers cosmic crisis",
+          "transgression involves boundary-crossing",
+          "consequences include summons before supreme deity",
+          "outcome determines humanity's relationship to immortality / divine knowledge",
+          "involves intercession of subordinate figures"
+        ],
+        "lexical_overlap": ["transgression", "boundary", "summons", "judgment"],
+        "transmission_route": "common Mesopotamian → Jewish antediluvian transgression-narrative substrate",
+        "reasoning_summary": "Adapa breaks the south wind's wing by curse — a transgression that calls him before Anu's heavenly tribunal. The Watchers descend on Mount Hermon — a transgression that calls divine judgment. Both narratives feature originally-positive divine-or-divinely-associated figures whose boundary-crossing triggers cosmic-judicial response. The Adapa narrative resolves in withheld-immortality; the Watchers narrative resolves in eternal binding. Both narratives concern the relationship between mortal-immortal boundary and the consequences of divine-human / boundary-crossing acts."
+      },
+      "suggested_anchor": "Izre'el 2001 Adapa for the south-wind transgression. Nickelsburg 2001 1 Enoch for the Watchers transgression. Sanders 2017 From Adapa to Enoch for the comparative argument.",
+      "transmission_direction": "common_substrate",
+      "notes": "Adapa-to-Enoch transmission is well-documented by Sanders 2017 (cited in Adapa.md §3.3). The transgression structural parallel is a corollary of that broader transmission. Could be added under the Watchers/apkallu query family."
+    },
+    {
+      "entity_a": {
+        "name": "Enki and the World Order assignment of divine domains",
+        "type": "narrative",
+        "primary_brief": "Enki_Ea.md",
+        "tradition": "sumerian",
+        "alt_names": []
+      },
+      "entity_b": {
+        "name": "Marduk's fifty names absorbing predecessor prerogatives",
+        "type": "concept",
+        "primary_brief": "Marduk.md",
+        "tradition": "akkadian",
+        "alt_names": ["Enuma Elish Tablet VII"]
+      },
+      "parallel_type": "structural",
+      "discovered_by": "ai_traversal",
+      "confidence_score": 0.64,
+      "validation_status": "pending",
+      "discovery_trace": {
+        "supporting_briefs": ["Enki_Ea.md", "Marduk.md", "Enuma_Elish.md"],
+        "structural_features": [
+          "single deity assigns / absorbs cosmic functions across the pantheon",
+          "systematic-administrative manifesto form",
+          "names of attributes / domains worked through",
+          "structural role of the named deity is cosmic-administrative",
+          "list-format theological work"
+        ],
+        "lexical_overlap": ["names", "fates", "domains", "decreed"],
+        "transmission_route": "intra-Mesopotamian theological reorganization; both texts perform list-based cosmic-administrative theology, with Marduk's 50 names being the Babylonian elevation of Enki's older Sumerian role",
+        "reasoning_summary": "Enki and the World Order: Enki assigns gods to their domains, fixes fates of cities, distributes the me, allocates duties. Enuma Elish Tablet VII: the assembly proclaims fifty names of Marduk, each name absorbing a predecessor's prerogative. Both are list-format theological-administrative texts in which a single deity organizes the pantheon's domains. Marduk's 50-names absorption is the late-Babylonian theological-political move; Enki's World Order is the older Sumerian administrative-cosmogony. Structurally, Marduk does what Enki did, but with absorption replacing assignment."
+      },
+      "suggested_anchor": "Lambert 2013 Babylonian Creation Myths on the 50 names. Kramer & Maier 1989 Myths of Enki, the Crafty God on Enki and the World Order.",
+      "transmission_direction": "unidirectional_a_to_b",
+      "notes": "Intra-Mesopotamian structural appropriation. Documents the Enki-to-Marduk role-transfer that the cluster has traced in multiple places (e.g. Marduk.md §5). Worth surfacing as a discovery candidate to document the *list-format theological-administrative* genre as a Mesopotamian distinctive."
+    }
+  ]
+}

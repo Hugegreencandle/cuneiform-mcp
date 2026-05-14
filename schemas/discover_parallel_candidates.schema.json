@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/discover_parallel_candidates.schema.json",
+  "title": "discover_parallel_candidates data payload",
+  "description": "Structured payload for the `discover_parallel_candidates` tool — the v0.7 Discovery Engine. Returns machine-discovered comparative-religion parallels from the curated Research/ cluster corpus, with full provenance trace.\n\nDiscipline reversal: where `find_antediluvian_parallel` REQUIRES named scholarly attribution (no scholar, no result), this tool RETURNS candidates WITHOUT human-scholar validation — flagged explicitly as machine-discovered, with `discovered_by: 'ai_traversal'` and `validation_status: 'pending'`. The structural-reasoning trace explains WHY the engine surfaced this pair.\n\nThis is the inverse-discipline tier: provisional parallels for human-scholar validation. Each candidate carries a discovery_trace showing which briefs supported the comparison, which structural features matched, and what the suggested anchor-to-check would be.\n\nProvenance is `source: local`, `endpoint: local:discoveredCandidatesIndex`. Underlying dataset curated via AI traversal of 24 research briefs + 3 datasets at cuneiform-mcp v0.7.0.",
+  "type": "object",
+  "required": ["query", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Echo of the input query, normalized.",
+      "properties": {
+        "min_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Minimum confidence threshold. Default 0.3 — surfaces all confidently-scored candidates; raise to 0.6+ for only the strongest."
+        },
+        "parallel_type": {
+          "type": "string",
+          "enum": ["structural", "lexical", "narrative", "topos", "onomastic", "iconographic", "all"],
+          "description": "Filter by parallel type. Default `all`."
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": ["pending", "validated", "rejected", "all"],
+          "description": "Filter by validation status. Default `pending` (the new candidates queue). `validated` candidates have been moved to the `find_antediluvian_parallel` dataset."
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Cap on results. Default 25."
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "description": "Ranked discovery candidates, highest confidence first.",
+      "items": { "$ref": "#/$defs/DiscoveryCandidate" }
+    },
+    "corpus_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Information about the corpus the discovery engine traversed.",
+      "properties": {
+        "brief_count": { "type": "integer", "minimum": 0 },
+        "dataset_count": { "type": "integer", "minimum": 0 },
+        "discovery_pass_date": { "type": "string", "format": "date" },
+        "engine_version": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "DiscoveryCandidate": {
+      "type": "object",
+      "required": ["entity_a", "entity_b", "parallel_type", "discovered_by", "confidence_score", "validation_status", "discovery_trace"],
+      "additionalProperties": false,
+      "description": "A machine-discovered comparative-religion parallel candidate. Explicitly second-class until human-scholar validation.",
+      "properties": {
+        "entity_a": {
+          "$ref": "#/$defs/Entity",
+          "description": "First entity in the proposed parallel. Order is not directional unless `transmission_direction` is specified."
+        },
+        "entity_b": {
+          "$ref": "#/$defs/Entity",
+          "description": "Second entity in the proposed parallel."
+        },
+        "parallel_type": {
+          "type": "string",
+          "enum": ["structural", "lexical", "narrative", "topos", "onomastic", "iconographic"],
+          "description": "Kind of parallel detected. Same vocabulary as `find_antediluvian_parallel` plus `iconographic` for visual-form correspondences."
+        },
+        "discovered_by": {
+          "type": "string",
+          "enum": ["ai_traversal", "human_scholar"],
+          "description": "Always `ai_traversal` for candidates from this tool. Field exists to make machine-discovery vs human-scholarship distinction load-bearing in downstream display."
+        },
+        "confidence_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Engine's confidence in the candidate. Composite of structural-similarity, lexical-overlap, transmission-plausibility scores. NOT a probability estimate — a relative ranking signal."
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": ["pending", "validated", "rejected"],
+          "description": "Human-review status. New candidates start `pending`. Validated candidates are typically promoted into `antediluvianParallels.json` with `[VERIFIED]` scholarly_attribution; rejected candidates are kept here with reason for negative-result preservation."
+        },
+        "discovery_trace": {
+          "type": "object",
+          "required": ["supporting_briefs", "structural_features"],
+          "additionalProperties": false,
+          "description": "The reasoning trace explaining why the engine surfaced this pair. Auditable: a human scholar can verify the steps.",
+          "properties": {
+            "supporting_briefs": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Specific brief filenames from ~/Desktop/Research/ that contain the entity attestations or motif descriptions the engine relied on. E.g. `[\"Apkallu.md\", \"Erra_Epic.md\", \"Igigi.md\"]`."
+            },
+            "structural_features": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Specific structural features matched between the entities. E.g. `[\"seven-count canonical set\", \"pre-flood timing\", \"divine-origin attribution\", \"antediluvian-wisdom transmission\"]`."
+            },
+            "lexical_overlap": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Specific shared terms, epithets, or descriptors. Optional. E.g. `[\"seven\", \"divine warrior\", \"protective\"]`."
+            },
+            "transmission_route": {
+              "type": "string",
+              "description": "Plausible historical/cultural route by which the two entities might be related. E.g. `Mesopotamian → Aramaic-Jewish via Babylonian-exile transmission`. Optional."
+            },
+            "reasoning_summary": {
+              "type": "string",
+              "description": "One-paragraph natural-language synthesis of why the engine flagged this pair. Up to ~500 chars."
+            }
+          }
+        },
+        "suggested_anchor": {
+          "type": "string",
+          "description": "Specific scholar/publication that a human reviewer should check to validate or reject this candidate. E.g. `Check Annus 2010 JSP 19.4 for Sebitti-Watchers structural inversion` or `Check Wiggermann 1992 for apkallū bucket-and-cone ↔ Ninhursag omega-symbol gesture parallel`. Optional but recommended for high-confidence candidates."
+        },
+        "transmission_direction": {
+          "type": "string",
+          "enum": ["unidirectional_a_to_b", "unidirectional_b_to_a", "bidirectional", "common_substrate", "structural_only", "unspecified"],
+          "description": "How the engine hypothesizes the relationship. `structural_only` for cases where no direct transmission is claimed — only that the two entities share a structural pattern. Optional, default `structural_only`."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form note. Often used for caveats, related candidates, or 'see also' pointers. Up to ~400 chars."
+        }
+      }
+    },
+    "Entity": {
+      "type": "object",
+      "required": ["name", "type", "primary_brief"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Canonical name of the entity. E.g. `Sebitti`, `Seven Watchers (Asael, Shemyaza, ...)`, `Apkallū bucket-and-cone gesture`."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["deity", "group", "motif", "narrative", "iconographic_form", "text", "ritual", "concept", "place"],
+          "description": "Kind of entity. Determines how the parallel should be reviewed."
+        },
+        "primary_brief": {
+          "type": "string",
+          "description": "Which brief in ~/Desktop/Research/ is the entity's primary source-of-attestation. E.g. `Erra_Epic.md` for Sebitti."
+        },
+        "alt_names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Alternative names or spellings. Optional."
+        },
+        "tradition": {
+          "type": "string",
+          "enum": ["sumerian", "akkadian", "ugaritic", "hebrew", "aramaic_jewish", "greek_hellenistic", "syriac_christian", "other"],
+          "description": "Cultural-linguistic tradition the entity belongs to. Determines transmission-plausibility scoring."
+        }
+      }
+    }
+  }
+}

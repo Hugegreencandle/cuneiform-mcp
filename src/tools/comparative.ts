@@ -134,6 +134,81 @@ export type ApkalluDataset = {
   sages: Sage[];
 };
 
+// ---------- v0.7 Discovery Engine types ----------
+
+export type EntityType =
+  | "deity"
+  | "group"
+  | "motif"
+  | "narrative"
+  | "iconographic_form"
+  | "text"
+  | "ritual"
+  | "concept"
+  | "place";
+
+export type Tradition =
+  | "sumerian"
+  | "akkadian"
+  | "ugaritic"
+  | "hebrew"
+  | "aramaic_jewish"
+  | "greek_hellenistic"
+  | "syriac_christian"
+  | "other";
+
+export type DiscoveryEntity = {
+  name: string;
+  type: EntityType;
+  primary_brief: string;
+  alt_names?: string[];
+  tradition?: Tradition;
+};
+
+export type DiscoveryTrace = {
+  supporting_briefs: string[];
+  structural_features: string[];
+  lexical_overlap?: string[];
+  transmission_route?: string;
+  reasoning_summary: string;
+};
+
+export type ValidationStatus = "pending" | "validated" | "rejected";
+export type DiscoveryParallelType =
+  | "structural"
+  | "lexical"
+  | "narrative"
+  | "topos"
+  | "onomastic"
+  | "iconographic";
+
+export type DiscoveryCandidate = {
+  entity_a: DiscoveryEntity;
+  entity_b: DiscoveryEntity;
+  parallel_type: DiscoveryParallelType;
+  discovered_by: "ai_traversal" | "human_scholar";
+  confidence_score: number;
+  validation_status: ValidationStatus;
+  discovery_trace: DiscoveryTrace;
+  suggested_anchor?: string;
+  transmission_direction?: string;
+  notes?: string;
+};
+
+export type DiscoveredCandidatesDataset = {
+  _meta: {
+    discovery_pass_date: string;
+    engine_version: string;
+    brief_count: number;
+    dataset_count: number;
+    entities_traversed: number;
+    pairs_evaluated: number;
+    candidates_surfaced: number;
+    description: string;
+  };
+  candidates: DiscoveryCandidate[];
+};
+
 // ---------- loader ----------
 
 const __filename = fileURLToPath(import.meta.url);
@@ -148,6 +223,7 @@ function dataPath(file: string): string {
 let _flood: FloodDataset | null = null;
 let _parallels: ParallelsDataset | null = null;
 let _apkallu: ApkalluDataset | null = null;
+let _discovered: DiscoveredCandidatesDataset | null = null;
 
 function loadJson<T>(file: string): T {
   const raw = readFileSync(dataPath(file), "utf8");
@@ -167,6 +243,11 @@ export function getParallelsDataset(): ParallelsDataset {
 export function getApkalluDataset(): ApkalluDataset {
   if (!_apkallu) _apkallu = loadJson<ApkalluDataset>("apkalluAttestations.json");
   return _apkallu;
+}
+
+export function getDiscoveredCandidatesDataset(): DiscoveredCandidatesDataset {
+  if (!_discovered) _discovered = loadJson<DiscoveredCandidatesDataset>("discoveredCandidates.json");
+  return _discovered;
 }
 
 // ---------- tool handlers ----------
@@ -328,6 +409,88 @@ export function renderParallelEntry(entry: ParallelEntry | null, query: { text_i
     }
     if (r.transmission_hypothesis) lines.push(`    transmission: ${r.transmission_hypothesis}`);
     if (r.notes) lines.push(`    notes: ${r.notes}`);
+  }
+  return lines.join("\n");
+}
+
+// ---------- v0.7 Discovery Engine handler ----------
+
+export type DiscoverParallelCandidatesArgs = {
+  min_confidence?: number;
+  parallel_type?: DiscoveryParallelType | "all";
+  validation_status?: ValidationStatus | "all";
+  max_results?: number;
+};
+
+export function discoverParallelCandidates(args: DiscoverParallelCandidatesArgs): {
+  query: DiscoverParallelCandidatesArgs;
+  results: DiscoveryCandidate[];
+  corpus_metadata: {
+    brief_count: number;
+    dataset_count: number;
+    discovery_pass_date: string;
+    engine_version: string;
+    entities_traversed: number;
+    candidates_in_corpus: number;
+  };
+} {
+  const ds = getDiscoveredCandidatesDataset();
+  const min_confidence = args.min_confidence ?? 0.3;
+  const parallel_type = args.parallel_type ?? "all";
+  const validation_status = args.validation_status ?? "pending";
+  const max_results = args.max_results ?? 25;
+
+  const filtered = ds.candidates.filter((c) => {
+    if (c.confidence_score < min_confidence) return false;
+    if (parallel_type !== "all" && c.parallel_type !== parallel_type) return false;
+    if (validation_status !== "all" && c.validation_status !== validation_status) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => b.confidence_score - a.confidence_score);
+  const sliced = filtered.slice(0, max_results);
+
+  return {
+    query: {
+      ...(args.min_confidence !== undefined ? { min_confidence } : {}),
+      ...(args.parallel_type !== undefined ? { parallel_type } : {}),
+      ...(args.validation_status !== undefined ? { validation_status } : {}),
+      ...(args.max_results !== undefined ? { max_results } : {}),
+    },
+    results: sliced,
+    corpus_metadata: {
+      brief_count: ds._meta.brief_count,
+      dataset_count: ds._meta.dataset_count,
+      discovery_pass_date: ds._meta.discovery_pass_date,
+      engine_version: ds._meta.engine_version,
+      entities_traversed: ds._meta.entities_traversed,
+      candidates_in_corpus: ds.candidates.length,
+    },
+  };
+}
+
+export function renderDiscoveredCandidates(result: ReturnType<typeof discoverParallelCandidates>): string {
+  const lines: string[] = [];
+  lines.push(`Discovery Engine (v0.7.0) — ${result.results.length} candidate(s) of ${result.corpus_metadata.candidates_in_corpus} in corpus`);
+  lines.push(`  corpus: ${result.corpus_metadata.brief_count} briefs, ${result.corpus_metadata.entities_traversed} entities traversed`);
+  lines.push(`  filters: min_confidence=${result.query.min_confidence ?? 0.3}, parallel_type=${result.query.parallel_type ?? "all"}, validation_status=${result.query.validation_status ?? "pending"}`);
+  lines.push("");
+  lines.push("Each candidate is MACHINE-DISCOVERED via structural-pattern matching over the corpus.");
+  lines.push("Status: pending human-scholar validation. Suggested anchors are pointers, NOT citations.");
+  lines.push("");
+  for (const c of result.results) {
+    lines.push(`### ${c.entity_a.name} (${c.entity_a.tradition}) ↔ ${c.entity_b.name} (${c.entity_b.tradition})`);
+    lines.push(`  [${c.parallel_type} / confidence ${c.confidence_score.toFixed(2)} / ${c.validation_status}]`);
+    lines.push(`  Reasoning: ${c.discovery_trace.reasoning_summary}`);
+    lines.push(`  Structural features: ${c.discovery_trace.structural_features.join("; ")}`);
+    if (c.discovery_trace.lexical_overlap && c.discovery_trace.lexical_overlap.length > 0) {
+      lines.push(`  Lexical overlap: ${c.discovery_trace.lexical_overlap.join(", ")}`);
+    }
+    lines.push(`  Supporting briefs: ${c.discovery_trace.supporting_briefs.join(", ")}`);
+    if (c.discovery_trace.transmission_route) lines.push(`  Transmission: ${c.discovery_trace.transmission_route}`);
+    if (c.suggested_anchor) lines.push(`  Suggested anchor: ${c.suggested_anchor}`);
+    if (c.notes) lines.push(`  Notes: ${c.notes}`);
+    lines.push("");
   }
   return lines.join("\n");
 }

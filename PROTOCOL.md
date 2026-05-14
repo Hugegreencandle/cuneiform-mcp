@@ -1,4 +1,4 @@
-# cuneiform-mcp Protocol — v0.6
+# cuneiform-mcp Protocol — v0.7
 
 > Every result should be inspectable, citeable, and reproducible.
 
@@ -50,9 +50,9 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The twelve tools
+## The thirteen tools
 
-> Nine corpus tools (v0.5) + three comparative-religion tools (v0.6). The v0.6 additions are curated-local — they don't hit external APIs; the underlying data is in `/data/*.json` and is derived from a small set of named modern scholarly editions. Discipline: every comparative claim returned by a v0.6 tool carries a `scholarly_attribution` field naming the scholar(s) who established the parallel.
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + one generative Discovery Engine tool (v0.7). The v0.6 additions are curated-local with REQUIRED named scholarly attribution. The v0.7 addition INVERTS that discipline: returns machine-discovered candidates explicitly flagged for human-scholar validation, with full reasoning trace.
 
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
@@ -379,6 +379,24 @@ Iconographic sub-object on visual attestations: `form` (fish_cloaked / bird_head
 
 Provenance: `source: local`, `endpoint: local:apkalluAttestationIndex`. Underlying data curated from Reiner 1961, Lenzi 2008, Annus 2010, Verderame 2013.
 
+### `discover_parallel_candidates` — schema: [discover_parallel_candidates.schema.json](schemas/discover_parallel_candidates.schema.json)
+
+The v0.7 **Discovery Engine** — the first generative comparative-religion tool. Returns machine-discovered candidate parallels from the cuneiform-mcp curated corpus, with full provenance trace. Each candidate carries `discovered_by: "ai_traversal"`, `validation_status: "pending"`, and a structural-reasoning trace.
+
+**Discipline reversal:** where v0.6 `find_antediluvian_parallel` REQUIRES named scholarly attribution (no scholar, no result), this tool RETURNS parallels WITHOUT human-scholar validation — explicitly flagged as machine-discovered. The two tiers compose: validated candidates are promoted into v0.6's `antediluvianParallels.json` once a human scholar confirms.
+
+Each `DiscoveryCandidate` carries:
+- `entity_a` and `entity_b` — typed entities (`deity` / `group` / `motif` / `narrative` / `iconographic_form` / `text` / `ritual` / `concept` / `place`) with `primary_brief` sourcing back to `~/Desktop/Research/`
+- `parallel_type` — same vocabulary as v0.6 plus `iconographic` for visual-form correspondences
+- `confidence_score` — relative ranking signal (NOT probability)
+- `discovery_trace` — auditable: `supporting_briefs[]`, `structural_features[]`, optional `lexical_overlap[]`, `transmission_route`, `reasoning_summary`
+- `suggested_anchor` — specific scholar/publication for human reviewer to check
+- `transmission_direction` — uni/bi/structural-only
+
+v0.7.0 ships with **33 machine-discovered candidates** from a one-time AI traversal pass over 24 briefs + 3 datasets (230 entities inventoried, 720 pairs evaluated). Top three: Astronomical Book 364-day calendar ↔ Mul.Apin schematic year (0.88, structural); Bird-headed apkallu (kuribu) ↔ Cherub (Hebrew kĕrūḇ) (0.85, iconographic); Sebitti ↔ Seven Watcher Leaders (0.82, structural).
+
+Provenance: `source: local`, `endpoint: local:discoveredCandidatesIndex`. Companion artifact at `~/Desktop/Research/DISCOVERED-CANDIDATES-2026-05-15.md` (human-readable scholar-facing review document, ~1000 lines).
+
 ## Citation
 
 If you build on this protocol, cite the repo and the version in the
@@ -390,6 +408,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.6.0}
+  version = {0.7.0}
 }
 ```
