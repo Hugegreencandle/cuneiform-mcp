@@ -1,0 +1,389 @@
+{
+  "_meta": {
+    "description": "Episode × witness alignment matrix for the four major Ancient Near Eastern flood narratives. Curated from Research/Atrahasis.md plus Lambert & Millard 1969, George 2003, Westermann 1984. Excerpts are paraphrased summaries authored for this dataset to avoid copyright concerns with the cited critical editions; consult the named scholarly_anchor for the verbatim translation.",
+    "compiled": "2026-05-15",
+    "curator_note": "Sumerian Ziusudra cells are flagged philological_uncertainty: partial or fragmentary; the Nippur manuscript has substantial gaps. Genesis cells use the consensus scholarly framework — Westermann's Genesis 1-11 commentary for J/P source-critical points where the witnesses overlap or diverge."
+  },
+  "witnesses": ["sumerian_ziusudra", "atrahasis", "gilgamesh_xi", "genesis_6_9"],
+  "rows": [
+    {
+      "episode": "creation_of_humanity",
+      "summary": "Humans are made to relieve the gods (or the lesser gods) of labor.",
+      "cells": {
+        "sumerian_ziusudra": null,
+        "atrahasis": {
+          "citation": "Atra-ḫasīs I.1-339",
+          "excerpt": "The Igigi do the labor of canals and rivers; after forty years they rebel and burn their tools. The Anunnaki accept Enki's plan: a god (Wē-ila) is slaughtered, his blood and flesh mixed with clay by the mother-goddess Bēlet-ilī. Fourteen portions are gestated; humanity emerges to carry the labor.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.56-67 (Old Babylonian recension I.i-iv)",
+          "divergence_notes": [
+            "Distinct anthropogenesis (slain-god blood + clay) absent from Gilgamesh XI and Genesis",
+            "Establishes labor-as-purpose framing for humans"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "gilgamesh_xi": null,
+        "genesis_6_9": null
+      },
+      "divergence_summary": "Only Atra-ḫasīs preserves the anthropogenesis frame. The omission in Gilgamesh XI reflects the epic's narrower focus on the Flood as a single retold event; Genesis 1-2's creation accounts precede the flood narrative as separate compositions."
+    },
+    {
+      "episode": "overpopulation",
+      "summary": "Humans multiply; the noise / weight of human civilization becomes intolerable.",
+      "cells": {
+        "sumerian_ziusudra": null,
+        "atrahasis": {
+          "citation": "Atra-ḫasīs I.352-415, II.i.1-21",
+          "excerpt": "The land bellows like a bull; Enlil cannot sleep for the racket. He sends successive plagues — disease, then drought, then famine — each time Enki advises Atra-ḫasīs how to survive. Each crisis partially abates but the population recovers.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.66-83",
+          "divergence_notes": [
+            "Noise / population-pressure motif is distinctly Mesopotamian",
+            "Three escalating non-flood plagues are unique to Atra-ḫasīs"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "gilgamesh_xi": null,
+        "genesis_6_9": {
+          "citation": "Genesis 6:5, 6:11-12",
+          "excerpt": "The LORD sees that the wickedness of humanity is great in the earth and that every imagination of the thoughts of his heart is only evil continually. The earth is corrupt and filled with violence.",
+          "translator": "ASV 1901",
+          "scholarly_anchor": "Westermann 1984, Genesis 1-11 commentary on 6:5-13",
+          "divergence_notes": [
+            "Genesis reframes the cause as moral wickedness, not population pressure / noise",
+            "No preliminary plagues; the Flood is the first and only divine response"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "Atra-ḫasīs grounds divine displeasure in population-pressure / noise (rigmu); Genesis substitutes moral corruption. This is the load-bearing theological re-framing of the Israelite redaction."
+    },
+    {
+      "episode": "divine_decision",
+      "summary": "A god (or the divine assembly) decides to destroy humanity by flood.",
+      "cells": {
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story ~140",
+          "excerpt": "[fragmentary] The assembly of An and Enlil decree that humanity be destroyed.",
+          "translator": "paraphrase based on Civil in Lambert & Millard 1969 appendix",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.138-145",
+          "divergence_notes": [
+            "Only fragmentary lines survive at this decision point",
+            "Decision is collective (assembly), as in Atra-ḫasīs"
+          ],
+          "philological_uncertainty": "fragmentary"
+        },
+        "atrahasis": {
+          "citation": "Atra-ḫasīs II.vii-viii, III.i",
+          "excerpt": "Enlil escalates from plagues to a final solution. The assembly is convened; the Flood is decreed. The gods swear an oath of secrecy binding none of them to warn humanity.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.82-89",
+          "divergence_notes": [
+            "Explicit oath-of-secrecy across the divine assembly — load-bearing for the wall-loophole that follows"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.14-19",
+          "excerpt": "Ut-napishti tells Gilgamesh: the great gods of Shuruppak — Anu, Enlil, Ninurta, Ennugi, and Ea — decided to send the Flood. The decision was sealed in the divine assembly.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.704-707",
+          "divergence_notes": [
+            "Names the five gods of the assembly explicitly",
+            "Compresses Atra-ḫasīs's longer escalation arc into a single decision moment"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 6:13",
+          "excerpt": "And God said unto Noah, The end of all flesh is come before me; for the earth is filled with violence through them; and, behold, I will destroy them with the earth.",
+          "translator": "ASV 1901",
+          "scholarly_anchor": "Westermann 1984, comments on 6:13",
+          "divergence_notes": [
+            "Single deity decides — no assembly",
+            "Decision announced directly to Noah without intermediate secrecy frame"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "All three Mesopotamian witnesses preserve an assembly-of-gods decision frame; Genesis collapses this to a single divine decree spoken directly to the survivor."
+    },
+    {
+      "episode": "forewarning",
+      "summary": "The deity friendly to humanity warns the chosen survivor of the coming Flood.",
+      "cells": {
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story ~150-160",
+          "excerpt": "[partial] Enki speaks at the side of a wall; Ziusudra stands beside the wall and hears the warning to build a great boat.",
+          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.140-145",
+          "divergence_notes": [
+            "The wall-as-medium for the warning is already present in the Sumerian — establishing the motif as pre-Akkadian"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "atrahasis": {
+          "citation": "Atra-ḫasīs III.i.11-50",
+          "excerpt": "Enki addresses the reed wall of Atra-ḫasīs's hut: 'Wall, listen to me! Reed hut, pay attention to my words! Demolish your house, build a ship; abandon possessions, save life; bring into the ship the seed of all living things.' Atra-ḫasīs overhears.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.88-91",
+          "divergence_notes": [
+            "Enki addresses the wall, not Atra-ḫasīs directly — preserves the secrecy oath formally while subverting it functionally",
+            "The legalism is the Mesopotamian theological signature of Enki's character"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.20-31",
+          "excerpt": "Ea speaks through the reed hut, addressing it: 'Reed hut, reed hut! Wall, wall! Reed hut, listen; wall, attend! O man of Shuruppak, son of Ubar-Tutu, demolish your house, build a boat; abandon possessions, save life; bring into the boat the seed of all living things.'",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.706-709",
+          "divergence_notes": [
+            "Verbatim transmission of the Atra-ḫasīs scene with Ut-napishti named",
+            "Demonstrates the SB redactor's direct dependence on the OB Atra-ḫasīs"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 6:13-17",
+          "excerpt": "God speaks directly to Noah, giving the ark's specifications and the duration of the Flood. No intermediary, no wall, no secrecy frame.",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 6:13-22",
+          "divergence_notes": [
+            "Direct divine address replaces the wall-loophole",
+            "Removes the legalism — the Israelite God does not need to subvert a divine-assembly oath",
+            "Westermann reads this as the Priestly redactor's de-mythologization of the inherited narrative"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "All three Mesopotamian witnesses preserve the speech-through-the-wall loophole — across Sumerian, Old Babylonian Akkadian, and Standard Babylonian Akkadian. Genesis removes it. This is one of the cleanest single-detail Mesopotamian → Hebrew theological transformations in the comparative-religion corpus."
+    },
+    {
+      "episode": "ark_construction",
+      "summary": "The survivor builds a vessel to divine specifications and loads it.",
+      "cells": {
+        "sumerian_ziusudra": null,
+        "atrahasis": {
+          "citation": "Atra-ḫasīs III.ii.10-55",
+          "excerpt": "Atra-ḫasīs builds a great boat sealed with bitumen. He loads family, animals, possessions, and provisions. The text describes its decks and structure.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.90-95",
+          "divergence_notes": [
+            "Ark is rectangular/multi-deck in the Atra-ḫasīs description"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.48-85",
+          "excerpt": "Ut-napishti builds a cube-shaped boat: 'Its width and length shall be the same.' Six decks, divided into nine compartments per deck. He loads family, craftsmen, animals, and provisions. The construction takes seven days.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.708-713",
+          "divergence_notes": [
+            "Cube specification is distinctive to Gilgamesh — Atra-ḫasīs description does not give a cube",
+            "Adds craftsmen to the manifest"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 6:14-22",
+          "excerpt": "The ark is to be built of gopher wood, three hundred cubits long, fifty cubits broad, thirty cubits high, three stories, one window, one door. Pitched with pitch inside and out. Noah loads his family, two of every kind of unclean animal, seven of every clean (J source) or two of every kind (P source).",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 6:14-22 and 7:1-5",
+          "divergence_notes": [
+            "Distinct rectangular proportions (6:1:0.6 ratio) — not the cubic Gilgamesh form nor the rectangular Atra-ḫasīs form",
+            "J/P source-critical issue: the animal-counts differ between Gen 7:2 (J) and Gen 6:19-20 (P)"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "Atra-ḫasīs and Genesis both give rectangular ark forms; Gilgamesh XI uniquely specifies a cube. The diverging specifications suggest each tradition independently inherited the ark-construction motif without normalizing its dimensions."
+    },
+    {
+      "episode": "the_flood",
+      "summary": "The Flood comes; humanity is destroyed except for those on the ark.",
+      "cells": {
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story ~201-205",
+          "excerpt": "[partial] The flood rages for seven days and seven nights; the wind howls across the land.",
+          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "divergence_notes": [
+            "Seven days and seven nights matches Atra-ḫasīs/Gilgamesh"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "atrahasis": {
+          "citation": "Atra-ḫasīs III.ii.53-iv.25",
+          "excerpt": "The Flood comes; the Anunnaki retreat to the heaven of Anu in fear of their own flood; Bēlet-ilī weeps over what is being destroyed. The waters rage for seven days and seven nights.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.94-99",
+          "divergence_notes": [
+            "Gods themselves are afraid of the flood — distinct mythological texture absent in Genesis",
+            "Bēlet-ilī's lament is the theological soft spot of the Mesopotamian narrative"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.96-131",
+          "excerpt": "The storm-god Adad rages, the Anunnaki raise their torches, the heavens go dark; even the gods cower like dogs at a wall. The Flood lasts six days and seven nights.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.712-715",
+          "divergence_notes": [
+            "Six days and seven nights — a one-day variant on the Atra-ḫasīs seven and seven",
+            "Vivid storm-god imagery characteristic of the SB redaction"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 7:11-24",
+          "excerpt": "The fountains of the great deep are broken up and the windows of heaven are opened. The rain is on the earth forty days and forty nights. The waters prevail upon the earth one hundred and fifty days.",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 7:11-24",
+          "divergence_notes": [
+            "Forty days and nights of rain (vs Mesopotamian seven)",
+            "150 days of prevailing waters — a much longer total duration",
+            "J/P source-critical issue: the durations are inconsistent between Gen 7:12 (J: 40 days) and 7:24 (P: 150 days)"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "Flood duration is one of the cleanest distinctions across the witnesses: Sumerian/OB/SB Akkadian all converge on roughly seven days; Genesis extends to forty days (rain) or 150 days (prevailing waters). The Israelite extension may reflect the Priestly source's interest in calendrical exactitude."
+    },
+    {
+      "episode": "landfall",
+      "summary": "The ark grounds on a mountain; the survivor sends out birds to test for dry land.",
+      "cells": {
+        "sumerian_ziusudra": null,
+        "atrahasis": null,
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.141-156",
+          "excerpt": "The boat grounds on Mount Nimush. After seven days Ut-napishti sends out a dove, which returns. Then a swallow, which returns. Then a raven, which does not return — the waters have receded. He opens the boat.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.714-717",
+          "divergence_notes": [
+            "Mount Nimush (= Mount Niṣir in older translations); identified with modern Pira Magrun in Iraqi Kurdistan",
+            "Three birds in order: dove, swallow, raven",
+            "Raven goes last — opposite Genesis order"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 8:4-12",
+          "excerpt": "The ark rests upon the mountains of Ararat in the seventh month, seventeenth day. Noah sends out a raven first; then a dove three times, the second returning with an olive leaf, the third not returning.",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 8:4-12",
+          "divergence_notes": [
+            "Mountains of Ararat (region, not specific peak)",
+            "Two birds (raven first, then three releases of dove) — distinct order from Gilgamesh",
+            "Olive leaf is unique to Genesis"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "The bird-release motif is shared with Gilgamesh XI but the species and order differ. Atra-ḫasīs is too fragmentary at this point to confirm whether the motif is OB or originated in the SB redaction."
+    },
+    {
+      "episode": "sacrifice",
+      "summary": "The survivor offers sacrifice; the gods (or God) respond.",
+      "cells": {
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story ~210-215",
+          "excerpt": "[partial] Ziusudra slaughters an ox and a sheep before An and Enlil.",
+          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "divergence_notes": [
+            "Establishes the sacrifice-after-flood motif at the Sumerian layer"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "atrahasis": {
+          "citation": "Atra-ḫasīs III.v.30-50",
+          "excerpt": "Atra-ḫasīs offers sacrifice. The gods — who have been starving without humans to feed them — gather around the smoke 'like flies.' Enlil arrives, sees the survivors, is furious; Enki defends the loophole he exploited.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.98-101",
+          "divergence_notes": [
+            "The 'gods like flies' image is one of the most-cited Atra-ḫasīs phrases",
+            "Theological logic: no humans = no sacrifices = hungry gods"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.157-167",
+          "excerpt": "Ut-napishti pours out a libation on the mountain peak; sets out seven and seven incense vessels. The gods smell the savor, the gods gather like flies around the sacrificer.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.716-719",
+          "divergence_notes": [
+            "Preserves the 'gods like flies' image from Atra-ḫasīs",
+            "Adds the libation-and-incense detail"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 8:20-22",
+          "excerpt": "Noah builds an altar and offers burnt offerings of every clean beast and every clean bird. The LORD smells the sweet savor and resolves in his heart never again to curse the ground for man's sake.",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 8:20-22",
+          "divergence_notes": [
+            "Preserves the smell-of-the-sacrifice motif — anthropomorphism striking in the Israelite context",
+            "Removes the 'gods like flies' image and the hunger framing",
+            "Resolution: divine self-restraint, not collective post-mortem"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "All four witnesses preserve the sacrifice-and-divine-response motif. The 'gods like flies' image survives across the Mesopotamian witnesses but is excised in Genesis; the underlying anthropomorphism (deity smells the sacrifice) survives in Hebrew."
+    },
+    {
+      "episode": "new_order",
+      "summary": "A new theological order is established to prevent recurrence.",
+      "cells": {
+        "sumerian_ziusudra": {
+          "citation": "Sumerian Flood Story ~252-260",
+          "excerpt": "[partial] Ziusudra is granted eternal life and dwells in Dilmun, the place where the sun rises.",
+          "translator": "paraphrase based on Civil in Lambert & Millard 1969",
+          "scholarly_anchor": "Civil, in Lambert & Millard 1969, pp.144-145",
+          "divergence_notes": [
+            "Ziusudra alone receives immortality — different resolution from Atra-ḫasīs's birth-control framework"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "atrahasis": {
+          "citation": "Atra-ḫasīs III.vii.1-vi.50",
+          "excerpt": "The assembly establishes a new order: mortality, miscarriage, and infertility are introduced as built-in population controls. A class of celibate priestesses (ugbabtu, etc.) is established. The demon Pašittu takes some newborns. Humans remain; the conditions for human existence are tighter.",
+          "translator": "paraphrase based on Lambert & Millard 1969",
+          "scholarly_anchor": "Lambert & Millard 1969, pp.100-105",
+          "divergence_notes": [
+            "Birth-control-by-theological-design — the most distinctive Atra-ḫasīs feature",
+            "Inverse of Genesis's covenant-of-restraint"
+          ],
+          "philological_uncertainty": "partial"
+        },
+        "gilgamesh_xi": {
+          "citation": "Gilgamesh XI.189-206",
+          "excerpt": "Enlil enters the boat, takes Ut-napishti and his wife by the hand, and grants them immortality, settling them far away at the mouth of the rivers — like Ziusudra in the Sumerian. The new theological order is not elaborated.",
+          "translator": "paraphrase based on George 2003",
+          "scholarly_anchor": "George 2003, vol.1, pp.718-721",
+          "divergence_notes": [
+            "Adopts the Ziusudra immortality-resolution rather than Atra-ḫasīs's birth-control framework",
+            "Three-layer dialogue between the witnesses on this point"
+          ],
+          "philological_uncertainty": "secure"
+        },
+        "genesis_6_9": {
+          "citation": "Genesis 8:21-22, 9:1-17",
+          "excerpt": "God resolves never again to curse the ground or destroy every living creature. Be fruitful and multiply (encouraging the very population growth that triggered the Flood in Mesopotamian thought). Establishes the rainbow covenant — the sign of divine self-binding. Permits eating of animals but forbids bloodshed.",
+          "translator": "ASV 1901, paraphrased",
+          "scholarly_anchor": "Westermann 1984, comments on 8:21-9:17",
+          "divergence_notes": [
+            "Covenant-of-restraint — God binds Himself, not humanity",
+            "Be-fruitful-and-multiply is theologically the opposite of Atra-ḫasīs's population-control resolution",
+            "Rainbow sign is the visible marker of the new order"
+          ],
+          "philological_uncertainty": "secure"
+        }
+      },
+      "divergence_summary": "The post-flood theological resolution is where the four witnesses diverge most dramatically. Atra-ḫasīs: built-in population control. Sumerian / Gilgamesh: immortality for the survivor. Genesis: divine self-restraint + encouraged human fertility. The Genesis resolution is theologically the most inverted from the Atra-ḫasīs source."
+    }
+  ]
+}

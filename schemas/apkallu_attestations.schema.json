@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/apkallu_attestations.schema.json",
+  "title": "apkallu_attestations data payload",
+  "description": "Structured payload for the `apkallu_attestations` tool — surfaces named occurrences of the seven antediluvian apkallū (and the postdiluvian successor-sages) across the cuneiform and Hellenistic textual record.\n\nReturns: per-sage attestations grouped by source-text (Bīt Mēseri, Uruk List of Kings and Sages, Berossus, etc.); iconographic forms where attested (fish-cloaked, bird-headed, figurine); the antediluvian king each sage is paired with in the standard tradition; cross-reference to the postdiluvian *ummânū* successor in the Uruk List.\n\nProvenance is `source: local`, `endpoint: local:apkalluAttestationIndex`. Underlying data is curated from Reiner 1961 (Bīt Mēseri), Lenzi 2008 (full scribal tradition), Annus 2010 (comparative), Verderame 2013 (iconography), plus the Research/Apkallu.md brief.",
+  "type": "object",
+  "required": ["query", "sages"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Echo of the input query, normalized.",
+      "properties": {
+        "sage_name": {
+          "type": "string",
+          "description": "Specific sage queried (e.g. `Uanna`, `Adapa`, `Enmeduga`). If absent, returns all seven canonical sages plus the four postdiluvian successors."
+        },
+        "include_iconography": {
+          "type": "boolean",
+          "description": "If true (default), each attestation carries iconographic form data where the source is a visual artifact rather than a text."
+        },
+        "include_postdiluvian": {
+          "type": "boolean",
+          "description": "If true (default true), include the four named *ummânū* successors from the Uruk List (Nungalpirigal, Piriggalnungal, Piriggalabsu, Lu-Nanna). If false, antediluvian seven only."
+        }
+      }
+    },
+    "sages": {
+      "type": "array",
+      "description": "One entry per sage, in canonical order (Uanna first; postdiluvian successors after the seventh antediluvian if included).",
+      "items": { "$ref": "#/$defs/Sage" }
+    }
+  },
+  "$defs": {
+    "Sage": {
+      "type": "object",
+      "required": ["name", "tier", "attestations"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Canonical Akkadian-form name. E.g. `Uanna` (= Oannes in Berossus), `Uanduga`, `Enmeduga`, `Enmegalama`, `Enmebulugga`, `An-Enlilda`, `Utuabzu`. For postdiluvian: `Nungalpirigal`, `Piriggalnungal`, `Piriggalabsu`, `Lu-Nanna`."
+        },
+        "alt_names": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Variants across sources. E.g. for Uanna: `[\"U-An\", \"U'an\", \"Oannes (Berossus)\"]`."
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["antediluvian", "postdiluvian"],
+          "description": "`antediluvian` for the canonical seven, `postdiluvian` for the four named successor *ummânū*."
+        },
+        "paired_king": {
+          "type": "string",
+          "description": "Antediluvian king this sage is paired with in the Uruk List of Kings and Sages. E.g. Uanna ~ Ayalu (Alulim), Uanduga ~ Alalgar. Empty/absent for postdiluvian sages."
+        },
+        "discipline_specialization": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Disciplines associated with this sage where attested. Drawn from the canon of apkallu-transmitted knowledge: `writing`, `lexicography`, `celestial_divination`, `terrestrial_divination`, `exorcism`, `medicine`, `hepatoscopy`, `mathematical_astronomy`, `lamentation_priest_craft`. Often empty — most sages are not specifically disciplinarily marked except in late tradition."
+        },
+        "attestations": {
+          "type": "array",
+          "description": "Where this sage is named or depicted. One entry per source-text or artifact.",
+          "items": { "$ref": "#/$defs/Attestation" }
+        }
+      }
+    },
+    "Attestation": {
+      "type": "object",
+      "required": ["source", "source_type", "citation"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source text or artifact. Textual examples: `Bīt Mēseri III`, `Uruk List of Kings and Sages (W.20030,7)`, `Berossus, Babyloniaca (Syncellus excerpt)`, `LKA 76`, `KAR 142`. Artifact examples: `Nimrud relief slab BM 124577`, `Aššur figurine deposit VA 8200`."
+        },
+        "source_type": {
+          "type": "string",
+          "enum": ["ritual_text", "scholarly_list", "myth_narrative", "colophon", "hellenistic_excerpt", "relief", "figurine_deposit", "amulet", "seal"],
+          "description": "Kind of attestation. Textual types in upper enum; artifact types lower."
+        },
+        "citation": {
+          "type": "string",
+          "description": "Line range, tablet section, or museum number. E.g. `Bīt Mēseri III.lines 1-21`, `W.20030,7 obv. col.i.6-10`, `BM 124577`."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["Sumerian", "Akkadian", "bilingual", "Greek", "n_a"],
+          "description": "Original language. `n_a` for non-textual artifacts."
+        },
+        "approximate_date": {
+          "type": "string",
+          "description": "Approximate composition or production date. E.g. `Neo-Assyrian (c. 700 BCE)`, `Seleucid (c. 165 BCE)`, `Hellenistic (c. 280 BCE)`."
+        },
+        "iconography": {
+          "$ref": "#/$defs/Iconography",
+          "description": "Present for visual-artifact attestations. Describes the visual form."
+        },
+        "scholarly_anchor": {
+          "type": "string",
+          "description": "Modern critical edition or study. E.g. `Reiner 1961, p.4-6` for Bīt Mēseri III. `Lenzi 2008, p.106-109` for Uruk List."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "Translation excerpt of the relevant passage. Length capped at ~6 lines. Present only for textual attestations."
+        },
+        "translator": {
+          "type": "string",
+          "description": "Translator for the excerpt. E.g. `Reiner 1961`, `Lenzi 2008`, `Foster 2005`."
+        }
+      }
+    },
+    "Iconography": {
+      "type": "object",
+      "required": ["form"],
+      "additionalProperties": false,
+      "properties": {
+        "form": {
+          "type": "string",
+          "enum": ["fish_cloaked", "bird_headed_griffin", "human_form", "figurine", "composite"],
+          "description": "Canonical iconographic form. `fish_cloaked` = the Oannes-type figure draped in a fish-skin; `bird_headed_griffin` = eagle-headed winged genie (Apkallu-Nisroch type); `human_form` = unambiguously human-figured sage; `figurine` = small ritual figurine deposit (clay or wood)."
+        },
+        "ritual_function": {
+          "type": "string",
+          "enum": ["apotropaic", "protective_deposit", "narrative_decoration", "unspecified"],
+          "description": "Functional context of the depiction. `apotropaic` = active warding; `protective_deposit` = buried/walled-in protective figurines; `narrative_decoration` = panel relief depicting the figure as part of a scene; `unspecified` when context is lost."
+        },
+        "location_in_situ": {
+          "type": "string",
+          "description": "Original architectural or archaeological context where known. E.g. `Northwest Palace, Nimrud, Throneroom B reliefs`, `foundation deposit under threshold, Aššur`."
+        },
+        "museum_number": {
+          "type": "string",
+          "description": "Current museum accession. E.g. `BM 124577`, `VA 8200`."
+        }
+      }
+    }
+  }
+}

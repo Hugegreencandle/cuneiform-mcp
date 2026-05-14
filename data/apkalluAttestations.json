@@ -1,0 +1,266 @@
+{
+  "_meta": {
+    "description": "Per-sage attestations of the seven antediluvian apkallū and the four named postdiluvian successor ummânū. Curated from Research/Apkallu.md plus Reiner 1961 (Bīt Mēseri), Lenzi 2008 (Uruk List), Annus 2010 (comparative), Verderame 2013 (iconography).",
+    "compiled": "2026-05-15",
+    "curator_note": "Akkadian sage names are spelled per Reiner 1961's transliteration. Variant spellings under alt_names. Each sage's paired antediluvian king follows the Uruk List of Kings and Sages (W.20030,7); the Sumerian King List names some kings differently — those variants are not normalized here since the apkallu pairing tradition is specifically the Uruk List's.",
+    "iconography_note": "Iconographic attestations are catalogued by museum object. The fish-cloaked Oannes-form is the most-attested visual type and is associated specifically with Uanna in textual sources; visual depictions in palace reliefs and figurine deposits are often unnamed and assigned to the broader apkallu category."
+  },
+  "sages": [
+    {
+      "name": "Uanna",
+      "alt_names": ["U-An", "U'an", "Oannes (Berossus)"],
+      "tier": "antediluvian",
+      "paired_king": "Ayalu (= Alulim of Eridu in SKL)",
+      "discipline_specialization": ["writing", "civilization-founding arts"],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 1-7",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, pp.4-5",
+          "excerpt": "[paraphrase] Uanna, who completed the plans of heaven and earth, paired with King Ayalu, the first of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        },
+        {
+          "source": "Berossus, Babyloniaca (preserved in Syncellus)",
+          "source_type": "hellenistic_excerpt",
+          "citation": "Berossus, frag. F1 (Verbrugghe & Wickersham 1996, pp.43-47)",
+          "language": "Greek",
+          "approximate_date": "Hellenistic (c. 280 BCE)",
+          "scholarly_anchor": "Verbrugghe & Wickersham 1996, Berossus and Manetho, pp.43-47",
+          "excerpt": "[paraphrase] In the first year, there appeared from the Erythraean Sea, in a place adjacent to Babylonia, a creature called Oannes — with the body of a fish, but under the fish's head another head, and feet like those of a man. He taught the people letters, sciences, the founding of cities, the construction of temples, the cultivation of fields, and all the arts of civilized life. After this day no further invention has been made.",
+          "translator": "paraphrase based on Verbrugghe & Wickersham 1996"
+        },
+        {
+          "source": "Nimrud Northwest Palace, reliefs",
+          "source_type": "relief",
+          "citation": "BM 124577 + parallel slabs",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 870 BCE, reign of Ashurnasirpal II)",
+          "scholarly_anchor": "Verderame 2013, iconography study + British Museum catalog",
+          "iconography": {
+            "form": "fish_cloaked",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud — primarily Throne Room B reliefs",
+            "museum_number": "BM 124577"
+          }
+        },
+        {
+          "source": "Aššur foundation deposits",
+          "source_type": "figurine_deposit",
+          "citation": "Various VA-series accession numbers, Vorderasiatisches Museum Berlin",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Wiggermann 1992, Mesopotamian Protective Spirits, pp.65-99",
+          "iconography": {
+            "form": "figurine",
+            "ritual_function": "protective_deposit",
+            "location_in_situ": "buried under thresholds and in foundation pits, Aššur"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uanduga",
+      "alt_names": ["U-An-Dugga"],
+      "tier": "antediluvian",
+      "paired_king": "Alalgar",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 8-9",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.5",
+          "excerpt": "[paraphrase] Uanduga, paired with King Alalgar, second of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        }
+      ]
+    },
+    {
+      "name": "Enmeduga",
+      "alt_names": ["En-Me-Duga"],
+      "tier": "antediluvian",
+      "paired_king": "Ammelu'anna",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 10-11",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.5",
+          "excerpt": "[paraphrase] Enmeduga, paired with King Ammelu'anna, third of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        }
+      ]
+    },
+    {
+      "name": "Enmegalama",
+      "alt_names": ["En-Me-Galama"],
+      "tier": "antediluvian",
+      "paired_king": "Amegalanna",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 12-13",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.5",
+          "excerpt": "[paraphrase] Enmegalama, paired with King Amegalanna, fourth of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        }
+      ]
+    },
+    {
+      "name": "Enmebulugga",
+      "alt_names": ["En-Me-Bulugga"],
+      "tier": "antediluvian",
+      "paired_king": "Enmeušumgalanna",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 14-15",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.5",
+          "excerpt": "[paraphrase] Enmebulugga, paired with King Enmeušumgalanna, fifth of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        }
+      ]
+    },
+    {
+      "name": "An-Enlilda",
+      "alt_names": ["An-Enlilda the conjurer of Eridu"],
+      "tier": "antediluvian",
+      "paired_king": "Dumuzi (the Shepherd)",
+      "discipline_specialization": ["exorcism"],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 16-17",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, p.5",
+          "excerpt": "[paraphrase] An-Enlilda, the conjurer of Eridu, paired with King Dumuzi the Shepherd, sixth of the antediluvian kings.",
+          "translator": "paraphrase based on Reiner 1961"
+        }
+      ]
+    },
+    {
+      "name": "Utuabzu",
+      "alt_names": ["Utuabzu the heaven-ascender"],
+      "tier": "antediluvian",
+      "paired_king": "En-men-dur-ana (Enmeduranki) of Sippar",
+      "discipline_specialization": ["celestial_divination"],
+      "attestations": [
+        {
+          "source": "Bīt Mēseri III",
+          "source_type": "ritual_text",
+          "citation": "Bīt Mēseri III lines 18-21",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Reiner 1961, pp.5-6",
+          "excerpt": "[paraphrase] Utuabzu, who ascended to heaven, paired with King Enmeduranki of Sippar, seventh and last of the antediluvian kings. The ascent-to-heaven motif at this position is one of two seventh-figure correspondences with Enoch (Genesis 5:24); see find_antediluvian_parallel for the comparative scholarship.",
+          "translator": "paraphrase based on Reiner 1961"
+        },
+        {
+          "source": "Enmeduranki text (Lambert 1967 critical edition)",
+          "source_type": "myth_narrative",
+          "citation": "K.2486 + duplicates, lines 1-30",
+          "language": "Akkadian",
+          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "scholarly_anchor": "Lambert 1967, Journal of Cuneiform Studies 21:126-138",
+          "excerpt": "[paraphrase] Enmeduranki, king of Sippar, beloved of Anu, Enlil, and Ea — they summoned him to heaven; the great gods sat him on a golden throne; they showed him how to observe oil on water (a divinatory technique), how to interpret the divine board, and the secrets of Anu, Enlil, and Ea. Utuabzu, the seventh apkallu paired with Enmeduranki, is the divine messenger of this transmission.",
+          "translator": "paraphrase based on Lambert 1967"
+        }
+      ]
+    },
+    {
+      "name": "Nungalpirigal",
+      "alt_names": [],
+      "tier": "postdiluvian",
+      "paired_king": "",
+      "discipline_specialization": ["scholarly transmission"],
+      "attestations": [
+        {
+          "source": "Uruk List of Kings and Sages",
+          "source_type": "scholarly_list",
+          "citation": "W.20030,7 obv. col.i.10-12",
+          "language": "Akkadian",
+          "approximate_date": "Seleucid (c. 165 BCE)",
+          "scholarly_anchor": "Lenzi 2008, pp.106-109",
+          "excerpt": "[paraphrase] First named ummânu after the Flood, transmitter of antediluvian wisdom into the postdiluvian world. Described in the list as 'two-thirds apkallu, one-third human' — explicit hybrid status.",
+          "translator": "paraphrase based on Lenzi 2008"
+        }
+      ]
+    },
+    {
+      "name": "Piriggalnungal",
+      "alt_names": [],
+      "tier": "postdiluvian",
+      "paired_king": "",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Uruk List of Kings and Sages",
+          "source_type": "scholarly_list",
+          "citation": "W.20030,7 obv. col.i.13-15",
+          "language": "Akkadian",
+          "approximate_date": "Seleucid (c. 165 BCE)",
+          "scholarly_anchor": "Lenzi 2008, pp.106-109",
+          "excerpt": "[paraphrase] Second named postdiluvian ummânu in the Uruk List.",
+          "translator": "paraphrase based on Lenzi 2008"
+        }
+      ]
+    },
+    {
+      "name": "Piriggalabsu",
+      "alt_names": [],
+      "tier": "postdiluvian",
+      "paired_king": "",
+      "discipline_specialization": [],
+      "attestations": [
+        {
+          "source": "Uruk List of Kings and Sages",
+          "source_type": "scholarly_list",
+          "citation": "W.20030,7 obv. col.i.16-18",
+          "language": "Akkadian",
+          "approximate_date": "Seleucid (c. 165 BCE)",
+          "scholarly_anchor": "Lenzi 2008, pp.106-109",
+          "excerpt": "[paraphrase] Third named postdiluvian ummânu in the Uruk List.",
+          "translator": "paraphrase based on Lenzi 2008"
+        }
+      ]
+    },
+    {
+      "name": "Lu-Nanna",
+      "alt_names": ["Lu-Nanna 'two-thirds apkallu'"],
+      "tier": "postdiluvian",
+      "paired_king": "",
+      "discipline_specialization": ["scholarly transmission"],
+      "attestations": [
+        {
+          "source": "Uruk List of Kings and Sages",
+          "source_type": "scholarly_list",
+          "citation": "W.20030,7 obv. col.i.19-21",
+          "language": "Akkadian",
+          "approximate_date": "Seleucid (c. 165 BCE)",
+          "scholarly_anchor": "Lenzi 2008, pp.106-109",
+          "excerpt": "[paraphrase] Fourth named postdiluvian ummânu in the Uruk List, also explicitly 'two-thirds apkallu, one-third human' — the divine-human hybrid descent motif that Annus 2010 connects to the Nephilim of Genesis 6:4 / 1 Enoch 7:2.",
+          "translator": "paraphrase based on Lenzi 2008"
+        }
+      ]
+    }
+  ]
+}

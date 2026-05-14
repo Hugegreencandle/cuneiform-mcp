@@ -7,6 +7,15 @@ import https from "node:https";
 import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
 import { provenance, schemaId, type Provenance } from "./types.js";
+import {
+  compareFloodNarratives,
+  findAntediluvianParallel,
+  apkalluAttestations,
+  listAntediluvianQueries,
+  renderFloodMatrix,
+  renderParallelEntry,
+  renderApkalluSages,
+} from "./tools/comparative.js";
 
 // eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
 // — about 1 fragment in 20 returns UND_ERR_CONNECT_TIMEOUT (10s) on undici's
@@ -105,7 +114,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2240,6 +2249,154 @@ server.registerTool(
   },
 );
 
+// ---------------------------------------------------------------------------
+// v0.6 comparative-religion tools
+//
+// Three curated-local tools surfacing Mesopotamian / Hebrew antediluvian-
+// wisdom parallels. Underlying data is in /data/*.json; discipline: every
+// comparative claim names the scholar(s) who established it.
+// ---------------------------------------------------------------------------
+
+server.registerTool(
+  "compare_flood_narratives",
+  {
+    description:
+      "Return an episode × witness alignment matrix for the four major Ancient Near Eastern flood narratives: Sumerian Ziusudra story (Nippur OB), Akkadian Atra-ḫasīs (Lambert & Millard 1969), Gilgamesh Tablet XI (George 2003), Hebrew Genesis 6-9 (BHS/MT). Episodes drawn from a controlled vocabulary: creation_of_humanity, overpopulation, divine_decision, forewarning, ark_construction, the_flood, landfall, sacrifice, aftermath, new_order. Each cell carries citation + excerpt + scholarly_anchor + divergence_notes + philological_uncertainty. Use for comparative-religion work and Genesis-6-9 source-critical background.",
+    inputSchema: {
+      episodes: z
+        .array(
+          z.enum([
+            "creation_of_humanity",
+            "overpopulation",
+            "divine_decision",
+            "forewarning",
+            "ark_construction",
+            "the_flood",
+            "landfall",
+            "sacrifice",
+            "aftermath",
+            "new_order",
+          ]),
+        )
+        .optional()
+        .describe("Episodes to include. Omit to return all ten episodes."),
+      witnesses: z
+        .array(z.enum(["sumerian_ziusudra", "atrahasis", "gilgamesh_xi", "genesis_6_9"]))
+        .optional()
+        .describe("Witnesses to include. Omit to return all four."),
+    },
+  },
+  async ({ episodes, witnesses }) => {
+    const SCHEMA = schemaId("compare_flood_narratives");
+    const result = compareFloodNarratives({ episodes, witnesses });
+    return structuredResult(renderFloodMatrix(result), {
+      schema: SCHEMA,
+      data: result,
+      provenance: provenance("local", "local:floodNarrativeIndex", VERSION, {
+        citation: "Lambert & Millard 1969; George 2003; Westermann 1984",
+      }),
+    });
+  },
+);
+
+server.registerTool(
+  "find_antediluvian_parallel",
+  {
+    description:
+      "Take a passage from a Jewish/Christian antediluvian-wisdom text (1 Enoch / Jubilees / Genesis 5-6 / Wisdom of Solomon / Ben Sira) and return ranked Mesopotamian source-candidates that comparative-religion scholarship has identified as parallels. Each result names the scholar(s) who established the parallel (Lambert 1967, Kvanvig 1988, Annus 2010, etc.). Discipline: no scholar, no result. Use for Second Temple Judaism / Genesis source-critical work.",
+    inputSchema: {
+      text_id: z
+        .enum(["1_enoch", "jubilees", "genesis", "wisdom_of_solomon", "ben_sira"])
+        .describe("Source text. 1_enoch covers the full pentaboroughs of 1 Enoch."),
+      passage: z
+        .string()
+        .optional()
+        .describe("Canonical passage reference. E.g. 'Genesis 5:21-24', '1 Enoch 6:1-2'. Either passage or topic should be supplied."),
+      topic: z
+        .string()
+        .optional()
+        .describe("Topic-keyword if a specific passage is not known. E.g. 'seventh_patriarch_ascent', 'fallen_angels_teaching_arts', 'nephilim_origin'."),
+    },
+  },
+  async ({ text_id, passage, topic }) => {
+    const SCHEMA = schemaId("find_antediluvian_parallel");
+    if (!passage && !topic) {
+      const queries = listAntediluvianQueries();
+      const lines = [
+        "find_antediluvian_parallel: supply either `passage` or `topic`.",
+        "",
+        "Curated queries available:",
+        ...queries.map((q) => `  • ${q.text_id} — passages: [${q.passages.join(", ")}]  topics: [${q.topics.join(", ")}]`),
+      ];
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: { query: { text_id }, results: [] },
+        provenance: provenance("local", "local:antediluvianParallelIndex", VERSION),
+        warnings: ["missing-query-parameter"],
+      });
+    }
+    const entry = findAntediluvianParallel({ text_id, passage, topic });
+    const text = renderParallelEntry(entry, { text_id, passage, topic });
+    if (!entry) {
+      return structuredResult(text, {
+        schema: SCHEMA,
+        data: { query: { text_id, ...(passage ? { passage } : {}), ...(topic ? { topic } : {}) }, results: [] },
+        provenance: provenance("local", "local:antediluvianParallelIndex", VERSION),
+        warnings: ["no-curated-parallel-for-query"],
+      });
+    }
+    return structuredResult(text, {
+      schema: SCHEMA,
+      data: {
+        query: { text_id, ...(passage ? { passage } : {}), ...(topic ? { topic } : {}) },
+        passage_text: entry.passage_text,
+        passage_translator: entry.passage_translator,
+        results: entry.results,
+      },
+      provenance: provenance("local", "local:antediluvianParallelIndex", VERSION, {
+        citation: "Lambert 1967; Kvanvig 1988; Annus 2010; Reed 2005",
+      }),
+    });
+  },
+);
+
+server.registerTool(
+  "apkallu_attestations",
+  {
+    description:
+      "Surface named occurrences of the seven antediluvian apkallū (and four postdiluvian successor ummânū) across the cuneiform and Hellenistic textual record. Per-sage entries include: paired antediluvian king (Uruk List of Kings and Sages), discipline specialization where attested, attestations across source-types (Bīt Mēseri ritual text, Uruk List scholarly list, Berossus Hellenistic excerpt, palace reliefs, figurine deposits), and iconographic form (fish_cloaked / bird_headed_griffin / human_form / figurine / composite). Curated from Reiner 1961, Lenzi 2008, Annus 2010, Verderame 2013.",
+    inputSchema: {
+      sage_name: z
+        .string()
+        .optional()
+        .describe("Specific sage name. E.g. 'Uanna', 'Adapa', 'Utuabzu'. Omit to return all sages."),
+      include_iconography: z
+        .boolean()
+        .optional()
+        .describe("Include iconographic-form data on visual attestations. Default true."),
+      include_postdiluvian: z
+        .boolean()
+        .optional()
+        .describe("Include the four postdiluvian ummânū (Nungalpirigal, Piriggalnungal, Piriggalabsu, Lu-Nanna). Default true."),
+    },
+  },
+  async ({ sage_name, include_iconography, include_postdiluvian }) => {
+    const SCHEMA = schemaId("apkallu_attestations");
+    const result = apkalluAttestations({ sage_name, include_iconography, include_postdiluvian });
+    const queryEcho: Record<string, unknown> = {};
+    if (sage_name) queryEcho.sage_name = sage_name;
+    if (include_iconography !== undefined) queryEcho.include_iconography = include_iconography;
+    if (include_postdiluvian !== undefined) queryEcho.include_postdiluvian = include_postdiluvian;
+    return structuredResult(renderApkalluSages(result), {
+      schema: SCHEMA,
+      data: { query: queryEcho, sages: result.sages },
+      provenance: provenance("local", "local:apkalluAttestationIndex", VERSION, {
+        citation: "Reiner 1961; Lenzi 2008; Annus 2010; Verderame 2013",
+      }),
+    });
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2260,7 +2417,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 9 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (find_join_candidates = lineToVec scorer, find_parallel_text = sign-trigram Jaccard; both local, no Auth0)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 12 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion tools v0.6: compare_flood_narratives, find_antediluvian_parallel, apkallu_attestations)\n`,
     );
     process.exit(0);
   }
@@ -2270,7 +2427,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (9 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (12 tools)\n`);
 }
 
 main().catch((err) => {

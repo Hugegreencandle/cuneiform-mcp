@@ -1,4 +1,4 @@
-# cuneiform-mcp Protocol — v0.5
+# cuneiform-mcp Protocol — v0.6
 
 > Every result should be inspectable, citeable, and reproducible.
 
@@ -50,7 +50,10 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The nine tools
+## The twelve tools
+
+> Nine corpus tools (v0.5) + three comparative-religion tools (v0.6). The v0.6 additions are curated-local — they don't hit external APIs; the underlying data is in `/data/*.json` and is derived from a small set of named modern scholarly editions. Discipline: every comparative claim returned by a v0.6 tool carries a `scholarly_attribution` field naming the scholar(s) who established the parallel.
+
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
 
@@ -350,6 +353,32 @@ prefixes for programmatic filtering. Codes seen across v0.5:
 | `unexpected-response-shape` | Upstream changed its markup; parser needs updating. |
 | (prose) | Truncation notices, fallback-path notes, partial-result counts. |
 
+### `compare_flood_narratives` — schema: [compare_flood_narratives.schema.json](schemas/compare_flood_narratives.schema.json)
+
+Episode × witness alignment matrix for the four canonical Ancient Near Eastern flood narratives: Sumerian Ziusudra story, Akkadian Atra-ḫasīs, Gilgamesh Tablet XI, Hebrew Genesis 6-9. Episodes drawn from a 10-item controlled vocabulary. Each cell carries `citation`, `excerpt`, `scholarly_anchor`, optional `divergence_notes[]`, and `philological_uncertainty` (secure/partial/fragmentary/reconstructed).
+
+Use for comparative-religion work and Genesis-6-9 source-critical background. Provenance: `source: local`, `endpoint: local:floodNarrativeIndex`. Underlying data curated from Lambert & Millard 1969, George 2003, Westermann 1984.
+
+### `find_antediluvian_parallel` — schema: [find_antediluvian_parallel.schema.json](schemas/find_antediluvian_parallel.schema.json)
+
+Take a passage from a Jewish/Christian antediluvian-wisdom text (1 Enoch / Jubilees / Genesis 5-6 / Wisdom of Solomon / Ben Sira) and return ranked Mesopotamian source-candidates that comparative-religion scholarship has identified as parallels. Each result names the scholar(s) who established the parallel.
+
+**Discipline:** `scholarly_attribution[]` is `minItems: 1` — no scholar, no result. This is the difference between research-grade and pop-comparative-religion tooling.
+
+Result fields: `parallel_type` (structural/lexical/narrative/topos/onomastic), `correspondence_strength` (strong/moderate/weak/contested), `transmission_hypothesis` (babylonian_exile / hellenistic_continuity / aramaic_substrate / common_ancient_near_eastern_substrate / unspecified).
+
+Curated queries in v0.6.0: Genesis 5:21-24 (Enoch ascent), Genesis 6:1-4 (sons of God / Nephilim), 1 Enoch 6:1-8 (Watchers descent). Calling without `passage` or `topic` returns the list of available queries.
+
+Provenance: `source: local`, `endpoint: local:antediluvianParallelIndex`. Underlying data curated from Lambert 1967, Kvanvig 1988, Annus 2010, Reed 2005.
+
+### `apkallu_attestations` — schema: [apkallu_attestations.schema.json](schemas/apkallu_attestations.schema.json)
+
+Surface named occurrences of the seven antediluvian apkallū and four named postdiluvian successor *ummânū* across the cuneiform and Hellenistic record. Per-sage entries include `paired_king` (Uruk List), `discipline_specialization[]`, and `attestations[]` across 9 source-types (ritual_text / scholarly_list / myth_narrative / colophon / hellenistic_excerpt / relief / figurine_deposit / amulet / seal).
+
+Iconographic sub-object on visual attestations: `form` (fish_cloaked / bird_headed_griffin / human_form / figurine / composite), `ritual_function`, `location_in_situ`, `museum_number`.
+
+Provenance: `source: local`, `endpoint: local:apkalluAttestationIndex`. Underlying data curated from Reiner 1961, Lenzi 2008, Annus 2010, Verderame 2013.
+
 ## Citation
 
 If you build on this protocol, cite the repo and the version in the
@@ -361,6 +390,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.5.0}
+  version = {0.6.0}
 }
 ```

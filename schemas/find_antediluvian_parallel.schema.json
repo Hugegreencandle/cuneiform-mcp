@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_antediluvian_parallel.schema.json",
+  "title": "find_antediluvian_parallel data payload",
+  "description": "Structured payload for the `find_antediluvian_parallel` tool — takes a passage from a Jewish/Christian antediluvian-wisdom text (1 Enoch / Jubilees / Genesis 5-6) and returns ranked Mesopotamian source-candidates that the comparative-religion scholarship has identified as parallels.\n\nDirection of comparison is Hebrew/Aramaic ← Mesopotamian. The tool surfaces both the proposed parallel(s) AND the scholar(s) who established each link, with their specific publications. This is comparative-religion as auditable evidence: a parallel without a scholar's name behind it is not returned.\n\nProvenance is `source: local`, `endpoint: local:antediluvianParallelIndex`. Underlying alignment is curated from Lambert 1967, Kvanvig 1988, Annus 2010, Reed 2005, plus the Research/The_Watchers.md brief.",
+  "type": "object",
+  "required": ["query", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["text_id", "passage"],
+      "additionalProperties": false,
+      "description": "Echo of the input query, normalized.",
+      "properties": {
+        "text_id": {
+          "type": "string",
+          "enum": ["1_enoch", "jubilees", "genesis", "wisdom_of_solomon", "ben_sira"],
+          "description": "Source text. `1_enoch` includes the Book of the Watchers (chs 1-36), Book of Parables (37-71), Astronomical Book (72-82), Book of Dreams (83-90), Epistle of Enoch (91-108)."
+        },
+        "passage": {
+          "type": "string",
+          "description": "Canonical passage reference. E.g. `1 Enoch 6:1-2`, `Genesis 5:21-24`, `Genesis 6:1-4`, `Jubilees 4:17-25`."
+        },
+        "topic": {
+          "type": "string",
+          "description": "Optional topic-keyword if the caller did not supply a specific passage. E.g. `seventh_patriarch_ascent`, `fallen_angels_teaching_arts`, `nephilim_origin`. Returns the most-cited passage for that topic."
+        }
+      }
+    },
+    "passage_text": {
+      "type": "string",
+      "description": "The text of the queried passage, ~300-600 chars, in standard English translation. Translator named under `passage_translator`."
+    },
+    "passage_translator": {
+      "type": "string",
+      "description": "Translator for the passage_text. E.g. `Nickelsburg 2004` for 1 Enoch, `NRSV` for Genesis."
+    },
+    "results": {
+      "type": "array",
+      "description": "Ranked candidate parallels, strongest first. Ranking is by `correspondence_strength`. Each result names the scholar(s) who established the parallel; results without scholarly attribution are not returned.",
+      "items": { "$ref": "#/$defs/ParallelCandidate" }
+    }
+  },
+  "$defs": {
+    "ParallelCandidate": {
+      "type": "object",
+      "required": ["mesopotamian_source", "parallel_type", "correspondence_strength", "scholarly_attribution"],
+      "additionalProperties": false,
+      "properties": {
+        "mesopotamian_source": {
+          "type": "object",
+          "required": ["text", "citation"],
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Standard text name. E.g. `Bīt Mēseri`, `Sumerian King List (WB 444)`, `Atra-ḫasīs Tablet III`, `Erra and Išum`, `Adapa myth`, `Enmeduranki text (Lambert 1967)`."
+            },
+            "citation": {
+              "type": "string",
+              "description": "Line-range or tablet-section reference. E.g. `Bīt Mēseri III.lines 1-21`, `SKL WB 444 col.i.1-39`."
+            },
+            "language": {
+              "type": "string",
+              "enum": ["Sumerian", "Akkadian", "bilingual"],
+              "description": "Original language of the cited text."
+            },
+            "approximate_date": {
+              "type": "string",
+              "description": "Approximate composition date of the Mesopotamian source. Free-form. E.g. `c. 2000 BCE`, `Neo-Assyrian (c. 700 BCE)`, `Old Babylonian recension c. 1700 BCE`."
+            }
+          }
+        },
+        "parallel_type": {
+          "type": "string",
+          "enum": [
+            "structural",
+            "lexical",
+            "narrative",
+            "topos",
+            "onomastic"
+          ],
+          "description": "Kind of parallel. `structural` = shared narrative architecture (e.g. seventh figure ascends); `lexical` = shared specific vocabulary or name; `narrative` = shared specific scene or event; `topos` = shared general motif (e.g. fish-cloaked sage); `onomastic` = name-correspondence (e.g. Enmeduranki ~ Enoch)."
+        },
+        "correspondence_strength": {
+          "type": "string",
+          "enum": ["strong", "moderate", "weak", "contested"],
+          "description": "Scholarly consensus on the parallel. `strong` = widely accepted as direct influence or shared substrate (e.g. Enmeduranki-Enoch); `moderate` = generally accepted but with caveats; `weak` = proposed but with significant counter-arguments; `contested` = active scholarly disagreement."
+        },
+        "scholarly_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "description": "One or more publications that established or strongly developed this parallel. Required — no scholar, no result.",
+          "items": {
+            "type": "object",
+            "required": ["author_year", "publication"],
+            "additionalProperties": false,
+            "properties": {
+              "author_year": {
+                "type": "string",
+                "description": "E.g. `Lambert 1967`, `Kvanvig 1988`, `Annus 2010`."
+              },
+              "publication": {
+                "type": "string",
+                "description": "Full citation: book or journal article. E.g. `Journal of Cuneiform Studies 21 (1967): 126-138`."
+              },
+              "argument_summary": {
+                "type": "string",
+                "description": "One-sentence summary of what this publication argued. E.g. `Established the seventh-antediluvian-king / seventh-patriarch structural parallel via shared celestial-knowledge motif`."
+              }
+            }
+          }
+        },
+        "transmission_hypothesis": {
+          "type": "string",
+          "enum": [
+            "babylonian_exile",
+            "hellenistic_continuity",
+            "aramaic_substrate",
+            "common_ancient_near_eastern_substrate",
+            "unspecified"
+          ],
+          "description": "How the parallel is hypothesized to have reached the Jewish text. Optional. Most current scholarship favors a layered model (multiple of these in combination)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form scholarly note on the parallel — caveats, refinements, recent challenges. Up to ~300 chars."
+        }
+      }
+    }
+  }
+}

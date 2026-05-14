@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compare_flood_narratives.schema.json",
+  "title": "compare_flood_narratives data payload",
+  "description": "Structured payload for the `compare_flood_narratives` tool — returns an episode × witness alignment matrix for the four major Ancient Near Eastern flood narratives.\n\nWitnesses: Sumerian Ziusudra story (Nippur, OB), Akkadian Atra-ḫasīs (Lambert & Millard 1969), Gilgamesh Tablet XI (George 2003), Hebrew Genesis 6-9 (BHS / MT). Episodes: a controlled vocabulary of canonical scenes (`overpopulation`, `divine_decision`, `forewarning`, `ark_construction`, `the_flood`, `landfall`, `sacrifice`, `aftermath`, `new_order`).\n\nAlignment is by *episode*, not by line. Each cell carries the passage's standard citation, a translation excerpt, the divergence_notes between this witness and the canonical version, and a scholarly_anchor pointing to the modern critical edition. Use this for comparative-religion work, source-criticism arguments, and Genesis-6-9 background.\n\nProvenance is `source: local`, `endpoint: local:floodNarrativeIndex`. The underlying alignments are derived from the Research/Atrahasis.md brief plus Lambert & Millard 1969, George 2003, Westermann 1984 — each cell carries its specific reference under `scholarly_anchor`.",
+  "type": "object",
+  "required": ["episodes", "witnesses", "alignment"],
+  "additionalProperties": false,
+  "properties": {
+    "episodes": {
+      "type": "array",
+      "description": "Episodes covered in this response. Subset of the controlled vocabulary, in canonical narrative order.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "creation_of_humanity",
+          "overpopulation",
+          "divine_decision",
+          "forewarning",
+          "ark_construction",
+          "the_flood",
+          "landfall",
+          "sacrifice",
+          "aftermath",
+          "new_order"
+        ]
+      }
+    },
+    "witnesses": {
+      "type": "array",
+      "description": "Witnesses (textual sources) covered in this response. Subset of the canonical four.",
+      "items": {
+        "$ref": "#/$defs/WitnessId"
+      }
+    },
+    "alignment": {
+      "type": "array",
+      "description": "Array of episode-rows. Each row contains aligned cells indexed by witness id. A missing cell means the episode is absent or unrecoverably damaged in that witness — explicit `null` instead of omission makes the negative information visible.",
+      "items": {
+        "type": "object",
+        "required": ["episode", "cells"],
+        "additionalProperties": false,
+        "properties": {
+          "episode": {
+            "type": "string",
+            "description": "Episode id from the controlled vocabulary."
+          },
+          "summary": {
+            "type": "string",
+            "description": "Brief synthetic description of what this episode is (one sentence). Helps consumers without comparative-religion background read the matrix."
+          },
+          "cells": {
+            "type": "object",
+            "description": "Map of witness-id → cell. Keys are from WitnessId enum. Values may be `null` to mark explicit absence.",
+            "additionalProperties": {
+              "oneOf": [
+                { "type": "null" },
+                { "$ref": "#/$defs/Cell" }
+              ]
+            }
+          },
+          "divergence_summary": {
+            "type": "string",
+            "description": "One-paragraph synthesis of how the witnesses differ on this episode. Optional — present where the divergence is theologically or philologically load-bearing (e.g., flood duration, post-flood resolution)."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "WitnessId": {
+      "type": "string",
+      "enum": ["sumerian_ziusudra", "atrahasis", "gilgamesh_xi", "genesis_6_9"],
+      "description": "Canonical witness id. `sumerian_ziusudra` = Nippur OB flood story; `atrahasis` = Lambert & Millard 1969 standard text; `gilgamesh_xi` = George 2003 SB Tablet XI; `genesis_6_9` = Masoretic Text (BHS)."
+    },
+    "Cell": {
+      "type": "object",
+      "required": ["citation", "excerpt", "scholarly_anchor"],
+      "additionalProperties": false,
+      "description": "Single witness's testimony for one episode.",
+      "properties": {
+        "citation": {
+          "type": "string",
+          "description": "Standard citation in the witness's own reference system. E.g. `Atra-ḫasīs III.i.1-15`, `Gilgamesh XI.20-31`, `Genesis 6:13-16`, `Sumerian Flood Story 145-155`."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "Translation excerpt of the passage. Length capped at ~6 lines/~600 chars. Use the standard published translation cited under `scholarly_anchor`."
+        },
+        "translator": {
+          "type": "string",
+          "description": "Translator/edition the excerpt is taken from. E.g. `Lambert & Millard 1969`, `George 2003`, `Foster 2005`, `NRSV`."
+        },
+        "scholarly_anchor": {
+          "type": "string",
+          "description": "Specific modern critical edition or commentary anchoring this passage. Format: `Author Year, page-or-line range`. E.g. `Lambert & Millard 1969, p.92-94`."
+        },
+        "divergence_notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Bullet-point notes on how THIS witness's account of this episode differs from sibling witnesses. Optional. E.g. `Flood lasts 7 days here; Genesis has 40 days`."
+        },
+        "philological_uncertainty": {
+          "type": "string",
+          "enum": ["secure", "partial", "fragmentary", "reconstructed"],
+          "description": "Confidence in the textual basis. `secure` = well-preserved manuscript; `partial` = readable with gaps; `fragmentary` = small surviving fragment; `reconstructed` = restored from parallels. Sumerian Ziusudra cells are mostly `partial` or `fragmentary`."
+        }
+      }
+    }
+  }
+}

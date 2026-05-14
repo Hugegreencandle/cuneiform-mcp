@@ -1,6 +1,6 @@
 {
   "name": "cuneiform-mcp",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents.",
   "type": "module",
   "bin": {
@@ -17,6 +17,7 @@
   "files": [
     "dist",
     "schemas",
+    "data",
     "README.md",
     "PROTOCOL.md",
     "LICENSE"

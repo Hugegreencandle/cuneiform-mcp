@@ -1,0 +1,225 @@
+{
+  "_meta": {
+    "description": "Curated parallels between Jewish/Christian antediluvian-wisdom texts (1 Enoch, Jubilees, Genesis 5-6) and Mesopotamian source-candidates. Each parallel names the scholar(s) who established it. Curated from Research/The_Watchers.md plus Lambert 1967, Kvanvig 1988, Annus 2010, Reed 2005.",
+    "compiled": "2026-05-15",
+    "curator_note": "Direction of comparison is Hebrew/Aramaic ← Mesopotamian. Parallels are returned with explicit correspondence_strength (strong/moderate/weak/contested) — the user can decide what to trust. No parallel without scholarly attribution.",
+    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset."
+  },
+  "parallels": [
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": ["Genesis 5:21-24"],
+        "topics": ["seventh_patriarch_ascent", "enoch_taken_by_god"]
+      },
+      "passage_text": "And Enoch lived sixty and five years, and begat Methuselah: and Enoch walked with God after he begat Methuselah three hundred years, and begat sons and daughters: and all the days of Enoch were three hundred sixty and five years: and Enoch walked with God: and he was not; for God took him.",
+      "passage_translator": "ASV 1901",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Sumerian King List (WB 444, Weld-Blundell Prism)",
+            "citation": "WB 444 col.i.31-35 — En-men-dur-ana of Sippar, seventh antediluvian king",
+            "language": "Sumerian",
+            "approximate_date": "Old Babylonian recension c. 1817 BCE"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Lambert 1967",
+              "publication": "W. G. Lambert, 'Enmeduranki and Related Matters,' Journal of Cuneiform Studies 21 (1967): 126-138",
+              "argument_summary": "Established that Enmeduranki (Akkadian form of En-men-dur-ana) is the seventh antediluvian king in the Sippar tradition, mirroring Enoch as seventh from Adam (Gen 5). Both are taken to heaven; both receive divine knowledge; both transmit it to subsequent humanity. The seventh-from-the-first-king parallel is too precise to be coincidence."
+            },
+            {
+              "author_year": "Kvanvig 1988",
+              "publication": "Helge Kvanvig, Roots of Apocalyptic: The Mesopotamian Background of the Enoch Figure and of the Son of Man (Neukirchener Verlag, 1988)",
+              "argument_summary": "Developed Lambert's argument into a full monograph showing that the Enochic figure as elaborated in 1 Enoch derives systematically from the Enmeduranki / antediluvian-sage tradition."
+            },
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Reinforced the Enmeduranki-Enoch correspondence with attention to the secrecy framework (Lenzi 2008) and the apkallu-knowledge transmission chain."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Strong scholarly consensus. The seventh-from-the-first structural parallel is the single most-cited Mesopotamian → Jewish antediluvian-wisdom correspondence."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Bīt Mēseri III",
+            "citation": "Bīt Mēseri III lines 1-21 — Utuabzu (seventh apkallu) ascends to heaven",
+            "language": "Akkadian",
+            "approximate_date": "Neo-Assyrian (c. 700 BCE)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Reiner 1961",
+              "publication": "Erica Reiner, 'The Etiological Myth of the Seven Sages,' Orientalia 30 (1961): 1-11",
+              "argument_summary": "First scholarly publication of the canonical list of seven apkallū from Bīt Mēseri III. Utuabzu, the seventh and last antediluvian sage, is described as ascending to heaven — exact structural parallel to Enoch's translation."
+            },
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Discusses Utuabzu-Enoch parallel as one of two strong seventh-figure correspondences (alongside Enmeduranki)."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Strong parallel. Reiner's 1961 publication of Bīt Mēseri III is the foundational text for the seven-apkallū tradition; the seventh apkallu's ascent is the closest Mesopotamian analogue to Genesis 5:24."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Enmeduranki text (Lambert 1967 critical edition)",
+            "citation": "K.2486 + dupls., lines 1-30 — Enmeduranki summoned to heaven, given the divinatory arts",
+            "language": "Akkadian",
+            "approximate_date": "Neo-Assyrian (c. 700 BCE)"
+          },
+          "parallel_type": "onomastic",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Lambert 1967",
+              "publication": "W. G. Lambert, 'Enmeduranki and Related Matters,' Journal of Cuneiform Studies 21 (1967): 126-138",
+              "argument_summary": "Proposed the onomastic correspondence en-me-dur-an-ki ↔ Hanok (Enoch), based on the shared structural role and the celestial-knowledge motif. The Hebrew name does not directly translate the Sumerian, but the figure's function maps closely."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Moderate strength. The name-correspondence is functional, not phonetic; Lambert and subsequent scholars treat the structural parallel as the load-bearing argument, with the onomastic point supporting it rather than standing alone."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": ["Genesis 6:1-4"],
+        "topics": ["sons_of_god", "nephilim_origin", "divine_human_unions"]
+      },
+      "passage_text": "And it came to pass, when men began to multiply on the face of the ground, and daughters were born unto them, that the sons of God saw the daughters of men that they were fair; and they took them wives, whomsoever they chose. ...The Nephilim were in the earth in those days, and also after that, when the sons of God came in unto the daughters of men, and they bare children to them: the same were the mighty men that were of old, the men of renown.",
+      "passage_translator": "ASV 1901",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Apkallu / ummânū tradition (broad)",
+            "citation": "Bīt Mēseri III + Uruk List of Kings and Sages (W.20030,7) + scattered scholarly text colophons",
+            "language": "Akkadian",
+            "approximate_date": "Neo-Assyrian through Seleucid (c. 700-200 BCE)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Argued that the Watchers tradition systematically derives from the Mesopotamian apkallu tradition. The 'sons of God' / Watchers descending to take human wives mirrors the post-flood ummânū tradition where sages father human descendants (one apkallu-line is explicitly described as 'two-thirds apkallu, one-third human')."
+            },
+            {
+              "author_year": "Kvanvig 1988",
+              "publication": "Helge Kvanvig, Roots of Apocalyptic (Neukirchener Verlag, 1988)",
+              "argument_summary": "Foundational monograph establishing the apkallu → Watchers transmission. Genesis 6:1-4 is the compressed Hebrew witness to a fuller Aramaic-Jewish narrative (preserved in the Book of the Watchers) that derives from Mesopotamian sources."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Strong scholarly consensus. Genesis 6:1-4 is widely read as a compressed reference to the larger Watchers narrative that 1 Enoch develops at length. The cryptic Genesis text is most parsimoniously explained as redactional compression of the same inherited tradition."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Gilgamesh Epic — Gilgamesh as two-thirds divine, one-third human",
+            "citation": "Gilgamesh I.46-48",
+            "language": "Akkadian",
+            "approximate_date": "Standard Babylonian (c. 1200 BCE)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Cites Gilgamesh's two-thirds-divine descent as a wider Mesopotamian topos of divine-human hybridity, of which the Watchers / Nephilim narrative is one instantiation."
+            }
+          ],
+          "transmission_hypothesis": "aramaic_substrate",
+          "notes": "Moderate strength. The divine-human hybrid topos is widespread across the Ancient Near East; Gilgamesh is one instance, not the direct source. Useful comparison but not load-bearing."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "1_enoch",
+        "passages": ["1 Enoch 6:1-8", "1 Enoch 7:1-6", "1 Enoch 8:1-3"],
+        "topics": ["fallen_angels_teaching_arts", "watchers_descent", "asael_metallurgy", "shemyaza_oath"]
+      },
+      "passage_text": "And it came to pass when the children of men had multiplied that in those days were born unto them beautiful and comely daughters. And the angels, the children of the heaven, saw and lusted after them, and said to one another: 'Come, let us choose us wives from among the children of men and beget us children.' And Semjâzâ, who was their leader, said unto them: 'I fear ye will not indeed agree to do this deed, and I alone shall have to pay the penalty of a great sin.' And they all answered him and said: 'Let us all swear an oath...' Then sware they all together and bound themselves by mutual imprecations upon it. And they were in all two hundred; who descended in the days of Jared on the summit of Mount Hermon...",
+      "passage_translator": "R. H. Charles 1912 (public domain)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Apkallu fish-cloaked descent topos",
+            "citation": "Bīt Mēseri III lines 1-21 + Berossus, Babyloniaca (Syncellus excerpt) on Oannes",
+            "language": "Akkadian / Greek",
+            "approximate_date": "Neo-Assyrian (c. 700 BCE) through Hellenistic (c. 280 BCE)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Argued that the Watchers' descent to teach humanity arts mirrors the apkallū's descent from the abzu to teach humanity arts. The valence is inverted (apkallū positive, Watchers negative) but the structural pattern — divine messengers descending pre-flood to transmit civilizational knowledge — is the same."
+            },
+            {
+              "author_year": "Reed 2005",
+              "publication": "Annette Yoshiko Reed, Fallen Angels and the History of Judaism and Christianity (Cambridge UP, 2005)",
+              "argument_summary": "Treated the Watchers tradition's reception history across Judaism and Christianity, including the inverted-valence argument relative to its Mesopotamian source."
+            }
+          ],
+          "transmission_hypothesis": "aramaic_substrate",
+          "notes": "Strong parallel. The pattern is: pre-flood + divine descent + transmission of civilizational arts. Valence inverts; structure holds."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Apkallu disciplinary specialization (Apkallu-knowledge tradition)",
+            "citation": "Various scholarly text colophons + Lenzi 2008 synthesis",
+            "language": "Akkadian",
+            "approximate_date": "Neo-Assyrian through Seleucid (c. 700-200 BCE)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Lenzi 2008",
+              "publication": "Alan Lenzi, Secrecy and the Gods: Secret Knowledge in Ancient Mesopotamia and Biblical Israel (Helsinki, 2008)",
+              "argument_summary": "Established that Mesopotamian scholarly knowledge was framed as antediluvian, apkallu-transmitted, and bound by secrecy formulae (niṣirtu, pirištu). The Watchers' specific teachings (metallurgy, astrology, magic, medicine, divination) match the apkallu-knowledge disciplinary canon precisely. The Israelite text codes these as forbidden — but the disciplinary inventory is Mesopotamian."
+            },
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Linked specific Watcher-teachings to specific apkallu disciplines (Asael→metallurgy mirrors apkallu craft; Baraqel→astrology mirrors apkallu celestial divination; Hermoni→enchantments mirrors apkallu exorcism)."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Strong. The disciplinary inventory is the cleanest single argument for the apkallu → Watchers transmission: the specific arts taught are not arbitrary, they map onto the canonical apkallu-knowledge curriculum."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Mount Hermon as locus of theophany (broader ANE substrate)",
+            "citation": "Various Ugaritic and Phoenician materials",
+            "language": "Ugaritic / Phoenician",
+            "approximate_date": "Late Bronze through Iron Age (c. 1300-700 BCE)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "weak",
+          "scholarly_attribution": [
+            {
+              "author_year": "Nickelsburg 2001",
+              "publication": "George W. E. Nickelsburg, 1 Enoch 1: A Commentary on the Book of 1 Enoch, Chapters 1-36; 81-108 (Hermeneia, Fortress, 2001)",
+              "argument_summary": "Notes that Mount Hermon's specific selection as the Watchers' descent point likely draws on its pre-existing role as a sacred mountain in West Semitic religion. The specific link is not Mesopotamian but broader-ANE."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Weak in the Mesopotamian sense — this is a West Semitic / Levantine input to the Watchers narrative, not a Mesopotamian one. Included for completeness."
+        }
+      ]
+    }
+  ]
+}
