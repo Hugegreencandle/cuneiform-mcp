@@ -49,8 +49,8 @@
         },
         "tier": {
           "type": "string",
-          "enum": ["antediluvian", "postdiluvian"],
-          "description": "`antediluvian` for the canonical seven, `postdiluvian` for the four named successor *ummânū*."
+          "enum": ["antediluvian", "postdiluvian", "collective"],
+          "description": "`antediluvian` for the canonical seven; `postdiluvian` for the four named successor *ummânū*; `collective` for the broader unattributed visual tradition where the iconographic type (fish-cloaked, bird-headed, human-form) is identifiable but no specific named sage attribution exists."
         },
         "paired_king": {
           "type": "string",
@@ -123,6 +123,11 @@
           "enum": ["fish_cloaked", "bird_headed_griffin", "human_form", "figurine", "composite"],
           "description": "Canonical iconographic form. `fish_cloaked` = the Oannes-type figure draped in a fish-skin; `bird_headed_griffin` = eagle-headed winged genie (Apkallu-Nisroch type); `human_form` = unambiguously human-figured sage; `figurine` = small ritual figurine deposit (clay or wood)."
         },
+        "wiggermann_type": {
+          "type": "string",
+          "enum": ["puradu", "bird_apkallu", "umu_apkallu"],
+          "description": "Wiggermann 1992's taxonomic categorization. `puradu` = fish-cloaked (= Oannes-form); `bird_apkallu` = bird-headed winged genie; `umu_apkallu` = the human-formed, often-winged variant typical of palace doorway and throne-room reliefs. Optional — when present, formalizes the alignment with the foundational iconographic study."
+        },
         "ritual_function": {
           "type": "string",
           "enum": ["apotropaic", "protective_deposit", "narrative_decoration", "unspecified"],
@@ -132,9 +137,17 @@
           "type": "string",
           "description": "Original architectural or archaeological context where known. E.g. `Northwest Palace, Nimrud, Throneroom B reliefs`, `foundation deposit under threshold, Aššur`."
         },
+        "palace_room": {
+          "type": "string",
+          "description": "Specific palace room or panel where attested. E.g. `Throne Room B, panel 6`, `Room G, panel 23`. Optional — adds queryability for palace-context research."
+        },
+        "bucket_and_cone_present": {
+          "type": "boolean",
+          "description": "Whether the figure depicted holds the canonical bucket (banduddû) and date-spathe cone (mullilu) gesture. The single most-attested ritual element of the apkallu visual tradition. Optional — when present, surfaces this iconographic feature for queryable research."
+        },
         "museum_number": {
           "type": "string",
-          "description": "Current museum accession. E.g. `BM 124577`, `VA 8200`."
+          "description": "Current museum accession. E.g. `BM 124577`, `MMA 32.143.7`, `AO 19849`, `VA Ass 03595`."
         }
       }
     }

@@ -3,7 +3,8 @@
     "description": "Per-sage attestations of the seven antediluvian apkallū and the four named postdiluvian successor ummânū. Curated from Research/Apkallu.md plus Reiner 1961 (Bīt Mēseri), Lenzi 2008 (Uruk List), Annus 2010 (comparative), Verderame 2013 (iconography).",
     "compiled": "2026-05-15",
     "curator_note": "Akkadian sage names are spelled per Reiner 1961's transliteration. Variant spellings under alt_names. Each sage's paired antediluvian king follows the Uruk List of Kings and Sages (W.20030,7); the Sumerian King List names some kings differently — those variants are not normalized here since the apkallu pairing tradition is specifically the Uruk List's.",
-    "iconography_note": "Iconographic attestations are catalogued by museum object. The fish-cloaked Oannes-form is the most-attested visual type and is associated specifically with Uanna in textual sources; visual depictions in palace reliefs and figurine deposits are often unnamed and assigned to the broader apkallu category."
+    "iconography_note": "Iconographic attestations are catalogued by museum object. The fish-cloaked Oannes-form is the most-attested visual type and is associated specifically with Uanna in textual sources; bird-headed and human-form variants are not textually pinned to specific named sages and are grouped under the `Apkallū (visual tradition)` collective entry. Wiggermann 1992 provides the foundational three-type taxonomy (purādu / bird-apkallū / ūmu-apkallū). Iconography schema-v0.7 fields: wiggermann_type, palace_room, bucket_and_cone_present.",
+    "iconography_dataset_source": "Specific museum-object identifications added 2026-05-15 from `/Users/danebrown/Desktop/Research/Apkallu_Iconography.md` candidate list (15 verified accessions across 9 institutions)."
   },
   "sages": [
     {
@@ -48,16 +49,33 @@
           }
         },
         {
-          "source": "Aššur foundation deposits",
+          "source": "Aššur 'house of the priest' figurine deposit",
           "source_type": "figurine_deposit",
-          "citation": "Various VA-series accession numbers, Vorderasiatisches Museum Berlin",
+          "citation": "VA Ass 03595, Vorderasiatisches Museum Berlin",
           "language": "n_a",
-          "approximate_date": "Neo-Assyrian (c. 700 BCE)",
+          "approximate_date": "Neo-Assyrian (c. 1000-612 BCE), specific deposit context Qd. kB 9I",
           "scholarly_anchor": "Wiggermann 1992, Mesopotamian Protective Spirits, pp.65-99",
           "iconography": {
             "form": "figurine",
+            "wiggermann_type": "puradu",
             "ritual_function": "protective_deposit",
-            "location_in_situ": "buried under thresholds and in foundation pits, Aššur"
+            "location_in_situ": "Aššur, 'house of the priest' (Qd. kB 9I), buried foundation deposit",
+            "museum_number": "VA Ass 03595"
+          }
+        },
+        {
+          "source": "Nimrud Northwest Palace, parallel relief slab",
+          "source_type": "relief",
+          "citation": "BM 124573",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 870 BCE, reign of Ashurnasirpal II)",
+          "scholarly_anchor": "Reade 1979/2002 + British Museum catalog; cross-referenced in Apkallu_Iconography.md",
+          "iconography": {
+            "form": "fish_cloaked",
+            "wiggermann_type": "puradu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "museum_number": "BM 124573"
           }
         }
       ]
@@ -259,6 +277,216 @@
           "scholarly_anchor": "Lenzi 2008, pp.106-109",
           "excerpt": "[paraphrase] Fourth named postdiluvian ummânu in the Uruk List, also explicitly 'two-thirds apkallu, one-third human' — the divine-human hybrid descent motif that Annus 2010 connects to the Nephilim of Genesis 6:4 / 1 Enoch 7:2.",
           "translator": "paraphrase based on Lenzi 2008"
+        }
+      ]
+    },
+    {
+      "name": "Apkallū (visual tradition)",
+      "alt_names": ["bird-apkallū", "ūmu-apkallū", "winged genie"],
+      "tier": "collective",
+      "discipline_specialization": ["apotropaic ritual", "palace doorway protection"],
+      "attestations": [
+        {
+          "source": "Nimrud NW Palace, Room I Panel 20",
+          "source_type": "relief",
+          "citation": "BM 124578",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 865-860 BCE, reign of Ashurnasirpal II)",
+          "scholarly_anchor": "Reade 1979/2002 + Stearns 1961, Reliefs from the Palace of Ashurnasirpal II",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "palace_room": "Room I, Panel 20",
+            "bucket_and_cone_present": true,
+            "museum_number": "BM 124578"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Metropolitan Museum holding",
+          "source_type": "relief",
+          "citation": "MMA 32.143.4",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Metropolitan Museum catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "museum_number": "MMA 32.143.4"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, the Met's flagship bird-headed apkallu",
+          "source_type": "relief",
+          "citation": "MMA 32.143.7",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Metropolitan Museum catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "bird_headed_griffin",
+            "wiggermann_type": "bird_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "bucket_and_cone_present": true,
+            "museum_number": "MMA 32.143.7"
+          }
+        },
+        {
+          "source": "Khorsabad façade L, palace of Sargon II",
+          "source_type": "relief",
+          "citation": "AO 19849",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 720-710 BCE, reign of Sargon II)",
+          "scholarly_anchor": "Louvre catalog + Albenda 1986, Palace of Sargon II",
+          "iconography": {
+            "form": "bird_headed_griffin",
+            "wiggermann_type": "bird_apkallu",
+            "ritual_function": "apotropaic",
+            "location_in_situ": "Khorsabad (Dur-Sharrukin), façade L",
+            "palace_room": "façade L",
+            "museum_number": "AO 19849"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Louvre holding",
+          "source_type": "relief",
+          "citation": "AO 19845",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 870 BCE, reign of Ashurnasirpal II)",
+          "scholarly_anchor": "Louvre catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "bird_headed_griffin",
+            "wiggermann_type": "bird_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "museum_number": "AO 19845"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Princeton holding (throne-room frieze)",
+          "source_type": "relief",
+          "citation": "Princeton y207",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Princeton Univ. Art Museum catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud — throne-room frieze",
+            "palace_room": "throne-room frieze",
+            "museum_number": "Princeton y207"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Walters holding",
+          "source_type": "relief",
+          "citation": "Walters 21.8",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Walters Art Museum catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud",
+            "museum_number": "Walters 21.8"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Room G — the canonical bucket-and-cone gesture",
+          "source_type": "relief",
+          "citation": "Hood S.856.3.3",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Hood Museum, Dartmouth catalog + Apkallu_Iconography.md (best in-cluster example of the gesture)",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud, Room G",
+            "palace_room": "Room G",
+            "bucket_and_cone_present": true,
+            "museum_number": "Hood S.856.3.3"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Room H — the rare wingless variant",
+          "source_type": "relief",
+          "citation": "Hood S.856.3.4",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 883-859 BCE)",
+          "scholarly_anchor": "Hood Museum, Dartmouth catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud, Room H — wingless variant",
+            "palace_room": "Room H",
+            "museum_number": "Hood S.856.3.4"
+          }
+        },
+        {
+          "source": "Nimrud palace, Fitzwilliam holding",
+          "source_type": "relief",
+          "citation": "Fitzwilliam ANE 44.1927",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 870 BCE)",
+          "scholarly_anchor": "Fitzwilliam Museum, Cambridge catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Nimrud (palace context)",
+            "museum_number": "Fitzwilliam ANE 44.1927"
+          }
+        },
+        {
+          "source": "Nineveh SW Palace, Sennacherib doorway program (composite Mischwesen group)",
+          "source_type": "relief",
+          "citation": "BM 118918",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 700-680 BCE, reign of Sennacherib)",
+          "scholarly_anchor": "Russell 1991, Sennacherib's Palace Without Rival at Nineveh + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "composite",
+            "ritual_function": "apotropaic",
+            "location_in_situ": "Southwest Palace, Nineveh — doorway",
+            "museum_number": "BM 118918"
+          }
+        },
+        {
+          "source": "Nineveh SW Palace doorway protective figures",
+          "source_type": "relief",
+          "citation": "BM 1856-0909-14_7",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 700-680 BCE, reign of Sennacherib)",
+          "scholarly_anchor": "British Museum catalog + Apkallu_Iconography.md",
+          "iconography": {
+            "form": "composite",
+            "ritual_function": "apotropaic",
+            "location_in_situ": "Southwest Palace, Nineveh — doorway",
+            "museum_number": "BM 1856-0909-14_7"
+          }
+        },
+        {
+          "source": "Nimrud NW Palace, Brooklyn holding (apkallu between sacred trees)",
+          "source_type": "relief",
+          "citation": "Brooklyn 70578",
+          "language": "n_a",
+          "approximate_date": "Neo-Assyrian (c. 870 BCE, reign of Ashurnasirpal II)",
+          "scholarly_anchor": "Brooklyn Museum catalog + Apkallu_Iconography.md (iconographic schema in compressed form)",
+          "iconography": {
+            "form": "human_form",
+            "wiggermann_type": "umu_apkallu",
+            "ritual_function": "narrative_decoration",
+            "location_in_situ": "Northwest Palace, Nimrud — apkallu between two sacred trees",
+            "bucket_and_cone_present": true,
+            "museum_number": "Brooklyn 70578"
+          }
         }
       ]
     }

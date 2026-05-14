@@ -105,8 +105,11 @@ export type Attestation = {
   approximate_date?: string;
   iconography?: {
     form: IconographyForm;
+    wiggermann_type?: "puradu" | "bird_apkallu" | "umu_apkallu";
     ritual_function?: "apotropaic" | "protective_deposit" | "narrative_decoration" | "unspecified";
     location_in_situ?: string;
+    palace_room?: string;
+    bucket_and_cone_present?: boolean;
     museum_number?: string;
   };
   scholarly_anchor?: string;
@@ -117,7 +120,7 @@ export type Attestation = {
 export type Sage = {
   name: string;
   alt_names?: string[];
-  tier: "antediluvian" | "postdiluvian";
+  tier: "antediluvian" | "postdiluvian" | "collective";
   paired_king?: string;
   discipline_specialization?: string[];
   attestations: Attestation[];
