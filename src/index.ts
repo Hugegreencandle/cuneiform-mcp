@@ -105,7 +105,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.5.0-dev";
+const VERSION = "0.5.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2260,7 +2260,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 9 tools registered, all live (find_join_candidates = lineToVec scorer, find_parallel_text = sign-trigram Jaccard; both local, no Auth0)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 9 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (find_join_candidates = lineToVec scorer, find_parallel_text = sign-trigram Jaccard; both local, no Auth0)\n`,
     );
     process.exit(0);
   }

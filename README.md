@@ -2,7 +2,15 @@
 
 MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents.
 
-## v0.4.0 — 9 tools live
+## v0.5.0 — research-grade structured outputs
+
+Every tool now returns a typed `structuredContent` envelope alongside the rendered text, with source-of-record provenance (`source`, `endpoint`, `fetched_at`, `mcp_version`) and per-tool JSON Schemas. Downstream agents can chain on typed fields instead of parsing markdown; scholars get a citable, reproducible response shape.
+
+The `find_parallel_text` tool also surfaces **auditable join evidence**: each candidate carries `intersection_size`, `union_size`, `candidate_fingerprint_size`, and a sample of shared trigrams — so you can inspect WHY a candidate matched, not just where it ranked.
+
+See [PROTOCOL.md](PROTOCOL.md) for the full interface, with per-tool examples and the JSON Schema index. Live schemas in [schemas/](schemas/).
+
+## 9 tools live
 
 | Tool | Source |
 |---|---|
