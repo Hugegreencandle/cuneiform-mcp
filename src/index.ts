@@ -1763,6 +1763,7 @@ server.registerTool(
     const k = top_k ?? 15;
     const filterJoins = filter_known_joins === true;
     const requireGenre = require_genre_overlap === true;
+    const SCHEMA = schemaId("find_join_candidates");
     // Normalize "BM.41255C" → "BM.41255.C" same as get_fragment.
     const normalize = (s: string): string => {
       const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
@@ -1774,11 +1775,26 @@ server.registerTool(
     const { scoreBoth } = await import("./lineToVecScore.js");
     const corpus = await loadCorpus();
 
+    const emptyTargetData = {
+      target: { museum_number: targetId, museum_number_input: museum_number },
+      top_k: k,
+      filters: { filter_known_joins: filterJoins, require_genre_overlap: requireGenre },
+      corpus_size: 0,
+      top_by_raw_score: [],
+      top_by_weighted_score: [],
+    };
+
     if (corpus.missing) {
-      return textResult(
+      return structuredResult(
         `Local corpus cache is empty. Run \`node ${process.argv[1]} --prefetch\` ` +
           `to crawl /fragments/all-signs (~24 minutes, ~7 MB JSONL written to ` +
           `${corpus.cachePath}). Then call find_join_candidates again.`,
+        {
+          schema: SCHEMA,
+          data: emptyTargetData,
+          provenance: provenance("local", `local:lineToVecCorpus:${corpus.cachePath}`, VERSION),
+          warnings: ["corpus-cache-missing"],
+        },
       );
     }
 
@@ -1789,8 +1805,14 @@ server.registerTool(
     if (!targetEnriched) {
       // Distinguish "no such fragment" from "couldn't fetch": loadCorpus
       // already proved the cache works, so a null here means HTTP failure or 404.
-      return textResult(
+      return structuredResult(
         `Couldn't fetch eBL record for "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
+        {
+          schema: SCHEMA,
+          data: { ...emptyTargetData, corpus_size: corpus.fragments.length },
+          provenance: provenance("local", `local:lineToVecCorpus:${corpus.cachePath}`, VERSION),
+          warnings: ["target-enrichment-failed"],
+        },
       );
     }
 
@@ -1800,8 +1822,22 @@ server.registerTool(
     const targetLineToVec = targetCached?.lineToVec ?? targetEnriched.lineToVec;
     const targetDesignation = targetCached?.designation ?? targetEnriched.designation;
     if (!targetLineToVec || targetLineToVec.length === 0) {
-      return textResult(
+      return structuredResult(
         `${targetEnriched.museumNumber} has no lineToVec encoding (likely untransliterated). The join matcher cannot score it.`,
+        {
+          schema: SCHEMA,
+          data: {
+            ...emptyTargetData,
+            target: {
+              museum_number: targetEnriched.museumNumber,
+              museum_number_input: museum_number,
+              ...(targetEnriched.designation ? { designation: targetEnriched.designation } : {}),
+            },
+            corpus_size: corpus.fragments.length,
+          },
+          provenance: provenance("local", `local:lineToVecCorpus:${corpus.cachePath}`, VERSION),
+          warnings: ["target-has-no-lineToVec"],
+        },
       );
     }
 
@@ -1886,7 +1922,41 @@ server.registerTool(
       `— TOP ${topWeighted.length} BY WEIGHTED SCORE (rulings count 3-10×, text lines 1×) —`,
       ...topWeighted.flatMap((h, i) => renderHit(h, i, "weighted")),
     ];
-    return textResult(lines.join("\n"));
+
+    const toCandidate = (h: RankedHit) => {
+      const enriched = enrichmentCache.get(h.museumNumber);
+      return {
+        museum_number: h.museumNumber,
+        score: h.score,
+        weighted_score: h.weighted,
+        ...(h.designation ? { designation: h.designation } : {}),
+        ...(enriched?.genres.length ? { genres: enriched.genres } : {}),
+        ...(enriched?.joinGroupsStr ? { join_groups_str: enriched.joinGroupsStr } : {}),
+      };
+    };
+
+    return structuredResult(lines.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        target: {
+          museum_number: targetEnriched.museumNumber,
+          museum_number_input: museum_number,
+          ...(targetDesignation ? { designation: targetDesignation } : {}),
+          ...(targetEnriched.genres.length > 0 ? { genres: targetEnriched.genres } : {}),
+          ...(targetEnriched.joinMembers.size > 0
+            ? { joins_flat: [...targetEnriched.joinMembers].filter((m) => m !== targetEnriched.museumNumber) }
+            : {}),
+          ...(targetEnriched.joinGroupsStr ? { join_groups_str: targetEnriched.joinGroupsStr } : {}),
+        },
+        top_k: k,
+        filters: { filter_known_joins: filterJoins, require_genre_overlap: requireGenre },
+        corpus_size: corpus.fragments.length,
+        ...(corpus.ageMs !== null ? { corpus_age_ms: corpus.ageMs } : {}),
+        top_by_raw_score: topRaw.map(toCandidate),
+        top_by_weighted_score: topWeighted.map(toCandidate),
+      },
+      provenance: provenance("local", `local:lineToVecCorpus:${corpus.cachePath}`, VERSION),
+    });
   },
 );
 
@@ -1952,6 +2022,7 @@ server.registerTool(
     const k = top_k ?? 15;
     const filterJoins = filter_known_joins === true;
     const requireGenre = require_genre_overlap === true;
+    const SCHEMA = schemaId("find_parallel_text");
     const normalize = (s: string): string => {
       const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
       return m ? `${m[1]}.${m[2]}.${m[3]}` : s;
@@ -1962,11 +2033,24 @@ server.registerTool(
       "./signsIndex.js"
     );
     const idx = await loadSignsIndex();
+    const emptyTargetData = {
+      target: { museum_number: targetId, museum_number_input: museum_number },
+      top_k: k,
+      filters: { filter_known_joins: filterJoins, require_genre_overlap: requireGenre },
+      corpus_size: 0,
+      candidates: [],
+    };
     if (idx.missing) {
-      return textResult(
+      return structuredResult(
         `Sign-trigram index missing. Run \`node scripts/build-signs-index.mjs\` ` +
           `to fetch eBL /fragments/all-signs and write the cache at ` +
           `${idx.cachePath} (one ~26 s request, ~33 MB on disk).`,
+        {
+          schema: SCHEMA,
+          data: emptyTargetData,
+          provenance: provenance("local", `local:signTrigramIndex:${idx.cachePath}`, VERSION),
+          warnings: ["signs-index-missing"],
+        },
       );
     }
 
@@ -1975,8 +2059,14 @@ server.registerTool(
     // both the up-to-date `signs` AND the genres/joins we need anyway.
     const targetEnriched = await fetchEnrichment(targetId);
     if (!targetEnriched) {
-      return textResult(
+      return structuredResult(
         `Couldn't fetch eBL record for "${museum_number}" (tried ${targetId}). Use search_fragments to discover valid IDs.`,
+        {
+          schema: SCHEMA,
+          data: { ...emptyTargetData, corpus_size: idx.fragments.size },
+          provenance: provenance("local", `local:signTrigramIndex:${idx.cachePath}`, VERSION),
+          warnings: ["target-enrichment-failed"],
+        },
       );
     }
     let targetTrigrams = idx.fragments.get(targetEnriched.museumNumber);
@@ -1994,17 +2084,61 @@ server.registerTool(
       }
     }
     if (!targetTrigrams || targetTrigrams.size === 0) {
-      return textResult(
+      return structuredResult(
         `${targetEnriched.museumNumber} has no sign-trigram fingerprint (likely untransliterated or too few signs). The parallel-text matcher cannot score it.`,
+        {
+          schema: SCHEMA,
+          data: {
+            ...emptyTargetData,
+            target: {
+              museum_number: targetEnriched.museumNumber,
+              museum_number_input: museum_number,
+              ...(targetEnriched.designation ? { designation: targetEnriched.designation } : {}),
+            },
+            corpus_size: idx.fragments.size,
+          },
+          provenance: provenance("local", `local:signTrigramIndex:${idx.cachePath}`, VERSION),
+          warnings: ["target-has-no-trigrams"],
+        },
       );
     }
 
-    type Hit = { museumNumber: string; jaccard: number };
+    // Score every candidate. Track intersection_size + union_size + a
+    // deterministic sample of shared trigrams — this is the Phase 2
+    // audit surface (scholars can see WHY a candidate matched, not just
+    // where it ranked).
+    type Hit = {
+      museumNumber: string;
+      jaccard: number;
+      intersection: number;
+      union: number;
+      candFingerprint: number;
+      shared: string[]; // small deterministic sample
+    };
+    const SHARED_SAMPLE_CAP = 10;
     const hits: Hit[] = [];
     for (const [mn, candSet] of idx.fragments) {
       if (mn === targetEnriched.museumNumber) continue;
       const j = jaccard(targetTrigrams, candSet);
-      if (j > 0) hits.push({ museumNumber: mn, jaccard: j });
+      if (j === 0) continue;
+      // Manually compute intersection + sample. Iterate the smaller set
+      // for performance (same trick as the jaccard helper).
+      const [small, big] =
+        targetTrigrams.size <= candSet.size ? [targetTrigrams, candSet] : [candSet, targetTrigrams];
+      const sharedAll: string[] = [];
+      for (const tri of small) if (big.has(tri)) sharedAll.push(tri);
+      sharedAll.sort();
+      const shared = sharedAll.slice(0, SHARED_SAMPLE_CAP);
+      const intersection = sharedAll.length;
+      const union = targetTrigrams.size + candSet.size - intersection;
+      hits.push({
+        museumNumber: mn,
+        jaccard: j,
+        intersection,
+        union,
+        candFingerprint: candSet.size,
+        shared,
+      });
     }
     hits.sort((a, b) => b.jaccard - a.jaccard);
 
@@ -2038,7 +2172,8 @@ server.registerTool(
       const cand = enrichmentCache.get(h.museumNumber);
       const out: string[] = [];
       out.push(
-        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} jaccard=${h.jaccard.toFixed(4)}` +
+        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} jaccard=${h.jaccard.toFixed(4)} ` +
+          `(∩=${h.intersection}, ∪=${h.union})` +
           (cand?.designation ? `   ${cand.designation}` : ""),
       );
       if (cand?.genres.length) out.push(`     genres: ${cand.genres.join("; ")}`);
@@ -2059,13 +2194,49 @@ server.registerTool(
       `Parallel-text candidates for ${targetEnriched.museumNumber}${targetEnriched.designation ? `  (${targetEnriched.designation})` : ""}`,
       `Scored against ${idx.fragments.size} cached fragments by sign-trigram Jaccard. Cache age: ${ageMin}m. Target fingerprint: ${targetTrigrams.size} unique trigrams.`,
       `Note: hits include parallel manuscripts + probable physical joins + coincidentally text-similar fragments — disambiguate with the genres/joins below each hit.`,
+      `Audit fields: ∩ = intersection size (shared trigrams), ∪ = union size. structuredContent.candidates[*].shared_trigrams_sample carries up to 10 matched trigrams.`,
       ...targetHeaderBits,
       ...(filterNotes.length ? [`Filters: ${filterNotes.join(" · ")}`] : []),
       ``,
       `— TOP ${top.length} BY JACCARD —`,
       ...top.flatMap((h, i) => renderHit(h, i)),
     ];
-    return textResult(lines.join("\n"));
+
+    return structuredResult(lines.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        target: {
+          museum_number: targetEnriched.museumNumber,
+          museum_number_input: museum_number,
+          ...(targetEnriched.designation ? { designation: targetEnriched.designation } : {}),
+          ...(targetEnriched.genres.length > 0 ? { genres: targetEnriched.genres } : {}),
+          ...(targetEnriched.joinMembers.size > 0
+            ? { joins_flat: [...targetEnriched.joinMembers].filter((m) => m !== targetEnriched.museumNumber) }
+            : {}),
+          ...(targetEnriched.joinGroupsStr ? { join_groups_str: targetEnriched.joinGroupsStr } : {}),
+        },
+        target_fingerprint_size: targetTrigrams.size,
+        top_k: k,
+        filters: { filter_known_joins: filterJoins, require_genre_overlap: requireGenre },
+        corpus_size: idx.fragments.size,
+        ...(idx.ageMs !== null ? { corpus_age_ms: idx.ageMs } : {}),
+        candidates: top.map((h) => {
+          const enr = enrichmentCache.get(h.museumNumber);
+          return {
+            museum_number: h.museumNumber,
+            jaccard: h.jaccard,
+            intersection_size: h.intersection,
+            union_size: h.union,
+            candidate_fingerprint_size: h.candFingerprint,
+            shared_trigrams_sample: h.shared,
+            ...(enr?.designation ? { designation: enr.designation } : {}),
+            ...(enr?.genres.length ? { genres: enr.genres } : {}),
+            ...(enr?.joinGroupsStr ? { join_groups_str: enr.joinGroupsStr } : {}),
+          };
+        }),
+      },
+      provenance: provenance("local", `local:signTrigramIndex:${idx.cachePath}`, VERSION),
+    });
   },
 );
 

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_join_candidates.schema.json",
+  "title": "find_join_candidates data payload",
+  "description": "Structured payload for the `find_join_candidates` tool. Surfaces eBL's published lineToVec ranker locally — recall@15 = 3.4% on known joins (validation 2026-05-14). Use `find_parallel_text` (22% recall) as the primary discovery tool; this one cross-validates against eBL's algorithm.\n\nEach candidate carries its raw and ruling-weighted score so downstream consumers can re-rank by their own combination. Provenance is `source: local`, `endpoint: local:lineToVecCorpus`, with `corpus_age_ms` reporting how old the cached index is.",
+  "type": "object",
+  "required": ["target", "top_k", "filters", "corpus_size", "top_by_raw_score", "top_by_weighted_score"],
+  "additionalProperties": false,
+  "properties": {
+    "target": { "$ref": "#/$defs/TargetRecord" },
+    "top_k": { "type": "integer", "minimum": 1 },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filter_known_joins", "require_genre_overlap"],
+      "properties": {
+        "filter_known_joins": { "type": "boolean" },
+        "require_genre_overlap": { "type": "boolean" }
+      }
+    },
+    "corpus_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of fragments scored against the target — i.e. how many have a non-empty lineToVec in our local cache."
+    },
+    "corpus_age_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Age in milliseconds of the on-disk corpus snapshot. Re-run --prefetch to refresh."
+    },
+    "top_by_raw_score": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Candidate" },
+      "description": "Top-K by raw prefix/suffix overlap length. Same NUMBER_OF_RESULTS_TO_RETURN = 15 as eBL's LineToVecRanker."
+    },
+    "top_by_weighted_score": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Candidate" },
+      "description": "Top-K by ruling-weighted score (text lines 1×, single ruling 3×, double 6×, triple 10× — same WEIGHTS map as ebl-api)."
+    }
+  },
+  "$defs": {
+    "TargetRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["museum_number"],
+      "properties": {
+        "museum_number": { "type": "string" },
+        "museum_number_input": { "type": "string" },
+        "designation": { "type": "string" },
+        "genres": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "joins_flat": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "join_groups_str": { "type": "string" }
+      }
+    },
+    "Candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["museum_number", "score", "weighted_score"],
+      "properties": {
+        "museum_number": { "type": "string" },
+        "designation": { "type": "string" },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Raw prefix/suffix overlap length (count of matched markers)."
+        },
+        "weighted_score": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ruling-weighted score using eBL's WEIGHTS map."
+        },
+        "genres": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "join_groups_str": {
+          "type": "string",
+          "description": "Known join groups for this candidate, semicolon-separated. Useful for showing \"this hit is from the same recorded join cluster\"."
+        }
+      }
+    }
+  }
+}

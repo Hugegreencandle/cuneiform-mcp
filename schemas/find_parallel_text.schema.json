@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_parallel_text.schema.json",
+  "title": "find_parallel_text data payload",
+  "description": "Structured payload for the `find_parallel_text` tool. Primary parallel/join discovery tool — sign-trigram Jaccard, ~22% recall@15 on known eBL joins (combined N=151, 267 known siblings, validation 2026-05-14).\n\nEach candidate carries its Jaccard similarity, intersection size, union size, AND a sample of shared trigrams. This is the Phase 2 auditable-join surface: scholars can inspect WHY a candidate matched, not just where it ranked. Provenance is `source: local`, `endpoint: local:signTrigramIndex`.",
+  "type": "object",
+  "required": ["target", "top_k", "filters", "corpus_size", "candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "target": { "$ref": "find_join_candidates.schema.json#/$defs/TargetRecord" },
+    "target_fingerprint_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of unique trigrams in the target's signs fingerprint (after the ≥2-X-trigram filter)."
+    },
+    "top_k": { "type": "integer", "minimum": 1 },
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filter_known_joins", "require_genre_overlap"],
+      "properties": {
+        "filter_known_joins": { "type": "boolean" },
+        "require_genre_overlap": { "type": "boolean" }
+      }
+    },
+    "corpus_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of fragments scored against the target — those with ≥1 trigram after filtering."
+    },
+    "corpus_age_ms": { "type": "integer", "minimum": 0 },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["museum_number", "jaccard", "intersection_size", "union_size"],
+        "properties": {
+          "museum_number": { "type": "string" },
+          "designation": { "type": "string" },
+          "jaccard": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Jaccard similarity = |A ∩ B| / |A ∪ B| where A, B are the trigram sets."
+          },
+          "intersection_size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Count of trigrams in BOTH target and candidate. This is the load-bearing audit field — a high Jaccard with intersection=2 means coincidence on a tiny shared vocabulary; intersection=200 means real evidence."
+          },
+          "union_size": { "type": "integer", "minimum": 0 },
+          "candidate_fingerprint_size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of unique trigrams in this candidate. Helps scholars judge whether a high score is dominated by a small candidate fingerprint."
+          },
+          "shared_trigrams_sample": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Up to 10 trigrams that appeared in both target and candidate. Sampled deterministically by sort order for reproducibility. The full intersection is recoverable by re-running with a larger sample cap (future tool option)."
+          },
+          "genres": { "type": "array", "items": { "type": "string" } },
+          "join_groups_str": { "type": "string" }
+        }
+      }
+    }
+  }
+}
