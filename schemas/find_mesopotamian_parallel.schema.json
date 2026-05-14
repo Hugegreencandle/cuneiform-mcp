@@ -156,7 +156,8 @@
         },
         "language": {
           "type": "string",
-          "enum": ["Sumerian", "Akkadian", "Ugaritic", "Hittite", "Hurrian", "bilingual"]
+          "enum": ["Sumerian", "Akkadian", "Ugaritic", "Hittite", "Hurrian", "Egyptian", "Demotic", "Coptic", "Greek", "bilingual"],
+          "description": "Original language of the source text. `Egyptian` for hieroglyphic + hieratic; `Demotic` for late-period cursive; `Coptic` for Christian-era; `Greek` for Hellenistic Egyptian (Hermetica, Berossus, etc.). v0.9.0+ extends with Egyptian-tradition languages."
         },
         "tradition": {
           "type": "string",
@@ -168,8 +169,11 @@
             "ugaritic",
             "hurrian_hittite",
             "amorite",
+            "egyptian",
+            "hellenistic_egyptian",
             "other"
-          ]
+          ],
+          "description": "Cultural-linguistic tradition. `egyptian` covers Old/Middle/New Kingdom Egyptian theological corpora (Pyramid Texts, Coffin Texts, Book of the Dead, Memphite Theology, Amarna). `hellenistic_egyptian` covers Hermetica, Demotic religious texts, Ptolemaic-era syncretism. v0.9.0+."
         },
         "approximate_date": {
           "type": "string"

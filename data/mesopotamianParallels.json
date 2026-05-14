@@ -3,7 +3,12 @@
     "description": "Curated cross-Mesopotamian-internal parallels validated by the Discovery Engine v0.7 pipeline. These are parallels between Mesopotamian / Hurrian-Hittite / Ugaritic figures and texts that DO NOT fit v0.6's Jewish-passage query structure but ARE validated against named published scholars. Query by deity, theme, tradition-pair, or text. Same named-scholarship discipline as v0.6.",
     "compiled": "2026-05-15",
     "curator_note": "Promoted from data/discoveredCandidates.json (machine-discovered, human-scholar validated). v0.8.0 ships with 6 parallels from the Discovery Engine; manual additions can be made to extend the dataset.",
-    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset."
+    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset.",
+    "v0_9_0_egyptian_expansion": {
+      "date": "2026-05-15",
+      "new_parallels_added": 4,
+      "source": "Mesopotamia_Egypt_Comparative.md framework brief (Tier-1 + Tier-2 recommendations)"
+    }
   },
   "parallels": [
     {
@@ -23,9 +28,25 @@
         "approximate_date": "Late Bronze Age (c. 1400-1200 BCE)"
       },
       "parallel_type": "structural",
-      "themes": ["chaoskampf", "cosmogonic_combat", "primordial_waters", "divine_kingship_via_combat"],
-      "deities": ["Marduk", "Tiamat", "Baal", "Yam", "Ea", "Kothar-wa-Hasis"],
-      "texts": ["Enūma Eliš", "Baal Cycle", "KTU 1.1-1.2"],
+      "themes": [
+        "chaoskampf",
+        "cosmogonic_combat",
+        "primordial_waters",
+        "divine_kingship_via_combat"
+      ],
+      "deities": [
+        "Marduk",
+        "Tiamat",
+        "Baal",
+        "Yam",
+        "Ea",
+        "Kothar-wa-Hasis"
+      ],
+      "texts": [
+        "Enūma Eliš",
+        "Baal Cycle",
+        "KTU 1.1-1.2"
+      ],
       "correspondence_strength": "strong",
       "scholarly_attribution": [
         {
@@ -70,9 +91,25 @@
         "approximate_date": "Standard Babylonian (c. 1100 BCE)"
       },
       "parallel_type": "structural",
-      "themes": ["divine_substitution", "warrior_god_pattern", "succession", "young_hero_inherits"],
-      "deities": ["Ninurta", "Asag", "Anzu", "Marduk", "Tiamat", "Enlil"],
-      "texts": ["lugal-e", "Anzû Epic", "Enūma Eliš"],
+      "themes": [
+        "divine_substitution",
+        "warrior_god_pattern",
+        "succession",
+        "young_hero_inherits"
+      ],
+      "deities": [
+        "Ninurta",
+        "Asag",
+        "Anzu",
+        "Marduk",
+        "Tiamat",
+        "Enlil"
+      ],
+      "texts": [
+        "lugal-e",
+        "Anzû Epic",
+        "Enūma Eliš"
+      ],
       "correspondence_strength": "strong",
       "scholarly_attribution": [
         {
@@ -117,9 +154,26 @@
         "approximate_date": "Old Babylonian onward (c. 1700 BCE+)"
       },
       "parallel_type": "logographic",
-      "themes": ["mother_goddess", "syncretism", "logographic_equation", "birth_ritual"],
-      "deities": ["Hannahanna", "Bēlet-ilī", "Ninhursag", "Ninmah", "Nintu", "Mami", "Aruru"],
-      "texts": ["Hittite Birth Rituals", "Atra-ḫasīs", "Telipinu myth"],
+      "themes": [
+        "mother_goddess",
+        "syncretism",
+        "logographic_equation",
+        "birth_ritual"
+      ],
+      "deities": [
+        "Hannahanna",
+        "Bēlet-ilī",
+        "Ninhursag",
+        "Ninmah",
+        "Nintu",
+        "Mami",
+        "Aruru"
+      ],
+      "texts": [
+        "Hittite Birth Rituals",
+        "Atra-ḫasīs",
+        "Telipinu myth"
+      ],
       "correspondence_strength": "strong",
       "scholarly_attribution": [
         {
@@ -164,9 +218,22 @@
         "approximate_date": "c. 765 BCE (per Erra Epic dating)"
       },
       "parallel_type": "structural",
-      "themes": ["named_authorship", "scribal_tradition", "dream_revelation"],
-      "deities": ["Inanna", "Erra", "Marduk"],
-      "texts": ["Exaltation of Inanna", "Inanna and Ebih", "Erra Epic", "Catalogue of Texts and Authors"],
+      "themes": [
+        "named_authorship",
+        "scribal_tradition",
+        "dream_revelation"
+      ],
+      "deities": [
+        "Inanna",
+        "Erra",
+        "Marduk"
+      ],
+      "texts": [
+        "Exaltation of Inanna",
+        "Inanna and Ebih",
+        "Erra Epic",
+        "Catalogue of Texts and Authors"
+      ],
       "correspondence_strength": "moderate",
       "scholarly_attribution": [
         {
@@ -211,9 +278,22 @@
         "approximate_date": "Old Babylonian recension c. 1817 BCE"
       },
       "parallel_type": "structural",
-      "themes": ["king_list_dissent", "competing_historiography", "parody", "cosmological_dispute"],
-      "deities": ["An", "Enlil", "Ningirsu"],
-      "texts": ["Rulers of Lagaš", "Sumerian King List", "WB 444"],
+      "themes": [
+        "king_list_dissent",
+        "competing_historiography",
+        "parody",
+        "cosmological_dispute"
+      ],
+      "deities": [
+        "An",
+        "Enlil",
+        "Ningirsu"
+      ],
+      "texts": [
+        "Rulers of Lagaš",
+        "Sumerian King List",
+        "WB 444"
+      ],
       "correspondence_strength": "strong",
       "scholarly_attribution": [
         {
@@ -253,9 +333,25 @@
         "approximate_date": "Amarna period EA 356 (c. 1350 BCE) + Nineveh fragments"
       },
       "parallel_type": "structural",
-      "themes": ["descent_ascent", "cosmological_paired_motif", "boundary_crossing", "gatekeeper_passage"],
-      "deities": ["Inanna", "Adapa", "Anu", "Ea", "Dumuzi", "Gishzida", "Ereshkigal"],
-      "texts": ["Inanna's Descent", "Adapa myth"],
+      "themes": [
+        "descent_ascent",
+        "cosmological_paired_motif",
+        "boundary_crossing",
+        "gatekeeper_passage"
+      ],
+      "deities": [
+        "Inanna",
+        "Adapa",
+        "Anu",
+        "Ea",
+        "Dumuzi",
+        "Gishzida",
+        "Ereshkigal"
+      ],
+      "texts": [
+        "Inanna's Descent",
+        "Adapa myth"
+      ],
       "correspondence_strength": "moderate",
       "scholarly_attribution": [
         {
@@ -273,6 +369,219 @@
         "discovery_candidate_pair": "Inanna's Descent (cosmological descent narrative) ↔ Adapa's ascent (cosmological ascent narrative)"
       },
       "notes": "Originally discovered as '7-gates-vs-2-gatekeepers structural inversion' but reformulated in v0.7.4 to match Annus 2016's actual broader paired-motif framing. The Dumuzi/Gishzida gatekeepers at Anu's heavenly gate are striking because both are chthonic underworld gods in their other attestations — the doubling reinforces Annus's claim that descent-and-ascent are structurally linked in Mesopotamian cosmology."
+    },
+    {
+      "id": "mp-creation-by-word-1",
+      "entity_a": {
+        "text": "Memphite Theology — Ptah of Memphis creates by heart (conception) and tongue (articulation); the world arises by divine word",
+        "citation": "Shabaka Stone, BM EA 498 (Allen 1988; Sethe 1928)",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Inscribed c. 716 BCE on Shabaka Stone; theology arguably older (Middle Kingdom?), dating contested per Junge 1973"
+      },
+      "entity_b": {
+        "text": "Marduk creates by word-and-action in Enūma Eliš Tablet IV — Marduk's divine speech tests his power (a constellation appears and disappears at his word) before he proceeds to split Tiamat and form the cosmos",
+        "citation": "Enūma Eliš IV.19-26 (Lambert 2013)",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Standard Babylonian (c. 1100 BCE)"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "creation_by_word",
+        "cosmogonic_theology",
+        "divine_speech",
+        "supreme_god_promotion"
+      ],
+      "deities": [
+        "Ptah",
+        "Atum",
+        "Marduk",
+        "Ea"
+      ],
+      "texts": [
+        "Memphite Theology",
+        "Shabaka Stone",
+        "Enūma Eliš"
+      ],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Allen 1988",
+          "publication": "James P. Allen, Genesis in Egypt: The Philosophy of Ancient Egyptian Creation Accounts, Yale Egyptological Studies 2 (New Haven: Yale UP, 1988)",
+          "argument_summary": "Allen treats the Memphite Theology's heart-and-tongue creation as the most philosophically developed Egyptian creation account, comparing it to Mesopotamian theology where divine speech is also creative. Establishes the structural parallel between Egyptian Ptah-as-word-creator and Mesopotamian Marduk-as-word-creator."
+        },
+        {
+          "author_year": "Assmann 2001",
+          "publication": "Jan Assmann, The Search for God in Ancient Egypt (Ithaca: Cornell UP, 2001; trans. David Lorton from 1984 German)",
+          "argument_summary": "Assmann treats the creation-by-word motif as a shared ANE theological move where one god is elevated to creator-supremacy via speech rather than physical action. The Memphite Theology and Enūma Eliš are placed in the same theological-political category: theology serving city-political consolidation through cosmogonic claims."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.9 Egyptian expansion — curated from Mesopotamia_Egypt_Comparative.md framework brief"
+      },
+      "notes": "v0.9.0 Egyptian expansion. The Memphite Theology's heart-tongue creation is also the comparative anchor for the Genesis 1 fiat-creation parallel (see antediluvianParallels.json Genesis 1:1-3 entry) — both Mesopotamia↔Egypt and Egypt↔Hebrew triangulation through this structural pattern."
+    },
+    {
+      "id": "mp-scribal-god-1",
+      "entity_a": {
+        "text": "Thoth (Egyptian) — god of writing, scribal craft, magical knowledge, the moon, and divine record-keeping. Patron of the *per-ankh* (House of Life) priestly institution. Often depicted as ibis or baboon. Records the Weighing of the Heart in BD Spell 125.",
+        "citation": "Pyramid Texts, Coffin Texts, Book of the Dead; Hornung 1982 + Mark Smith 2017",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Attested from Old Kingdom (c. 2400 BCE) onward; canonical scribal-god throughout Egyptian history"
+      },
+      "entity_b": {
+        "text": "Nabu (Mesopotamian) — god of writing, scribal craft, and divine wisdom. Son of Marduk. Patron of the *bīt mummi* (scribal house). Often depicted with stylus and tablet. Records on the Tablet of Destinies.",
+        "citation": "Lambert 2013; ORACC AMGG entry on Nabu",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Attested from Old Babylonian (c. 1700 BCE) onward; canonical scribal-god of late-Babylonian period"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "scribal_god",
+        "wisdom",
+        "divine_record_keeping"
+      ],
+      "deities": [
+        "Thoth",
+        "Nabu",
+        "Marduk"
+      ],
+      "texts": [
+        "Egyptian funerary corpus",
+        "Babylonian scholarly texts"
+      ],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Hornung 1982",
+          "publication": "Erik Hornung, Conceptions of God in Ancient Egypt: The One and the Many (Ithaca: Cornell UP, 1982; trans. John Baines from 1971 German)",
+          "argument_summary": "Hornung treats Thoth as the prototypical Egyptian scribal-wisdom god, structurally parallel to Mesopotamian Nabu — both are subordinate-but-central administrative gods within polytheistic systems organized around a supreme deity (Re/Marduk)."
+        },
+        {
+          "author_year": "Mark Smith 2010",
+          "publication": "Mark S. Smith, God in Translation: Deities in Cross-Cultural Discourse in the Biblical World, Forschungen zum Alten Testament 57 (Tübingen: Mohr Siebeck, 2008; reprint Eerdmans 2010)",
+          "argument_summary": "Discusses cross-cultural deity-equation (interpretatio graeca, interpretatio mesopotamica) and treats Thoth-Nabu as one of the cleanest scribal-god equations across ANE traditions. Both gods bridged via Hellenistic Hermes Trismegistus in Greco-Roman period."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.9 Egyptian expansion — curated from Mesopotamia_Egypt_Comparative.md framework brief"
+      },
+      "notes": "v0.9.0 Egyptian expansion. Both gods are bridged via Hellenistic Hermes Trismegistus (Egyptian Hermetica corpus). See also Berossus.md for the Hellenistic Mesopotamian wisdom-god syncretism (Ea → Oannes → Hermes Trismegistus)."
+    },
+    {
+      "id": "mp-cosmic-order-1",
+      "entity_a": {
+        "text": "Egyptian Maat — cosmic order, truth, justice, harmony; the binding principle that all gods and humans must uphold; personified as goddess (daughter of Re) with feather-of-truth; weighed against the heart in BD Spell 125",
+        "citation": "BD Spell 125 (Faulkner 1985); Pyramid Texts and Coffin Texts substrate; Assmann 1990 Ma'at, Gerechtigkeit und Unsterblichkeit",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Continuous from Old Kingdom (c. 2400 BCE) onward"
+      },
+      "entity_b": {
+        "text": "Sumerian me — cosmic ordinances, the divinely-decreed structures of civilization; held at Eridu by Enki; transferred to Inanna at Uruk in 'Inanna and Enki'; comprise institutions, professions, technologies, emotional states",
+        "citation": "Inanna and Enki (ETCSL 1.3.1); Farber-Flügge 1973 (foundational study)",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Old Babylonian recension c. 1700 BCE; substrate likely older"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "cosmic_order",
+        "organizing_principle",
+        "ethical_substrate"
+      ],
+      "deities": [
+        "Maat",
+        "Enki",
+        "Inanna",
+        "Re"
+      ],
+      "texts": [
+        "Book of the Dead Spell 125",
+        "Inanna and Enki",
+        "Coffin Texts"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Assmann 1990",
+          "publication": "Jan Assmann, Ma'at: Gerechtigkeit und Unsterblichkeit im Alten Ägypten (Munich: C.H. Beck, 1990)",
+          "argument_summary": "Foundational German monograph on Maat as Egyptian cosmic-order principle. Compares Maat to other ANE organizing-principle concepts including Mesopotamian me. Both are foundational organizing-principles for their respective theologies but differently structured: Maat is unitary cosmic-justice; me are plural civilizational ordinances."
+        },
+        {
+          "author_year": "Mark Smith 2010",
+          "publication": "Mark S. Smith, God in Translation: Deities in Cross-Cultural Discourse in the Biblical World (Tübingen: Mohr Siebeck / Eerdmans 2010)",
+          "argument_summary": "Discusses Maat and me as structurally comparable cosmic-order concepts within their respective ANE theological systems, though differing in scope and personification."
+        }
+      ],
+      "transmission_hypothesis": "independent_typological_match",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.9 Egyptian expansion — curated from Mesopotamia_Egypt_Comparative.md framework brief"
+      },
+      "notes": "v0.9.0 Egyptian expansion. Differences are as load-bearing as similarities: Maat is unitary cosmic-justice personified as goddess; me are plural civilizational ordinances held as objects. Both organize their respective cosmologies but at different scales and granularities."
+    },
+    {
+      "id": "mp-royal-renewal-1",
+      "entity_a": {
+        "text": "Egyptian Sed-festival (Heb-Sed) — royal jubilee ritual celebrated at intervals (traditionally 30 years after coronation, then every 3 years); pharaoh's authority renewed through ritual race + recrowning ceremony",
+        "citation": "Hornung 1992 Idea into Image; various tomb and temple reliefs",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Attested from Old Kingdom (1st Dynasty) onward"
+      },
+      "entity_b": {
+        "text": "Babylonian Akitu festival — annual New Year ritual at Babylon, 12 days in Nisannu; king's authority renewed before Marduk's cult statue; the king is ritually 'slapped' and 'humiliated' as part of authority-renewal; Enūma Eliš recited on day 4",
+        "citation": "Bidmead 2002 The Akītu Festival; Black 1981 Religion 11",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Attested throughout 2nd-1st millennium BCE"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "royal_renewal",
+        "ritual_authority",
+        "cyclical_kingship"
+      ],
+      "deities": [
+        "Re",
+        "Marduk"
+      ],
+      "texts": [
+        "Sed-festival reliefs",
+        "Akitu ritual texts",
+        "Enūma Eliš"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Hornung 1992",
+          "publication": "Erik Hornung, Idea into Image: Essays on Ancient Egyptian Thought (New York: Timken, 1992; trans. Elizabeth Bredeck from 1989 German Geist der Pharaonenzeit)",
+          "argument_summary": "Hornung treats the Sed-festival as the Egyptian royal-renewal ritual paralleling but distinct from ANE neighbors. Notes the Mesopotamian Akitu as the closest comparative parallel: both renew royal authority through ritual + cosmogonic recitation. Differs from Akitu in absence of king-humiliation element."
+        },
+        {
+          "author_year": "Bidmead 2002",
+          "publication": "Julye Bidmead, The Akītu Festival: Religious Continuity and Royal Legitimation in Mesopotamia (Piscataway, NJ: Gorgias Press, 2002)",
+          "argument_summary": "Bidmead 2002 explicitly compares the Akitu to Egyptian Sed-festival as parallel royal-legitimation rituals, while moving away from older Frankfort/Hooke myth-and-ritual readings that overstated the cosmogonic dying-and-rising-god framework."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.9 Egyptian expansion — curated from Mesopotamia_Egypt_Comparative.md framework brief"
+      },
+      "notes": "v0.9.0 Egyptian expansion. Note: the older myth-and-ritual reading (Frankfort, Hooke) overstated the cosmogonic-renewal dimension. Current consensus (Bidmead 2002, Hornung 1992) treats both rituals as political-theological royal-legitimation rituals with distinct mechanisms — Sed-festival emphasizes recrowning; Akitu emphasizes king-humiliation-and-renewal."
     }
   ]
 }

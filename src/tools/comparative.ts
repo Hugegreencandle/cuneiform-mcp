@@ -235,6 +235,8 @@ export type MesopotamianTradition =
   | "ugaritic"
   | "hurrian_hittite"
   | "amorite"
+  | "egyptian"
+  | "hellenistic_egyptian"
   | "other";
 
 export type MesopotamianLanguage =
@@ -243,6 +245,10 @@ export type MesopotamianLanguage =
   | "Ugaritic"
   | "Hittite"
   | "Hurrian"
+  | "Egyptian"
+  | "Demotic"
+  | "Coptic"
+  | "Greek"
   | "bilingual";
 
 export type MesopotamianParallelType =

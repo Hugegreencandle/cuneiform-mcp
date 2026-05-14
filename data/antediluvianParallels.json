@@ -19,6 +19,11 @@
       "new_results_added": 2,
       "new_queries_added": 1,
       "existing_queries_appended": 1
+    },
+    "v0_9_0_egyptian_expansion": {
+      "date": "2026-05-15",
+      "new_queries_added": 3,
+      "source": "Mesopotamia_Egypt_Comparative.md framework brief (Hebrew↔Egyptian Tier-1 recommendations)"
     }
   },
   "parallels": [
@@ -662,6 +667,140 @@
           ],
           "transmission_hypothesis": "common_ancient_near_eastern_substrate",
           "notes": "Promoted from Discovery Engine v0.7 reformulation pass (2026-05-15). Wenham 1987 catalogues 17 points of contact-and-divergence between Genesis and the Mesopotamian flood tradition, with flood-duration as one of the documented divergences. Mesopotamian witnesses preserve a stable seven-and-seven-day duration across all three sources; the Hebrew variant (40-day rain in Gen 7:12 attributed to J; 150-day prevailing waters in Gen 7:24 attributed to P) represents redactional layering of distinct flood-account sources. Lambert & Millard 1969 establishes the Mesopotamian canonical duration."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Psalm 104:1-35"
+        ],
+        "topics": [
+          "aten_hymn_parallel",
+          "creation_hymn",
+          "monotheist_doxology"
+        ]
+      },
+      "passage_text": "Bless Jehovah, O my soul. O Jehovah my God, thou art very great; Thou art clothed with honor and majesty: Who coverest thyself with light as with a garment; Who stretchest out the heavens like a curtain... O Jehovah, how manifold are thy works! In wisdom hast thou made them all: The earth is full of thy riches.",
+      "passage_translator": "ASV 1901 — Psalm 104:1-2, 24",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "The Great Hymn to the Aten (composed under Akhenaten c. 1353-1336 BCE; inscribed in the tomb of Ay at Akhetaten / modern Amarna)",
+            "citation": "Murnane 1995 Texts from the Amarna Period (SBL WAW 5); Lichtheim 1976 Ancient Egyptian Literature Vol. 2",
+            "language": "Egyptian",
+            "approximate_date": "Amarna period c. 1353-1336 BCE"
+          },
+          "parallel_type": "lexical",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Breasted 1905/1933",
+              "publication": "James Henry Breasted, A History of Egypt (London: Hodder & Stoughton, 1905); also Dawn of Conscience (New York: Scribner's, 1933)",
+              "argument_summary": "Original argument that the Great Hymn to the Aten directly influenced Psalm 104 via Egyptian-Hebrew religious-historical contact. Breasted's reading was that the Hymn's specific phrases ('How manifold are your works!' / 'You make the seasons') were borrowed by the Israelite psalmist. Subsequent scholarship has refined this to a more nuanced shared-substrate position."
+            },
+            {
+              "author_year": "Assmann 1997",
+              "publication": "Jan Assmann, Moses the Egyptian: The Memory of Egypt in Western Monotheism (Cambridge MA: Harvard UP, 1997)",
+              "argument_summary": "Refines Breasted's thesis. Argues the Aten-Psalm 104 parallel reflects common Ancient Near Eastern hymnic conventions and shared religious vocabulary rather than direct Hebrew borrowing from Egyptian text. The 'Mosaic distinction' (monotheism vs polytheism) is a later Israelite theological development; both texts participate in pre-distinction ANE religious discourse."
+            },
+            {
+              "author_year": "Hoffmeier 2015",
+              "publication": "James K. Hoffmeier, Akhenaten and the Origins of Monotheism (Oxford: Oxford UP, 2015)",
+              "argument_summary": "Modern synthesis: confirms specific phraseological parallels between the Aten Hymn and Psalm 104 are real but argues for shared ANE substrate rather than direct borrowing. Reads Atenism as one ANE expression of incipient monotheist tendencies, with Israelite religion as another later expression of the same trajectory."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.9.0 Egyptian expansion (2026-05-15). The Aten Hymn ↔ Psalm 104 parallel is the most-cited single Egypt↔Hebrew Bible parallel in comparative-religion scholarship. Modern consensus has moved from Breasted's direct-borrowing position to a shared-substrate framing (Assmann 1997, Hoffmeier 2015), but the specific phraseological parallels remain documented and load-bearing."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Genesis 1:1-31"
+        ],
+        "topics": [
+          "fiat_creation",
+          "creation_by_word",
+          "cosmogonic_theology"
+        ]
+      },
+      "passage_text": "In the beginning God created the heavens and the earth... And God said, Let there be light: and there was light. And God saw the light, that it was good: and God divided the light from the darkness... And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters... And God said, Let the earth bring forth living creatures after their kind...",
+      "passage_translator": "ASV 1901 — Genesis 1:1, 3-4, 6, 24",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Memphite Theology — Ptah of Memphis creates by heart (conception) and tongue (articulation); the world arises by divine word",
+            "citation": "Shabaka Stone, BM EA 498 (Allen 1988; Sethe 1928)",
+            "language": "Egyptian",
+            "approximate_date": "Inscribed c. 716 BCE; theology arguably older"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Allen 1988",
+              "publication": "James P. Allen, Genesis in Egypt: The Philosophy of Ancient Egyptian Creation Accounts, Yale Egyptological Studies 2 (New Haven: Yale UP, 1988)",
+              "argument_summary": "Allen treats the Memphite Theology's heart-and-tongue creation as the most philosophically developed Egyptian creation account. The Egyptian-Hebrew Genesis-1-fiat-creation parallel is one of the cleanest cross-tradition theological parallels: both texts present cosmogony as result of divine speech."
+            },
+            {
+              "author_year": "Hoffmeier 1996",
+              "publication": "James K. Hoffmeier, Israel in Egypt: The Evidence for the Authenticity of the Exodus Tradition (New York: Oxford UP, 1996)",
+              "argument_summary": "Treats the Genesis 1 fiat-creation as drawing from broader ANE creation-by-word substrate of which the Memphite Theology is the most-developed Egyptian example. Argues for shared substrate rather than direct dependence."
+            },
+            {
+              "author_year": "Hoffmeier 2015",
+              "publication": "James K. Hoffmeier, Akhenaten and the Origins of Monotheism (Oxford: Oxford UP, 2015)",
+              "argument_summary": "Extends the comparative argument: notes that creation-by-word is more distinctively Egyptian than Mesopotamian among ANE cosmogonies. The Genesis 1 P-source author was likely aware of this Egyptian tradition through ongoing Egyptian-Israelite cultural contact."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.9.0 Egyptian expansion (2026-05-15). The Memphite Theology ↔ Genesis 1 parallel triangulates with the Mesopotamia↔Egypt parallel (Memphite ↔ Enūma Eliš — see mesopotamianParallels.json mp-creation-by-word-1). Three-way comparison: Memphite ↔ Enūma Eliš ↔ Genesis 1 as instantiations of cosmogonic-creation-by-word across three ANE traditions."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Exodus 20:1-17",
+          "Deuteronomy 5:6-21"
+        ],
+        "topics": [
+          "decalogue",
+          "negative_confession",
+          "ethical_codes"
+        ]
+      },
+      "passage_text": "And God spake all these words, saying, I am Jehovah thy God, who brought thee out of the land of Egypt, out of the house of bondage. Thou shalt have no other gods before me... Thou shalt not kill. Thou shalt not commit adultery. Thou shalt not steal. Thou shalt not bear false witness against thy neighbor.",
+      "passage_translator": "ASV 1901 — Exodus 20:1-3, 13-16",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Book of the Dead Spell 125 — the 42 Negative Confessions recited before the 42 judge-gods during the Weighing of the Heart ('I have not killed; I have not stolen; I have not committed adultery; I have not cursed god...')",
+            "citation": "BD Spell 125 (Faulkner 1985; Hornung 1992 Idea into Image)",
+            "language": "Egyptian",
+            "approximate_date": "New Kingdom (c. 1550 BCE onward); inscribed on funerary papyri including Papyrus of Ani (BM EA 10470)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Hoffmeier 1996",
+              "publication": "James K. Hoffmeier, Israel in Egypt: The Evidence for the Authenticity of the Exodus Tradition (New York: Oxford UP, 1996)",
+              "argument_summary": "Compares Egyptian Negative Confession (BD Spell 125) with Hebrew Decalogue and Levitical purity codes. Both texts share specific ethical-religious prohibitions (killing, theft, adultery, false witness) framed as the violator's accountability before divine judgment. Argues for shared ANE ethical-religious substrate rather than direct borrowing."
+            },
+            {
+              "author_year": "Assmann 2001",
+              "publication": "Jan Assmann, The Search for God in Ancient Egypt (Ithaca: Cornell UP, 2001; trans. David Lorton from 1984 German)",
+              "argument_summary": "Treats the Negative Confession as the Egyptian expression of cosmic-justice (Maat) accountability — structurally parallel to Israelite covenant-ethics (the Decalogue framed as the conditions of covenant fidelity). Both texts assume divine judgment based on ethical-religious behavior; both list specific prohibitions; both function within a cosmic-order theological framework."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.9.0 Egyptian expansion (2026-05-15). The Negative Confession ↔ Decalogue parallel is one of the most-cited Egypt↔Hebrew Bible ethical-religious parallels. Note: the comparison is structural (judgment-by-ethical-criteria) rather than direct literary borrowing. Specific shared prohibitions (killing, theft, adultery, false witness) are well-attested in both texts but reflect common ANE ethical-religious vocabulary rather than direct dependence."
         }
       ]
     }

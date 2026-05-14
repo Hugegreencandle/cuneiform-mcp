@@ -118,7 +118,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.8.0";
+const VERSION = "0.9.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2549,7 +2549,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion retrieval tools v0.6; 1 generative Discovery Engine tool v0.7; 1 Mesopotamian-internal retrieval tool v0.8: find_mesopotamian_parallel)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal retrieval; v0.9 Egyptian expansion adds Mesopotamia↔Egypt + Egypt↔Hebrew parallels to existing tools)\n`,
     );
     process.exit(0);
   }
