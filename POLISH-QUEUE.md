@@ -34,7 +34,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 - [x] **Surface the matcher's measured recall in user-facing text.** Shipped 2026-05-14 with the v0.4 ship: README and both tool descriptions now quote the validated numbers (3.4% for lineToVec, 25% for trigram).
 
-- [ ] **Second crawl pass covering the `/fragments/all-signs` gap.** K.2862's three known siblings (K.2868, K.5065.A, Rm.111) have transliteration content at eBL but are missing from `/fragments/all-signs` and have empty `lineToVec` on `/fragments/<id>`. eBL stats: 36,583 transliterated, 36,493 in all-signs, 36,328 in our cache with non-empty `lineToVec` — gap of ~250 fragments, concentrated in joined ones. Pass would crawl every museum number declared in any cached fragment's `joins[]`; most will return empty, but some will fill the gap. Cost: ~1,000 extra HTTPs, ~3 min.
+- [x] **Second crawl pass covering the `/fragments/all-signs` gap.** CLOSED 2026-05-14 as no-op. The premise was wrong: the polish-queue note assumed K.2862's siblings had transliteration content at `/fragments/<id>` even though missing from `/fragments/all-signs`. They don't. Probed 106 gap candidates discovered from 300 random K.* fragments' `joins[]` — every one returns 200 OK but with empty `signs` and empty `lineToVec`. 46 of 300 K.* fragments (15%) touch at least one gap-member, so the gap is common but uniformly empty. eBL knows these museum numbers exist (because in-corpus fragments declare joins to them) but has no transliteration content recorded yet. Full writeup: `GAP-PROBE-2026-05-14.md`. **Side-finding worth surfacing as a future UX item:** `find_parallel_text` could annotate "known sibling, no transliteration available at eBL" when the target has joins to gap fragments — informational only, not a matcher improvement.
 
 ## P4 — sign-trigram follow-ups (post-v0.4)
 
@@ -54,5 +54,6 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 - (P1) `find_join_candidates` ranker semantics + genre/joins filters (`2a9d01c`)
 - (P4) Sign-variant normalization — shelved, negative result (`NORMALIZATION-EXPERIMENT-2026-05-14.md`)
 - (P4) X-trigram filter (`drop ≥2 X`) — shipped, median rank 89 → 26 (`X-FILTER-EXPERIMENT-2026-05-14.md`)
+- (P3) `/fragments/all-signs` gap-fill crawl — closed as no-op, gap fragments are uniformly empty stubs at eBL (`GAP-PROBE-2026-05-14.md`)
 
 <!-- Add new items at the bottom of the appropriate priority section. Roll completed items into "Done" with commit sha. -->
