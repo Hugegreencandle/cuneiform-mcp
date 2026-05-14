@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/search_oracc.schema.json",
+  "title": "search_oracc data payload",
+  "description": "Structured payload for the `search_oracc` tool. UPenn ORACC mirror's HTML pager scraped into typed hits. The `total_hits` field comes from `data-imax` on the page wrapper and reports the upstream count; `hits` is the parsed subset (some pages report hits we can't parse because of unusual markup, surfaced via the `unparsed_hits` count).",
+  "type": "object",
+  "required": ["query", "project", "limit", "total_hits", "unique_texts", "hits"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": "string" },
+    "project": {
+      "type": "string",
+      "description": "ORACC project code as a slash-path. Top-level (e.g. `dcclt`) or nested (e.g. `saao/saa01`)."
+    },
+    "limit": { "type": "integer", "minimum": 1 },
+    "total_hits": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total hits as reported by `data-imax` on the page response (NOT necessarily the count of `hits` returned)."
+    },
+    "unique_texts": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of distinct text IDs among the parsed hits."
+    },
+    "unparsed_hits": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "When `total_hits > len(hits) + offsets`, the gap is hits the regex didn't recognize on this page."
+    },
+    "hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text_id", "iref", "citation", "snippet", "hit_type"],
+        "additionalProperties": false,
+        "properties": {
+          "text_id": {
+            "type": "string",
+            "description": "P/Q/X-prefixed text identifier extracted from the iref."
+          },
+          "iref": {
+            "type": "string",
+            "description": "Full `data-iref` attribute value as ORACC stored it — useful for deeplinks."
+          },
+          "citation": {
+            "type": "string",
+            "description": "Canonical publication citation as rendered on the pager."
+          },
+          "snippet": {
+            "type": "string",
+            "description": "Stripped text of the matched line. Tag-marked highlights are not preserved — see `rendered` in the envelope for the markdown form."
+          },
+          "hit_type": {
+            "type": "string",
+            "enum": ["translation", "transliteration"],
+            "description": "Which result shape produced this hit. ORACC uses `refline tr` for translation hits and `ce-result` for transliteration hits."
+          }
+        }
+      }
+    }
+  }
+}

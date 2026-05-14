@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_oracc_text.schema.json",
+  "title": "get_oracc_text data payload",
+  "description": "Structured payload for the `get_oracc_text` tool. ORACC TEI XML edition rendered into typed transliteration lines and translation blocks. `found=false` when the UPenn mirror returns 200 + empty body (its 404 substitute).",
+  "type": "object",
+  "required": ["project", "text_id", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "project": { "type": "string" },
+    "text_id": { "type": "string" },
+    "found": { "type": "boolean" },
+    "error": { "type": "string", "description": "Human-readable failure reason when `found=false`." },
+    "title": { "type": "string", "description": "Edition title as parsed from the TEI header." },
+    "cdli_id": {
+      "type": "string",
+      "description": "Cross-reference into CDLI when the TEI header records one. May equal `text_id` (ORACC and CDLI sometimes share P-numbers)."
+    },
+    "transliteration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line_count", "lines", "truncated"],
+      "properties": {
+        "line_count": { "type": "integer", "minimum": 0 },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "Rendered transliteration line. ORACC TEI numbers lines via `<lb n=\"N\"/>` and words via `<w lemma>` — both fold into the string form here."
+          }
+        },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "translation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["block_count", "blocks", "truncated"],
+      "properties": {
+        "block_count": { "type": "integer", "minimum": 0 },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "One translation `<div3 type=\"tr\">` block, flattened to plain text."
+          }
+        },
+        "truncated": { "type": "boolean" }
+      }
+    }
+  }
+}

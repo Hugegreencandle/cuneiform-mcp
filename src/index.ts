@@ -958,45 +958,72 @@ server.registerTool(
     const cap = max_results ?? 25;
     const proj = project.replace(/^\/+|\/+$/g, "");
     const url = `${URLS.ORACC_BASE}/${proj}/pager?q=${encodeURIComponent(query)}`;
+    const SCHEMA = schemaId("search_oracc");
     const res = await oraccHttpsGet(url);
     if (!res.ok) {
-      return textResult(
+      return structuredResult(
         `ORACC search failed (${res.status ?? "no-status"}): ${res.error} — ${url}.`,
+        {
+          schema: SCHEMA,
+          data: { query, project: proj, limit: cap, total_hits: 0, unique_texts: 0, hits: [] },
+          provenance: provenance("ORACC", url, VERSION),
+          warnings: [`upstream-fetch-failed${res.status ? `-${res.status}` : ""}`],
+        },
       );
     }
     const html = res.body;
     if (!html.includes("p4Pager")) {
-      return textResult(
+      return structuredResult(
         `Unexpected response shape (no p4Pager) from ${url}. The UPenn mirror may have changed format.`,
+        {
+          schema: SCHEMA,
+          data: { query, project: proj, limit: cap, total_hits: 0, unique_texts: 0, hits: [] },
+          provenance: provenance("ORACC", url, VERSION),
+          warnings: ["unexpected-response-shape"],
+        },
       );
     }
     const imaxMatch = html.match(/data-imax="(\d+)"/);
     const totalHits = imaxMatch ? parseInt(imaxMatch[1], 10) : 0;
     if (totalHits === 0 || html.includes("No results were found for this search")) {
-      return textResult(
-        `No results for "${query}" in ${proj}.\nSource: ${url}`,
-      );
+      return structuredResult(`No results for "${query}" in ${proj}.\nSource: ${url}`, {
+        schema: SCHEMA,
+        data: { query, project: proj, limit: cap, total_hits: 0, unique_texts: 0, hits: [] },
+        provenance: provenance("ORACC", url, VERSION),
+      });
     }
 
     // Two result shapes:
     //   translation hit  -> <p class="label">...</p>     + <p class="refline tr">…<span class="cell">…</span></p>
     //   transliteration  -> <p class="ce-label">...</p>  + <p class="ce-result">…</p>
-    const pairRegex =
-      /<p class="(?:label|ce-label)">\s*<a[^>]*data-iref="([^"]+)"[^>]*>([^<]+)<\/a>\s*<\/p>\s*<p class="(?:refline[^"]*|ce-result)"[^>]*>([\s\S]*?)<\/p>/g;
-
-    type Hit = { textId: string; iref: string; cite: string; snippet: string };
+    // Split into two passes so we can tag each hit's type.
+    type Hit = {
+      text_id: string;
+      iref: string;
+      citation: string;
+      snippet: string;
+      hit_type: "translation" | "transliteration";
+    };
     const hits: Hit[] = [];
-    for (const m of html.matchAll(pairRegex)) {
-      const iref = m[1];
-      const cite = m[2].trim();
-      const markedBody = markSelectedSpans(m[3]);
-      const snippet = stripXmlTags(markedBody);
-      const textIdMatch = iref.match(/^([PQX]\d+)/);
-      const textId = textIdMatch ? textIdMatch[1] : iref;
-      hits.push({ textId, iref, cite, snippet });
-    }
+    const translationRegex =
+      /<p class="label">\s*<a[^>]*data-iref="([^"]+)"[^>]*>([^<]+)<\/a>\s*<\/p>\s*<p class="refline[^"]*"[^>]*>([\s\S]*?)<\/p>/g;
+    const xlitRegex =
+      /<p class="ce-label">\s*<a[^>]*data-iref="([^"]+)"[^>]*>([^<]+)<\/a>\s*<\/p>\s*<p class="ce-result"[^>]*>([\s\S]*?)<\/p>/g;
+    const pushHits = (re: RegExp, hit_type: Hit["hit_type"]) => {
+      for (const m of html.matchAll(re)) {
+        const iref = m[1];
+        const cite = m[2].trim();
+        const markedBody = markSelectedSpans(m[3]);
+        const snippet = stripXmlTags(markedBody);
+        const textIdMatch = iref.match(/^([PQX]\d+)/);
+        const text_id = textIdMatch ? textIdMatch[1] : iref;
+        hits.push({ text_id, iref, citation: cite, snippet, hit_type });
+      }
+    };
+    pushHits(translationRegex, "translation");
+    pushHits(xlitRegex, "transliteration");
 
-    const uniqueTexts = new Set(hits.map((h) => h.textId)).size;
+    const uniqueTexts = new Set(hits.map((h) => h.text_id)).size;
     const shown = hits.slice(0, cap);
     const truncated = hits.length > cap;
 
@@ -1007,9 +1034,36 @@ server.registerTool(
       }`,
       `Source: ${url}`,
       ``,
-      ...shown.map((h, i) => `${String(i + 1).padStart(3, " ")}. [${h.textId}] ${h.cite}\n     ${h.snippet}`),
+      ...shown.map(
+        (h, i) => `${String(i + 1).padStart(3, " ")}. [${h.text_id}] ${h.citation}\n     ${h.snippet}`,
+      ),
     ];
-    return textResult(out.join("\n"));
+
+    const warnings: string[] = [];
+    if (truncated) {
+      warnings.push(`hits truncated to first ${cap} of ${hits.length} parsed; re-query with a larger max_results.`);
+    }
+    const unparsed = Math.max(0, totalHits - hits.length);
+    if (unparsed > 0) {
+      warnings.push(
+        `${unparsed} hit${unparsed === 1 ? "" : "s"} reported by ORACC (data-imax) but not parsed — markup variant we don't yet recognize.`,
+      );
+    }
+
+    return structuredResult(out.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        query,
+        project: proj,
+        limit: cap,
+        total_hits: totalHits,
+        unique_texts: uniqueTexts,
+        ...(unparsed > 0 ? { unparsed_hits: unparsed } : {}),
+        hits: shown,
+      },
+      provenance: provenance("ORACC", url, VERSION),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   },
 );
 
@@ -1043,16 +1097,38 @@ server.registerTool(
     const cap = max_lines ?? 300;
     const proj = project.replace(/^\/+|\/+$/g, "");
     const url = `${URLS.ORACC_BASE}/${proj}/tei/${text_id}.xml`;
+    const SCHEMA = schemaId("get_oracc_text");
     const res = await oraccHttpsGet(url);
     if (!res.ok) {
-      return textResult(
+      return structuredResult(
         `ORACC fetch failed (${res.status ?? "no-status"}): ${res.error} — ${url}. Check project + text_id (e.g. saao/saa01 + P224485).`,
+        {
+          schema: SCHEMA,
+          data: {
+            project: proj,
+            text_id,
+            found: false,
+            error: `upstream-fetch-failed${res.status ? `-${res.status}` : ""}: ${res.error}`,
+          },
+          provenance: provenance("ORACC", url, VERSION),
+          warnings: ["upstream-fetch-failed"],
+        },
       );
     }
     const xml = res.body;
     if (!xml || !xml.includes("<TEI")) {
-      return textResult(
+      return structuredResult(
         `No TEI edition found at ${url}. The UPenn mirror returns 200 + empty body for unknown paths — verify project nesting (e.g. 'saao/saa01' not 'saa01') and text_id casing.`,
+        {
+          schema: SCHEMA,
+          data: {
+            project: proj,
+            text_id,
+            found: false,
+            error: "no-tei-content (UPenn mirror returns 200 + empty body for unknown paths)",
+          },
+          provenance: provenance("ORACC", url, VERSION),
+        },
       );
     }
     const parsed = parseOraccTei(xml, text_id);
@@ -1071,7 +1147,35 @@ server.registerTool(
       `— TRANSLATION (${parsed.translation.length} block${parsed.translation.length === 1 ? "" : "s"}${transTruncated ? `, showing first ${cap}` : ""}) —`,
       ...(trans.length ? trans : ["  (no translation blocks)"]),
     ];
-    return textResult(out.join("\n"));
+
+    const warnings: string[] = [];
+    if (xlitTruncated) warnings.push(`transliteration truncated to first ${cap} of ${parsed.transliteration.length} lines.`);
+    if (transTruncated) warnings.push(`translation truncated to first ${cap} of ${parsed.translation.length} blocks.`);
+
+    return structuredResult(out.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        project: proj,
+        text_id,
+        found: true,
+        title: parsed.title,
+        ...(parsed.cdliId ? { cdli_id: parsed.cdliId } : {}),
+        transliteration: {
+          line_count: parsed.transliteration.length,
+          lines: xlit,
+          truncated: xlitTruncated,
+        },
+        translation: {
+          block_count: parsed.translation.length,
+          blocks: trans,
+          truncated: transTruncated,
+        },
+      },
+      provenance: provenance("ORACC", url, VERSION, {
+        citation: parsed.title !== text_id ? parsed.title : undefined,
+      }),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   },
 );
 
