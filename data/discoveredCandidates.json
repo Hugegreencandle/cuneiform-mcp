@@ -16,6 +16,23 @@
       "rejected": 3,
       "pending": 3,
       "validation_method": "Four parallel Claude subagents searched scholarly literature for each candidate's suggested anchor publications. A candidate is `validated` only when a published, peer-reviewed scholar has been verified to have made the exact argument in a peer-reviewed venue."
+    },
+    "validation_pass_round2": {
+      "pass_date": "2026-05-15",
+      "pass_label": "Round 2 — All 24 remaining pending candidates",
+      "candidates_reviewed": 24,
+      "validated": 9,
+      "rejected": 9,
+      "pending": 6,
+      "validation_method": "Six parallel Claude subagents (batches E-J), each verifying 4 candidates by searching scholarly literature for suggested anchor publications."
+    },
+    "validation_totals": {
+      "total_candidates": 33,
+      "validated": 15,
+      "rejected": 12,
+      "pending": 6,
+      "rounds_completed": 2,
+      "total_reviewed": 36
     }
   },
   "candidates": [
@@ -48,7 +65,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.82,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Erra_Epic.md",
@@ -79,9 +96,9 @@
       "notes": "Could be added as a third query under 1 Enoch 6:1-8 in find_antediluvian_parallel once validated, complementing the apkallū-positive-seven parallel already curated. The Sebitti are the destructive-seven counterpart to the apkallū's wisdom-seven, making them a structurally cleaner direct precedent for the Watchers' negative valence than the apkallū themselves.",
       "validation_log": {
         "validated_on": "2026-05-15",
-        "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebFetch of Annus 2010 PDF (godawa.com) — confirmed footnote 53 cites Bhayro 2005 for Enochic-giants ↔ Sebitti, NOT for seven-leader-Watchers ↔ Sebitti.",
-        "inconclusive_notes": "Reformulation required for validation. As stated, the parallel is doubly wrong: (a) the chief Watchers are counted as 20 in 1 Enoch 6:7, not 7; (b) the Mesopotamian-side referent that scholars (Bhayro 2005 cited by Annus 2010 fn. 53) actually pair with Sebitti is the Enochic GIANTS (Watchers' offspring, the Nephilim), not the chief watcher class. If reformulated as 'Sebitti ↔ Enochic giants/Nephilim,' then Bhayro 2005 (The Shemihazah and Asael Narrative of 1 Enoch 6-11, AOAT 322:244-45) validates that re-stated form. Recommend re-running discovery with the corrected entity-pair."
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Round-2 WebFetch of Annus 2010 PDF — verified fn. 53 verbatim. Bhayro 2005 publication record confirmed; full pp. 244-45 not open-access but the citation chain via Annus is itself peer-reviewed.",
+        "rejection_reason": "Rejected as stated after dedicated round-2 verification. Bhayro 2005 (AOAT 322:244-45, cited by Annus 2010 fn. 53) validates ONLY the reformulation 'Sebitti ↔ Enochic giants/Nephilim' — not 'Sebitti ↔ seven leader-Watchers' as stated. The chief Watchers are counted as 20 (1 Enoch 6:7), not 7. Recommended action: re-run discovery with the corrected entity-pair (Sebitti ↔ Enochic giants), which would validate via Bhayro 2005."
       }
     },
     {
@@ -134,9 +151,9 @@
       "notes": "Would extend the cluster's narrative-comparison surface beyond the apkallu/Watchers thread. If validated, a new query topic 'threshold-gated divine journey' could anchor a comparative parallel-set including these two plus Gilgamesh's Mashu pass + 1 Enoch Tour-of-Heaven.",
       "validation_log": {
         "validated_on": "2026-05-15",
-        "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebSearch + WebFetch of Annus 2016 'Overturned Boat,' Izre'el 2001 listings, Sanders 2020 blog, Katz 2003 Eisenbrauns entry.",
-        "inconclusive_notes": "No peer-reviewed scholar verified to have made this EXACT inverted-direction structural parallel as a thesis. Adjacent published arguments: (1) Annus 2016 The Overturned Boat has a 'Descent and Ascent' chapter but Inanna is mentioned only in passing, not paired with Adapa; (2) the Dumuzi/Gishzida-as-Anu-gatekeepers oddity is noted by Izre'el 2001 + Katz 2003 + Sanders 2020 but framed as gatekeeper-anomaly, not as Inanna-Adapa structural-trajectory parallel; (3) Lapinkivi on Ereshkigal-Ishtar derivation does not extend to Adapa. The parallel may be defensible but no peer-reviewed scholar makes the specific argument in venues searched. Pending full-text Izre'el 2001 ch. 4-6 + Katz 2003 ch. 4 review."
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Eisenbrauns publisher description + Artemov OLZ review + Equinox JCH review + academia.edu literature extracts on Annus 2016.",
+        "inconclusive_notes": "Round-2: Annus 2016 *The Overturned Boat* Part Two has a 'Descent and Ascent' chapter that pairs Inanna and Adapa as shared/paired motifs in Mesopotamian cosmological frame. HOWEVER, the candidate's specific 'seven gates ↔ Anu's gatekeepers (Dumuzi/Gishzida) as structural inversion' framing is a more architectural claim than what surfaces in publisher summaries and reviews of Annus 2016. Annus appears to argue cosmological continuity (descent enables ascent), not specifically a 7-gates-vs-2-gatekeepers inversion of narrative units. Recommend: obtain full chapter text + promote to validated OR rephrase candidate to match Annus's actual framing."
       }
     },
     {
@@ -264,9 +281,9 @@
       "notes": "Could anchor a new entry in antediluvianParallels.json on the pseudepigraphic-authorial-frame as a Mesopotamian → Jewish transmission. Not a parallel of content but of compositional-frame technology — which is its own kind of comparative-religion data.",
       "validation_log": {
         "validated_on": "2026-05-15",
-        "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebSearch + WebFetch of Annus 2010 PDF + VanderKam 1984 summary + Stone pseudepigraphy paper + Borger 1971 references.",
-        "inconclusive_notes": "No published scholar verified to have made the SPECIFIC Kabti-ilāni-Marduk colophon ↔ 1 Enoch Enoch-frame argument. Adjacent published arguments: (1) VanderKam 1984 Enoch and the Growth of an Apocalyptic Tradition (CBQMS 16) argues Enmeduranki ↔ Enoch frame parallel, but Mesopotamian source is Enmeduranki tradition NOT Erra colophon; (2) Annus 2010 discusses Erra Epic in apkallu/flood context not pseudepigraphy-frame; (3) Borger 1971 BiOr 28 on Marduk Prophecy + subsequent Akkadian-prophecies ↔ Daniel discussion doesn't extend to 1 Enoch's Enoch-frame. Argument is plausible but no peer-reviewed scholar makes it explicitly in venues searched. Recommend re-anchoring against Enmeduranki ↔ Enoch (VanderKam 1984) or parking until peer-reviewed Erra-frame ↔ Enoch-frame argument located."
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "WebFetch of Annus 2010 PDF (full-text grep for 'Kabti', 'colophon', 'pseudepigraph'); Drawnel 2012 review of Kvanvig 2011; Britannica + Encyclopedia.com on Kabti-ilāni-Marduk.",
+        "inconclusive_notes": "Round-2 verification confirms inconclusive. Full-text search of Annus 2010 PDF found no Kabti-colophon ↔ Enoch-frame structural argument. Drawnel 2012 review of Kvanvig 2011 *Primeval History* confirms Kvanvig devotes a full Erra section but argues Watcher-Story ↔ Babylonian-imperial-ideology, not Erra-colophon ↔ Enoch-frame. Adjacent published arguments (VanderKam 1984 Enmeduranki↔Enoch; Borger 1971 Marduk/Shulgi Prophecies↔Daniel) use different Mesopotamian sources. Recommend re-anchoring against Enmeduranki↔Enoch or parking."
       }
     },
     {
@@ -345,7 +362,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.66,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Enlil.md",
@@ -371,7 +388,29 @@
       },
       "suggested_anchor": "Check Garcia Martinez 1997 work on the heavenly tablets motif. Check Hempel 2006 on Qumran heavenly-tablet discourse. Annus 2010 (apkallu transmission) may touch on this.",
       "transmission_direction": "common_substrate",
-      "notes": "Moderate-confidence topos parallel. The Jewish heavenly tablets are predestinarian rather than royal-regalial, but the source-object of cosmic decree in tablet form is the structural commonality. Worth validating; would expand find_antediluvian_parallel into a 1 Enoch 81 query."
+      "notes": "Moderate-confidence topos parallel. The Jewish heavenly tablets are predestinarian rather than royal-regalial, but the source-object of cosmic decree in tablet form is the structural commonality. Worth validating; would expand find_antediluvian_parallel into a 1 Enoch 81 query.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Annus 2010",
+          "publication": "Amar Annus, 'On the Origin of Watchers: A Comparative Study of the Antediluvian Wisdom in Mesopotamian and Jewish Traditions,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320, at p. 284 and fn. 8",
+          "argument_summary": "Verbatim: 'In Mesopotamian tradition, such a divine source of information was the Tablet of Destinies, which corresponds to heavenly tablets and the Pargod in 3 Enoch, on which the divine secrets are written.' Fn. 8 adds: 'At least one Mesopotamian myth (LKA 146) presents the seven apkallus as possessors of the Tablet of Destinies. See Denning-Bolle 1992: 50; Lenzi 2008a: 122-25.'"
+        },
+        {
+          "author_year": "Paul 1973",
+          "publication": "Shalom M. Paul, 'Heavenly Tablets and the Book of Life,' Journal of the Ancient Near Eastern Society 5 (1973): 345-353",
+          "argument_summary": "Foundational treatment of the heavenly-tablets motif from Sumerian tuppi šīmāti through Mesopotamian, biblical, and Talmudic times. Establishes that the gods in Mesopotamia were determiners of destiny who wrote decisions on 'tablets of destiny' (tuppi simati), and that this concept underlies the biblical/Second Temple 'book of life' tradition."
+        },
+        {
+          "author_year": "Arbel 2006",
+          "publication": "Vita Daphna Arbel, 'Seal of Resemblance, Full of Wisdom, and Perfect in Beauty: The Enoch/Metatron Narrative of 3 Enoch and Ancient Near Eastern Mythology,' p. 372 (cited by Annus 2010)",
+          "argument_summary": "Separate published treatment of the Tablet-of-Destinies → heavenly-tablets/Pargod correspondence, cited by Annus 2010 alongside his own argument."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "WebFetch of Annus 2010 PDF — verified the explicit p. 284 + fn. 8 argument; Paul 1973 JANES verified open-access."
+      }
     },
     {
       "entity_a": {
@@ -460,7 +499,7 @@
       "parallel_type": "lexical",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.68,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Enuma_Elish.md",
@@ -484,7 +523,13 @@
       },
       "suggested_anchor": "Gunkel 1895 Schöpfung und Chaos (foundational). Westermann 1984 Genesis 1-11 commentary on Gen 1:2. Walton 2011 Genesis 1 as Ancient Cosmology.",
       "transmission_direction": "unidirectional_a_to_b",
-      "notes": "Well-known in specialist scholarship but not in antediluvianParallels.json. Would extend the dataset to Genesis 1 cosmogony (currently only Gen 5/Gen 6). High candidate for promotion to validated."
+      "notes": "Well-known in specialist scholarship but not in antediluvianParallels.json. Would extend the dataset to Genesis 1 cosmogony (currently only Gen 5/Gen 6). High candidate for promotion to validated.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "WebFetch of Gunkel 1895 (Internet Archive) + Westermann 1984 listing + Wikipedia tehom article + standard Semitic-cognate references.",
+        "rejection_reason": "Rejected as framed — conflates two distinct Mesopotamian primordial waters. Apsû (freshwater abyss, slain by Ea in Enūma Eliš Tablet I) is NOT the figure scholars connect to Hebrew tehom. The scholarly tradition (Gunkel 1895 onward) connects TIAMAT (saltwater, slain by Marduk in Tablet IV) to tehom — on grounds of phonological similarity, gender (both feminine), and cosmogonic function. Additionally: Westermann 1984 actively REJECTS the linguistic parallel (concludes tehom is a common Semitic cognate, cf. Ugaritic thm / Akkadian tiamtum / Eblaite ti'amatum / Arabic tihamat, not a borrowing). Modern phonological consensus follows Westermann: tehom CANNOT be linguistically derived from Tiamat. If reformulated as 'Tiamat ↔ tehom (cognate cosmogonic role, not linguistic derivation)' the candidate is partially validated by Gunkel 1895 but with major caveat."
+      }
     },
     {
       "entity_a": {
@@ -580,7 +625,13 @@
       },
       "suggested_anchor": "Annus 2010 on apkallu→Watchers parallel may cover this. Kvanvig 1988 Roots of Apocalyptic on the Atrahasis-substrate. Reed 2005 Fallen Angels for the punitive-inversion theology.",
       "transmission_direction": "common_substrate",
-      "notes": "Lower-confidence because the structural inversion is more interpretive than verbatim. But the Igigi-rebellion-as-Watchers-precursor reading is genuinely new — the curated dataset's Watchers parallels focus on apkallū as the source, not Igigi. If validated, would document the Mesopotamian junior-celestial-rebellion tradition as a second Watchers source-strand alongside the apkallū."
+      "notes": "Lower-confidence because the structural inversion is more interpretive than verbatim. But the Igigi-rebellion-as-Watchers-precursor reading is genuinely new — the curated dataset's Watchers parallels focus on apkallū as the source, not Igigi. If validated, would document the Mesopotamian junior-celestial-rebellion tradition as a second Watchers source-strand alongside the apkallū.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Full-text search of Annus 2010 PDF for 'Igigi'/'Anunnaki'; review of intertextual.bible citing Kvanvig 2011:403-404; Drawnel 2012 review; Annus 2024 MDPI Religions article keywords.",
+        "inconclusive_notes": "Round-2 verification: Annus 2010 contains zero hits for 'Igigi' or 'Anunnaki' in any context. Kvanvig 2011 *Primeval History* makes the closest published argument but his framing (Watchers ↔ Atrahasis humans in the role-slot of pre-flood humanity, NOT Watchers ↔ Igigi in the role-slot of rebelling junior gods) is structurally different from the candidate. The Anunnaki/Igigi tier-binary ↔ Watchers framing appears as editorial gloss on intertextual.bible but no peer-reviewed scholar makes it explicitly. Recommend reformulation against Kvanvig 2011's actual claim (Watchers ↔ humans) or parking."
+      }
     },
     {
       "entity_a": {
@@ -602,7 +653,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.69,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Gilgamesh_Epic.md",
@@ -627,7 +678,13 @@
       },
       "suggested_anchor": "George 2003 Babylonian Gilgamesh Epic on Tablet XI sleep-test. Izre'el 2001 Adapa and the South Wind for the bread-of-life motif. Buccellati 1973 on Adapa and faith — for the inverted-trust reading.",
       "transmission_direction": "structural_only",
-      "notes": "Intra-Mesopotamian doublet; would extend the v0.7 tool's coverage to immortality-test as a discoverable structural motif. The bread-as-token detail is the strongest single point."
+      "notes": "Intra-Mesopotamian doublet; would extend the v0.7 tool's coverage to immortality-test as a discoverable structural motif. The bread-as-token detail is the strongest single point.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Sanders 2017 Mohr Siebeck listing + PSU library catalog TOC + Ancient Jew Review book note + Biblical Review.",
+        "rejection_reason": "Sanders 2017 *From Adapa to Enoch* table-of-contents covers Mesopotamian-Judean scribal continuity but does NOT pair Gilgamesh XI's sleep-test with Adapa's bread-of-life refusal as parallel mortality-failure-tests. Multiple book-note reviews (Ancient Jew Review, Biblical Review, Mohr Siebeck) confirm this is not in Sanders's scope. George 2003 treats the sleep-test within Gilgamesh's narrative but does not pair with Adapa. The parallel is intuitive and frequently cited at the comparative-mythology level but not anchored in peer-reviewed scholarship in venues searched."
+      }
     },
     {
       "entity_a": {
@@ -721,7 +778,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.62,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Inanna_Ishtar.md",
@@ -747,7 +804,29 @@
       },
       "suggested_anchor": "Helle 2023 Enheduanna: The Complete Poems for the Enheduanna context. Cagni 1969 L'Epopea di Erra for Kabti context. Lenzi 2008 Secrecy and the Gods on scribal-authorial transmission.",
       "transmission_direction": "structural_only",
-      "notes": "Internal-Mesopotamian. Establishes named-authorial-signature as a documented Mesopotamian scribal practice — useful background context for the 1 Enoch pseudepigraphic frame discovered above (candidate 4)."
+      "notes": "Internal-Mesopotamian. Establishes named-authorial-signature as a documented Mesopotamian scribal practice — useful background context for the 1 Enoch pseudepigraphic frame discovered above (candidate 4). | VALIDATION CAVEAT: Drop the 'Hellenistic-pseudepigraphy' extension of the original candidate claim. Neither Helle nor Lenzi explicitly extends the named-authorship tradition to Hellenistic Greek pseudepigraphy in materials verified. The biblical/ANE reception link is solid (Lenzi 2008); the Hellenistic link needs a separate scholar.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Helle 2019",
+          "publication": "Sophus Helle, 'Enheduana: The Birth of Literature through the Goddess,' Iraq 81 (2019), Cambridge Core",
+          "argument_summary": "Treats Enheduana as the first named author in literary history, in a Mesopotamian tradition that systematically named authors via the Neo-Assyrian Catalogue of Texts and Authors. Discusses Kabti-ilāni-Marduk by name as a later, rare case of self-identifying authorship (revealed in dream), establishing the 'tradition of named authorship within anonymity' frame."
+        },
+        {
+          "author_year": "Helle 2023",
+          "publication": "Sophus Helle, Enheduana: The Complete Poems of the World's First Author (Yale University Press, 2023)",
+          "argument_summary": "Extended treatment placing Enheduana within Mesopotamian named-authorship tradition with Kabti-ilāni-Marduk as parallel case."
+        },
+        {
+          "author_year": "Lenzi 2008",
+          "publication": "Alan Lenzi, Secrecy and the Gods: Secret Knowledge in Ancient Mesopotamia and Biblical Israel (State Archives of Assyria Studies 19; Helsinki, 2008)",
+          "argument_summary": "Discusses Kabti-ilāni-Marduk's dream-revelation framing as a scribal strategy for legitimating texts as divine revelation. Explicitly compares Mesopotamian scribal authority claims to biblical Israel (Moses as parallel mediator) — the documented Mesopotamia→biblical reception argument."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Cambridge Core Helle 2019; Helle's own PDF 'The First Authors'; CORE PDF of Lenzi 2008 Secrecy and the Gods; Britannica on Kabti-ilāni-Marduk."
+      }
     },
     {
       "entity_a": {
@@ -769,7 +848,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.5,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Atrahasis.md",
@@ -793,7 +872,19 @@
       },
       "suggested_anchor": "Lambert & Millard 1969 Atra-ḫasīs commentary on the Wē-ila theology. Westermann 1984 Genesis 1-11 commentary on 1:26 and 2:7. Steinkeller's work on Mesopotamian anthropogony.",
       "transmission_direction": "common_substrate",
-      "notes": "Lower-confidence topos parallel. The structural pattern is real but the Hebrew demythologization is so thorough that calling this a 'transmission' overstates. Would be useful in the v0.7 tool surface as a topos-level entry with explicit caution."
+      "notes": "Lower-confidence topos parallel. The structural pattern is real but the Hebrew demythologization is so thorough that calling this a 'transmission' overstates. Would be useful in the v0.7 tool surface as a topos-level entry with explicit caution. | VALIDATION SCOPE: The candidate has two legs. (1) Eṭemmu ↔ Genesis 2:7 divine breath — VALIDATED by Lambert & Millard 1969 explicitly. (2) Eṭemmu ↔ Genesis 1 imago Dei — Westermann 1984 treats imago Dei relationally and is more cautious; this leg is implied but not explicitly drawn. Recommend separating the two legs into distinct candidates in any future re-run.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Lambert & Millard 1969",
+          "publication": "W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford: Clarendon, 1969)",
+          "argument_summary": "Explicitly state — and this is widely cited downstream — that 'in all probability the Babylonians conceived of man as matter (clay) activated by the addition of divine blood,' paired with the observation that 'the Hebrew account of creation in Genesis 2 explains that God imparted the breath of life into man, and so animation began.' This IS a direct comparative move treating the divine element in humans in Atrahasis as the Mesopotamian counterpart to Genesis 2:7's divine breath. The eṭemmu / ṭemu / damu wordplay (ghost / reason / blood) tied to the slain Wē-ila is the Lambert & Millard reading reproduced in most subsequent scholarship."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Lambert & Millard 1969 Atrahasis Internet Archive + Westermann 1984 Genesis 1-11 listing + Britannica eṭemmu entry."
+      }
     },
     {
       "entity_a": {
@@ -934,7 +1025,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.65,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Lagash_King_List.md",
@@ -959,7 +1050,24 @@
       },
       "suggested_anchor": "Sollberger 1967 JCS 21 'The Rulers of Lagaš.' Glassner 2004 Mesopotamian Chronicles. Marchesi 2010/2011 on Early Dynastic Lagash chronology.",
       "transmission_direction": "structural_only",
-      "notes": "Intra-Sumerian counter-tradition. Establishes that the antediluvian-wisdom thread the cluster traces is a SPECIFIC scribal tradition (Eridu-Nippur), not a pan-Sumerian assumption. Important methodological context for the entire find_antediluvian_parallel framework."
+      "notes": "Intra-Sumerian counter-tradition. Establishes that the antediluvian-wisdom thread the cluster traces is a SPECIFIC scribal tradition (Eridu-Nippur), not a pan-Sumerian assumption. Important methodological context for the entire find_antediluvian_parallel framework. | Drop Marchesi 2010/2011 (handles ED chronology, not cosmological-dispute argument) and Wilcke 1989 (tangential) from the anchors — Sollberger 1967 + Glassner 2004 are the clean validated pair.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Sollberger 1967",
+          "publication": "Edmond Sollberger, 'The Rulers of Lagaš,' Journal of Cuneiform Studies 21 (1967): 279-291",
+          "argument_summary": "Editio princeps. Describes the Lagash King List as a satirical/pseudo-historical composition responding to the SKL — a deliberate dissent from the WB-444 framework."
+        },
+        {
+          "author_year": "Glassner 2004",
+          "publication": "Jean-Jacques Glassner, Mesopotamian Chronicles (Society of Biblical Literature, Writings from the Ancient World 19; 2004)",
+          "argument_summary": "Explicitly organizes the Lagash King List under the section heading 'A Parody: The Royal Chronicle of Lagash' (Chronicle 6). Frames the agricultural-labor cosmology as a deliberate inversion of the SKL's 'kingship descended from heaven' formula. The Lagash text's opening (ETCSL 2.1.2) confirms: 'After the flood had swept over… kingship and the crown of the city had not yet come out from heaven, and Nin-ĝirsu had not yet established for the multitude of well-guarded people the pickaxe, the spade, the earth basket and the plough, which mean life for the Land.'"
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Sollberger 1967 JCS access + ETCSL 2.1.2 translation + Glassner 2004 Livius CM 6 page."
+      }
     },
     {
       "entity_a": {
@@ -981,7 +1089,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.58,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Inanna_Ishtar.md",
@@ -1005,7 +1113,13 @@
       },
       "suggested_anchor": "Cooper 1993 'Sacred Marriage and Popular Cult' for the SM rite. Bidmead 2002 The Akītu Festival. Black 1981 'The New Year Ceremonies in Ancient Babylon.'",
       "transmission_direction": "structural_only",
-      "notes": "Intra-Mesopotamian. The structural parallel between sacred marriage and Akitu humiliation as 'annual royal-renewal rites with controlled boundary-crossing' is interesting but not strongly documented. Would surface a new comparative-religion query category in the v0.7 tool."
+      "notes": "Intra-Mesopotamian. The structural parallel between sacred marriage and Akitu humiliation as 'annual royal-renewal rites with controlled boundary-crossing' is interesting but not strongly documented. Would surface a new comparative-religion query category in the v0.7 tool.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Bidmead 2002 Akītu Festival + Cooper 1993 Google Books + JANES article 'Rectifying the King or Renewing the Cosmos'.",
+        "rejection_reason": "Anchors argue AGAINST the parallel. Cooper 1993 'Sacred Marriage and Popular Cult in Early Mesopotamia' (Heidelberg conference volume) frames sacred marriage as a literary/cultic phenomenon rooted in early-Mesopotamian popular religion — does NOT frame it as a structural parallel to the Akitu king-humiliation rite. Bidmead 2002 The Akītu Festival explicitly moves AWAY from the older Frankfort/Hooke myth-and-ritual reading: 'examines the akītu for its political and sociological significance, doing away with the concepts of hieros gamos, cultic battle, and the motif of the dying-rising god.' The parallel existed in the older Frankfort/Hooke 'myth-and-ritual school' but is rejected by current consensus. 'The evidence for a sacred marriage involving Marduk during the Babylonian Akitu is at best sketchy' — current consensus."
+      }
     },
     {
       "entity_a": {
@@ -1025,7 +1139,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.42,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Erra_Epic.md",
@@ -1050,7 +1164,24 @@
       },
       "suggested_anchor": "Balentine 1983 The Hidden God: The Hiding of the Face of God in the Old Testament. Cagni 1969 Erra Epic. Berkovits Faith After the Holocaust on hester panim theology.",
       "transmission_direction": "common_substrate",
-      "notes": "Lower-confidence topos parallel. Speculative but interesting; would extend the comparative-religion surface to Hebrew Wisdom/Prophetic territory. Worth listing for completeness."
+      "notes": "Lower-confidence topos parallel. Speculative but interesting; would extend the comparative-religion surface to Hebrew Wisdom/Prophetic territory. Worth listing for completeness. | ANCHOR CORRECTION: Bodi 1991 (NOT Balentine 1983) is the correct anchor. Balentine 1983 works within Hebrew Bible / OT theology and does not engage Mesopotamian sources for hester panim. The Mesopotamian-side parallel is supplied by Bodi + Block. The post-biblical rabbinic term 'hester panim' is technically distinct from Bodi's 'divine absence' terminology but the underlying motif is the same.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Bodi 1991",
+          "publication": "Daniel Bodi, The Book of Ezekiel and the Poem of Erra (Orbis Biblicus et Orientalis 104; Fribourg/Göttingen: Vandenhoeck & Ruprecht, 1991)",
+          "argument_summary": "The foundational scholarly treatment that explicitly identifies 'the absence of the divinity from its shrine' as one of twelve shared motifs between the Erra Epic and the book of Ezekiel. Bodi argues that the Erra-poem's Marduk-absence motif shaped Ezekiel's portrayal of YHWH's withdrawal from the Jerusalem temple — the Mesopotamian textual source for the biblical divine-abandonment motif."
+        },
+        {
+          "author_year": "Block 2000",
+          "publication": "Daniel I. Block, The Gods of the Nations: Studies in Ancient Near Eastern National Theology (Apollos / Baker Academic, 2000); cf. Block, 'Divine Abandonment: Ezekiel's Adaptation of an Ancient Near Eastern Motif'",
+          "argument_summary": "Extends Bodi's argument into the broader Hebrew Bible. Treats the divine-absence motif as a structural parallel between Mesopotamian and biblical corpora."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Bodi 1991 ZORA/UZH archived PDF + Block 2000 references + Researchgate AOAT 390 on divine abandonment."
+      }
     },
     {
       "entity_a": {
@@ -1070,7 +1201,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.48,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Sumerian_King_List.md",
@@ -1095,7 +1226,13 @@
       },
       "suggested_anchor": "Lambert 1967 Enmeduranki for the Mesopotamian side. Sommer The Bodies of God and the World of Ancient Israel on divine-encounter typologies. Kvanvig 1988 Roots of Apocalyptic.",
       "transmission_direction": "common_substrate",
-      "notes": "Lower-confidence typological parallel. The structural pattern is real but the content (divination vs law) is so different that calling this a transmission overstates. Worth listing as a typological-only candidate for the v0.7 surface."
+      "notes": "Lower-confidence typological parallel. The structural pattern is real but the content (divination vs law) is so different that calling this a transmission overstates. Worth listing as a typological-only candidate for the v0.7 surface.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Lambert 1967 Semantic Scholar + Orlov Marquette/Maqom papers + Sommer 2009 Internet Archive.",
+        "rejection_reason": "Rejected. Lambert 1967 (JCS 21:126-138) anchors Enmeduranki to ENOCH (already validated in v0.6 dataset for Genesis 5:21-24), not Moses. The Moses comparison appears in the literature only in an INVERTED POLEMICAL form: Second Temple Enochic literature positioned Enoch's revelation as competing-with-or-superior-to Moses's Sinai revelation (Annus 2010 + Orlov in Marquette/Maqom volumes). That is an internal Jewish polemic about Enoch-vs-Moses authority, NOT a direct Enmeduranki↔Moses structural parallel. Sommer 2009 Bodies of God surfaces no Enmeduranki-Moses comparison. The candidate conflates 'Enoch is modeled on Enmeduranki' (validated) with 'Moses is modeled on Enmeduranki' (not published). Sacred-mountain revelation is too generic a frame to bear a 1:1 comparison absent an explicit scholar."
+      }
     },
     {
       "entity_a": {
@@ -1138,7 +1275,13 @@
       },
       "suggested_anchor": "Niditch 1987 Underdogs and Tricksters for the trickster-narrative typology. Kramer 1972 The Sacred Marriage Rite for the Inanna context.",
       "transmission_direction": "common_substrate",
-      "notes": "Very speculative typological parallel. Listed because the structural pattern is real but I'd flag it as low-confidence even within this set. Could be useful as a 'caution: typology-only' example in the v0.7 tool."
+      "notes": "Very speculative typological parallel. Listed because the structural pattern is real but I'd flag it as low-confidence even within this set. Could be useful as a 'caution: typology-only' example in the v0.7 tool.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Niditch 1987 Underdogs and Tricksters Internet Archive + Journal for Semitics + Baylor dissertation references.",
+        "inconclusive_notes": "Both halves individually well-established: Inanna obtains the me from a drunk Enki (Kramer 1972, Sumerian myth Inanna and Enki / Transfer of Arts of Civilization); Jacob as biblical trickster is central in Niditch 1987 Underdogs and Tricksters. HOWEVER, Niditch 1987's actual content does NOT bridge to Mesopotamia explicitly with Inanna-Enki paired with Jacob-Isaac. Folklore-typology arguments may surface widely (Inanna-trickster archetype in Journal for Semitics; Jacob-as-divine-trickster Baylor dissertation) but no peer-reviewed publication verified pairing Inanna's me-theft with Jacob's deception of Isaac as parallel trickster-obtains-divine-benediction. The trickster archetype is published; THIS pairing is not. Per Round-2 discipline: inconclusive (lean reject)."
+      }
     },
     {
       "entity_a": {
@@ -1160,7 +1303,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.56,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Inanna_Ishtar.md",
@@ -1184,7 +1327,13 @@
       },
       "suggested_anchor": "Burkert 1992 The Orientalizing Revolution. M.L. West 1997 The East Face of Helicon. Budin 2003 The Origin of Aphrodite.",
       "transmission_direction": "common_substrate",
-      "notes": "Meta-parallel — two parallel transmission chains documented separately. Useful for v0.7 tool surfacing the long-distance Mesopotamian → Greek pattern at the cluster level."
+      "notes": "Meta-parallel — two parallel transmission chains documented separately. Useful for v0.7 tool surfacing the long-distance Mesopotamian → Greek pattern at the cluster level.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Burkert 1992 Internet Archive + West 1997 BMCR review + JNES review of Budin 2003 + Copenhaver 1992 + Wikipedia Enūma Eliš.",
+        "rejection_reason": "Rejected as a single paired structural parallel. The two chains operate in different periods: Inanna→Astarte→Aphrodite peaks in Bronze Age + Archaic Greek (Burkert 1992 Orientalizing Revolution focuses on 750-650 BCE); Enki→Hermes Trismegistus is Hellenistic syncretism (Berossus 3rd c. BCE + later Hermetic corpus). Burkert, West 1997, Budin 2003, and Copenhaver 1992 each treat their respective chain but no scholar verified to treat them as instances of one transmission pattern. Each chain individually IS validated by its respective anchors — but the PAIRED structural-parallel framing is unsupported. Recommend splitting into two separate parallels (Inanna↔Aphrodite via Burkert/Budin; Enki↔Hermes via Copenhaver) rather than a single paired claim."
+      }
     },
     {
       "entity_a": {
@@ -1208,7 +1357,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.45,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Sumerian_Flood_Story.md",
@@ -1231,7 +1380,29 @@
       },
       "suggested_anchor": "Civil 1969 in Lambert & Millard 1969 on Sumerian Flood Story lines 84-100. Westermann 1984 Genesis 1-11 commentary on chapter 4. Chen 2013 Primeval Flood Catastrophe.",
       "transmission_direction": "common_substrate",
-      "notes": "Modest-confidence topos parallel. Genesis 4's J-source pre-flood civilization frame is conventionally read against the Mesopotamian Eridu/Sumerian Flood Story; would extend the dataset's reach."
+      "notes": "Modest-confidence topos parallel. Genesis 4's J-source pre-flood civilization frame is conventionally read against the Mesopotamian Eridu/Sumerian Flood Story; would extend the dataset's reach. | ANCHOR CORRECTION: Shea 1991 + Jacobsen 1981 are the primary anchors (not Westermann 1984 as initially suggested). Westermann 1984 is consistent with the parallel via his ANE-comparative method but the specific five-cities/Cainite-genealogy mapping is more explicit in Shea/Jacobsen.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Shea 1991",
+          "publication": "William H. Shea, 'The Antediluvians,' Origins (Geoscience Research Institute) 18 (1991)",
+          "argument_summary": "Explicitly maps the Cainite cultural-accomplishments of Genesis 4 (animal husbandry via Jabal, music via Jubal, metallurgy via Tubal-Cain, city-building, polygyny via Lamech) onto the Sumerian/Mesopotamian antediluvian-cities tradition (Eridu, Bad-tibira, Larak, Sippar, Shuruppak). Treats them as typologically parallel pre-flood civilization-founding sections."
+        },
+        {
+          "author_year": "Jacobsen 1981",
+          "publication": "Thorkild Jacobsen, 'The Eridu Genesis,' Journal of Biblical Literature 100 (1981): 513-529",
+          "argument_summary": "Interpretive framework treating the Sumerian Flood Story's antediluvian-cities + Genesis pre-flood civilization sections as parallel instances of a broader 'primeval history' genre. The 'Eridu Genesis' label has become the standard framework for this comparative reading."
+        },
+        {
+          "author_year": "Civil 1969",
+          "publication": "Miguel Civil, in W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford UP, 1969), appendix pp. 138-145",
+          "argument_summary": "Editio princeps of the Sumerian Flood Story's antediluvian-cities list (lines 84-100), naming the five cities with tutelary deities — the textual foundation for the parallel."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Shea 1991 Geoscience Research Institute PDF + Jacobsen 1981 JBL discussion in Armstrong Institute Eridu/Cain article + Civil 1969 in Lambert & Millard appendix."
+      }
     },
     {
       "entity_a": {
@@ -1314,7 +1485,7 @@
       "parallel_type": "onomastic",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.54,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Adapa.md",
@@ -1337,7 +1508,19 @@
       },
       "suggested_anchor": "Andreasen 1981 'Adam and Adapa' AUSS 19. Buccellati 1973 'Adapa, Genesis, and the Notion of Faith.' Liverani 2004 'Adapa, Guest of the Gods.' Heidel 1951 The Babylonian Genesis (skeptical).",
       "transmission_direction": "common_substrate",
-      "notes": "Major gap in antediluvianParallels.json. Would add a Genesis 2-3 query topic. The onomastic argument is contested but the structural-mirror argument is firmly established. High-priority for promotion to validated."
+      "notes": "Major gap in antediluvianParallels.json. Would add a Genesis 2-3 query topic. The onomastic argument is contested but the structural-mirror argument is firmly established. High-priority for promotion to validated. | VALIDATION CAVEAT: The 'onomastic' component of the candidate as originally stated (Adapa→Adaba→Adam phonological progression) is NOT supported by Andreasen 1981 — his thesis is explicitly STRUCTURAL/typological ('Two Anthropological Characters'), and he distances himself from the same-person/onomastic-identification camp. The phonological-pipeline argument appears to belong to other scholars (Sjöberg on Sumerian a-dam) or older 19th-c. assyriology. The structural parallel is validated; the onomastic component should be dropped or re-attributed.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Andreasen 1981",
+          "publication": "Niels-Erik Andreasen, 'Adam and Adapa: Two Anthropological Characters,' Andrews University Seminary Studies 19.3 (1981): 179-194",
+          "argument_summary": "Catalogues the parallels between Adam and Adapa — both first/prototype humans, both tested with food (and drink in Adapa's case), both involve obeying a divine figure (Ea/El), both involve loss of eternal life through the food test, both involve proper clothing. Argues the parallels are real but 'seriously blunted by the entirely different contexts in which they occur.' Treats them as 'anthropological characters' belonging to a shared Ancient Near Eastern type — the moderate position between 'identical figures' and 'illusory parallels' poles."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Open-access verification via Andrews Digital Commons (digitalcommons.andrews.edu/old-testament-pubs/66/) and AUSS PDF (andrews.edu/library/car/cardigital/Periodicals/AUSS/1981-3/1981-3-01.pdf)."
+      }
     },
     {
       "entity_a": {
@@ -1361,7 +1544,7 @@
       "parallel_type": "iconographic",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.6,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Ninhursag.md",
@@ -1386,7 +1569,13 @@
       },
       "suggested_anchor": "Stol 2000 Birth in Babylonia and the Bible for omega-symbol. Wiggermann 1992 Mesopotamian Protective Spirits for bucket-and-cone. Albenda 1986 for the pollination reading.",
       "transmission_direction": "structural_only",
-      "notes": "Intra-Mesopotamian iconographic-structural parallel. The cluster's interest in *cosmogonic operations as queryable through ritual-instrument abstraction* would benefit from this entry. Already mentioned in spec's predicted findings."
+      "notes": "Intra-Mesopotamian iconographic-structural parallel. The cluster's interest in *cosmogonic operations as queryable through ritual-instrument abstraction* would benefit from this entry. Already mentioned in spec's predicted findings.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Stol 2000 Internet Archive + Wiggermann 1992 Internet Archive + JANER 2025 omega-iconography article + ORACC AMGG entries.",
+        "rejection_reason": "Rejected: no peer-reviewed scholar verified to make this iconographic-parallel argument. Stol 2000 Birth in Babylonia and the Bible discusses the omega-symbol as stylized uterus associated with the mother goddess but does NOT compare it to apkallū bucket-and-cone. Wiggermann 1992 treats the bucket-and-cone gesture as a purification mechanism for cosmic boundary-maintenance but NOT in iconographic dialogue with Ninhursag's omega. Black & Green 1992 treat the two motifs in separate iconographic registers. Multiple searches for an explicit pairing returned the two motifs in separate encyclopedic contexts but no structural-parallel argument. This is exactly the pattern-match parallel that pattern-matching can surface but published scholarship doesn't anchor."
+      }
     },
     {
       "entity_a": {
@@ -1502,7 +1691,13 @@
       },
       "suggested_anchor": "Lambert & Millard 1969 commentary on flood durations. Westermann 1984 Genesis 1-11 on Gen 7:11-24. Chen 2013 Primeval Flood Catastrophe.",
       "transmission_direction": "unidirectional_a_to_b",
-      "notes": "Already covered in floodAlignment.json at the the_flood episode level. Listed here as a discovered candidate because the asymmetric-duration parallel is a documented Mesopotamia→Hebrew transformation that find_antediluvian_parallel could surface as a structural-divergence query."
+      "notes": "Already covered in floodAlignment.json at the the_flood episode level. Listed here as a discovered candidate because the asymmetric-duration parallel is a documented Mesopotamia→Hebrew transformation that find_antediluvian_parallel could surface as a structural-divergence query.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Chen 2013 OUP product page + Lambert & Millard 1969 Internet Archive + Wenham WBC Internet Archive + Wikipedia Genesis flood narrative.",
+        "inconclusive_notes": "Round-2: The structural contrast (Mesopotamian 7-and-7 across all 3 witnesses vs Hebrew 40-day rain + 150-day prevailing waters) IS standard scholarly consensus (Lambert & Millard 1969 + Wenham 1987 + standard P/J source criticism). HOWEVER, the candidate's specific 'Hebrew tradition as DELIBERATE INNOVATION over Mesopotamian' framing was attributed to Chen 2013 — but Chen 2013's actual thesis is the OPPOSITE directionality: he argues the Mesopotamian flood motif itself was an OB-period innovation in Sumerian literature, not that Hebrew authors innovated over Mesopotamian models. The deliberate-extension interpretive claim needs Wenham 1987 (WBC Genesis 1-15) as anchor, not Chen 2013. Recommend re-anchoring + re-running validation."
+      }
     },
     {
       "entity_a": {
@@ -1522,7 +1717,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.3,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Igigi.md",
@@ -1544,7 +1739,13 @@
       },
       "suggested_anchor": "Lambert & Millard 1969 on the 40-year reading. Kilmer 1972 'Mesopotamian Concept of Overpopulation.' Numerology in Mesopotamian and Hebrew tradition generally.",
       "transmission_direction": "common_substrate",
-      "notes": "Very speculative; included to document the 40-year topos as a discoverable numerological pattern. Flagged for likely rejection on review."
+      "notes": "Very speculative; included to document the 40-year topos as a discoverable numerological pattern. Flagged for likely rejection on review.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Intertextual.bible Atrahasis ↔ 1 Enoch 6 + Lambert & Millard 1969 commentary + Kilmer 1972 Orientalia + Westermann 1984 standard numerology discussion.",
+        "rejection_reason": "Rejected. No peer-reviewed scholarship surfaces this parallel. Where the Atrahasis Igigi-rebellion is compared to biblical material, the comparand is 1 Enoch 6 (Watchers' descent), not the wilderness narrative (intertextual.bible Atrahasis I ↔ 1 Enoch 6:2; Annus 2010). The 40-year figure in Atrahasis is itself TEXTUALLY CONTESTED — Lambert & Millard 1969 note manuscript variants reading 2,500 years rather than 40. Kilmer 1972 'Mesopotamian Concept of Overpopulation' treats Atrahasis as overpopulation/flood theodicy, not wilderness-formation. The 40 in the wilderness narrative is a standard biblical typological number (40 days flood, 40 days Sinai, 40 days Elijah, 40 days Jesus) with no specific connection to Atrahasis's contested 40. Numerological-coincidence at best."
+      }
     },
     {
       "entity_a": {
@@ -1564,7 +1765,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.69,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Berossus.md",
@@ -1589,7 +1790,24 @@
       },
       "suggested_anchor": "Annus 2010 on Berossus-Jubilees-1 Enoch wisdom-preservation common substrate. Verbrugghe & Wickersham 1996 Berossus and Manetho on the buried-tablets motif specifically. Nickelsburg 2001 on 1 Enoch's wisdom-preservation theme.",
       "transmission_direction": "common_substrate",
-      "notes": "Important parallel because Berossus has no cuneiform parent for the buried-tablets motif. The convergence with 1 Enoch / Jubilees in the Hellenistic period suggests a shared antediluvian-wisdom-preservation theological framework operating independent of (or downstream of) any extant cuneiform source. Worth high-priority validation."
+      "notes": "Important parallel because Berossus has no cuneiform parent for the buried-tablets motif. The convergence with 1 Enoch / Jubilees in the Hellenistic period suggests a shared antediluvian-wisdom-preservation theological framework operating independent of (or downstream of) any extant cuneiform source. Worth high-priority validation. | ANCHOR CORRECTION: van der Horst 2002 is the primary anchor (not Annus 2010 as initially suggested by the Discovery Engine). Annus 2010 is supporting/contextual.",
+      "scholarly_attribution": [
+        {
+          "author_year": "van der Horst 2002",
+          "publication": "Pieter W. van der Horst, 'Antediluvian Knowledge: Jewish Speculations About Wisdom From Before the Flood in Their Ancient Context,' in Japheth in the Tents of Shem: Studies on Jewish Hellenism in Antiquity (Peeters, 2002)",
+          "argument_summary": "Explicitly compares Berossus' Sippar-tablet-burial (preserved in Syncellus and Eusebius) with Jubilees' Cainan-stone-writing tradition and the Enochic preservation-of-wisdom-across-Flood motif. Treats them as cognate antediluvian-knowledge-survival traditions reflecting a common Ancient Near Eastern substrate."
+        },
+        {
+          "author_year": "Annus 2010",
+          "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+          "argument_summary": "Secondary support: discusses the broader Mesopotamian-Jewish antediluvian wisdom substrate from which both Berossus and 1 Enoch / Jubilees draw."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "TheTorah.com piece by Sharon citing van der Horst 2002 fn. 12; BMCR review of van der Horst 2002."
+      }
     },
     {
       "entity_a": {
@@ -1609,7 +1827,7 @@
       "parallel_type": "topos",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.38,
-      "validation_status": "pending",
+      "validation_status": "validated",
       "discovery_trace": {
         "supporting_briefs": [
           "Gilgamesh_Epic.md",
@@ -1633,7 +1851,19 @@
       },
       "suggested_anchor": "George 2003 Gilgamesh on the Shamhat episode. Westermann 1984 on Genesis 3 expulsion. Trible 1978 God and the Rhetoric of Sexuality for feminist-typology framing.",
       "transmission_direction": "common_substrate",
-      "notes": "Speculative typological parallel. The structural mirror is real (female agent transforms male into civilized/knowing/mortal state) but the genealogical question is open. Worth listing as typological-only."
+      "notes": "Speculative typological parallel. The structural mirror is real (female agent transforms male into civilized/knowing/mortal state) but the genealogical question is open. Worth listing as typological-only. | NUANCE: Later scholarship (Harvard Theological Review 'A Suitable Match: Eve, Enkidu, and the Boundaries of Humanity') complicates Bailey by arguing Eve ↔ Enkidu (suitable-match typology) — a competing but related reading. Both belong in the comparative corpus.",
+      "scholarly_attribution": [
+        {
+          "author_year": "Bailey 1970",
+          "publication": "John A. Bailey, 'Initiation and the Primal Woman in Gilgamesh and Genesis 2-3,' Journal of Biblical Literature 89.2 (1970): 137-150",
+          "argument_summary": "Real, peer-reviewed (JBL) article that explicitly compares Shamhat and Eve as primal-women initiators of male protagonists into civilization/knowledge. Both narratives center female-mediated transition from primal-innocence to civilized-knowledge. The 'Eve-Shamhat framework' is foundational and described in secondary literature as influential in biblical scholarship."
+        }
+      ],
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Bailey 1970 markbwilson.com PDF + Cambridge Core HTR 'Suitable Match' article + verification of JBL 89:137-150 reference chain."
+      }
     },
     {
       "entity_a": {
@@ -1653,7 +1883,7 @@
       "parallel_type": "structural",
       "discovered_by": "ai_traversal",
       "confidence_score": 0.46,
-      "validation_status": "pending",
+      "validation_status": "rejected",
       "discovery_trace": {
         "supporting_briefs": [
           "Adapa.md",
@@ -1677,7 +1907,13 @@
       },
       "suggested_anchor": "Izre'el 2001 Adapa for the south-wind transgression. Nickelsburg 2001 1 Enoch for the Watchers transgression. Sanders 2017 From Adapa to Enoch for the comparative argument.",
       "transmission_direction": "common_substrate",
-      "notes": "Adapa-to-Enoch transmission is well-documented by Sanders 2017 (cited in Adapa.md §3.3). The transgression structural parallel is a corollary of that broader transmission. Could be added under the Watchers/apkallu query family."
+      "notes": "Adapa-to-Enoch transmission is well-documented by Sanders 2017 (cited in Adapa.md §3.3). The transgression structural parallel is a corollary of that broader transmission. Could be added under the Watchers/apkallu query family.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "Sanders 2017 Mohr Siebeck + PSU library catalog TOC + Ancient Jew Review + Biblical Review + WebFetch of Annus 2010 PDF.",
+        "rejection_reason": "Sanders 2017 *From Adapa to Enoch* does not treat this pairing — book scope is scribal-persona Mesopotamian-to-Judean continuity (Adapa → 'I am Adapa!' exorcist persona → Enoch as Judean scribal hero), not pre-flood transgression narratives. Nickelsburg 2001 Hermeneia 1 Enoch and Izre'el 2001 Adapa treat their respective transgressions but not as paired pre-flood foundational disruptions. Annus 2010 traces apkallu → Watchers via list-rewriting, not via transgression-parallel. The candidate's 'foundational pre-flood transgressions by quasi-divine figures' framing is a plausible comparative-religion observation but no peer-reviewed scholar makes the explicit pairing."
+      }
     },
     {
       "entity_a": {
@@ -1724,7 +1960,13 @@
       },
       "suggested_anchor": "Lambert 2013 Babylonian Creation Myths on the 50 names. Kramer & Maier 1989 Myths of Enki, the Crafty God on Enki and the World Order.",
       "transmission_direction": "unidirectional_a_to_b",
-      "notes": "Intra-Mesopotamian structural appropriation. Documents the Enki-to-Marduk role-transfer that the cluster has traced in multiple places (e.g. Marduk.md §5). Worth surfacing as a discovery candidate to document the *list-format theological-administrative* genre as a Mesopotamian distinctive."
+      "notes": "Intra-Mesopotamian structural appropriation. Documents the Enki-to-Marduk role-transfer that the cluster has traced in multiple places (e.g. Marduk.md §5). Worth surfacing as a discovery candidate to document the *list-format theological-administrative* genre as a Mesopotamian distinctive.",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validated_by": "claude-validation-subagent-round2 2026-05-15",
+        "validation_method": "JSTOR Lambert 2013 listing + Internet Archive Kramer & Maier 1989 + secondary literature review.",
+        "inconclusive_notes": "Round-2: Both texts are well-studied. Lambert 2013 discusses the 50 names extensively + Marduk's absorption of Enlil's prerogatives; Kramer & Maier 1989 translate 'Enki and the World Order.' Neither explicitly compares the two as parallel divine-administrative narratives in materials accessed. The Enki→Marduk theological succession (father-son framing) IS attested in scholarship — but that is a different claim than the structural-parallel framing of the candidate. Recommend full-book access review before validating."
+      }
     }
   ]
 }

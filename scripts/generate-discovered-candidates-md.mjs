@@ -28,24 +28,42 @@ lines.push("Each candidate carries a **discovery_trace**: which briefs supported
 lines.push("");
 lines.push("**Discipline:** machine-discovered parallels are explicitly second-class. The `discovered_by: ai_traversal` flag is load-bearing. Until human-scholar validation, these are *hypothesis-generation*, not citation material. Candidates that have completed a validation pass carry `scholarly_attribution` + a `validation_log` with the audit trail.");
 
-if (ds._meta.validation_pass) {
+if (ds._meta.validation_totals) {
   lines.push("");
   lines.push("---");
   lines.push("");
-  lines.push("## Validation pass results");
+  lines.push("## Validation totals (across all rounds)");
+  lines.push("");
+  const vt = ds._meta.validation_totals;
+  lines.push(`**Rounds completed:** ${vt.rounds_completed}`);
+  lines.push(`**Total candidates reviewed:** ${vt.total_reviewed} of ${vt.total_candidates}`);
+  lines.push("");
+  lines.push(`| Verdict | Count | Share |`);
+  lines.push(`|---|---|---|`);
+  lines.push(`| ✓ **validated** (with named scholarly attribution) | ${vt.validated} | ${((vt.validated / vt.total_candidates) * 100).toFixed(0)}% |`);
+  lines.push(`| ✗ **rejected** (with reason) | ${vt.rejected} | ${((vt.rejected / vt.total_candidates) * 100).toFixed(0)}% |`);
+  lines.push(`| ○ **pending** (inconclusive validation pass) | ${vt.pending} | ${((vt.pending / vt.total_candidates) * 100).toFixed(0)}% |`);
+  lines.push("");
+}
+
+if (ds._meta.validation_pass) {
+  lines.push("");
+  lines.push("### Round 1 — Top 12 candidates (confidence ≥ 0.70)");
   lines.push("");
   const vp = ds._meta.validation_pass;
-  lines.push(`**Pass label:** ${vp.pass_label}`);
-  lines.push(`**Pass date:** ${vp.pass_date}`);
-  lines.push(`**Candidates reviewed:** ${vp.candidates_reviewed}`);
+  lines.push(`Validated: ${vp.validated}, Rejected: ${vp.rejected}, Pending: ${vp.pending}.`);
   lines.push("");
-  lines.push(`| Verdict | Count |`);
-  lines.push(`|---|---|`);
-  lines.push(`| validated (with named scholarly attribution) | ${vp.validated} |`);
-  lines.push(`| rejected (with reason) | ${vp.rejected} |`);
-  lines.push(`| pending (inconclusive validation pass) | ${vp.pending} |`);
+  lines.push(`*Method: ${vp.validation_method}*`);
+}
+
+if (ds._meta.validation_pass_round2) {
   lines.push("");
-  lines.push(`**Method:** ${vp.validation_method}`);
+  lines.push("### Round 2 — Remaining 24 pending candidates (confidence 0.30–0.74)");
+  lines.push("");
+  const vp2 = ds._meta.validation_pass_round2;
+  lines.push(`Validated: ${vp2.validated}, Rejected: ${vp2.rejected}, Pending: ${vp2.pending}.`);
+  lines.push("");
+  lines.push(`*Method: ${vp2.validation_method}*`);
 }
 lines.push("");
 lines.push("---");
