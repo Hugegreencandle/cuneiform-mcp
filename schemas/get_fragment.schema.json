@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_fragment.schema.json",
+  "title": "get_fragment data payload",
+  "description": "Structured payload for the `get_fragment` tool. Full eBL fragment record. `joins[]` follows eBL's grouped layout: each top-level entry is a connected join group, with each member as a museum-number object. CDLI/ORACC cross-refs live under `external` for chaining.",
+  "type": "object",
+  "required": ["museum_number_input", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "museum_number_input": {
+      "type": "string",
+      "description": "Raw caller input, before normalization."
+    },
+    "museum_number_normalized": {
+      "type": "string",
+      "description": "Canonical form used for the eBL query (e.g. `BM.41255C` → `BM.41255.C`)."
+    },
+    "found": { "type": "boolean" },
+    "error": { "type": "string" },
+    "museum_number_obj": { "$ref": "envelope.schema.json#/$defs/MuseumNumber" },
+    "museum_number": { "type": "string" },
+    "publication": { "type": "string" },
+    "description": { "type": "string" },
+    "collection": { "type": "string" },
+    "museum": {
+      "type": "string",
+      "description": "Holding museum identifier (eBL stores this snake_case-style; the rendered text replaces underscores with spaces — we keep raw form here)."
+    },
+    "script": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string" },
+        "period_modifier": { "type": "string" }
+      }
+    },
+    "genres": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Hierarchical category path, e.g. [\"CANONICAL\", \"Literature\", \"Lugal-e\"]. CANONICAL is the universal top-level marker."
+      }
+    },
+    "external": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cdli_number": { "type": "string" },
+        "bm_id_number": { "type": "string" },
+        "oracc_numbers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "dimensions_cm": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Tablet dimensions in centimetres when recorded. Each axis is an object so a `note` (e.g. \"approx\") can travel alongside the value.",
+      "properties": {
+        "length": { "$ref": "#/$defs/Dim" },
+        "width": { "$ref": "#/$defs/Dim" },
+        "thickness": { "$ref": "#/$defs/Dim" }
+      }
+    },
+    "joins": {
+      "type": "array",
+      "description": "Top-level array is the list of join groups; each group is an array of member museum numbers.",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["museum_number", "museum_number_obj"],
+          "properties": {
+            "museum_number": { "type": "string" },
+            "museum_number_obj": { "$ref": "envelope.schema.json#/$defs/MuseumNumber" }
+          }
+        }
+      }
+    },
+    "joins_flat": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Convenience: every member of every join group as a flat string list, with the target's own museum number excluded."
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "has_photo": { "type": "boolean" },
+        "cdli_images": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "transliteration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line_count", "lines", "truncated"],
+      "description": "Transliteration as rendered by eBL. `lines` is the cap-limited subset; each entry is the prefix + concatenated content tokens.",
+      "properties": {
+        "line_count": { "type": "integer", "minimum": 0 },
+        "lines": { "type": "array", "items": { "type": "string" } },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "references": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 0 },
+        "shown": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string" },
+              "pages": { "type": "string" }
+            },
+            "required": ["id"]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Dim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": { "type": "number" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

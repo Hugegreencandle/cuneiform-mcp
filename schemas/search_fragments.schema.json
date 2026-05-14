@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/search_fragments.schema.json",
+  "title": "search_fragments data payload",
+  "description": "Structured payload for the `search_fragments` tool. eBL /api/fragments/query results. `resolved_mode` reports which parameter eBL was queried under (auto-detection collapses to `number` for museum-number-shaped queries, else `transliteration`).",
+  "type": "object",
+  "required": ["query", "resolved_mode", "limit", "count_returned", "match_count_total", "fragments"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": "string" },
+    "resolved_mode": {
+      "type": "string",
+      "enum": ["number", "transliteration", "lemmas"],
+      "description": "Which eBL query parameter the search used. `auto` is resolved client-side based on whether the query looks like a museum number."
+    },
+    "limit": { "type": "integer", "minimum": 1 },
+    "count_returned": { "type": "integer", "minimum": 0 },
+    "match_count_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Sum of `matchCount` across all returned fragments — eBL's count of line-level matches on this page (not the total catalog match count)."
+    },
+    "fragments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["museum_number", "museum_number_obj", "match_count", "matching_lines"],
+        "additionalProperties": false,
+        "properties": {
+          "museum_number": {
+            "type": "string",
+            "description": "Display form: `prefix.number[.suffix]`."
+          },
+          "museum_number_obj": {
+            "$ref": "envelope.schema.json#/$defs/MuseumNumber",
+            "description": "eBL's three-component form. Use this when walking joins[] or matching against other typed payloads to avoid string-parse landmines."
+          },
+          "match_count": { "type": "integer", "minimum": 0 },
+          "matching_lines": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 },
+            "description": "Line numbers within the fragment that matched the query."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1209,6 +1209,7 @@ server.registerTool(
   },
   async ({ query, mode, limit }) => {
     const cap = limit ?? 20;
+    const SCHEMA = schemaId("search_fragments");
     // Museum numbers in eBL look like K.1, BM.42345, VAT.4936, Sm.1, Ki.1904-10-9,1.
     // Heuristic: starts with 1-5 capital letters, then a dot, then a digit.
     const looksLikeMuseumNumber = /^[A-Z][A-Za-z]{0,4}\.\d/.test(query);
@@ -1229,8 +1230,21 @@ server.registerTool(
     try {
       res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     } catch (err) {
-      return textResult(
+      return structuredResult(
         `eBL fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+        {
+          schema: SCHEMA,
+          data: {
+            query,
+            resolved_mode: paramName,
+            limit: cap,
+            count_returned: 0,
+            match_count_total: 0,
+            fragments: [],
+          },
+          provenance: provenance("eBL", url, VERSION),
+          warnings: [`upstream-fetch-failed: ${err instanceof Error ? err.message : String(err)}`],
+        },
       );
     }
     if (!res.ok) {
@@ -1238,7 +1252,19 @@ server.registerTool(
         res.status === 422
           ? " The server rejected the parameter — try setting mode explicitly."
           : "";
-      return textResult(`eBL search returned HTTP ${res.status} for ${url}.${hint}`);
+      return structuredResult(`eBL search returned HTTP ${res.status} for ${url}.${hint}`, {
+        schema: SCHEMA,
+        data: {
+          query,
+          resolved_mode: paramName,
+          limit: cap,
+          count_returned: 0,
+          match_count_total: 0,
+          fragments: [],
+        },
+        provenance: provenance("eBL", url, VERSION),
+        warnings: [`upstream-http-${res.status}`],
+      });
     }
     type Hit = {
       matchingLines: number[];
@@ -1251,8 +1277,30 @@ server.registerTool(
       `${mn.prefix}.${mn.number}${mn.suffix ? mn.suffix : ""}`;
 
     if (!data.items || data.items.length === 0) {
-      return textResult(`No fragments matched ${paramName}="${query}".\nSource: ${url}`);
+      return structuredResult(`No fragments matched ${paramName}="${query}".\nSource: ${url}`, {
+        schema: SCHEMA,
+        data: {
+          query,
+          resolved_mode: paramName,
+          limit: cap,
+          count_returned: 0,
+          match_count_total: data.matchCountTotal ?? 0,
+          fragments: [],
+        },
+        provenance: provenance("eBL", url, VERSION),
+      });
     }
+
+    const fragmentsStructured = data.items.map((it) => ({
+      museum_number: fmtMuseum(it.museumNumber),
+      museum_number_obj: {
+        prefix: it.museumNumber.prefix,
+        number: it.museumNumber.number,
+        suffix: it.museumNumber.suffix ?? "",
+      },
+      match_count: it.matchCount,
+      matching_lines: it.matchingLines ?? [],
+    }));
 
     const out = [
       `eBL fragment search: ${paramName}="${query}" (limit ${cap})`,
@@ -1273,7 +1321,18 @@ server.registerTool(
       ``,
       `Tip: call get_fragment(museum_number="<id>") for full publication + description.`,
     ];
-    return textResult(out.join("\n"));
+    return structuredResult(out.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        query,
+        resolved_mode: paramName,
+        limit: cap,
+        count_returned: data.items.length,
+        match_count_total: data.matchCountTotal,
+        fragments: fragmentsStructured,
+      },
+      provenance: provenance("eBL", url, VERSION),
+    });
   },
 );
 
@@ -1301,6 +1360,7 @@ server.registerTool(
   },
   async ({ museum_number, max_lines }) => {
     const cap = max_lines ?? 60;
+    const SCHEMA = schemaId("get_fragment");
     // eBL stores museum numbers as {prefix, number, suffix} and the URL form
     // is "Prefix.Number.Suffix" with a dot before the suffix. Users frequently
     // type "BM.41255C" (no dot) — normalize.
@@ -1315,17 +1375,48 @@ server.registerTool(
     try {
       res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
     } catch (err) {
-      return textResult(
+      return structuredResult(
         `eBL fetch failed: ${err instanceof Error ? err.message : String(err)} (${url})`,
+        {
+          schema: SCHEMA,
+          data: {
+            museum_number_input: museum_number,
+            museum_number_normalized: id,
+            found: false,
+            error: err instanceof Error ? err.message : String(err),
+          },
+          provenance: provenance("eBL", url, VERSION),
+          warnings: ["upstream-fetch-failed"],
+        },
       );
     }
     if (res.status === 404) {
-      return textResult(
+      return structuredResult(
         `No fragment "${museum_number}" (tried ${id}). Use search_fragments to discover valid IDs.`,
+        {
+          schema: SCHEMA,
+          data: {
+            museum_number_input: museum_number,
+            museum_number_normalized: id,
+            found: false,
+            error: "eBL 404",
+          },
+          provenance: provenance("eBL", url, VERSION),
+        },
       );
     }
     if (!res.ok) {
-      return textResult(`eBL returned HTTP ${res.status} for ${url}.`);
+      return structuredResult(`eBL returned HTTP ${res.status} for ${url}.`, {
+        schema: SCHEMA,
+        data: {
+          museum_number_input: museum_number,
+          museum_number_normalized: id,
+          found: false,
+          error: `HTTP ${res.status}`,
+        },
+        provenance: provenance("eBL", url, VERSION),
+        warnings: [`upstream-http-${res.status}`],
+      });
     }
     type Dim = { value: number; note?: string } | null;
     type Frag = {
@@ -1420,7 +1511,121 @@ server.registerTool(
 
     lines.push("");
     lines.push(`Source: ${url}`);
-    return textResult(lines.join("\n"));
+
+    // Build structured payload.
+    const dimsStruct: Record<string, { value: number; note?: string }> = {};
+    if (f.length && typeof f.length.value === "number")
+      dimsStruct.length = { value: f.length.value, ...(f.length.note ? { note: f.length.note } : {}) };
+    if (f.width && typeof f.width.value === "number")
+      dimsStruct.width = { value: f.width.value, ...(f.width.note ? { note: f.width.note } : {}) };
+    if (f.thickness && typeof f.thickness.value === "number")
+      dimsStruct.thickness = { value: f.thickness.value, ...(f.thickness.note ? { note: f.thickness.note } : {}) };
+
+    const joinsStruct = (f.joins ?? []).map((grp) =>
+      grp.map((j) => ({
+        museum_number: fmtMuseum(j.museumNumber),
+        museum_number_obj: {
+          prefix: j.museumNumber.prefix,
+          number: j.museumNumber.number,
+          suffix: j.museumNumber.suffix ?? "",
+        },
+      })),
+    );
+    const selfStr = fmtMuseum(f.museumNumber);
+    const joinsFlat: string[] = [];
+    for (const grp of joinsStruct) {
+      for (const m of grp) {
+        if (m.museum_number !== selfStr && !joinsFlat.includes(m.museum_number)) {
+          joinsFlat.push(m.museum_number);
+        }
+      }
+    }
+
+    const transliterationStruct =
+      (f.text?.numberOfLines ?? 0) > 0 && f.text?.lines?.length
+        ? (() => {
+            const all = f.text!.lines.map((line) => {
+              const body = (line.content ?? []).map((c) => c.value).join(" ").trim();
+              return `${line.prefix ?? ""} ${body}`.trimEnd();
+            });
+            const shown = all.slice(0, cap);
+            return {
+              line_count: f.text!.numberOfLines,
+              lines: shown,
+              truncated: all.length > cap,
+            };
+          })()
+        : undefined;
+
+    const refsStruct = f.references && f.references.length > 0
+      ? {
+          count: f.references.length,
+          shown: f.references.slice(0, 5).map((r) => ({
+            id: r.id,
+            ...(r.type ? { type: r.type } : {}),
+            ...(r.pages ? { pages: r.pages } : {}),
+          })),
+        }
+      : undefined;
+
+    const scriptStruct: Record<string, string> = {};
+    if (f.script?.period && f.script.period !== "None") scriptStruct.period = f.script.period;
+    if (f.script?.periodModifier && f.script.periodModifier !== "None")
+      scriptStruct.period_modifier = f.script.periodModifier;
+
+    const externalStruct: Record<string, unknown> = {};
+    if (f.externalNumbers?.cdliNumber) externalStruct.cdli_number = f.externalNumbers.cdliNumber;
+    if (f.externalNumbers?.bmIdNumber) externalStruct.bm_id_number = f.externalNumbers.bmIdNumber;
+    if (f.externalNumbers?.oraccNumbers?.length)
+      externalStruct.oracc_numbers = f.externalNumbers.oraccNumbers;
+
+    const warnings: string[] = [];
+    if (transliterationStruct?.truncated) {
+      warnings.push(
+        `transliteration truncated to first ${cap} of ${transliterationStruct.line_count} lines.`,
+      );
+    }
+    if (f.references && f.references.length > 5) {
+      warnings.push(`references truncated to first 5 of ${f.references.length}.`);
+    }
+
+    return structuredResult(lines.join("\n"), {
+      schema: SCHEMA,
+      data: {
+        museum_number_input: museum_number,
+        museum_number_normalized: id,
+        found: true,
+        museum_number: selfStr,
+        museum_number_obj: {
+          prefix: f.museumNumber.prefix,
+          number: f.museumNumber.number,
+          suffix: f.museumNumber.suffix ?? "",
+        },
+        ...(f.publication ? { publication: f.publication.split("\n")[0].trim() } : {}),
+        ...(f.description ? { description: f.description } : {}),
+        ...(f.collection ? { collection: f.collection } : {}),
+        ...(f.museum ? { museum: f.museum } : {}),
+        ...(Object.keys(scriptStruct).length > 0 ? { script: scriptStruct } : {}),
+        ...(f.genres?.length ? { genres: f.genres.map((g) => g.category) } : {}),
+        ...(Object.keys(externalStruct).length > 0 ? { external: externalStruct } : {}),
+        ...(Object.keys(dimsStruct).length > 0 ? { dimensions_cm: dimsStruct } : {}),
+        ...(joinsStruct.length > 0 ? { joins: joinsStruct, joins_flat: joinsFlat } : {}),
+        ...(f.hasPhoto || f.cdliImages?.length
+          ? {
+              images: {
+                ...(typeof f.hasPhoto === "boolean" ? { has_photo: f.hasPhoto } : {}),
+                ...(f.cdliImages?.length ? { cdli_images: f.cdliImages } : {}),
+              },
+            }
+          : {}),
+        ...(transliterationStruct ? { transliteration: transliterationStruct } : {}),
+        ...(refsStruct ? { references: refsStruct } : {}),
+      },
+      provenance: provenance("eBL", url, VERSION, {
+        citation: f.publication ? f.publication.split("\n")[0].trim() : undefined,
+      }),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   },
 );
 
