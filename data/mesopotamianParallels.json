@@ -1,0 +1,278 @@
+{
+  "_meta": {
+    "description": "Curated cross-Mesopotamian-internal parallels validated by the Discovery Engine v0.7 pipeline. These are parallels between Mesopotamian / Hurrian-Hittite / Ugaritic figures and texts that DO NOT fit v0.6's Jewish-passage query structure but ARE validated against named published scholars. Query by deity, theme, tradition-pair, or text. Same named-scholarship discipline as v0.6.",
+    "compiled": "2026-05-15",
+    "curator_note": "Promoted from data/discoveredCandidates.json (machine-discovered, human-scholar validated). v0.8.0 ships with 6 parallels from the Discovery Engine; manual additions can be made to extend the dataset.",
+    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset."
+  },
+  "parallels": [
+    {
+      "id": "mp-chaoskampf-1",
+      "entity_a": {
+        "text": "Marduk's combat with Tiamat in Enūma Eliš IV.93-104 — Marduk slays Tiamat with his net and the four winds, splits her body to form heaven and earth",
+        "citation": "Enūma Eliš IV.93-104 (Lambert 2013)",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Standard Babylonian (c. 1100 BCE)"
+      },
+      "entity_b": {
+        "text": "Baal's combat with Yam in the Ugaritic Baal Cycle — Baal slays Yam (Sea) with magical weapons crafted by Kothar-wa-Hasis, asserting divine kingship over the cosmos",
+        "citation": "KTU 1.1-1.2 (Smith 1994)",
+        "language": "Ugaritic",
+        "tradition": "ugaritic",
+        "approximate_date": "Late Bronze Age (c. 1400-1200 BCE)"
+      },
+      "parallel_type": "structural",
+      "themes": ["chaoskampf", "cosmogonic_combat", "primordial_waters", "divine_kingship_via_combat"],
+      "deities": ["Marduk", "Tiamat", "Baal", "Yam", "Ea", "Kothar-wa-Hasis"],
+      "texts": ["Enūma Eliš", "Baal Cycle", "KTU 1.1-1.2"],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Gunkel 1895",
+          "publication": "Hermann Gunkel, Schöpfung und Chaos in Urzeit und Endzeit: Eine religionsgeschichtliche Untersuchung über Gen 1 und Ap Joh 12 (Göttingen: Vandenhoeck & Ruprecht, 1895)",
+          "argument_summary": "Coined the term Chaoskampf and argued that the cosmogonic combat motif — divine hero vs. chaos-monster (typically serpentine/aquatic) — is a recurring Ancient Near Eastern pattern instantiated in the Marduk-Tiamat combat of Enūma Eliš and in biblical creation/sea-conflict imagery. Established the comparative-religion framework that subsequent scholars (Smith 1994, Day 1985) extended to Baal-Yam."
+        },
+        {
+          "author_year": "Smith 1994",
+          "publication": "Mark S. Smith, The Ugaritic Baal Cycle, Volume I: Introduction with Text, Translation and Commentary of KTU 1.1-1.2, Vetus Testamentum Supplements 55 (Leiden: Brill, 1994)",
+          "argument_summary": "Smith explicitly classifies the Baal-Yam story as a cosmogony — 'a battle between a divine hero and his cosmic enemy issuing in cosmic order' (p. 16) — and observes that 'the diverse materials in the Baal Cycle served the purpose of exalting Baal much as the diverse materials in Enuma Elish served the purpose of exalting Marduk' (pp. 34-35). Both texts amalgamate divine combat + kingship-proclamation + palace-construction."
+        },
+        {
+          "author_year": "Day 1985",
+          "publication": "John Day, God's Conflict with the Dragon and the Sea: Echoes of a Canaanite Myth in the Old Testament, University of Cambridge Oriental Publications 35 (Cambridge: CUP, 1985)",
+          "argument_summary": "Treats Baal-Yam and Marduk-Tiamat as parallel instances of the broader chaos-combat motif with biblical reception in Old Testament dragon/sea imagery."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Marduk's combat with Tiamat ↔ Baal's combat with Yam"
+      },
+      "notes": "Foundational Ancient Near Eastern comparative-religion framework. Most-cited single parallel in ANE studies. The 'Chaoskampf' framework subsequently extended into biblical reception (Gen 1:2 tehom, Psalm 74, Isaiah 51, Job 26, Revelation 12) — though that extension is a different parallel and not anchored here. v0.6 dataset's Genesis 1 entry would need separate human-scholar validation."
+    },
+    {
+      "id": "mp-divine-substitution-1",
+      "entity_a": {
+        "text": "Ninurta's combat with Asag in lugal-e (and recovery of Tablet of Destinies from Anzû in the Anzû Epic)",
+        "citation": "lugal-e (ETCSL 1.6.2) + Standard Babylonian Anzû (Annus 2002)",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Sumerian Ur III + SB Anzû (c. 2100-1100 BCE)"
+      },
+      "entity_b": {
+        "text": "Marduk's combat with Tiamat in Enūma Eliš — recasting Ninurta's older warrior-god combat narrative with Marduk substituted into the role",
+        "citation": "Enūma Eliš IV (Lambert 2013)",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Standard Babylonian (c. 1100 BCE)"
+      },
+      "parallel_type": "structural",
+      "themes": ["divine_substitution", "warrior_god_pattern", "succession", "young_hero_inherits"],
+      "deities": ["Ninurta", "Asag", "Anzu", "Marduk", "Tiamat", "Enlil"],
+      "texts": ["lugal-e", "Anzû Epic", "Enūma Eliš"],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Lambert 1986",
+          "publication": "W.G. Lambert, 'Ninurta Mythology in the Babylonian Epic of Creation,' in K. Hecker & W. Sommerfeld (eds.), Keilschriftliche Literaturen: Ausgewählte Vorträge der XXXII. Rencontre Assyriologique Internationale, Berliner Beiträge zum Vorderen Orient 6 (Berlin: Reimer, 1986), pp. 55-60",
+          "argument_summary": "The seminal explicit argument that Marduk in Enūma Eliš is portrayed as 'Ninurta redivivus' — direct and conscious borrowing from the Anzû Epic and lugal-e (Ninurta vs. Asag/Anzu cycle). Diagnostic borrowings: (a) Tablet of Destinies as the prize-object; (b) Marduk's net and flood-weapons (which fit Anzu/Asag but make no logical sense against a sea-body like Tiamat — clearest sign of secondary adaptation); (c) the post-victory fifty-name ceremony patterned on Ninurta's post-Anzû acclamation; (d) the wind-blowing-the-blood/feathers motif adapted from the Anzû episode."
+        },
+        {
+          "author_year": "Lambert 2013",
+          "publication": "W.G. Lambert, Babylonian Creation Myths, Mesopotamian Civilizations 16 (Winona Lake, IN: Eisenbrauns, 2013)",
+          "argument_summary": "Restates the 1986 argument; the posthumous monograph is the modern standard reference for the Marduk-modeled-on-Ninurta thesis."
+        },
+        {
+          "author_year": "Annus 2002",
+          "publication": "Amar Annus, The God Ninurta in the Mythology and Royal Ideology of Ancient Mesopotamia, State Archives of Assyria Studies 14 (Helsinki: Neo-Assyrian Text Corpus Project, 2002)",
+          "argument_summary": "Extends Lambert's case showing Marduk's Babylonian elevation effectively substitutes him into Ninurta's older warrior-god role across the late-Babylonian theological politics."
+        }
+      ],
+      "transmission_hypothesis": "direct_borrowing",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Ninurta defeats Asag / recovers Tablet of Destinies ↔ Marduk defeats Tiamat (and inherits her role)"
+      },
+      "notes": "Lambert's diagnostic argument is one of the cleanest 'direct conscious adaptation' arguments in Mesopotamian comparative-religion. The net-and-flood-weapons detail is the smoking gun — these are useless against Tiamat (saltwater) but make sense against Anzû (a bird) and Asag (a mountain-being), revealing the Enūma Eliš author's source text."
+    },
+    {
+      "id": "mp-mother-goddess-1",
+      "entity_a": {
+        "text": "Hannahanna, the Hurrian-Hittite mother goddess of birth, fertility, and bees — invoked in Hittite birth rituals and the Telipinu myth",
+        "citation": "Hittite Birth Rituals (Beckman 1983); Telipinu myth (CTH 324)",
+        "language": "Hittite",
+        "tradition": "hurrian_hittite",
+        "approximate_date": "Hittite Empire period (c. 1600-1200 BCE)"
+      },
+      "entity_b": {
+        "text": "Bēlet-ilī / Ninhursag / Ninmah / Nintu — the Mesopotamian mother goddess, co-creator of humanity in Atra-ḫasīs",
+        "citation": "Atra-ḫasīs I.190-260 (Lambert & Millard 1969); various Sumerian + Akkadian birth incantations",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Old Babylonian onward (c. 1700 BCE+)"
+      },
+      "parallel_type": "logographic",
+      "themes": ["mother_goddess", "syncretism", "logographic_equation", "birth_ritual"],
+      "deities": ["Hannahanna", "Bēlet-ilī", "Ninhursag", "Ninmah", "Nintu", "Mami", "Aruru"],
+      "texts": ["Hittite Birth Rituals", "Atra-ḫasīs", "Telipinu myth"],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "von Schuler 1972-1975",
+          "publication": "Einar von Schuler, 'Ḫannaḫanna(š),' in Reallexikon der Assyriologie und Vorderasiatischen Archäologie Band 4 (Berlin/New York: de Gruyter, 1972-1975), p. 108",
+          "argument_summary": "Established that Ḫannaḫanna is written with the Sumerograms DINGIR.MAḪ and dNIN.TU in Hittite texts — the same logograms used in Mesopotamia for the Mother Goddess (Bēlet-ilī / Ninmaḫ / Nintu / Ninḫursag). This direct scribal identification, accepted as standard Assyriological consensus, treats Ḫannaḫanna and Bēlet-ilī / Ninḫursag as functionally equivalent senior mother goddesses across the Hittite-Mesopotamian cultural interface."
+        },
+        {
+          "author_year": "Beckman 1983",
+          "publication": "Gary M. Beckman, Hittite Birth Rituals, Studien zu den Boğazköy-Texten 29 (Wiesbaden: Harrassowitz, 1983; 2nd rev. ed. 1986)",
+          "argument_summary": "Shows the Ḫannaḫanna = Bēlet-ilī equation operating in cultic practice — Ḫannaḫanna performs the same midwifery/creation role as Bēlet-ilī does in Mesopotamian birth incantations and Atra-ḫasīs."
+        },
+        {
+          "author_year": "Asher-Greve & Westenholz 2013",
+          "publication": "Julia M. Asher-Greve & Joan Goodnick Westenholz, Goddesses in Context: On Divine Powers, Roles, Relationships and Gender in Mesopotamian Textual and Visual Sources, Orbis Biblicus et Orientalis 259 (Fribourg/Göttingen: Academic Press/Vandenhoeck & Ruprecht, 2013)",
+          "argument_summary": "Treats the cross-cultural mother-goddess complex (Nintu / Bēlet-ilī / Mami / Aruru) as a syncretic cluster of which Ḫannaḫanna is the Hittite-Hurrian member."
+        }
+      ],
+      "transmission_hypothesis": "syncretism",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Hannahanna (Hurrian-Hittite mother-goddess) ↔ Bēlet-ilī / Ninhursag"
+      },
+      "notes": "The DINGIR.MAḪ logographic equation is one of the cleanest examples of cross-tradition divine syncretism in the cuneiform record. Hittite scribes used the same Sumerogram to write 'Hannahanna' as Mesopotamian scribes used to write 'Bēlet-ilī' — direct scribal identification rather than typological inference."
+    },
+    {
+      "id": "mp-named-authorship-1",
+      "entity_a": {
+        "text": "Enheduanna (c. 2300 BCE) — Sargonic priestess of the Inanna cult at Ur and first named author in literary history. Composed the hymn-cycle Exaltation of Inanna (nin-me-šara) + Inanna and Ebih + the Temple Hymns.",
+        "citation": "Helle 2023; ETCSL Inanna hymn corpus",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Sargonic c. 2300 BCE"
+      },
+      "entity_b": {
+        "text": "Kabti-ilāni-Marduk (c. 765 BCE) — Babylonian scribe of the Dabibi family, named in the Erra Epic's colophon as the human transcriber of a dream-revelation received from Erra himself.",
+        "citation": "Erra Epic V colophon (Cagni 1969)",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "c. 765 BCE (per Erra Epic dating)"
+      },
+      "parallel_type": "structural",
+      "themes": ["named_authorship", "scribal_tradition", "dream_revelation"],
+      "deities": ["Inanna", "Erra", "Marduk"],
+      "texts": ["Exaltation of Inanna", "Inanna and Ebih", "Erra Epic", "Catalogue of Texts and Authors"],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Helle 2019",
+          "publication": "Sophus Helle, 'Enheduana: The Birth of Literature through the Goddess,' Iraq 81 (2019), Cambridge Core",
+          "argument_summary": "Treats Enheduana as the first named author in literary history, in a Mesopotamian tradition that systematically named authors via the Neo-Assyrian Catalogue of Texts and Authors. Discusses Kabti-ilāni-Marduk by name as a later, rare case of self-identifying authorship (revealed in dream), establishing the 'tradition of named authorship within anonymity' frame."
+        },
+        {
+          "author_year": "Helle 2023",
+          "publication": "Sophus Helle, Enheduana: The Complete Poems of the World's First Author (New Haven: Yale University Press, 2023)",
+          "argument_summary": "Extended treatment placing Enheduana within Mesopotamian named-authorship tradition with Kabti-ilāni-Marduk as parallel case."
+        },
+        {
+          "author_year": "Lenzi 2008",
+          "publication": "Alan Lenzi, Secrecy and the Gods: Secret Knowledge in Ancient Mesopotamia and Biblical Israel, State Archives of Assyria Studies 19 (Helsinki: Neo-Assyrian Text Corpus Project, 2008)",
+          "argument_summary": "Discusses Kabti-ilāni-Marduk's dream-revelation framing as a scribal strategy for legitimating texts as divine revelation. Explicitly compares Mesopotamian scribal authority claims to biblical Israel (Moses as parallel mediator)."
+        }
+      ],
+      "transmission_hypothesis": "scribal_transmission",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Enheduanna (named author) ↔ Kabti-ilāni-Marduk (named author)"
+      },
+      "notes": "The named-authorship tradition within an overwhelmingly anonymous scribal culture is rare and distinctive. Enheduana and Kabti-ilāni-Marduk bookend ~1,500 years of Mesopotamian literary history. The biblical-reception extension (Mesopotamia → Israel via Moses as mediator) is established by Lenzi 2008; the Hellenistic-pseudepigraphy extension would need separate human-scholar validation."
+    },
+    {
+      "id": "mp-king-list-dissent-1",
+      "entity_a": {
+        "text": "The Rulers of Lagaš (Lagash King List) — Sumerian satirical composition opening with an agricultural-labor cosmology that explicitly INVERTS the SKL's 'kingship descended from heaven' formula. Foregrounds Ningirsu and agricultural implements as the prerequisite for kingship.",
+        "citation": "Sollberger 1967 JCS 21; ETCSL 2.1.2",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Old Babylonian period (c. 1700 BCE)"
+      },
+      "entity_b": {
+        "text": "The Sumerian King List (WB 444, Weld-Blundell Prism) — the canonical Nippur-tradition Sumerian historiographical framework opening with 'kingship descended from heaven' and structuring history as antediluvian + postdiluvian dynasties",
+        "citation": "WB 444 (Jacobsen 1939); Glassner 2004",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Old Babylonian recension c. 1817 BCE"
+      },
+      "parallel_type": "structural",
+      "themes": ["king_list_dissent", "competing_historiography", "parody", "cosmological_dispute"],
+      "deities": ["An", "Enlil", "Ningirsu"],
+      "texts": ["Rulers of Lagaš", "Sumerian King List", "WB 444"],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Sollberger 1967",
+          "publication": "Edmond Sollberger, 'The Rulers of Lagaš,' Journal of Cuneiform Studies 21 (1967): 279-291",
+          "argument_summary": "Editio princeps. Describes the Lagash King List as a satirical/pseudo-historical composition responding to the SKL — a deliberate dissent from the WB-444 framework."
+        },
+        {
+          "author_year": "Glassner 2004",
+          "publication": "Jean-Jacques Glassner, Mesopotamian Chronicles, Writings from the Ancient World 19 (Atlanta: Society of Biblical Literature, 2004)",
+          "argument_summary": "Explicitly organizes the Lagash King List under the section heading 'A Parody: The Royal Chronicle of Lagash' (Chronicle 6). Frames the agricultural-labor cosmology as a deliberate inversion of the SKL's 'kingship descended from heaven' formula. The Lagash text's opening (ETCSL 2.1.2) confirms: 'After the flood had swept over… kingship and the crown of the city had not yet come out from heaven, and Nin-ĝirsu had not yet established for the multitude of well-guarded people the pickaxe, the spade, the earth basket and the plough, which mean life for the Land.'"
+        }
+      ],
+      "transmission_hypothesis": "direct_borrowing",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Lagash KL agricultural-labor cosmology ↔ SKL kingship-from-heaven cosmology"
+      },
+      "notes": "Important counter-example to the SKL orthodoxy. Demonstrates that the WB-444 framework was not universal Sumerian doctrine — Lagash-scribal-tradition explicitly dissented. Theological consequence: the Mesopotamian flood-as-cosmic-pivot was not a universal Sumerian doctrine."
+    },
+    {
+      "id": "mp-descent-ascent-1",
+      "entity_a": {
+        "text": "Inanna's Descent to the Netherworld — Inanna's journey from heaven through seven gates of the underworld; her death and revival; the demand for a substitute (Dumuzi)",
+        "citation": "Inanna's Descent (ETCSL 1.4.1); Sladek 1974",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Old Babylonian recension c. 1800 BCE"
+      },
+      "entity_b": {
+        "text": "Adapa's ascent to the heaven of Anu — Adapa summoned through Anu's gate-keepers (Dumuzi + Gishzida); offered the bread-of-life and water-of-life; refuses per Enki's prior coaching; loses immortality but retains wisdom",
+        "citation": "Adapa myth (Izre'el 2001)",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Amarna period EA 356 (c. 1350 BCE) + Nineveh fragments"
+      },
+      "parallel_type": "structural",
+      "themes": ["descent_ascent", "cosmological_paired_motif", "boundary_crossing", "gatekeeper_passage"],
+      "deities": ["Inanna", "Adapa", "Anu", "Ea", "Dumuzi", "Gishzida", "Ereshkigal"],
+      "texts": ["Inanna's Descent", "Adapa myth"],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Annus 2016",
+          "publication": "Amar Annus, The Overturned Boat: Intertextuality of the Adapa Myth and Exorcist Literature, State Archives of Assyria Studies 24 (Helsinki: Neo-Assyrian Text Corpus Project, 2016). Part Two: 'Descent and Ascent.'",
+          "argument_summary": "Devotes Part Two to 'Descent and Ascent' treating Inanna's journey and Adapa's ascent as shared/paired motifs central to Mesopotamian religious experience. Argues that descent into the underworld (sea, netherworld) was a structurally necessary precursor to heavenly ascent in the Mesopotamian cosmological frame — paired cosmological motif rather than 7-gates-vs-2-gatekeepers inversion."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "ai_traversal",
+        "discovery_date": "2026-05-15",
+        "reformulated_on": "2026-05-15",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "Inanna's Descent (cosmological descent narrative) ↔ Adapa's ascent (cosmological ascent narrative)"
+      },
+      "notes": "Originally discovered as '7-gates-vs-2-gatekeepers structural inversion' but reformulated in v0.7.4 to match Annus 2016's actual broader paired-motif framing. The Dumuzi/Gishzida gatekeepers at Anu's heavenly gate are striking because both are chthonic underworld gods in their other attestations — the doubling reinforces Annus's claim that descent-and-ascent are structurally linked in Mesopotamian cosmology."
+    }
+  ]
+}

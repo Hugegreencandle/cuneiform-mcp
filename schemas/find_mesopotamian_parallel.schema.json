@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_mesopotamian_parallel.schema.json",
+  "title": "find_mesopotamian_parallel data payload",
+  "description": "Structured payload for the v0.8 `find_mesopotamian_parallel` tool — the cross-Mesopotamian-internal sibling to v0.6's `find_antediluvian_parallel`. Returns curated parallels between Mesopotamian texts/figures (Sumerian↔Akkadian, Akkadian↔Ugaritic, Hurrian↔Akkadian, etc.) WITHOUT requiring a Jewish/Christian biblical passage as the entry-point.\n\nDiscipline: same as v0.6 — named scholarly attribution REQUIRED (`scholarly_attribution.minItems: 1`). No scholar, no result. Difference from v0.6: the query is keyed on Mesopotamian-internal axes (deity, theme, tradition-pair, text) rather than a Jewish passage.\n\nThe v0.8 dataset ships with 6 parallels validated by the Discovery Engine v0.7 pipeline — they are cross-Mesopotamian-internal and therefore don't fit v0.6's Jewish-passage query structure. Includes the foundational Chaoskampf parallel (Gunkel 1895), the Ninurta→Marduk substitution thesis (Lambert 1986), the Hannahanna↔Bēlet-ilī Hurrian-Hittite↔Mesopotamian mother-goddess equivalence, named-authorship tradition (Helle 2019/2023), the Lagash↔SKL king-list dissent, and the Mesopotamian descent-and-ascent paired motif (Annus 2016).\n\nProvenance is `source: local`, `endpoint: local:mesopotamianParallelsIndex`.",
+  "type": "object",
+  "required": ["query", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Echo of the input query, normalized. All filters are AND-combined.",
+      "properties": {
+        "deity_name": {
+          "type": "string",
+          "description": "Filter results that mention this deity. Matches against the per-result `deities[]` field (case-insensitive substring). E.g. 'Marduk', 'Inanna', 'Bēlet-ilī'."
+        },
+        "theme": {
+          "type": "string",
+          "description": "Filter by theme tag. Matches against per-result `themes[]`. Vocabulary: `chaoskampf`, `cosmogonic_combat`, `divine_substitution`, `mother_goddess`, `named_authorship`, `king_list_dissent`, `descent_ascent`, `cosmological_paired_motif`, `boundary_crossing`, `succession`, `divine_kingship_via_combat`."
+        },
+        "tradition_pair": {
+          "type": "string",
+          "description": "Filter by tradition pair, e.g. `akkadian↔ugaritic`, `sumerian↔akkadian`, `hurrian↔akkadian`, `akkadian↔akkadian`, `sumerian↔sumerian`. Order-insensitive — `akkadian↔ugaritic` matches `ugaritic↔akkadian`."
+        },
+        "text_name": {
+          "type": "string",
+          "description": "Filter by text name. Matches against per-result `texts[]` (case-insensitive substring). E.g. 'Enūma Eliš', 'Baal Cycle', 'Erra Epic', 'lugal-e'."
+        },
+        "max_results": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Cap on results. Default 25."
+        }
+      }
+    },
+    "results": {
+      "type": "array",
+      "description": "Matching parallels. Order: by correspondence_strength (strong > moderate > weak) then by curated insertion order.",
+      "items": { "$ref": "#/$defs/MesopotamianParallel" }
+    },
+    "corpus_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_parallels": { "type": "integer", "minimum": 0 },
+        "traditions_covered": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "themes_covered": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "MesopotamianParallel": {
+      "type": "object",
+      "required": [
+        "id",
+        "entity_a",
+        "entity_b",
+        "parallel_type",
+        "themes",
+        "deities",
+        "texts",
+        "correspondence_strength",
+        "scholarly_attribution"
+      ],
+      "additionalProperties": false,
+      "description": "Single curated Mesopotamian-internal parallel. Same shape conventions as ParallelCandidate in find_antediluvian_parallel; differences are: (1) no Jewish-passage query keying; (2) entity_a and entity_b are both Mesopotamian/ANE; (3) themes and deities arrays for queryability.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier. Format: `mp-<topic>-<int>`. E.g. `mp-chaoskampf-1`, `mp-mother-goddess-1`."
+        },
+        "entity_a": { "$ref": "#/$defs/MesopotamianEntity" },
+        "entity_b": { "$ref": "#/$defs/MesopotamianEntity" },
+        "parallel_type": {
+          "type": "string",
+          "enum": ["structural", "lexical", "narrative", "topos", "onomastic", "iconographic", "logographic"],
+          "description": "Same vocabulary as v0.6 plus `logographic` for the case where two deities are conflated by shared Sumerogram (e.g. DINGIR.MAḪ for Hannahanna and Bēlet-ilī)."
+        },
+        "themes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Theme tags for queryability. Use the controlled vocabulary from `query.theme`."
+        },
+        "deities": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Deities mentioned in either entity, for queryability. Canonical Akkadian form preferred."
+        },
+        "texts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Texts mentioned in either entity, for queryability."
+        },
+        "correspondence_strength": {
+          "type": "string",
+          "enum": ["strong", "moderate", "weak", "contested"],
+          "description": "Scholarly consensus level."
+        },
+        "scholarly_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ScholarlyAttribution" },
+          "description": "REQUIRED. Named publications establishing the parallel."
+        },
+        "transmission_hypothesis": {
+          "type": "string",
+          "enum": [
+            "direct_borrowing",
+            "common_substrate",
+            "independent_typological_match",
+            "syncretism",
+            "scribal_transmission",
+            "unspecified"
+          ],
+          "description": "Mechanism by which the parallel arose. `direct_borrowing` = one text consciously adapted from the other (e.g. Marduk-Tiamat from Ninurta-Asag per Lambert 1986); `syncretism` = same deity under different names/cultures (e.g. Hannahanna ≈ Bēlet-ilī)."
+        },
+        "discovery_origin": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "If this parallel originated from the Discovery Engine, this block captures the provenance back to discoveredCandidates.json.",
+          "properties": {
+            "discovered_by": { "type": "string", "enum": ["ai_traversal", "human_scholar"] },
+            "discovery_date": { "type": "string", "format": "date" },
+            "promoted_on": { "type": "string", "format": "date" },
+            "discovery_candidate_pair": {
+              "type": "string",
+              "description": "Entity-pair identifier in discoveredCandidates.json."
+            }
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "MesopotamianEntity": {
+      "type": "object",
+      "required": ["text", "tradition"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Description of the entity. E.g. 'Marduk\\'s combat with Tiamat in Enūma Eliš IV.93-104.'"
+        },
+        "citation": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "enum": ["Sumerian", "Akkadian", "Ugaritic", "Hittite", "Hurrian", "bilingual"]
+        },
+        "tradition": {
+          "type": "string",
+          "enum": [
+            "sumerian",
+            "akkadian",
+            "babylonian",
+            "assyrian",
+            "ugaritic",
+            "hurrian_hittite",
+            "amorite",
+            "other"
+          ]
+        },
+        "approximate_date": {
+          "type": "string"
+        }
+      }
+    },
+    "ScholarlyAttribution": {
+      "type": "object",
+      "required": ["author_year", "publication"],
+      "additionalProperties": false,
+      "properties": {
+        "author_year": { "type": "string" },
+        "publication": { "type": "string" },
+        "argument_summary": { "type": "string" }
+      }
+    }
+  }
+}

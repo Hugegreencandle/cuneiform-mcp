@@ -12,11 +12,13 @@ import {
   findAntediluvianParallel,
   apkalluAttestations,
   discoverParallelCandidates,
+  findMesopotamianParallel,
   listAntediluvianQueries,
   renderFloodMatrix,
   renderParallelEntry,
   renderApkalluSages,
   renderDiscoveredCandidates,
+  renderMesopotamianParallels,
 } from "./tools/comparative.js";
 
 // eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
@@ -116,7 +118,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.7.0";
+const VERSION = "0.8.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2462,6 +2464,71 @@ server.registerTool(
   },
 );
 
+// ---------------------------------------------------------------------------
+// v0.8 Mesopotamian-internal parallel retrieval
+//
+// Sibling to v0.6's find_antediluvian_parallel but for cross-Mesopotamian
+// parallels (Sumerian↔Akkadian, Akkadian↔Ugaritic, Hurrian↔Akkadian) that
+// don't anchor to a Jewish biblical passage. Same named-scholarship
+// discipline — REQUIRES scholarly_attribution. Query by deity, theme,
+// tradition-pair, or text.
+//
+// v0.8.0 dataset ships with 6 parallels promoted from Discovery Engine
+// v0.7 validation pipeline (Chaoskampf, Ninurta↔Marduk substitution,
+// Hannahanna↔Bēlet-ilī, named-authorship tradition, Lagash↔SKL king-list
+// dissent, descent-and-ascent paired motif).
+// ---------------------------------------------------------------------------
+
+server.registerTool(
+  "find_mesopotamian_parallel",
+  {
+    description:
+      "Return curated cross-Mesopotamian-internal parallels (Sumerian↔Akkadian, Akkadian↔Ugaritic, Hurrian↔Akkadian, Akkadian↔Akkadian, etc.) WITHOUT requiring a Jewish/Christian biblical passage as the entry-point. Sibling to v0.6's find_antediluvian_parallel — same named-scholarship discipline (scholarly_attribution.minItems: 1 enforced). Query filters AND-combine: deity_name + theme + tradition_pair + text_name. v0.8.0 dataset ships with 6 parallels promoted from the Discovery Engine v0.7 validation pipeline.",
+    inputSchema: {
+      deity_name: z
+        .string()
+        .optional()
+        .describe("Filter results that mention this deity (case-insensitive substring match against per-result deities[]). E.g. 'Marduk', 'Inanna', 'Bēlet-ilī'."),
+      theme: z
+        .string()
+        .optional()
+        .describe("Filter by theme tag (matches against themes[]). Common themes: chaoskampf, cosmogonic_combat, divine_substitution, mother_goddess, named_authorship, king_list_dissent, descent_ascent, succession."),
+      tradition_pair: z
+        .string()
+        .optional()
+        .describe("Filter by tradition pair, order-insensitive. E.g. 'akkadian↔ugaritic', 'sumerian↔akkadian', 'hurrian_hittite↔akkadian'. Separator can be ↔, <->, <=>, ⇔, --, —, or comma."),
+      text_name: z
+        .string()
+        .optional()
+        .describe("Filter by text name (substring match). E.g. 'Enūma Eliš', 'Baal Cycle', 'Erra Epic', 'lugal-e'."),
+      max_results: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Cap on results. Default 25."),
+    },
+  },
+  async ({ deity_name, theme, tradition_pair, text_name, max_results }) => {
+    const SCHEMA = schemaId("find_mesopotamian_parallel");
+    const result = findMesopotamianParallel({
+      deity_name,
+      theme,
+      tradition_pair,
+      text_name,
+      max_results,
+    });
+    return structuredResult(renderMesopotamianParallels(result), {
+      schema: SCHEMA,
+      data: result,
+      provenance: provenance("local", "local:mesopotamianParallelsIndex", VERSION, {
+        citation: "Curated dataset; each parallel carries named scholarly_attribution",
+      }),
+    });
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2482,7 +2549,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 13 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion retrieval tools v0.6; 1 generative Discovery Engine tool v0.7: discover_parallel_candidates)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (9 corpus tools v0.5; 3 comparative-religion retrieval tools v0.6; 1 generative Discovery Engine tool v0.7; 1 Mesopotamian-internal retrieval tool v0.8: find_mesopotamian_parallel)\n`,
     );
     process.exit(0);
   }
@@ -2492,7 +2559,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (13 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (14 tools)\n`);
 }
 
 main().catch((err) => {

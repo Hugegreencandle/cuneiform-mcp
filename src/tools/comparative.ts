@@ -225,6 +225,77 @@ export type DiscoveredCandidatesDataset = {
   candidates: DiscoveryCandidate[];
 };
 
+// ---------- v0.8 Mesopotamian-internal parallel types ----------
+
+export type MesopotamianTradition =
+  | "sumerian"
+  | "akkadian"
+  | "babylonian"
+  | "assyrian"
+  | "ugaritic"
+  | "hurrian_hittite"
+  | "amorite"
+  | "other";
+
+export type MesopotamianLanguage =
+  | "Sumerian"
+  | "Akkadian"
+  | "Ugaritic"
+  | "Hittite"
+  | "Hurrian"
+  | "bilingual";
+
+export type MesopotamianParallelType =
+  | "structural"
+  | "lexical"
+  | "narrative"
+  | "topos"
+  | "onomastic"
+  | "iconographic"
+  | "logographic";
+
+export type MesopotamianTransmissionHypothesis =
+  | "direct_borrowing"
+  | "common_substrate"
+  | "independent_typological_match"
+  | "syncretism"
+  | "scribal_transmission"
+  | "unspecified";
+
+export type MesopotamianEntity = {
+  text: string;
+  citation?: string;
+  language?: MesopotamianLanguage;
+  tradition: MesopotamianTradition;
+  approximate_date?: string;
+};
+
+export type MesopotamianParallel = {
+  id: string;
+  entity_a: MesopotamianEntity;
+  entity_b: MesopotamianEntity;
+  parallel_type: MesopotamianParallelType;
+  themes: string[];
+  deities: string[];
+  texts: string[];
+  correspondence_strength: CorrespondenceStrength;
+  scholarly_attribution: ScholarlyAttribution[];
+  transmission_hypothesis?: MesopotamianTransmissionHypothesis;
+  discovery_origin?: {
+    discovered_by?: string;
+    discovery_date?: string;
+    reformulated_on?: string;
+    promoted_on?: string;
+    discovery_candidate_pair?: string;
+  };
+  notes?: string;
+};
+
+export type MesopotamianParallelsDataset = {
+  _meta: { description: string; compiled: string; curator_note: string; discipline_rule: string };
+  parallels: MesopotamianParallel[];
+};
+
 // ---------- loader ----------
 
 const __filename = fileURLToPath(import.meta.url);
@@ -240,6 +311,7 @@ let _flood: FloodDataset | null = null;
 let _parallels: ParallelsDataset | null = null;
 let _apkallu: ApkalluDataset | null = null;
 let _discovered: DiscoveredCandidatesDataset | null = null;
+let _mesopotamian: MesopotamianParallelsDataset | null = null;
 
 function loadJson<T>(file: string): T {
   const raw = readFileSync(dataPath(file), "utf8");
@@ -264,6 +336,11 @@ export function getApkalluDataset(): ApkalluDataset {
 export function getDiscoveredCandidatesDataset(): DiscoveredCandidatesDataset {
   if (!_discovered) _discovered = loadJson<DiscoveredCandidatesDataset>("discoveredCandidates.json");
   return _discovered;
+}
+
+export function getMesopotamianParallelsDataset(): MesopotamianParallelsDataset {
+  if (!_mesopotamian) _mesopotamian = loadJson<MesopotamianParallelsDataset>("mesopotamianParallels.json");
+  return _mesopotamian;
 }
 
 // ---------- tool handlers ----------
@@ -483,6 +560,141 @@ export function discoverParallelCandidates(args: DiscoverParallelCandidatesArgs)
       candidates_in_corpus: ds.candidates.length,
     },
   };
+}
+
+// ---------- v0.8 Mesopotamian-parallel handler ----------
+
+export type FindMesopotamianParallelArgs = {
+  deity_name?: string;
+  theme?: string;
+  tradition_pair?: string;
+  text_name?: string;
+  max_results?: number;
+};
+
+function normalizeTraditionPair(a: string, b: string): string {
+  return [a, b].sort().join("↔");
+}
+
+function matchesTraditionPair(parallel: MesopotamianParallel, query: string): boolean {
+  const qNormalized = normalizeTraditionPair(
+    ...(query.split(/↔|<->|<=>|⇔|--|—|,/).map((s) => s.trim().toLowerCase()) as [string, string]),
+  );
+  const parallelPair = normalizeTraditionPair(
+    parallel.entity_a.tradition.toLowerCase(),
+    parallel.entity_b.tradition.toLowerCase(),
+  );
+  return parallelPair === qNormalized;
+}
+
+const STRENGTH_RANK: Record<CorrespondenceStrength, number> = {
+  strong: 4,
+  moderate: 3,
+  weak: 2,
+  contested: 1,
+};
+
+export function findMesopotamianParallel(args: FindMesopotamianParallelArgs): {
+  query: FindMesopotamianParallelArgs;
+  results: MesopotamianParallel[];
+  corpus_metadata: {
+    total_parallels: number;
+    traditions_covered: string[];
+    themes_covered: string[];
+  };
+} {
+  const ds = getMesopotamianParallelsDataset();
+  const max_results = args.max_results ?? 25;
+
+  const deity = args.deity_name?.toLowerCase().trim();
+  const theme = args.theme?.toLowerCase().trim();
+  const textName = args.text_name?.toLowerCase().trim();
+  const traditionPair = args.tradition_pair?.trim();
+
+  const filtered = ds.parallels.filter((p) => {
+    if (deity) {
+      const has = p.deities.some((d) => d.toLowerCase().includes(deity));
+      if (!has) return false;
+    }
+    if (theme) {
+      const has = p.themes.some((t) => t.toLowerCase().includes(theme));
+      if (!has) return false;
+    }
+    if (textName) {
+      const has = p.texts.some((t) => t.toLowerCase().includes(textName));
+      if (!has) return false;
+    }
+    if (traditionPair) {
+      if (!matchesTraditionPair(p, traditionPair)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort(
+    (a, b) =>
+      STRENGTH_RANK[b.correspondence_strength] - STRENGTH_RANK[a.correspondence_strength],
+  );
+
+  const sliced = filtered.slice(0, max_results);
+
+  const traditionsCovered = new Set<string>();
+  const themesCovered = new Set<string>();
+  for (const p of ds.parallels) {
+    traditionsCovered.add(p.entity_a.tradition);
+    traditionsCovered.add(p.entity_b.tradition);
+    for (const t of p.themes) themesCovered.add(t);
+  }
+
+  return {
+    query: {
+      ...(args.deity_name !== undefined ? { deity_name: args.deity_name } : {}),
+      ...(args.theme !== undefined ? { theme: args.theme } : {}),
+      ...(args.tradition_pair !== undefined ? { tradition_pair: args.tradition_pair } : {}),
+      ...(args.text_name !== undefined ? { text_name: args.text_name } : {}),
+      ...(args.max_results !== undefined ? { max_results: args.max_results } : {}),
+    },
+    results: sliced,
+    corpus_metadata: {
+      total_parallels: ds.parallels.length,
+      traditions_covered: [...traditionsCovered].sort(),
+      themes_covered: [...themesCovered].sort(),
+    },
+  };
+}
+
+export function renderMesopotamianParallels(result: ReturnType<typeof findMesopotamianParallel>): string {
+  const lines: string[] = [];
+  lines.push(`Mesopotamian-internal parallels — ${result.results.length} of ${result.corpus_metadata.total_parallels} match the query.`);
+  const filterParts: string[] = [];
+  if (result.query.deity_name) filterParts.push(`deity_name="${result.query.deity_name}"`);
+  if (result.query.theme) filterParts.push(`theme="${result.query.theme}"`);
+  if (result.query.tradition_pair) filterParts.push(`tradition_pair="${result.query.tradition_pair}"`);
+  if (result.query.text_name) filterParts.push(`text_name="${result.query.text_name}"`);
+  if (filterParts.length > 0) lines.push(`  filters: ${filterParts.join(", ")}`);
+  if (result.results.length === 0) {
+    lines.push("");
+    lines.push("No parallels match. Try a broader query.");
+    lines.push("");
+    lines.push(`Available themes: ${result.corpus_metadata.themes_covered.join(", ")}`);
+    lines.push(`Available traditions: ${result.corpus_metadata.traditions_covered.join(", ")}`);
+    return lines.join("\n");
+  }
+  lines.push("");
+  for (const p of result.results) {
+    lines.push(`### ${p.entity_a.text.substring(0, 60)}... (${p.entity_a.tradition}) ↔ ${p.entity_b.text.substring(0, 60)}... (${p.entity_b.tradition})`);
+    lines.push(`  [${p.parallel_type} / ${p.correspondence_strength}]`);
+    lines.push(`  themes: ${p.themes.join(", ")}`);
+    lines.push(`  deities: ${p.deities.join(", ")}`);
+    lines.push(`  texts: ${p.texts.join(", ")}`);
+    for (const cite of p.scholarly_attribution) {
+      lines.push(`  scholar: ${cite.author_year} — ${cite.publication}`);
+      if (cite.argument_summary) lines.push(`    → ${cite.argument_summary.substring(0, 200)}${cite.argument_summary.length > 200 ? "..." : ""}`);
+    }
+    if (p.transmission_hypothesis) lines.push(`  transmission: ${p.transmission_hypothesis}`);
+    if (p.notes) lines.push(`  notes: ${p.notes.substring(0, 200)}${p.notes.length > 200 ? "..." : ""}`);
+    lines.push("");
+  }
+  return lines.join("\n");
 }
 
 export function renderDiscoveredCandidates(result: ReturnType<typeof discoverParallelCandidates>): string {

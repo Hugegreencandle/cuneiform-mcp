@@ -1,4 +1,4 @@
-# cuneiform-mcp Protocol — v0.7
+# cuneiform-mcp Protocol — v0.8
 
 > Every result should be inspectable, citeable, and reproducible.
 
@@ -50,9 +50,9 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The thirteen tools
+## The fourteen tools
 
-> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + one generative Discovery Engine tool (v0.7). The v0.6 additions are curated-local with REQUIRED named scholarly attribution. The v0.7 addition INVERTS that discipline: returns machine-discovered candidates explicitly flagged for human-scholar validation, with full reasoning trace.
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + one generative Discovery Engine tool (v0.7) + one Mesopotamian-internal retrieval tool (v0.8). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The v0.7 Discovery Engine inverts that discipline: returns machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to v0.6 or v0.8 retrieval-tier datasets depending on whether the parallel anchors to a Jewish biblical passage (v0.6) or stays Mesopotamian-internal (v0.8).
 
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
@@ -397,6 +397,30 @@ v0.7.0 ships with **33 machine-discovered candidates** from a one-time AI traver
 
 Provenance: `source: local`, `endpoint: local:discoveredCandidatesIndex`. Companion artifact at `~/Desktop/Research/DISCOVERED-CANDIDATES-2026-05-15.md` (human-readable scholar-facing review document, ~1000 lines).
 
+### `find_mesopotamian_parallel` — schema: [find_mesopotamian_parallel.schema.json](schemas/find_mesopotamian_parallel.schema.json)
+
+The v0.8 retrieval tool — cross-Mesopotamian-internal sibling to v0.6's `find_antediluvian_parallel`. Returns curated parallels between Mesopotamian / Hurrian-Hittite / Ugaritic figures and texts WITHOUT requiring a Jewish biblical passage as the entry-point.
+
+**Same named-scholarship discipline as v0.6:** `scholarly_attribution.minItems: 1` enforced. No scholar, no result.
+
+**Query keying:** Mesopotamian-internal axes (filters AND-combine):
+- `deity_name` — e.g. "Marduk", "Inanna", "Bēlet-ilī" (case-insensitive substring match)
+- `theme` — e.g. "chaoskampf", "divine_substitution", "mother_goddess", "named_authorship", "king_list_dissent", "descent_ascent", "succession"
+- `tradition_pair` — e.g. "akkadian↔ugaritic", "sumerian↔akkadian", "hurrian_hittite↔akkadian" (order-insensitive; separator can be ↔ / <-> / <=> / ⇔ / -- / — / `,`)
+- `text_name` — e.g. "Enūma Eliš", "Baal Cycle", "Erra Epic", "lugal-e"
+
+Each `MesopotamianParallel` carries: entity_a + entity_b (both Mesopotamian/ANE), `parallel_type` (same as v0.6 plus `logographic` for cases like the DINGIR.MAḪ Hannahanna↔Bēlet-ilī equation), themes[], deities[], texts[], correspondence_strength, scholarly_attribution, transmission_hypothesis (direct_borrowing / common_substrate / syncretism / scribal_transmission / independent_typological_match), and `discovery_origin` (if promoted from Discovery Engine).
+
+v0.8.0 dataset ships with **6 parallels** promoted from the Discovery Engine v0.7 validation pipeline:
+- **mp-chaoskampf-1**: Marduk-Tiamat ↔ Baal-Yam (Gunkel 1895, Smith 1994, Day 1985)
+- **mp-divine-substitution-1**: Ninurta-Asag ↔ Marduk-Tiamat (Lambert 1986, Lambert 2013, Annus 2002)
+- **mp-mother-goddess-1**: Hannahanna ↔ Bēlet-ilī (von Schuler RlA, Beckman 1983, Asher-Greve & Westenholz 2013)
+- **mp-named-authorship-1**: Enheduanna ↔ Kabti-ilāni-Marduk (Helle 2019, Helle 2023, Lenzi 2008)
+- **mp-king-list-dissent-1**: Lagash KL ↔ SKL (Sollberger 1967, Glassner 2004)
+- **mp-descent-ascent-1**: Inanna's Descent ↔ Adapa's ascent (Annus 2016) — reformulated from initial Discovery Engine framing
+
+Provenance: `source: local`, `endpoint: local:mesopotamianParallelsIndex`.
+
 ## Citation
 
 If you build on this protocol, cite the repo and the version in the
@@ -408,6 +432,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.7.0}
+  version = {0.8.0}
 }
 ```
