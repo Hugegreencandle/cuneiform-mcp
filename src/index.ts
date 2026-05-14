@@ -6,6 +6,7 @@ import net from "node:net";
 import https from "node:https";
 import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
+import { provenance, schemaId, type Provenance } from "./types.js";
 
 // eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
 // — about 1 fragment in 20 returns UND_ERR_CONNECT_TIMEOUT (10s) on undici's
@@ -104,7 +105,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.4.0";
+const VERSION = "0.5.0-dev";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -141,6 +142,50 @@ async function loadSigns(): Promise<Map<string, LabasiSign>> {
 
 function textResult(text: string) {
   return { content: [{ type: "text" as const, text }] };
+}
+
+// v0.5 structured-response helper. Returns the MCP shape with both the
+// rendered text (back-compat for any caller treating the response as
+// human-readable) AND a structuredContent envelope (typed payload +
+// provenance + optional warnings). Callers pass the typed data; this
+// helper stamps the envelope around it.
+//
+// Validates the envelope shape at construction time — catches missing
+// required fields (schema URL, provenance source/endpoint/fetched_at/
+// mcp_version) before they leak into a response. Throws synchronously
+// in the handler if violated, surfacing as an MCP tool error.
+function structuredResult<T>(
+  text: string,
+  envelope: {
+    schema: string;
+    data: T;
+    provenance: import("./types.js").Provenance;
+    warnings?: string[];
+  },
+) {
+  if (typeof envelope.schema !== "string" || !envelope.schema.startsWith("http")) {
+    throw new Error(`structuredResult: schema must be an http(s) URI, got ${envelope.schema}`);
+  }
+  if (envelope.data === null || typeof envelope.data !== "object") {
+    throw new Error("structuredResult: data must be a non-null object");
+  }
+  const p = envelope.provenance;
+  if (!p || !p.source || !p.endpoint || !p.fetched_at || !p.mcp_version) {
+    throw new Error(
+      `structuredResult: provenance must include source, endpoint, fetched_at, mcp_version (got ${JSON.stringify(p)})`,
+    );
+  }
+  return {
+    content: [{ type: "text" as const, text }],
+    structuredContent: {
+      schema: envelope.schema,
+      data: envelope.data as Record<string, unknown>,
+      provenance: envelope.provenance as unknown as Record<string, unknown>,
+      ...(envelope.warnings && envelope.warnings.length > 0
+        ? { warnings: envelope.warnings }
+        : {}),
+    },
+  };
 }
 
 function stripXmlTags(s: string): string {
@@ -307,6 +352,7 @@ server.registerTool(
   async ({ sign, max_values }) => {
     const cap = max_values ?? 30;
     const NAME = sign.toUpperCase();
+    const SCHEMA = schemaId("lookup_sign");
 
     // 1) Warm-cache OGSL lookup first — fast path for the 239 most-studied signs.
     const signs = await loadSigns();
@@ -321,10 +367,32 @@ server.registerTool(
         ``,
         `Tip: re-call with max_values to also fetch sound values + 7 list refs from eBL.`,
       ];
-      return textResult(out.filter((l) => l !== null).join("\n"));
+      const cross_refs: Array<{ list: string; number: string }> = [];
+      if (ogsl.abz_number) cross_refs.push({ list: "ABZ", number: ogsl.abz_number });
+      if (ogsl.meszl_number) cross_refs.push({ list: "MZL", number: ogsl.meszl_number });
+      const data = {
+        query: sign,
+        name: NAME,
+        found: true,
+        source_path: "OGSL" as const,
+        ...(cross_refs.length > 0 ? { cross_refs } : {}),
+        ...(ogsl.image_1 ? { ogsl_image: ogsl.image_1 } : {}),
+      };
+      const prov: Provenance = provenance("OGSL", URLS.OGSL_SIGNS, VERSION, {
+        citation: "OGSL Labasi sign-list (curated subset, ~239 signs)",
+      });
+      return structuredResult(out.filter((l) => l !== null).join("\n"), {
+        schema: SCHEMA,
+        data,
+        provenance: prov,
+        warnings: [
+          "OGSL warm-cache path returns Borger ABZ/MZL only. Re-call with `max_values` to fetch the full canonical record (cross-refs, sound values, logograms) from eBL.",
+        ],
+      });
     }
 
     // 2) Fall through to eBL for the canonical sign record (covers ~600+ signs).
+    const eblUrl = `${URLS.EBL_BASE}/signs/${encodeURIComponent(NAME)}`;
     const ebl = await fetchEblSign(NAME);
     if (!ebl) {
       // 3) Helpful failure — show OGSL near-matches if any.
@@ -332,8 +400,19 @@ server.registerTool(
       const tail = ogslCandidates.length
         ? `\nOGSL near-matches: ${ogslCandidates.join(", ")}`
         : "";
-      return textResult(
+      return structuredResult(
         `Sign "${sign}" not found in OGSL Labasi (239 signs) or eBL /signs (full canonical list).${tail}`,
+        {
+          schema: SCHEMA,
+          data: {
+            query: sign,
+            name: NAME,
+            found: false,
+            source_path: "miss" as const,
+            ...(ogslCandidates.length > 0 ? { near_matches: ogslCandidates } : {}),
+          },
+          provenance: provenance("local", "local:lookup_sign", VERSION),
+        },
       );
     }
 
@@ -360,9 +439,62 @@ server.registerTool(
         ? `Logograms (${ebl.logograms?.length ?? 0}, showing first 5): ${logograms.join(" · ")}`
         : null,
       ``,
-      `Source: ${URLS.EBL_BASE}/signs/${encodeURIComponent(NAME)}`,
+      `Source: ${eblUrl}`,
     ];
-    return textResult(lines.filter((l) => l !== null).join("\n"));
+
+    const data = {
+      query: sign,
+      name: NAME,
+      found: true,
+      source_path: "eBL" as const,
+      ...(glyph ? { glyph } : {}),
+      ...(ebl.unicode && ebl.unicode.length > 0 ? { unicode: ebl.unicode } : {}),
+      ...(ebl.lists && ebl.lists.length > 0
+        ? {
+            cross_refs: ebl.lists.map((l) => ({
+              list: l.name,
+              number: l.number,
+            })),
+          }
+        : {}),
+      ...(ebl.LaBaSi ? { labasi: ebl.LaBaSi } : {}),
+      ...(ebl.values && ebl.values.length > 0
+        ? {
+            sound_values: ebl.values.slice(0, cap).map((v) => ({
+              value: v.value,
+              ...(v.subIndex !== undefined ? { sub_index: v.subIndex } : {}),
+              rendered: `${v.value}${subscript(v.subIndex)}`,
+            })),
+            sound_values_total: ebl.values.length,
+            sound_values_truncated: valuesTrunc,
+          }
+        : {}),
+      ...(logograms.length > 0
+        ? {
+            logograms,
+            logograms_total: ebl.logograms?.length ?? 0,
+          }
+        : {}),
+    };
+
+    const warnings: string[] = [];
+    if (valuesTrunc) {
+      warnings.push(
+        `sound_values truncated to first ${cap} of ${ebl.values?.length ?? 0}; re-query with a larger max_values to see the rest.`,
+      );
+    }
+    if ((ebl.logograms?.length ?? 0) > 5) {
+      warnings.push(
+        `logograms truncated to first 5 of ${ebl.logograms?.length ?? 0}; full list available upstream.`,
+      );
+    }
+
+    return structuredResult(lines.filter((l) => l !== null).join("\n"), {
+      schema: SCHEMA,
+      data,
+      provenance: provenance("eBL", eblUrl, VERSION),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
   },
 );
 

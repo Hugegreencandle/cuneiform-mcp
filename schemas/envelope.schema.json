@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/envelope.schema.json",
+  "title": "StructuredEnvelope",
+  "description": "Wrapper shape attached to every cuneiform-mcp tool's structuredContent. Concrete tool schemas reference this for the common fields (schema, provenance, warnings) and define their own `data` payload.",
+  "type": "object",
+  "required": ["schema", "data", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "Stable URI identifying which tool-specific schema this envelope conforms to."
+    },
+    "data": {
+      "description": "Tool-specific payload. Shape defined by the schema referenced in `schema`."
+    },
+    "provenance": { "$ref": "#/$defs/Provenance" },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Truncations, fallback-path notices, partial-result warnings. Absent or empty when the response is complete and authoritative."
+    }
+  },
+  "$defs": {
+    "Provenance": {
+      "type": "object",
+      "required": ["source", "endpoint", "fetched_at", "mcp_version"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["eBL", "ORACC", "CDLI", "OGSL", "local"],
+          "description": "Upstream system that owns this data. `local` for results derived from cached corpus indexes."
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "Exact URL fetched, or `local:<index-name>` for cache-derived data. Should be reproducible by an external client."
+        },
+        "fetched_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of the upstream fetch (or local read)."
+        },
+        "mcp_version": {
+          "type": "string",
+          "description": "cuneiform-mcp version that produced the response."
+        },
+        "citation": {
+          "type": "string",
+          "description": "Optional human-readable citation hint (DOI, permalink, textual reference). Used by `lookup_sign`/`get_oracc_text`/etc when the upstream record has a published edition."
+        }
+      }
+    },
+    "MuseumNumber": {
+      "type": "object",
+      "required": ["prefix", "number", "suffix"],
+      "additionalProperties": false,
+      "description": "eBL's three-component museum number. Suffix is an empty string when absent. Render as `prefix.number[.suffix]`.",
+      "properties": {
+        "prefix": { "type": "string", "minLength": 1 },
+        "number": { "type": "string", "minLength": 1 },
+        "suffix": { "type": "string" }
+      }
+    }
+  }
+}

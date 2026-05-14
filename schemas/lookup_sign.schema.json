@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/lookup_sign.schema.json",
+  "title": "lookup_sign data payload",
+  "description": "Structured payload returned by the `lookup_sign` tool. Wrapped in the StructuredEnvelope from envelope.schema.json — refer to that schema for `schema`, `provenance`, and `warnings` fields. When `found=false`, optional fields are absent but `near_matches` may contain OGSL suggestions.",
+  "type": "object",
+  "required": ["query", "name", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "The raw input sign name as the caller passed it."
+    },
+    "name": {
+      "type": "string",
+      "description": "Canonicalized (upper-cased) sign name used to query upstream sources."
+    },
+    "found": {
+      "type": "boolean",
+      "description": "True if either OGSL (warm cache) or eBL /signs returned a record."
+    },
+    "source_path": {
+      "type": "string",
+      "enum": ["OGSL", "eBL", "miss"],
+      "description": "Which lookup path produced the result. `OGSL` = warm-cache hit (239 curated signs). `eBL` = fallback to /api/signs. `miss` = neither matched."
+    },
+    "glyph": {
+      "type": "string",
+      "description": "Rendered cuneiform glyph(s) as a JS string, formed from the unicode codepoint array. May span multiple codepoints for compound signs."
+    },
+    "unicode": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "description": "Unicode codepoints of the cuneiform glyph(s). Empty array when unknown."
+    },
+    "cross_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["list", "number"],
+        "additionalProperties": false,
+        "properties": {
+          "list": {
+            "type": "string",
+            "description": "Sign-list identifier (e.g. ABZ, MZL, LAK, HZL, KWU, OBZL, SLLHA)."
+          },
+          "number": {
+            "type": "string",
+            "description": "Entry number within that list. String, since some lists use compound numbers (e.g. `ABZ406v2`)."
+          }
+        }
+      },
+      "description": "Cross-references into the major published sign lists."
+    },
+    "labasi": {
+      "type": "string",
+      "description": "LaBaSi sign identifier when present (eBL exposes this as a separate top-level field)."
+    },
+    "sound_values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["value", "rendered"],
+        "additionalProperties": false,
+        "properties": {
+          "value": { "type": "string" },
+          "sub_index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Akkadian/Sumerian sub-index for disambiguating homophonous readings (subscript number)."
+          },
+          "rendered": {
+            "type": "string",
+            "description": "Display form with Unicode subscript digits already applied, e.g. `lugal₂`."
+          }
+        }
+      },
+      "description": "Phonetic sound values for the sign. May be truncated; check `sound_values_total` and warnings."
+    },
+    "sound_values_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of sound values upstream reported, before any truncation."
+    },
+    "sound_values_truncated": {
+      "type": "boolean",
+      "description": "True if `sound_values` was clipped at `max_values`. Caller can re-query with a larger cap."
+    },
+    "logograms": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Known logographic readings (top-5 by default; full list lives upstream)."
+    },
+    "logograms_total": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of logograms upstream reported."
+    },
+    "near_matches": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "OGSL near-matches surfaced when both lookup paths miss. Substring-similarity, not Levenshtein."
+    },
+    "ogsl_image": {
+      "type": "string",
+      "format": "uri",
+      "description": "Reference image URL from OGSL's `image_1` field, when the OGSL path matched."
+    }
+  }
+}
