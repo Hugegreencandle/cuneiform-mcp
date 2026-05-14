@@ -2,6 +2,11 @@
 // validate-matcher.mjs, but the scorer is sign-trigram Jaccard against the
 // cached all-signs-full.json (not lineToVec). Phase 1 (HTTP fetch of
 // joins[]) is the bottleneck — phase 2 scoring is sub-second per target.
+//
+// Tokenizer matches src/signsIndex.ts: drops trigrams with ≥2 X tokens
+// (shipped 2026-05-14, commit 6d79d5a, X-FILTER-EXPERIMENT-2026-05-14.md).
+// Recall@15 is filter-invariant on the 50/87 baseline, but mean/median
+// rank do differ — the validation should mirror the live tool's behavior.
 
 import dns from "node:dns";
 import net from "node:net";
@@ -44,7 +49,10 @@ function trigramsFromSigns(signs) {
   for (const line of signs.split(/\r?\n/)) {
     const toks = line.trim().split(/\s+/).filter(Boolean);
     for (let i = 0; i + 2 < toks.length; i++) {
-      out.add(toks[i] + " " + toks[i + 1] + " " + toks[i + 2]);
+      const a = toks[i], b = toks[i + 1], c = toks[i + 2];
+      const xCount = (a === "X" ? 1 : 0) + (b === "X" ? 1 : 0) + (c === "X" ? 1 : 0);
+      if (xCount >= 2) continue;
+      out.add(a + " " + b + " " + c);
     }
   }
   return out;

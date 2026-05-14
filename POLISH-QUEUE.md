@@ -38,7 +38,7 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 
 ## P4 — sign-trigram follow-ups (post-v0.4)
 
-- [ ] **Run a clean N=100 trigram validation when eBL is healthy.** The 2026-05-14 stress test (seed=137, N=100 target) was truncated at N=26 by an eBL outage (HTTP 000 from fetch=550 onwards). N=26 still confirmed recall@15 = 19.3%, but a full N=100 would tighten the confidence interval. Cost: ~10 min when eBL is up.
+- [x] **Run a clean N=100 trigram validation when eBL is healthy.** SHIPPED 2026-05-14. seed=137 N=101 (one over due to concurrency overshoot) on healthy eBL: recall@15 = 38/180 = **21.1%**. Combined with the seed=42 baseline (22/87 = 25.3%) we get 60/267 = **22.5%** across both seeds with 95% CI ≈ [17%, 28%]. The original 25.3% sat on the optimistic end; 21-22% is the more reliable headline number. The truncated 19.3%/N=57 result was within sampling noise. **35.6% zero-trigram-overlap floor** confirmed at full sample size — siblings with zero shared trigrams are the hard algorithmic limit, identical fraction to seed=42 baseline. Phase 1 took 540s (2,171 fetches for 101 keepers, 4.6% keeper rate matches the truncated run, confirming eBL outage was the only difference last time). Full writeup: `VALIDATION-N100-2026-05-14.md`.
 
 - [x] **Try filtering `X` (unreadable) tokens from trigrams.** SHIPPED `drop ≥2 X` 2026-05-14. Tested 5 strengths against the 50/87 baseline. **Recall@15 unchanged at 22/87 (25.3%)** — no filter strength rescues a sibling into top-15. But median rank of known siblings compresses dramatically: 89 → 26 (3.4×), mean 1,952 → 575. One sibling (`BM.39639 → BM.38610`) rescued into top-30 (rank 89 → 22 under drop-≥2X). Seven siblings lose any-rank visibility, all baseline rank ≥1,716 (invisible regardless). `drop ≥2 X` picked over the polish-queue's literal `drop anyX` spec because it produces the same K=30 rescue at a better landing rank (22 vs 28) and preserves "1×X" trigrams (two real signs + one damaged position = real evidence, not noise). Live in `src/signsIndex.ts:trigramsFromSigns`. Full writeup: `X-FILTER-EXPERIMENT-2026-05-14.md`.
 
@@ -55,5 +55,6 @@ Backlog of small fixes, refinements, and follow-up ideas for cuneiform-mcp. Pull
 - (P4) Sign-variant normalization — shelved, negative result (`NORMALIZATION-EXPERIMENT-2026-05-14.md`)
 - (P4) X-trigram filter (`drop ≥2 X`) — shipped, median rank 89 → 26 (`X-FILTER-EXPERIMENT-2026-05-14.md`)
 - (P3) `/fragments/all-signs` gap-fill crawl — closed as no-op, gap fragments are uniformly empty stubs at eBL (`GAP-PROBE-2026-05-14.md`)
+- (P4) N=100 trigram re-validation — 21.1% on seed=137, combined 22.5% across both seeds with CI [17%, 28%] (`VALIDATION-N100-2026-05-14.md`)
 
 <!-- Add new items at the bottom of the appropriate priority section. Roll completed items into "Done" with commit sha. -->
