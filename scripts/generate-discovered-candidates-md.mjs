@@ -26,7 +26,27 @@ lines.push("- Explicitly **filtered out parallels already curated** in `antedilu
 lines.push("");
 lines.push("Each candidate carries a **discovery_trace**: which briefs supported the comparison, which structural features matched, what transmission route is hypothesized, and what scholar/publication a human reviewer should check to validate or reject the candidate.");
 lines.push("");
-lines.push("**Discipline:** machine-discovered parallels are explicitly second-class. The `discovered_by: ai_traversal` flag is load-bearing. Until human-scholar validation, these are *hypothesis-generation*, not citation material.");
+lines.push("**Discipline:** machine-discovered parallels are explicitly second-class. The `discovered_by: ai_traversal` flag is load-bearing. Until human-scholar validation, these are *hypothesis-generation*, not citation material. Candidates that have completed a validation pass carry `scholarly_attribution` + a `validation_log` with the audit trail.");
+
+if (ds._meta.validation_pass) {
+  lines.push("");
+  lines.push("---");
+  lines.push("");
+  lines.push("## Validation pass results");
+  lines.push("");
+  const vp = ds._meta.validation_pass;
+  lines.push(`**Pass label:** ${vp.pass_label}`);
+  lines.push(`**Pass date:** ${vp.pass_date}`);
+  lines.push(`**Candidates reviewed:** ${vp.candidates_reviewed}`);
+  lines.push("");
+  lines.push(`| Verdict | Count |`);
+  lines.push(`|---|---|`);
+  lines.push(`| validated (with named scholarly attribution) | ${vp.validated} |`);
+  lines.push(`| rejected (with reason) | ${vp.rejected} |`);
+  lines.push(`| pending (inconclusive validation pass) | ${vp.pending} |`);
+  lines.push("");
+  lines.push(`**Method:** ${vp.validation_method}`);
+}
 lines.push("");
 lines.push("---");
 lines.push("");
@@ -81,9 +101,31 @@ for (const c of sorted) {
   lines.push("");
   lines.push(`- **Parallel type:** ${c.parallel_type}`);
   lines.push(`- **Confidence:** ${c.confidence_score.toFixed(2)}`);
-  lines.push(`- **Validation status:** \`${c.validation_status}\``);
+  const statusBadge = c.validation_status === "validated" ? "✓ validated" : c.validation_status === "rejected" ? "✗ rejected" : "○ pending";
+  lines.push(`- **Validation status:** \`${c.validation_status}\` (${statusBadge})`);
   if (c.transmission_direction) lines.push(`- **Transmission direction:** ${c.transmission_direction}`);
   lines.push("");
+  if (c.scholarly_attribution && c.scholarly_attribution.length > 0) {
+    lines.push("**Scholarly attribution (validated):**");
+    lines.push("");
+    for (const cite of c.scholarly_attribution) {
+      lines.push(`- **${cite.author_year}** — ${cite.publication}`);
+      if (cite.argument_summary) lines.push(`  - *${cite.argument_summary}*`);
+    }
+    lines.push("");
+  }
+  if (c.validation_log?.rejection_reason) {
+    lines.push(`**Rejection reason:** ${c.validation_log.rejection_reason}`);
+    lines.push("");
+  }
+  if (c.validation_log?.inconclusive_notes) {
+    lines.push(`**Inconclusive — validation notes:** ${c.validation_log.inconclusive_notes}`);
+    lines.push("");
+  }
+  if (c.validation_log?.validation_method) {
+    lines.push(`*Validation method: ${c.validation_log.validation_method}*`);
+    lines.push("");
+  }
   lines.push(`**Reasoning:** ${c.discovery_trace.reasoning_summary}`);
   lines.push("");
   lines.push("**Structural features matched:**");

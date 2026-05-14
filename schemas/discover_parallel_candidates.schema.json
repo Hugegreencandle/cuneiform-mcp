@@ -124,6 +124,44 @@
           "type": "string",
           "description": "Specific scholar/publication that a human reviewer should check to validate or reject this candidate. E.g. `Check Annus 2010 JSP 19.4 for Sebitti-Watchers structural inversion` or `Check Wiggermann 1992 for apkallū bucket-and-cone ↔ Ninhursag omega-symbol gesture parallel`. Optional but recommended for high-confidence candidates."
         },
+        "scholarly_attribution": {
+          "type": "array",
+          "description": "Named scholarly attribution after human-scholar validation. Empty/absent when `validation_status: pending`. REQUIRED on `validation_status: validated`. Same shape as ParallelCandidate.scholarly_attribution in find_antediluvian_parallel — author_year + publication + argument_summary.",
+          "items": {
+            "type": "object",
+            "required": ["author_year", "publication"],
+            "additionalProperties": false,
+            "properties": {
+              "author_year": { "type": "string" },
+              "publication": { "type": "string" },
+              "argument_summary": { "type": "string" }
+            }
+          }
+        },
+        "validation_log": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Audit trail of the validation pass. Optional, present when `validation_status` has been changed from initial `pending`.",
+          "properties": {
+            "validated_on": { "type": "string", "format": "date" },
+            "validated_by": {
+              "type": "string",
+              "description": "Identifier for who/what performed the validation. E.g. `claude-subagent-batch-A 2026-05-15`."
+            },
+            "validation_method": {
+              "type": "string",
+              "description": "How the validation was conducted. E.g. `web search for suggested anchor publications; verified explicit argument in cited venue`."
+            },
+            "rejection_reason": {
+              "type": "string",
+              "description": "Present when `validation_status: rejected`. Explains why."
+            },
+            "inconclusive_notes": {
+              "type": "string",
+              "description": "Present when `validation_status: pending` after a validation pass that couldn't conclusively confirm or reject. E.g. `closely adjacent argument exists but specific parallel not verified`."
+            }
+          }
+        },
         "transmission_direction": {
           "type": "string",
           "enum": ["unidirectional_a_to_b", "unidirectional_b_to_a", "bidirectional", "common_substrate", "structural_only", "unspecified"],

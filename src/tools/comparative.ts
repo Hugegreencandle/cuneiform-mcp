@@ -191,6 +191,14 @@ export type DiscoveryCandidate = {
   validation_status: ValidationStatus;
   discovery_trace: DiscoveryTrace;
   suggested_anchor?: string;
+  scholarly_attribution?: ScholarlyAttribution[];
+  validation_log?: {
+    validated_on?: string;
+    validated_by?: string;
+    validation_method?: string;
+    rejection_reason?: string;
+    inconclusive_notes?: string;
+  };
   transmission_direction?: string;
   notes?: string;
 };
