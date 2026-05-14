@@ -15,8 +15,8 @@
       "properties": {
         "text_id": {
           "type": "string",
-          "enum": ["1_enoch", "jubilees", "genesis", "wisdom_of_solomon", "ben_sira"],
-          "description": "Source text. `1_enoch` includes the Book of the Watchers (chs 1-36), Book of Parables (37-71), Astronomical Book (72-82), Book of Dreams (83-90), Epistle of Enoch (91-108)."
+          "enum": ["1_enoch", "jubilees", "genesis", "wisdom_of_solomon", "ben_sira", "ezekiel"],
+          "description": "Source text. `1_enoch` includes the Book of the Watchers (chs 1-36), Book of Parables (37-71), Astronomical Book (72-82), Book of Dreams (83-90), Epistle of Enoch (91-108). `ezekiel` added v0.7.3 for the Bodi 1991 Erra/Ezekiel divine-absence parallel."
         },
         "passage": {
           "type": "string",

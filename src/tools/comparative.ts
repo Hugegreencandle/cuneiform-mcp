@@ -68,9 +68,17 @@ export type ParallelCandidate = {
   notes?: string;
 };
 
+export type JewishTextId =
+  | "1_enoch"
+  | "jubilees"
+  | "genesis"
+  | "wisdom_of_solomon"
+  | "ben_sira"
+  | "ezekiel";
+
 export type ParallelEntry = {
   query_match: {
-    text_id: "1_enoch" | "jubilees" | "genesis" | "wisdom_of_solomon" | "ben_sira";
+    text_id: JewishTextId;
     passages: string[];
     topics: string[];
   };

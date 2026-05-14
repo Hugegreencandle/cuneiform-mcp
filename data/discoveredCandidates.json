@@ -33,6 +33,12 @@
       "pending": 6,
       "rounds_completed": 2,
       "total_reviewed": 36
+    },
+    "v0_7_3_promotion": {
+      "date": "2026-05-15",
+      "promoted_to_antediluvian": 10,
+      "remaining_validated_unpromoted": 5,
+      "reason_unpromoted": "Mesopotamian-internal parallels (Mesopotamian↔Mesopotamian, Hurrian↔Akkadian, Mesopotamian↔Ugaritic) — no Jewish-passage query maps. Planned: v0.8 find_mesopotamian_parallel tool."
     }
   },
   "candidates": [
@@ -226,7 +232,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebSearch confirmed Kramer 1945 Crozer Quarterly + Kramer 1963 p. 149 + Kramer & Maier 1989 via Bible Archaeology Report, Wikipedia Garden of the gods, panglott blog quoting Kramer 1963."
+        "validation_method": "WebSearch confirmed Kramer 1945 Crozer Quarterly + Kramer 1963 p. 149 + Kramer & Maier 1989 via Bible Archaeology Report, Wikipedia Garden of the gods, panglott blog quoting Kramer 1963.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -409,7 +417,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "WebFetch of Annus 2010 PDF — verified the explicit p. 284 + fn. 8 argument; Paul 1973 JANES verified open-access."
+        "validation_method": "WebFetch of Annus 2010 PDF — verified the explicit p. 284 + fn. 8 argument; Paul 1973 JANES verified open-access.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -474,7 +484,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebSearch + WebFetch of open-access Neugebauer 1981 PDF + Ben-Dov 2008 chapter previews."
+        "validation_method": "WebSearch + WebFetch of open-access Neugebauer 1981 PDF + Ben-Dov 2008 chapter previews.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -883,7 +895,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "Lambert & Millard 1969 Atrahasis Internet Archive + Westermann 1984 Genesis 1-11 listing + Britannica eṭemmu entry."
+        "validation_method": "Lambert & Millard 1969 Atrahasis Internet Archive + Westermann 1984 Genesis 1-11 listing + Britannica eṭemmu entry.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1180,7 +1194,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "Bodi 1991 ZORA/UZH archived PDF + Block 2000 references + Researchgate AOAT 390 on divine abandonment."
+        "validation_method": "Bodi 1991 ZORA/UZH archived PDF + Block 2000 references + Researchgate AOAT 390 on divine abandonment.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1401,7 +1417,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "Shea 1991 Geoscience Research Institute PDF + Jacobsen 1981 JBL discussion in Armstrong Institute Eridu/Cain article + Civil 1969 in Lambert & Millard appendix."
+        "validation_method": "Shea 1991 Geoscience Research Institute PDF + Jacobsen 1981 JBL discussion in Armstrong Institute Eridu/Cain article + Civil 1969 in Lambert & Millard appendix.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1464,7 +1482,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent 2026-05-15",
-        "validation_method": "WebFetch of Annus 2010 PDF — verified the explicit Lu-Nanna ↔ Gilgamesh fraction-formula parallel argument at pp. 282-283."
+        "validation_method": "WebFetch of Annus 2010 PDF — verified the explicit Lu-Nanna ↔ Gilgamesh fraction-formula parallel argument at pp. 282-283.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1519,7 +1539,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "Open-access verification via Andrews Digital Commons (digitalcommons.andrews.edu/old-testament-pubs/66/) and AUSS PDF (andrews.edu/library/car/cardigital/Periodicals/AUSS/1981-3/1981-3-01.pdf)."
+        "validation_method": "Open-access verification via Andrews Digital Commons (digitalcommons.andrews.edu/old-testament-pubs/66/) and AUSS PDF (andrews.edu/library/car/cardigital/Periodicals/AUSS/1981-3/1981-3-01.pdf).",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1806,7 +1828,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "TheTorah.com piece by Sharon citing van der Horst 2002 fn. 12; BMCR review of van der Horst 2002."
+        "validation_method": "TheTorah.com piece by Sharon citing van der Horst 2002 fn. 12; BMCR review of van der Horst 2002.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {
@@ -1862,7 +1886,9 @@
       "validation_log": {
         "validated_on": "2026-05-15",
         "validated_by": "claude-validation-subagent-round2 2026-05-15",
-        "validation_method": "Bailey 1970 markbwilson.com PDF + Cambridge Core HTR 'Suitable Match' article + verification of JBL 89:137-150 reference chain."
+        "validation_method": "Bailey 1970 markbwilson.com PDF + Cambridge Core HTR 'Suitable Match' article + verification of JBL 89:137-150 reference chain.",
+        "promotion_target": "antediluvianParallels.json (v0.7.3 promotion 2026-05-15)",
+        "promoted_on": "2026-05-15"
       }
     },
     {

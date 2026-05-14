@@ -1,16 +1,30 @@
 {
   "_meta": {
-    "description": "Curated parallels between Jewish/Christian antediluvian-wisdom texts (1 Enoch, Jubilees, Genesis 5-6) and Mesopotamian source-candidates. Each parallel names the scholar(s) who established it. Curated from Research/The_Watchers.md plus Lambert 1967, Kvanvig 1988, Annus 2010, Reed 2005.",
+    "description": "Curated parallels between Jewish/Christian antediluvian-wisdom texts (1 Enoch, Jubilees, Genesis 5-6, Ezekiel) and Mesopotamian source-candidates. Each parallel names the scholar(s) who established it. Curated from Research/The_Watchers.md plus Lambert 1967, Kvanvig 1988, Annus 2010, Reed 2005; expanded 2026-05-15 with 10 promoted candidates from cuneiform-mcp v0.7 Discovery Engine validation.",
     "compiled": "2026-05-15",
     "curator_note": "Direction of comparison is Hebrew/Aramaic ← Mesopotamian. Parallels are returned with explicit correspondence_strength (strong/moderate/weak/contested) — the user can decide what to trust. No parallel without scholarly attribution.",
-    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset."
+    "discipline_rule": "If you cannot cite a published scholar who established a parallel, do not add it to this dataset.",
+    "v0_7_3_promotion": {
+      "date": "2026-05-15",
+      "source": "data/discoveredCandidates.json (machine-discovered, human-scholar validated)",
+      "promoted_count": 10,
+      "new_queries_added": 6,
+      "existing_queries_appended": 1,
+      "candidates_remaining_in_discovered": 5,
+      "candidates_remaining_reason": "5 validated candidates are Mesopotamian-internal (Mesopotamian↔Mesopotamian, Hurrian↔Akkadian, or Mesopotamian↔Ugaritic) and don't fit the v0.6 tool's Jewish-passage-query structure. They are: Marduk-Tiamat ↔ Baal-Yam; Enheduanna ↔ Kabti-ilāni-Marduk; Hannahanna ↔ Bēlet-ilī; Lagash KL ↔ SKL; Ninurta-Asag ↔ Marduk-Tiamat. Planned home: v0.8 find_mesopotamian_parallel tool with a Mesopotamian-internal query structure."
+    }
   },
   "parallels": [
     {
       "query_match": {
         "text_id": "genesis",
-        "passages": ["Genesis 5:21-24"],
-        "topics": ["seventh_patriarch_ascent", "enoch_taken_by_god"]
+        "passages": [
+          "Genesis 5:21-24"
+        ],
+        "topics": [
+          "seventh_patriarch_ascent",
+          "enoch_taken_by_god"
+        ]
       },
       "passage_text": "And Enoch lived sixty and five years, and begat Methuselah: and Enoch walked with God after he begat Methuselah three hundred years, and begat sons and daughters: and all the days of Enoch were three hundred sixty and five years: and Enoch walked with God: and he was not; for God took him.",
       "passage_translator": "ASV 1901",
@@ -92,8 +106,14 @@
     {
       "query_match": {
         "text_id": "genesis",
-        "passages": ["Genesis 6:1-4"],
-        "topics": ["sons_of_god", "nephilim_origin", "divine_human_unions"]
+        "passages": [
+          "Genesis 6:1-4"
+        ],
+        "topics": [
+          "sons_of_god",
+          "nephilim_origin",
+          "divine_human_unions"
+        ]
       },
       "passage_text": "And it came to pass, when men began to multiply on the face of the ground, and daughters were born unto them, that the sons of God saw the daughters of men that they were fair; and they took them wives, whomsoever they chose. ...The Nephilim were in the earth in those days, and also after that, when the sons of God came in unto the daughters of men, and they bare children to them: the same were the mighty men that were of old, the men of renown.",
       "passage_translator": "ASV 1901",
@@ -140,14 +160,47 @@
           ],
           "transmission_hypothesis": "aramaic_substrate",
           "notes": "Moderate strength. The divine-human hybrid topos is widespread across the Ancient Near East; Gilgamesh is one instance, not the direct source. Useful comparison but not load-bearing."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Uruk List of Kings and Sages (Lu-Nanna 'two-thirds apkallu') + Gilgamesh Epic SB I.46-48 ('two-thirds divine')",
+            "citation": "W.20030,7 obv.col.i.19-21 (Lu-Nanna); Gilgamesh SB I.46-48 (George 2003 vol.1 p.540)",
+            "language": "Akkadian",
+            "approximate_date": "Seleucid Uruk List (c. 165 BCE); SB Gilgamesh (c. 1200 BCE)"
+          },
+          "parallel_type": "lexical",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers: A Comparative Study of the Antediluvian Wisdom in Mesopotamian and Jewish Traditions,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320, at pp. 282-283 (summary point 7)",
+              "argument_summary": "Annus explicitly states that Lu-Nanna's status as 'two-thirds apkallu' (per Kilmer 1987) 'exactly matches the status of Gilgamesh in the post-diluvian world, as he also was two-thirds divine, and one-third human (I 48).' Treats this as a single Mesopotamian theological-genealogical formula expressing antediluvian-postdiluvian hybridity, linked to the Nephilim/giants of Genesis 6 and the Book of Giants (citing Stuckenbruck 2003: 329)."
+            },
+            {
+              "author_year": "Kilmer 1987",
+              "publication": "Anne Draffkorn Kilmer, 'The Mesopotamian Counterparts of the Biblical Něpīlīm,' in E.W. Conrad and E.G. Newing (eds.), Perspectives on Language and Text: Essays and Poems in Honor of Francis I. Andersen's Sixtieth Birthday (Winona Lake, IN: Eisenbrauns, 1987), pp. 39-43",
+              "argument_summary": "Original argument that the Mesopotamian fraction-formula expressions of divine-human hybridity are the philological counterparts of the Hebrew Nephilim."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Annus 2010 JSP 19.4 pp.282-283 summary point 7 verbatim: Lu-Nanna's status as 'two-thirds apkallu' 'exactly matches the status of Gilgamesh in the post-diluvian world, as he also was two-thirds divine, and one-third human.' Annus treats this as a single Mesopotamian theological-genealogical formula expressing antediluvian-postdiluvian hybridity, explicitly linking it to the Nephilim of Genesis 6:4 / 1 Enoch 7:2."
         }
       ]
     },
     {
       "query_match": {
         "text_id": "1_enoch",
-        "passages": ["1 Enoch 6:1-8", "1 Enoch 7:1-6", "1 Enoch 8:1-3"],
-        "topics": ["fallen_angels_teaching_arts", "watchers_descent", "asael_metallurgy", "shemyaza_oath"]
+        "passages": [
+          "1 Enoch 6:1-8",
+          "1 Enoch 7:1-6",
+          "1 Enoch 8:1-3"
+        ],
+        "topics": [
+          "fallen_angels_teaching_arts",
+          "watchers_descent",
+          "asael_metallurgy",
+          "shemyaza_oath"
+        ]
       },
       "passage_text": "And it came to pass when the children of men had multiplied that in those days were born unto them beautiful and comely daughters. And the angels, the children of the heaven, saw and lusted after them, and said to one another: 'Come, let us choose us wives from among the children of men and beget us children.' And Semjâzâ, who was their leader, said unto them: 'I fear ye will not indeed agree to do this deed, and I alone shall have to pay the penalty of a great sin.' And they all answered him and said: 'Let us all swear an oath...' Then sware they all together and bound themselves by mutual imprecations upon it. And they were in all two hundred; who descended in the days of Jared on the summit of Mount Hermon...",
       "passage_translator": "R. H. Charles 1912 (public domain)",
@@ -218,6 +271,330 @@
           ],
           "transmission_hypothesis": "common_ancient_near_eastern_substrate",
           "notes": "Weak in the Mesopotamian sense — this is a West Semitic / Levantine input to the Watchers narrative, not a Mesopotamian one. Included for completeness."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Genesis 2:7-25"
+        ],
+        "topics": [
+          "eden",
+          "creation_of_humanity",
+          "creation_of_woman",
+          "eternal_life_lost",
+          "divine_breath"
+        ]
+      },
+      "passage_text": "And Jehovah God formed man of the dust of the ground, and breathed into his nostrils the breath of life; and man became a living soul. And Jehovah God planted a garden eastward, in Eden; and there he put the man whom he had formed... And the rib, which Jehovah God had taken from the man, made he a woman, and brought her unto the man.",
+      "passage_translator": "ASV 1901 (paraphrased composite of Genesis 2:7, 2:8, 2:22)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Enki and Ninhursag (Sumerian Dilmun myth) + Sumerian Flood Story (Dilmun eternal-life destination)",
+            "citation": "ETCSL 1.1.1 (Enki and Ninhursag); Civil 1969 lines 251-261 (Flood Story)",
+            "language": "Sumerian",
+            "approximate_date": "Old Babylonian recension c. 1700 BCE"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Kramer 1945",
+              "publication": "Samuel Noah Kramer, 'A Sumerian \"Paradise\" Myth,' Crozer Quarterly 22 (1945)",
+              "argument_summary": "First systematic statement of the Dilmun ↔ Eden paradise parallel and the Nin-ti / Eve-rib pun argument. Argued that the Dilmun paradise of Enki and Ninhursag — 'pure, clean, bright,' a 'land of the living' that knows neither sickness nor death — provides numerous parallels to the biblical Eden 'planted eastward,' and that the Sumerian episode of Ninhursag creating Nin-ti ('Lady of the Rib' / 'Lady who makes live') to heal Enki's rib is the literary source explaining (a) why Eve was fashioned from a rib specifically, and (b) why Eve is named 'mother of all living' — a Sumerian pun (Sumerian ti = both 'rib' and 'to live') preserved as Hebrew etiology."
+            },
+            {
+              "author_year": "Kramer 1963",
+              "publication": "Samuel Noah Kramer, The Sumerians: Their History, Culture, and Character (Chicago: University of Chicago Press, 1963), p. 149",
+              "argument_summary": "Restates and consolidates the Dilmun-Eden and Nin-ti / Eve-rib arguments in the standard mid-century synthesis of Sumerian civilization."
+            },
+            {
+              "author_year": "Kramer & Maier 1989",
+              "publication": "Samuel Noah Kramer & John Maier, Myths of Enki, the Crafty God (New York: Oxford University Press, 1989)",
+              "argument_summary": "Expanded modern treatment. The Dilmun-Eden and Nin-ti / Eve-rib parallels remain canonical comparative-religion arguments in Sumerology, well-established in the field."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Kramer 1945 Crozer Quarterly 22 was first systematic statement; Kramer 1963 The Sumerians p.149 restates; Kramer & Maier 1989 expands. Both the Dilmun-Eden paradise parallel AND the Ninti/Eve-rib pun (Sumerian ti = both 'rib' and 'to live') are foundational comparative-religion arguments in Sumerology."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Adapa myth",
+            "citation": "EA 356 (Amarna fragment) + K.8743 (Neo-Assyrian fragment) + Izre'el 2001 critical edition",
+            "language": "Akkadian",
+            "approximate_date": "Old Babylonian / Amarna period (c. 1350 BCE)"
+          },
+          "parallel_type": "onomastic",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Andreasen 1981",
+              "publication": "Niels-Erik Andreasen, 'Adam and Adapa: Two Anthropological Characters,' Andrews University Seminary Studies 19.3 (1981): 179-194",
+              "argument_summary": "Catalogues the parallels between Adam and Adapa — both first/prototype humans, both tested with food (and drink in Adapa's case), both involve obeying a divine figure (Ea/El), both involve loss of eternal life through the food test, both involve proper clothing. Argues the parallels are real but 'seriously blunted by the entirely different contexts in which they occur.' Treats them as 'anthropological characters' belonging to a shared Ancient Near Eastern type — the moderate position between 'identical figures' and 'illusory parallels' poles."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Andreasen 1981 himself describes the parallels as 'real but seriously blunted by the entirely different contexts.' Validates the STRUCTURAL parallel (both are first/prototype humans, both tested with food, both lose immortality through food-test). The ONOMASTIC component (Adapa→Adaba→Adam phonological progression) is NOT in Andreasen and should be re-attributed to other scholars (Sjöberg on Sumerian a-dam) or dropped."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Atra-ḫasīs anthropogenesis (Wē-ila slain god + divine blood mixed with clay)",
+            "citation": "Atra-ḫasīs I.190-260 (Lambert & Millard 1969, pp. 56-67)",
+            "language": "Akkadian",
+            "approximate_date": "Old Babylonian (c. 1700 BCE)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Lambert & Millard 1969",
+              "publication": "W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford: Clarendon, 1969)",
+              "argument_summary": "Explicitly state — and this is widely cited downstream — that 'in all probability the Babylonians conceived of man as matter (clay) activated by the addition of divine blood,' paired with the observation that 'the Hebrew account of creation in Genesis 2 explains that God imparted the breath of life into man, and so animation began.' This IS a direct comparative move treating the divine element in humans in Atrahasis as the Mesopotamian counterpart to Genesis 2:7's divine breath. The eṭemmu / ṭemu / damu wordplay (ghost / reason / blood) tied to the slain Wē-ila is the Lambert & Millard reading reproduced in most subsequent scholarship."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Lambert & Millard 1969 explicitly compares 'divine blood in clay-formed humans' (Mesopotamian Atra-ḫasīs) with 'divine breath in dust-formed humans' (Genesis 2:7). Validation scope: Genesis 2:7 divine-breath leg only; Genesis 1 imago Dei leg is implied but not explicitly drawn (Westermann 1984 reads imago Dei relationally and is more cautious)."
+        },
+        {
+          "mesopotamian_source": {
+            "text": "Gilgamesh Epic — Shamhat civilizing Enkidu (SB Tablet I)",
+            "citation": "Gilgamesh SB I.150-220 (George 2003, vol. 1)",
+            "language": "Akkadian",
+            "approximate_date": "Standard Babylonian recension c. 1200 BCE"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Bailey 1970",
+              "publication": "John A. Bailey, 'Initiation and the Primal Woman in Gilgamesh and Genesis 2-3,' Journal of Biblical Literature 89.2 (1970): 137-150",
+              "argument_summary": "Real, peer-reviewed (JBL) article that explicitly compares Shamhat and Eve as primal-women initiators of male protagonists into civilization/knowledge. Both narratives center female-mediated transition from primal-innocence to civilized-knowledge. The 'Eve-Shamhat framework' is foundational and described in secondary literature as influential in biblical scholarship."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Bailey 1970 JBL 89.2:137-150 is the foundational explicit comparison of Shamhat-as-primal-woman with Eve-as-primal-woman. Later HTR article 'A Suitable Match: Eve, Enkidu, and the Boundaries of Humanity' complicates with Eve↔Enkidu reading — both Bailey's Eve↔Shamhat and the rebuttal Eve↔Enkidu belong in the comparative corpus."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Genesis 4:17-26"
+        ],
+        "topics": [
+          "pre_flood_civilization",
+          "cainite_culture_founders"
+        ]
+      },
+      "passage_text": "And Cain knew his wife; and she conceived, and bare Enoch: and he builded a city... And Adah bare Jabal: he was the father of such as dwell in tents and have cattle. And his brother's name was Jubal: he was the father of all such as handle the harp and pipe. And Zillah, she also bare Tubal-cain, the forger of every cutting instrument of brass and iron...",
+      "passage_translator": "ASV 1901 (Genesis 4:17-22)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Sumerian Flood Story (CBS 10673)",
+            "citation": "Sumerian Flood Story lines 84-100 (Civil 1969, in Lambert & Millard 1969 pp. 138-145); ETCSL 1.7.4",
+            "language": "Sumerian",
+            "approximate_date": "Old Babylonian (c. 1700-1600 BCE)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Shea 1991",
+              "publication": "William H. Shea, 'The Antediluvians,' Origins (Geoscience Research Institute) 18 (1991)",
+              "argument_summary": "Explicitly maps the Cainite cultural-accomplishments of Genesis 4 (animal husbandry via Jabal, music via Jubal, metallurgy via Tubal-Cain, city-building, polygyny via Lamech) onto the Sumerian/Mesopotamian antediluvian-cities tradition (Eridu, Bad-tibira, Larak, Sippar, Shuruppak). Treats them as typologically parallel pre-flood civilization-founding sections."
+            },
+            {
+              "author_year": "Jacobsen 1981",
+              "publication": "Thorkild Jacobsen, 'The Eridu Genesis,' Journal of Biblical Literature 100 (1981): 513-529",
+              "argument_summary": "Interpretive framework treating the Sumerian Flood Story's antediluvian-cities + Genesis pre-flood civilization sections as parallel instances of a broader 'primeval history' genre. The 'Eridu Genesis' label has become the standard framework for this comparative reading."
+            },
+            {
+              "author_year": "Civil 1969",
+              "publication": "Miguel Civil, in W.G. Lambert & A.R. Millard, Atra-ḫasīs: The Babylonian Story of the Flood (Oxford UP, 1969), appendix pp. 138-145",
+              "argument_summary": "Editio princeps of the Sumerian Flood Story's antediluvian-cities list (lines 84-100), naming the five cities with tutelary deities — the textual foundation for the parallel."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Shea 1991 Origins 18 explicitly maps Cainite cultural-accomplishments (Jabal pastoralism / Jubal music / Tubal-Cain metallurgy / city-building / Lamech polygyny) onto the five Sumerian antediluvian cities (Eridu, Bad-tibira, Larak, Sippar, Shuruppak with tutelary deities). Jacobsen 1981 JBL 100:513-529 'The Eridu Genesis' provides the broader interpretive framework treating both as 'primeval history' genre."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "1_enoch",
+        "passages": [
+          "1 Enoch 72:1-82:20"
+        ],
+        "topics": [
+          "364_day_calendar",
+          "schematic_year",
+          "babylonian_astronomy",
+          "astronomical_book"
+        ]
+      },
+      "passage_text": "The book of the courses of the luminaries of heaven, the relations of each, according to their classes, their dominion and their seasons, according to their names and places of origin, and according to their months, which Uriel, the holy angel who was with me, showed me; and he showed me all their laws exactly as they are, and how it is with regard to all the years of the world and unto eternity, till the new creation is accomplished which dureth till eternity.",
+      "passage_translator": "R.H. Charles 1912 (public domain) — 1 Enoch 72:1",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Mul.Apin (Babylonian astronomical compendium)",
+            "citation": "Mul.Apin Tablets I-II (Hunger & Pingree 1989)",
+            "language": "Akkadian",
+            "approximate_date": "Standard text c. 1000 BCE; manuscripts Neo-Assyrian and later"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Neugebauer 1981",
+              "publication": "Otto Neugebauer, The 'Astronomical' Chapters of the Ethiopic Book of Enoch (72 to 82): Translation and Commentary, with additional notes on the Aramaic fragments by Matthew Black, Det Kongelige Danske Videnskabernes Selskab, Matematisk-fysiske Meddelelser 40:10 (Copenhagen: Munksgaard, 1981)",
+              "argument_summary": "Argued that the 30-day schematic months and the 360+4 day structure of the Astronomical Book of Enoch's calendar were inspired by Babylonian arithmetical schemes of the type of Mul.Apin. Cautious framing: 'inspired by' rather than 'derived from' — AB shows no trace of sophisticated Babylonian Persian/Seleucid-period astronomy."
+            },
+            {
+              "author_year": "Ben-Dov 2008",
+              "publication": "Jonathan Ben-Dov, Head of All Years: Astronomy and Calendars at Qumran in Their Ancient Context, Studies on the Texts of the Desert of Judah 78 (Leiden: Brill, 2008)",
+              "argument_summary": "Substantially strengthens Neugebauer's argument. Chapter on 'The Astronomical Book and Babylonian Astronomy: MUL.APIN and EAE' provides the modern systematic case for the Mul.Apin → AB derivation."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Neugebauer 1981 (foundational, cautious 'inspired by' framing); Ben-Dov 2008 STDJ 78 'The Astronomical Book and Babylonian Astronomy: MUL.APIN and EAE' (modern systematic case). The 364-day schematic year of 1 Enoch's Astronomical Book (chs 72-82) is the cleanest TECHNICAL-CONTENT continuity (not just narrative parallel) between Mesopotamian astronomy and Second Temple Jewish texts."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "1_enoch",
+        "passages": [
+          "1 Enoch 81:1-2",
+          "1 Enoch 93:2",
+          "Jubilees 4:32"
+        ],
+        "topics": [
+          "heavenly_tablets",
+          "book_of_destiny",
+          "divine_record_keeping"
+        ]
+      },
+      "passage_text": "And he said unto me: 'O Enoch, observe these heavenly tablets, and read what is written thereon, and mark every individual fact.' And I observed the heavenly tablets, and read everything which was written and understood everything, and read the book of all the deeds of mankind, and of all the children of flesh that shall be upon the earth to the remotest generations.",
+      "passage_translator": "R.H. Charles 1912 (public domain) — 1 Enoch 81:1-2",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Tablet of Destinies (tuppi šīmāti)",
+            "citation": "Enūma Eliš IV.121-122 + LKA 146 (seven apkallu possess Tablet)",
+            "language": "Akkadian",
+            "approximate_date": "Standard Babylonian (Enūma Eliš c. 1100 BCE); divinatory tradition older"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers: A Comparative Study of the Antediluvian Wisdom in Mesopotamian and Jewish Traditions,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320, at p. 284 and fn. 8",
+              "argument_summary": "Verbatim: 'In Mesopotamian tradition, such a divine source of information was the Tablet of Destinies, which corresponds to heavenly tablets and the Pargod in 3 Enoch, on which the divine secrets are written.' Fn. 8 adds: 'At least one Mesopotamian myth (LKA 146) presents the seven apkallus as possessors of the Tablet of Destinies. See Denning-Bolle 1992: 50; Lenzi 2008a: 122-25.'"
+            },
+            {
+              "author_year": "Paul 1973",
+              "publication": "Shalom M. Paul, 'Heavenly Tablets and the Book of Life,' Journal of the Ancient Near Eastern Society 5 (1973): 345-353",
+              "argument_summary": "Foundational treatment of the heavenly-tablets motif from Sumerian tuppi šīmāti through Mesopotamian, biblical, and Talmudic times. Establishes that the gods in Mesopotamia were determiners of destiny who wrote decisions on 'tablets of destiny' (tuppi simati), and that this concept underlies the biblical/Second Temple 'book of life' tradition."
+            },
+            {
+              "author_year": "Arbel 2006",
+              "publication": "Vita Daphna Arbel, 'Seal of Resemblance, Full of Wisdom, and Perfect in Beauty: The Enoch/Metatron Narrative of 3 Enoch and Ancient Near Eastern Mythology,' p. 372 (cited by Annus 2010)",
+              "argument_summary": "Separate published treatment of the Tablet-of-Destinies → heavenly-tablets/Pargod correspondence, cited by Annus 2010 alongside his own argument."
+            }
+          ],
+          "transmission_hypothesis": "babylonian_exile",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Annus 2010 JSP 19.4 p.284 + fn.8 verbatim: 'the Tablet of Destinies corresponds to heavenly tablets and the Pargod in 3 Enoch.' Paul 1973 JANES 5:345-353 provides the foundational treatment from Sumerian tuppi-šīmāti through biblical/Talmudic 'book of life' tradition. Arbel 2006:372 separate published treatment."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "jubilees",
+        "passages": [
+          "Jubilees 4:17-25",
+          "Jubilees 8:1-4",
+          "1 Enoch 65:1-11"
+        ],
+        "topics": [
+          "antediluvian_wisdom_preservation",
+          "wisdom_across_flood"
+        ]
+      },
+      "passage_text": "And [Enoch] was the first among men that are born on earth who learnt writing and knowledge and wisdom and who wrote down the signs of heaven according to the order of their months in a book... And he was moreover with the angels of God these six jubilees of years, and they showed him everything which is on earth and in the heavens, the rule of the sun, and he wrote down everything.",
+      "passage_translator": "R.H. Charles 1903 (public domain) — Jubilees 4:17-21",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Berossus, Babyloniaca (Xisuthros' Sippar-tablet burial)",
+            "citation": "Berossus frag. F4b (preserved in Syncellus + Eusebius); Verbrugghe & Wickersham 1996 pp. 49-50",
+            "language": "Greek",
+            "approximate_date": "Hellenistic (c. 280 BCE); reflects older Babylonian tradition"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "van der Horst 2002",
+              "publication": "Pieter W. van der Horst, 'Antediluvian Knowledge: Jewish Speculations About Wisdom From Before the Flood in Their Ancient Context,' in Japheth in the Tents of Shem: Studies on Jewish Hellenism in Antiquity (Peeters, 2002)",
+              "argument_summary": "Explicitly compares Berossus' Sippar-tablet-burial (preserved in Syncellus and Eusebius) with Jubilees' Cainan-stone-writing tradition and the Enochic preservation-of-wisdom-across-Flood motif. Treats them as cognate antediluvian-knowledge-survival traditions reflecting a common Ancient Near Eastern substrate."
+            },
+            {
+              "author_year": "Annus 2010",
+              "publication": "Amar Annus, 'On the Origin of Watchers,' Journal for the Study of the Pseudepigrapha 19.4 (2010): 277-320",
+              "argument_summary": "Secondary support: discusses the broader Mesopotamian-Jewish antediluvian wisdom substrate from which both Berossus and 1 Enoch / Jubilees draw."
+            }
+          ],
+          "transmission_hypothesis": "hellenistic_continuity",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). van der Horst 2002 'Antediluvian Knowledge' in Japheth in the Tents of Shem (Peeters) explicitly compares Berossus' Sippar-tablet-burial with Jubilees' Cainan-stone-writing tradition and the Enochic preservation-of-wisdom-across-Flood motif. Treats them as cognate antediluvian-knowledge-survival traditions reflecting a common Ancient Near Eastern substrate. Annus 2010 provides broader context."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "ezekiel",
+        "passages": [
+          "Ezekiel 10:18-19",
+          "Ezekiel 11:22-23"
+        ],
+        "topics": [
+          "divine_abandonment",
+          "hester_panim",
+          "glory_departing_temple"
+        ]
+      },
+      "passage_text": "And the glory of Jehovah went forth from over the threshold of the house, and stood over the cherubim. And the cherubim lifted up their wings, and mounted up from the earth in my sight when they went forth... And the glory of Jehovah went up from the midst of the city, and stood upon the mountain which is on the east side of the city.",
+      "passage_translator": "ASV 1901 — Ezekiel 10:18-19, 11:23",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Erra Epic (Marduk's absence from Babylon enables Erra's rampage)",
+            "citation": "Erra Epic Tablet I.131-189 (Marduk's departure; Cagni 1969)",
+            "language": "Akkadian",
+            "approximate_date": "Late Babylonian (c. 765-763 BCE per Kabti-ilāni-Marduk's authorial frame)"
+          },
+          "parallel_type": "topos",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Bodi 1991",
+              "publication": "Daniel Bodi, The Book of Ezekiel and the Poem of Erra (Orbis Biblicus et Orientalis 104; Fribourg/Göttingen: Vandenhoeck & Ruprecht, 1991)",
+              "argument_summary": "The foundational scholarly treatment that explicitly identifies 'the absence of the divinity from its shrine' as one of twelve shared motifs between the Erra Epic and the book of Ezekiel. Bodi argues that the Erra-poem's Marduk-absence motif shaped Ezekiel's portrayal of YHWH's withdrawal from the Jerusalem temple — the Mesopotamian textual source for the biblical divine-abandonment motif."
+            },
+            {
+              "author_year": "Block 2000",
+              "publication": "Daniel I. Block, The Gods of the Nations: Studies in Ancient Near Eastern National Theology (Apollos / Baker Academic, 2000); cf. Block, 'Divine Abandonment: Ezekiel's Adaptation of an Ancient Near Eastern Motif'",
+              "argument_summary": "Extends Bodi's argument into the broader Hebrew Bible. Treats the divine-absence motif as a structural parallel between Mesopotamian and biblical corpora."
+            }
+          ],
+          "transmission_hypothesis": "common_ancient_near_eastern_substrate",
+          "notes": "Promoted from Discovery Engine v0.7 (machine-discovered, human-scholar validated 2026-05-15). Bodi 1991 OBO 104 'The Book of Ezekiel and the Poem of Erra' is the foundational treatment — explicitly identifies 'absence of the divinity from its shrine' as one of TWELVE shared motifs between the Erra Epic and Ezekiel. Block 2000 'The Gods of the Nations' + 'Divine Abandonment' article extends to broader Hebrew Bible. The hester panim (post-biblical rabbinic term) is technically distinct from Bodi's 'divine absence' but the underlying motif is the same."
         }
       ]
     }
