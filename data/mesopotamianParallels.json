@@ -13,6 +13,11 @@
       "date": "2026-05-15",
       "new_parallels_added": 4,
       "source": "Mesopotamia_Medical_Comparative.md framework brief (Tier-1 + Tier-2 + Tier-3 recommendations)"
+    },
+    "v0_11_0_farming_expansion": {
+      "date": "2026-05-15",
+      "new_parallels_added": 2,
+      "source": "Mesopotamia_Agricultural_Comparative.md framework brief (Tier-1 recommendations)"
     }
   },
   "parallels": [
@@ -812,6 +817,128 @@
         "discovery_candidate_pair": "v0.10 Medical expansion — Mesopotamia_Medical_Comparative.md Tier-3 (structural-only)"
       },
       "notes": "v0.10.0 Medical expansion. Marked correspondence_strength as moderate because the typological parallel is real but direct genealogical transmission (Mesopotamia → Greece) is debated. Geller 2010 favors substrate influence; Edelstein & Edelstein 1945 emphasizes Greek-internal development. Both positions accept the structural-parallel framework."
+    },
+    {
+      "id": "mp-agricultural-didactic-1",
+      "entity_a": {
+        "text": "Sumerian Farmer's Instructions — 111-line father-to-son didactic agricultural manual covering the full annual farming cycle (field preparation → irrigation → plowing → seeding → weeding → harvesting → threshing); composed in the *edubba-a* (scribal school) literary tradition; framed under Ninurta as agricultural patron deity.",
+        "citation": "Miguel Civil, The Farmer's Instructions: A Sumerian Agricultural Manual, Aula Orientalis Supplementa 5 (Sabadell: Editorial AUSA, 1994); ETCSL 5.6.3",
+        "language": "Sumerian",
+        "tradition": "sumerian",
+        "approximate_date": "Old Babylonian recension c. 1700 BCE; substrate likely older"
+      },
+      "entity_b": {
+        "text": "Hesiod's Works and Days — 828-line Greek didactic poem covering the agricultural year (autumn plowing → winter rest → spring plowing → summer harvest) plus moral admonitions; framed as advice from Hesiod to his brother Perses; one of the foundational works of Greek literature.",
+        "citation": "M.L. West, Hesiod: Works and Days, edited with prolegomena and commentary (Oxford: Clarendon Press, 1978)",
+        "language": "Greek",
+        "tradition": "hellenistic_egyptian",
+        "approximate_date": "c. 700 BCE"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "agricultural_didactic",
+        "wisdom_literature",
+        "father_son_instruction",
+        "annual_agricultural_cycle"
+      ],
+      "deities": [
+        "Ninurta",
+        "Demeter",
+        "Zeus"
+      ],
+      "texts": [
+        "Farmer's Instructions",
+        "Works and Days"
+      ],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "West 1978",
+          "publication": "M.L. West, Hesiod: Works and Days, edited with prolegomena and commentary (Oxford: Clarendon Press, 1978)",
+          "argument_summary": "West's foundational commentary on Hesiod's Works and Days explicitly treats the poem as participating in a broader ANE wisdom-literature substrate that includes the Sumerian Farmer's Instructions. Both texts share: father-to-son advice format; annual-cycle agricultural structure; integration of agricultural with moral-religious advice; didactic poetic register. West argues for substrate-influence rather than direct borrowing."
+        },
+        {
+          "author_year": "West 1997",
+          "publication": "M.L. West, The East Face of Helicon: West Asiatic Elements in Greek Poetry and Myth (Oxford: Oxford UP, 1997)",
+          "argument_summary": "Extended argument that Hesiod systematically draws on ANE wisdom-literature traditions including Mesopotamian agricultural and cosmogonic poetry. The Works and Days's structural similarity to Farmer's Instructions is one of West's principal pieces of evidence."
+        },
+        {
+          "author_year": "Burkert 1992",
+          "publication": "Walter Burkert, The Orientalizing Revolution: Near Eastern Influence on Greek Culture in the Early Archaic Age (Cambridge MA: Harvard UP, 1992; trans. Margaret E. Pinder & Walter Burkert from 1984 German)",
+          "argument_summary": "Foundational argument for substantial Mesopotamian → Greek cultural transmission c. 750-650 BCE via Phoenician and Aramaean intermediaries. The Farmer's Instructions ↔ Works and Days parallel is part of Burkert's broader case for ANE didactic-poetry transmission to early Greek literature."
+        },
+        {
+          "author_year": "Civil 1994",
+          "publication": "Miguel Civil, The Farmer's Instructions: A Sumerian Agricultural Manual, Aula Orientalis Supplementa 5 (Sabadell: Editorial AUSA, 1994)",
+          "argument_summary": "Foundational critical edition of the Sumerian text. Civil notes the structural parallel to Hesiod's Works and Days as one of the canonical ANE↔Greek didactic-agricultural literature comparisons; treats both as instantiations of shared ANE wisdom-literature genre."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.11 Farming expansion — Mesopotamia_Agricultural_Comparative.md Tier-1 recommendation"
+      },
+      "notes": "v0.11.0 Farming expansion. The canonical ANE↔Greek agricultural-didactic-poetry parallel; West 1978 + 1997 + Burkert 1992 establish the broader Mesopotamian → Greek wisdom-literature transmission framework. Both texts also share Ninurta/Zeus as agricultural-patron deities (different cosmologies but parallel structural role)."
+    },
+    {
+      "id": "mp-irrigation-hydrology-1",
+      "entity_a": {
+        "text": "Mesopotamian canal irrigation system — dual-river (Tigris + Euphrates) alluvial plain requiring active hydraulic engineering: main canals (ÍD/nāru), branch canals (pa₅/palgu), field channels (atappu), drainage networks. Required corvée-labor + institutional management (Bīt-bēl-pâni canal-head institutions). Long-term salinization → wheat-to-barley shift.",
+        "citation": "Robert McC. Adams, Heartland of Cities (Univ. of Chicago, 1981); Jacobsen & Adams 1958 Science 128:1251-1258",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Continuous attestation c. 3500 BCE onward"
+      },
+      "entity_b": {
+        "text": "Egyptian basin irrigation system — single-river (Nile) annual-flood-driven; floodwater channeled into basins via earthen dikes; basins drained after sediment-deposition + crop-establishment. Minimal active hydraulic engineering required after initial basin construction; no salinization due to annual flood-renewal.",
+        "citation": "Karl W. Butzer, Early Hydraulic Civilization in Egypt (Univ. of Chicago, 1976); Eyre 1999 in Bowman & Rogan eds. Agriculture in Egypt",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Continuous attestation c. 3500 BCE onward"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "irrigation_institutions",
+        "hydrological_civilization",
+        "agricultural_engineering"
+      ],
+      "deities": [
+        "Enki",
+        "Enbilulu",
+        "Ninkasi",
+        "Hapi",
+        "Khnum"
+      ],
+      "texts": [
+        "Hammurabi Code §§53-56",
+        "Egyptian administrative agricultural texts"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Adams 1981",
+          "publication": "Robert McC. Adams, Heartland of Cities: Surveys of Ancient Settlement and Land Use on the Central Floodplain of the Euphrates (Chicago: University of Chicago Press, 1981)",
+          "argument_summary": "Foundational archaeological-landscape study reconstructing Mesopotamian irrigation networks across millennia. Adams discusses the divergent hydrological + institutional structures of Mesopotamian canal irrigation vs Egyptian basin irrigation as the two paradigmatic ANE 'hydraulic civilizations.' Both produced agricultural surplus enabling complex civilization but via fundamentally different water-management approaches."
+        },
+        {
+          "author_year": "Butzer 1976",
+          "publication": "Karl W. Butzer, Early Hydraulic Civilization in Egypt: A Study in Cultural Ecology (Chicago: University of Chicago Press, 1976)",
+          "argument_summary": "Counterpart to Adams 1981 — the foundational study of Egyptian basin irrigation. Butzer demonstrates the institutional + ecological differences: Nile basin irrigation requires far less centralized authority and produces no salinization, in contrast to Mesopotamian canal irrigation. Both Adams + Butzer effectively pair these traditions as the two paradigmatic ANE hydraulic-civilization types."
+        },
+        {
+          "author_year": "Jacobsen & Adams 1958",
+          "publication": "Thorkild Jacobsen & Robert McC. Adams, 'Salt and Silt in Ancient Mesopotamian Agriculture,' Science 128.3334 (1958): 1251-1258",
+          "argument_summary": "Documents the long-term salinization-driven decline of Mesopotamian agricultural productivity + the wheat-to-barley shift c. 2400-1700 BCE — explicitly contrasted with Egyptian agricultural stability due to annual Nile flood-renewal. The single most-cited comparative agricultural-ecological argument in ANE studies."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.11 Farming expansion — Mesopotamia_Agricultural_Comparative.md Tier-1 recommendation"
+      },
+      "notes": "v0.11.0 Farming expansion. The two paradigmatic ANE hydraulic-civilization traditions. Diverged in both institutional structure (centralized vs distributed water-management) and ecological trajectory (salinization vs stability). The Wittfogel 'hydraulic despotism' thesis attempted to unify them politically; modern scholarship (Adams 1981; Trigger 2003) has substantially rejected unification in favor of recognizing institutional + ecological diversity."
     }
   ]
 }

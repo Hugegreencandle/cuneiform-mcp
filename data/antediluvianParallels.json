@@ -29,6 +29,12 @@
       "date": "2026-05-15",
       "new_queries_added": 3,
       "source": "Mesopotamia_Medical_Comparative.md framework brief (Hebrew-anchored medical parallels)"
+    },
+    "v0_11_0_farming_expansion": {
+      "date": "2026-05-15",
+      "new_queries_added": 2,
+      "source": "Mesopotamia_Agricultural_Comparative.md framework brief (Hebrew-anchored Tier-1 agricultural-legal parallels)",
+      "wright_2009_anchor": "The Hammurabi↔Exodus/Deuteronomy direct-dependence parallel is the strongest single Mesopotamia↔Hebrew textual-dependence case in the cluster"
     }
   },
   "parallels": [
@@ -942,6 +948,106 @@
           ],
           "transmission_hypothesis": "common_substrate",
           "notes": "Promoted from v0.10.0 Medical expansion (2026-05-15). The 1 Samuel passage is one of the cleanest biblical texts showing influence of broader ANE 'spirit-attribution' medical framework. Both Mesopotamian eṭemmu-tradition and Hebrew Bible 'evil spirit' tradition share: attribution of mental affliction to discrete spirit-entity; specific therapeutic interventions; recognition that affliction is removable. The Hebrew text is theologically distinctive in attributing the 'evil spirit' to YHWH ('from Jehovah') rather than to a discrete demon; the Mesopotamian text attributes eṭemmu-affliction to the unincorporated ghost of the dead."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Exodus 21:1-23:33",
+          "Deuteronomy 19:1-25:19"
+        ],
+        "topics": [
+          "covenant_code",
+          "agricultural_laws",
+          "livestock_liability",
+          "irrigation_canal_breach",
+          "fugitive_slave",
+          "thresher_ox",
+          "fruit_tree_damage"
+        ]
+      },
+      "passage_text": "If a man leave his ox loose, and he go into another man's field, and feed thereof; of the best of his own field, and of the best of his own vineyard, shall he make restitution. If fire break out, and catch in thorns, so that the shocks of grain, or the standing grain, or the field be consumed therewith; he that kindled the fire shall surely make restitution... Thou shalt not muzzle the ox when he treadeth out the grain.",
+      "passage_translator": "ASV 1901 — Exodus 22:5-6 + Deuteronomy 25:4 (composite)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Hammurabi Code agricultural laws (§§42-65 land + §§53-56 irrigation-canal-breach liability + §240+ ox + thresher-ox laws). The single longest legal-textual continuous corpus addressing agricultural responsibility in the ANE; provides specific liability rules for livestock damage, fire-spread, canal-breach, fugitive-slave, fruit-tree damage, etc.",
+            "citation": "Roth 1995 Law Collections from Mesopotamia and Asia Minor (SBL WAW 6, pp. 84-105); Westbrook 1988 + 1994",
+            "language": "Akkadian",
+            "approximate_date": "Hammurabi reign c. 1792-1750 BCE; legal substrate older"
+          },
+          "parallel_type": "narrative",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Wright 2009",
+              "publication": "David P. Wright, Inventing God's Law: How the Covenant Code of the Bible Used and Revised the Laws of Hammurabi (New York: Oxford University Press, 2009)",
+              "argument_summary": "Argues for SUBSTANTIAL DIRECT DEPENDENCE of the biblical Covenant Code (Exodus 21-23) + adjacent Deuteronomic agricultural laws on the Laws of Hammurabi. Evidence: (1) sequential ordering of specific laws in the biblical text matches Hammurabi's ordering at the section level; (2) specific wording shows borrowing not just structural similarity; (3) characteristic inversions + reversals (e.g. fugitive-slave laws — Hammurabi §16-17 require return; Deuteronomy 23:15-16 prohibits return — exact reversal patterns characteristic of literary citation-via-revision). Hammurabi §53-56 (irrigation-canal-breach liability) ↔ Exodus 22:5-6 (fire-spread liability) is one of Wright's specific parallel cases. Wright's position is increasingly accepted in mainstream biblical-studies but remains contested; some scholars (Roth, Westbrook) maintain shared ANE legal substrate framing without direct dependence."
+            },
+            {
+              "author_year": "Westbrook 1988",
+              "publication": "Raymond Westbrook, Studies in Biblical and Cuneiform Law, Cahiers de la Revue Biblique 26 (Paris: Gabalda, 1988)",
+              "argument_summary": "Pre-Wright foundational comparative-legal study treating biblical agricultural laws as drawing on ANE legal substrate including Hammurabi Code. Westbrook's position is shared-substrate rather than direct dependence — explicitly distinguishes from Wright 2009's stronger direct-dependence position. Foundational reference for comparative ANE legal scholarship."
+            },
+            {
+              "author_year": "Roth 1995",
+              "publication": "Martha T. Roth, Law Collections from Mesopotamia and Asia Minor, SBL Writings from the Ancient World 6 (Atlanta: Scholars Press, 1995)",
+              "argument_summary": "Standard modern English critical edition of Hammurabi Code + other Mesopotamian + Hittite law collections. Roth provides the systematic English text + commentary that supports both Westbrook 1988's shared-substrate framing and Wright 2009's direct-dependence framing. Roth herself maintains a careful comparative position."
+            }
+          ],
+          "transmission_hypothesis": "direct_borrowing",
+          "notes": "Promoted from v0.11.0 Farming expansion (2026-05-15). The Wright 2009 direct-dependence argument is THE strongest single Mesopotamia↔Hebrew Bible textual-dependence case in any axis of the cluster. Specific Wright-paralleled laws include: Hammurabi §53-56 (canal-breach liability) ↔ Exodus 22:5-6 (fire-spread); Hammurabi §59 (fruit-tree damage) ↔ Deuteronomy 20:19-20 (war-fruit-tree-protection); Hammurabi §240+ (thresher-ox not-muzzled) ↔ Deuteronomy 25:4 (thresher-ox not-muzzled — DIRECT verbal parallel); Hammurabi §16-17 (fugitive-slave-return required) ↔ Deuteronomy 23:15-16 (fugitive-slave-return prohibited — INVERSION as Wright's signature direct-dependence diagnostic). NOTE: this entry's transmission_hypothesis = direct_borrowing reflects Wright 2009's position; the older shared-substrate framing (Westbrook 1988) is also widely held."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Leviticus 25:1-55"
+        ],
+        "topics": [
+          "jubilee_year",
+          "sabbatical_year",
+          "restorative_justice",
+          "agricultural_reform",
+          "social_reset"
+        ]
+      },
+      "passage_text": "And ye shall hallow the fiftieth year, and proclaim liberty throughout the land unto all the inhabitants thereof: it shall be a jubilee unto you; and ye shall return every man unto his possession, and ye shall return every man unto his family... The land shall not be sold in perpetuity; for the land is mine: for ye are strangers and sojourners with me. And in all the land of your possession ye shall grant a redemption for the land.",
+      "passage_translator": "ASV 1901 — Leviticus 25:10, 23-24 (composite)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Urukagina's reform inscriptions (Lagash, c. 2350 BCE) — the earliest documented social-reform texts in human history. Urukagina (also: Uru'inimgina), king of Lagash, issued reform inscriptions documenting + reversing: temple-priesthood land-monopoly abuses; tax-collection abuses; debt-slavery abuses; restorative measures returning land + freedom to common people. Foundational template for ANE + Mediterranean restorative-justice agricultural-economic reform tradition.",
+            "citation": "Cooper 1986 Presargonic Inscriptions (American Oriental Society); Lambert 1956",
+            "language": "Sumerian",
+            "tradition": "sumerian",
+            "approximate_date": "c. 2350 BCE (Urukagina's reign of Lagash)"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Cooper 1986",
+              "publication": "Jerrold S. Cooper, Presargonic Inscriptions, Sumerian and Akkadian Royal Inscriptions Vol. 1 (American Oriental Society, 1986)",
+              "argument_summary": "Foundational publication of Urukagina's reform inscriptions. Cooper treats Urukagina's reforms as the earliest documented social-reform texts in human history — addressing land-monopoly abuses, debt-slavery, and tax-collection oppression. Notes the structural parallel to later ANE + Mediterranean restorative-justice traditions including the Israelite Jubilee year."
+            },
+            {
+              "author_year": "Westbrook 1991",
+              "publication": "Raymond Westbrook, Property and the Family in Biblical Law, JSOT Supplement 113 (Sheffield: JSOT Press, 1991)",
+              "argument_summary": "Comparative-ANE legal study of biblical property laws including the Jubilee year. Treats the Israelite Jubilee as participating in broader ANE restorative-justice tradition rooted in Mesopotamian precedents like Urukagina's reforms and the Sumerian-Akkadian *mīšarum* (royal-edict debt-cancellation) tradition. The Jubilee year is the most-developed religious-systematic articulation of this ANE tradition."
+            },
+            {
+              "author_year": "Wright 2009",
+              "publication": "David P. Wright, Inventing God's Law: How the Covenant Code of the Bible Used and Revised the Laws of Hammurabi (Oxford University Press, 2009)",
+              "argument_summary": "Within his broader argument for Hammurabi-Covenant-Code dependence, Wright notes the structural parallel between Mesopotamian royal restorative-edict tradition (Urukagina + Hammurabi's *mīšarum* + Ammisaduqa's edict) and the Israelite Jubilee + Sabbatical year traditions. Both traditions reset agricultural-economic relations periodically; both protect against permanent land-alienation; both frame the reset as divine + royal authority."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.11.0 Farming expansion (2026-05-15). The structural parallel is between (a) royal-edict restorative-justice tradition (Urukagina + Hammurabi + Ammisaduqa) — episodic, periodically issued — and (b) Israelite Jubilee+Sabbatical — periodic, systematized into 7-year and 50-year cycles. The Israelite tradition is the most-developed religious-systematic articulation of this ANE tradition. Cross-reference Lagash_King_List.md §7-8 for the Urukagina reform context within Sumerian historiography."
         }
       ]
     }
