@@ -18,6 +18,11 @@
       "date": "2026-05-15",
       "new_parallels_added": 2,
       "source": "Mesopotamia_Agricultural_Comparative.md framework brief (Tier-1 recommendations)"
+    },
+    "v0_12_0_esoteric_expansion": {
+      "date": "2026-05-15",
+      "new_parallels_added": 1,
+      "source": "Mesopotamian_Esoteric_Reception.md framework brief (Tier-1 recommendations)"
     }
   },
   "parallels": [
@@ -939,6 +944,73 @@
         "discovery_candidate_pair": "v0.11 Farming expansion — Mesopotamia_Agricultural_Comparative.md Tier-1 recommendation"
       },
       "notes": "v0.11.0 Farming expansion. The two paradigmatic ANE hydraulic-civilization traditions. Diverged in both institutional structure (centralized vs distributed water-management) and ecological trajectory (salinization vs stability). The Wittfogel 'hydraulic despotism' thesis attempted to unify them politically; modern scholarship (Adams 1981; Trigger 2003) has substantially rejected unification in favor of recognizing institutional + ecological diversity."
+    },
+    {
+      "id": "mp-astrology-transmission-1",
+      "entity_a": {
+        "text": "Mesopotamian horoscopy + mathematical astronomy — the first documented horoscopes appear in Babylonia c. 410 BCE; the 12-sign zodiac is standardized in Babylonian astronomical texts by c. 500 BCE; the Astronomical Cuneiform Texts (ACT) corpus c. 350 BCE-100 CE develops procedural mathematical astronomy with sexagesimal arithmetic + linear zigzag functions for precise planetary-position prediction. Practiced at Esagila (Babylon) + Eanna (Uruk) temple-schools.",
+        "citation": "Rochberg 1998 Babylonian Horoscopes (TAPS 88.1); Hunger & Pingree 1999 Astral Sciences in Mesopotamia (HdO I.44); Neugebauer 1955 Astronomical Cuneiform Texts (3 vols); Ossendrijver 2012 Babylonian Mathematical Astronomy (Springer)",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "Horoscopy c. 410 BCE - 69 BCE; ACT c. 350 BCE - 100 CE; latest cuneiform astronomical tablet (Almanac W22340a Uruk) c. 79/80 CE"
+      },
+      "entity_b": {
+        "text": "Hellenistic Greek astrology + Ptolemy's astronomical-astrological synthesis — Berossus transmits Babylonian astronomy to Greek world c. 280 BCE; Hipparchus c. 150 BCE explicitly cites Babylonian observations + discovers precession of equinoxes using them; Ptolemy's Almagest + Tetrabiblos c. 150 CE is the canonical Greco-Roman synthesis with substantial Babylonian substrate (zodiac, planetary motion theory, eclipse prediction).",
+        "citation": "Pingree 1997 From Astral Omens to Astrology: From Babylon to Bīkāner (Serie Orientale Roma LXXVIII); Jones 2010 Ptolemy's First Commentator; Tester 1987 A History of Western Astrology",
+        "language": "Greek",
+        "tradition": "hellenistic_egyptian",
+        "approximate_date": "Berossus c. 280 BCE; Hipparchus c. 150 BCE; Ptolemy c. 150 CE; reception in Arabic + medieval European astrology continues to present day"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "technical_knowledge_transmission",
+        "astronomy",
+        "astrology",
+        "zodiac",
+        "horoscopy",
+        "mathematical_astronomy",
+        "longest_continuous_intellectual_tradition"
+      ],
+      "deities": [
+        "Marduk",
+        "Nabu",
+        "Anu",
+        "Šamaš",
+        "Sin"
+      ],
+      "texts": [
+        "Mul.Apin",
+        "Enūma Anu Enlil",
+        "Astronomical Cuneiform Texts (ACT)",
+        "Astronomical Diaries",
+        "Ptolemy Tetrabiblos",
+        "Ptolemy Almagest"
+      ],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Pingree 1997",
+          "publication": "David Pingree, From Astral Omens to Astrology: From Babylon to Bīkāner, Serie Orientale Roma 78 (Rome: Istituto Italiano per il Medio ed Estremo Oriente, 1997)",
+          "argument_summary": "The foundational study of Mesopotamian → Greek → Arabic → European astronomical-astrological transmission. Pingree documents the continuous documentary chain: Babylonian Mul.Apin + ACT mathematical-astronomical procedure texts → Berossus's Greek-language Babyloniaca (c. 280 BCE) → Hellenistic Greek astrologers (Sudines, Antigonus, others with Babylonian-derived names) → Ptolemy's Almagest + Tetrabiblos (c. 150 CE) → Arabic medieval astrology (al-Biruni, al-Kindi, Picatrix) → European medieval + modern astrology. The 12-sign zodiac alone is direct translation of Babylonian constellation-names. Pingree's argument is widely accepted: this is the longest documented continuous technical-intellectual transmission in human history."
+        },
+        {
+          "author_year": "Rochberg 2004",
+          "publication": "Francesca Rochberg, The Heavenly Writing: Divination, Horoscopy, and Astronomy in Mesopotamian Culture (Cambridge: Cambridge UP, 2004)",
+          "argument_summary": "Modern synthesis treating Mesopotamian celestial divination + horoscopy + mathematical astronomy as a unified intellectual tradition (rather than separate fields). The Mesopotamian → Greek transmission is foregrounded; Rochberg argues that Hellenistic astrology is substantially a continuation of Babylonian practice with Greek mathematical refinements."
+        },
+        {
+          "author_year": "Hunger & Pingree 1999",
+          "publication": "Hermann Hunger & David Pingree, Astral Sciences in Mesopotamia, Handbuch der Orientalistik I.44 (Leiden: Brill, 1999)",
+          "argument_summary": "Foundational handbook covering the full Mesopotamian astronomical-astrological corpus including the earliest surviving Babylonian horoscopes c. 410 BCE. Hunger and Pingree document the specific texts + procedures that constitute the Babylonian astronomical tradition before its Hellenistic transmission."
+        }
+      ],
+      "transmission_hypothesis": "scribal_transmission",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.12 Esoteric expansion — Mesopotamian_Esoteric_Reception.md Tier-1 recommendation"
+      },
+      "notes": "v0.12.0 Esoteric expansion. THE LONGEST DOCUMENTED CONTINUOUS TECHNICAL-INTELLECTUAL TRANSMISSION IN HUMAN HISTORY: Mul.Apin c. 1500 BCE → Late-Babylonian horoscopy c. 410 BCE → Berossus c. 280 BCE → Hipparchus c. 150 BCE → Ptolemy c. 150 CE → Arabic medieval astrology c. 800-1200 CE → European medieval + modern astrology → modern newspaper horoscopes. The 12-sign zodiac alone preserves direct Babylonian constellation-names across 4,000+ years. transmission_hypothesis: scribal_transmission reflects the documented direct-borrowing chain."
     }
   ]
 }
