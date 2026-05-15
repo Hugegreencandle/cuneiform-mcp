@@ -13,12 +13,14 @@ import {
   apkalluAttestations,
   discoverParallelCandidates,
   findMesopotamianParallel,
+  discoverPrimarySourceParallels,
   listAntediluvianQueries,
   renderFloodMatrix,
   renderParallelEntry,
   renderApkalluSages,
   renderDiscoveredCandidates,
   renderMesopotamianParallels,
+  renderPrimarySourceParallels,
 } from "./tools/comparative.js";
 
 // eBL (www.ebl.lmu.de) publishes AAAA records but its IPv6 listener is flaky
@@ -118,7 +120,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.12.0";
+const VERSION = "0.13.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2529,6 +2531,82 @@ server.registerTool(
   },
 );
 
+// ---------------------------------------------------------------------------
+// v0.13 Discovery Engine v2.0 — Primary-source corpus traversal
+//
+// Sibling to v0.7's discover_parallel_candidates (which traversed 48
+// secondary-literature briefs and rediscovered published scholar arguments).
+// v0.13 traverses the eBL primary-source corpus (~36K tablets in cache) at
+// scale that no human scholar can read exhaustively, surfacing sign-trigram
+// Jaccard matches as candidate parallels. v0.13.0 MVP runs Mode A (lexical
+// reuse) without cross-boundary metadata filtering; Mode B (cross-genre /
+// cross-period / cross-city filtering) requires per-tablet metadata
+// enrichment, deferred to v0.13.x.
+//
+// Underlying dataset: data/primarySourceParallels.json — produced by
+// scripts/discovery-primary-v2.mjs running against ~/.cache/cuneiform-mcp/
+// all-signs-full.json cached corpus.
+// ---------------------------------------------------------------------------
+
+server.registerTool(
+  "discover_primary_source_parallels",
+  {
+    description:
+      "Return primary-source cuneiform-corpus parallel candidates discovered by the v0.13 Discovery Engine v2.0 sign-trigram Jaccard traversal. Sibling to v0.7's discover_parallel_candidates but targets primary sources (eBL/CDLI/ORACC ~36K tablets) rather than secondary literature. Each candidate carries discovered_by: 'ai_corpus_traversal' + validation_status: 'pending' + match_evidence (jaccard + intersection_size + shared_trigram_sample). Promote to retrieval-tier (or reject as artifact) requires human-scholar review. v0.13.0 MVP: Mode A lexical-reuse only; cross-boundary metadata filtering (Mode B) deferred to v0.13.1 once per-tablet metadata enrichment runs.",
+    inputSchema: {
+      min_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum Jaccard score (0-1). Default 0 (no filter). >=0.5 = strong overlap."),
+      min_novelty: z
+        .number()
+        .min(0)
+        .max(2)
+        .optional()
+        .describe("Minimum composite novelty score (0-2). In v0.13.0 MVP, novelty_score equals jaccard until metadata enrichment runs. Default 0."),
+      cross_genre_only: z
+        .boolean()
+        .optional()
+        .describe("Only return parallels crossing genre boundaries. v0.13.0: always returns 0 results because metadata is not yet enriched."),
+      cross_period_only: z
+        .boolean()
+        .optional()
+        .describe("Only return parallels crossing period boundaries. v0.13.0: always returns 0 results because metadata is not yet enriched."),
+      validation_status: z
+        .enum(["pending", "validated_as_known", "validated_as_novel", "rejected_as_artifact", "all"])
+        .optional()
+        .describe("Filter by validation status. Default 'all'."),
+      max_results: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Cap on results. Default 25."),
+    },
+  },
+  async ({ min_jaccard, min_novelty, cross_genre_only, cross_period_only, validation_status, max_results }) => {
+    const SCHEMA = schemaId("discover_primary_source_parallels");
+    const result = discoverPrimarySourceParallels({
+      min_jaccard,
+      min_novelty,
+      cross_genre_only,
+      cross_period_only,
+      validation_status,
+      max_results,
+    });
+    return structuredResult(renderPrimarySourceParallels(result), {
+      schema: SCHEMA,
+      data: result,
+      provenance: provenance("local", "local:primarySourceParallelsIndex", VERSION, {
+        citation: "Machine-discovered via cuneiform-mcp v0.13.0 sign-trigram Jaccard traversal of eBL corpus 2026-05-15. ALL CANDIDATES PENDING HUMAN-SCHOLAR VALIDATION.",
+      }),
+    });
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2549,7 +2627,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal retrieval; v0.9-v0.12 expansions: Egyptian + Medical + Farming + Esoteric — 17 mesopotamian + 20 antediluvian query entries / 30 results / 48-brief research cluster)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 15 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0)\n`,
     );
     process.exit(0);
   }
@@ -2559,7 +2637,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (14 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (15 tools)\n`);
 }
 
 main().catch((err) => {

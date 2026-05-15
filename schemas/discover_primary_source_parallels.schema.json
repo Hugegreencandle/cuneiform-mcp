@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/discover_primary_source_parallels.schema.json",
+  "title": "discover_primary_source_parallels data payload",
+  "description": "Structured payload for the v0.13 Discovery Engine v2.0 — primary-source mode. Returns machine-discovered candidate parallels between cuneiform tablets in the eBL/CDLI/ORACC corpus, with sign-trigram Jaccard evidence + cross-boundary novelty scoring.\n\nDiscipline: same as v0.7 — machine-discovered candidates carry `discovered_by: 'ai_corpus_traversal'` + `validation_status: 'pending'` + auditable match_evidence. Promotion to retrieval-tier (or rejection) requires human-scholar review.\n\nThe v2.0 engine inverts the v0.7 target: v0.7 traversed 48 secondary-literature briefs and rediscovered published scholar arguments; v0.13 traverses the primary-source corpus (~36K eBL fragments + CDLI catalog + ORACC) at scale that no human scholar can read exhaustively, looking for previously-unnoticed lexical-reuse parallels especially across genre/period/city boundaries.",
+  "type": "object",
+  "required": ["query", "results"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+        "min_novelty": { "type": "number", "minimum": 0, "maximum": 2 },
+        "cross_genre_only": { "type": "boolean" },
+        "cross_period_only": { "type": "boolean" },
+        "validation_status": {
+          "type": "string",
+          "enum": ["pending", "validated_as_known", "validated_as_novel", "rejected_as_artifact", "all"]
+        },
+        "max_results": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/PrimarySourceParallel" }
+    },
+    "corpus_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "total_parallels_in_corpus": { "type": "integer", "minimum": 0 },
+        "engine_version": { "type": "string" },
+        "discovery_pass_date": { "type": "string", "format": "date" },
+        "corpus_size_traversed": { "type": "integer", "minimum": 0 },
+        "metadata_enrichment_status": {
+          "type": "string",
+          "enum": ["complete", "partial_only_eBL", "partial_no_metadata", "not_yet_run"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "PrimarySourceParallel": {
+      "type": "object",
+      "required": ["id", "tablet_a", "tablet_b", "match_evidence", "discovered_by", "validation_status", "novelty_score"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier. Format: `psp-YYYY-MM-DD-NNNN`. E.g. `psp-2026-05-15-0042`."
+        },
+        "tablet_a": { "$ref": "#/$defs/TabletRef" },
+        "tablet_b": { "$ref": "#/$defs/TabletRef" },
+        "match_evidence": {
+          "type": "object",
+          "required": ["match_type", "jaccard", "intersection_size", "union_size"],
+          "additionalProperties": false,
+          "properties": {
+            "match_type": {
+              "type": "string",
+              "enum": ["sign_trigram_jaccard", "semantic_embedding", "lineToVec_lemma"]
+            },
+            "jaccard": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Jaccard similarity = |A ∩ B| / |A ∪ B| over sign-trigram fingerprints."
+            },
+            "intersection_size": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of trigrams in BOTH tablets. Load-bearing audit field — a high Jaccard with intersection=2 means coincidence on a tiny shared vocabulary; intersection=200 means real evidence."
+            },
+            "union_size": { "type": "integer", "minimum": 0 },
+            "shared_trigram_sample": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Up to 10 trigrams shared by both tablets. Sampled deterministically by sort order for reproducibility."
+            }
+          }
+        },
+        "cross_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Boundary-crossing flags. Boolean defaults to false if metadata is unavailable for one or both tablets — `metadata_enrichment_status: partial_no_metadata` warns downstream consumers.",
+          "properties": {
+            "different_genre": { "type": "boolean" },
+            "different_period": { "type": "boolean" },
+            "different_city": { "type": "boolean" },
+            "different_language": { "type": "boolean" }
+          }
+        },
+        "novelty_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "Composite ranking score = jaccard + cross-boundary bonuses - formulaic-genre penalty. Range 0-2. >=0.55 strong; 0.40-0.55 moderate; <0.40 weak."
+        },
+        "discovered_by": {
+          "type": "string",
+          "enum": ["ai_corpus_traversal", "human_scholar"]
+        },
+        "discovery_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": ["pending", "validated_as_known", "validated_as_novel", "rejected_as_artifact"]
+        },
+        "validation_log": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "validated_on": { "type": "string", "format": "date" },
+            "validated_by": { "type": "string" },
+            "validation_method": { "type": "string" },
+            "known_publication": { "type": "string" },
+            "rejection_reason": { "type": "string" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "TabletRef": {
+      "type": "object",
+      "required": ["museum_number"],
+      "additionalProperties": false,
+      "properties": {
+        "museum_number": { "type": "string" },
+        "cdli_id": { "type": "string" },
+        "designation": { "type": "string" },
+        "genre": { "type": "string" },
+        "period": { "type": "string" },
+        "city": { "type": "string" },
+        "language": { "type": "string" },
+        "trigram_count": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -302,6 +302,80 @@ export type MesopotamianParallelsDataset = {
   parallels: MesopotamianParallel[];
 };
 
+// ---------- v0.13 Primary-Source Discovery Engine v2.0 types ----------
+
+export type PrimarySourceTabletRef = {
+  museum_number: string;
+  cdli_id?: string;
+  designation?: string;
+  genre?: string;
+  period?: string;
+  city?: string;
+  language?: string;
+  trigram_count?: number;
+};
+
+export type PrimarySourceMatchEvidence = {
+  match_type: "sign_trigram_jaccard" | "semantic_embedding" | "lineToVec_lemma";
+  jaccard: number;
+  intersection_size: number;
+  union_size: number;
+  shared_trigram_sample?: string[];
+};
+
+export type PrimarySourceCrossBoundary = {
+  different_genre: boolean;
+  different_period: boolean;
+  different_city: boolean;
+  different_language: boolean;
+};
+
+export type PrimarySourceValidationStatus =
+  | "pending"
+  | "validated_as_known"
+  | "validated_as_novel"
+  | "rejected_as_artifact";
+
+export type PrimarySourceParallel = {
+  id: string;
+  tablet_a: PrimarySourceTabletRef;
+  tablet_b: PrimarySourceTabletRef;
+  match_evidence: PrimarySourceMatchEvidence;
+  cross_boundary: PrimarySourceCrossBoundary;
+  novelty_score: number;
+  discovered_by: "ai_corpus_traversal" | "human_scholar";
+  discovery_date: string;
+  validation_status: PrimarySourceValidationStatus;
+  validation_log?: {
+    validated_on?: string;
+    validated_by?: string;
+    validation_method?: string;
+    known_publication?: string;
+    rejection_reason?: string;
+  };
+  notes?: string;
+};
+
+export type PrimarySourceParallelsDataset = {
+  _meta: {
+    description: string;
+    compiled: string;
+    engine_version: string;
+    sample_size: number;
+    min_jaccard: number;
+    min_intersection: number;
+    min_trigram_count: number;
+    random_seed: number;
+    corpus_size_traversed: number;
+    total_candidates_found: number;
+    candidates_output: number;
+    discovery_pass_duration_seconds: number;
+    metadata_enrichment_status: "complete" | "partial_only_eBL" | "partial_no_metadata" | "not_yet_run";
+    note: string;
+  };
+  parallels: PrimarySourceParallel[];
+};
+
 // ---------- loader ----------
 
 const __filename = fileURLToPath(import.meta.url);
@@ -318,6 +392,7 @@ let _parallels: ParallelsDataset | null = null;
 let _apkallu: ApkalluDataset | null = null;
 let _discovered: DiscoveredCandidatesDataset | null = null;
 let _mesopotamian: MesopotamianParallelsDataset | null = null;
+let _primarySource: PrimarySourceParallelsDataset | null = null;
 
 function loadJson<T>(file: string): T {
   const raw = readFileSync(dataPath(file), "utf8");
@@ -347,6 +422,117 @@ export function getDiscoveredCandidatesDataset(): DiscoveredCandidatesDataset {
 export function getMesopotamianParallelsDataset(): MesopotamianParallelsDataset {
   if (!_mesopotamian) _mesopotamian = loadJson<MesopotamianParallelsDataset>("mesopotamianParallels.json");
   return _mesopotamian;
+}
+
+export function getPrimarySourceParallelsDataset(): PrimarySourceParallelsDataset {
+  if (!_primarySource) _primarySource = loadJson<PrimarySourceParallelsDataset>("primarySourceParallels.json");
+  return _primarySource;
+}
+
+export type DiscoverPrimarySourceParallelsArgs = {
+  min_jaccard?: number;
+  min_novelty?: number;
+  cross_genre_only?: boolean;
+  cross_period_only?: boolean;
+  validation_status?: PrimarySourceValidationStatus | "all";
+  max_results?: number;
+};
+
+export function discoverPrimarySourceParallels(args: DiscoverPrimarySourceParallelsArgs): {
+  query: DiscoverPrimarySourceParallelsArgs;
+  results: PrimarySourceParallel[];
+  corpus_metadata: {
+    total_parallels_in_corpus: number;
+    engine_version: string;
+    discovery_pass_date: string;
+    corpus_size_traversed: number;
+    metadata_enrichment_status: string;
+  };
+} {
+  const ds = getPrimarySourceParallelsDataset();
+  const min_jaccard = args.min_jaccard ?? 0;
+  const min_novelty = args.min_novelty ?? 0;
+  const cross_genre_only = args.cross_genre_only === true;
+  const cross_period_only = args.cross_period_only === true;
+  const validation_status = args.validation_status ?? "all";
+  const max_results = args.max_results ?? 25;
+
+  const filtered = ds.parallels.filter((p) => {
+    if (p.match_evidence.jaccard < min_jaccard) return false;
+    if (p.novelty_score < min_novelty) return false;
+    if (cross_genre_only && !p.cross_boundary.different_genre) return false;
+    if (cross_period_only && !p.cross_boundary.different_period) return false;
+    if (validation_status !== "all" && p.validation_status !== validation_status) return false;
+    return true;
+  });
+
+  filtered.sort((a, b) => b.novelty_score - a.novelty_score);
+  const sliced = filtered.slice(0, max_results);
+
+  return {
+    query: {
+      ...(args.min_jaccard !== undefined ? { min_jaccard } : {}),
+      ...(args.min_novelty !== undefined ? { min_novelty } : {}),
+      ...(args.cross_genre_only !== undefined ? { cross_genre_only } : {}),
+      ...(args.cross_period_only !== undefined ? { cross_period_only } : {}),
+      ...(args.validation_status !== undefined ? { validation_status } : {}),
+      ...(args.max_results !== undefined ? { max_results } : {}),
+    },
+    results: sliced,
+    corpus_metadata: {
+      total_parallels_in_corpus: ds.parallels.length,
+      engine_version: ds._meta.engine_version,
+      discovery_pass_date: ds._meta.compiled,
+      corpus_size_traversed: ds._meta.corpus_size_traversed,
+      metadata_enrichment_status: ds._meta.metadata_enrichment_status,
+    },
+  };
+}
+
+export function renderPrimarySourceParallels(
+  result: ReturnType<typeof discoverPrimarySourceParallels>,
+): string {
+  const lines: string[] = [];
+  lines.push(
+    `Primary-Source Discovery — ${result.results.length} of ${result.corpus_metadata.total_parallels_in_corpus} match the query.`,
+  );
+  lines.push(
+    `  corpus: ${result.corpus_metadata.corpus_size_traversed} tablets traversed; pass date ${result.corpus_metadata.discovery_pass_date}; engine ${result.corpus_metadata.engine_version}`,
+  );
+  lines.push(`  metadata_enrichment_status: ${result.corpus_metadata.metadata_enrichment_status}`);
+  lines.push("");
+  if (result.results.length === 0) {
+    lines.push("No parallels match. Try lowering min_jaccard or min_novelty.");
+    return lines.join("\n");
+  }
+  lines.push(
+    "All candidates are MACHINE-DISCOVERED via sign-trigram Jaccard matching; pending human-scholar validation.",
+  );
+  lines.push("");
+  for (const p of result.results) {
+    const aLabel = p.tablet_a.designation
+      ? `${p.tablet_a.museum_number} (${p.tablet_a.designation})`
+      : p.tablet_a.museum_number;
+    const bLabel = p.tablet_b.designation
+      ? `${p.tablet_b.museum_number} (${p.tablet_b.designation})`
+      : p.tablet_b.museum_number;
+    lines.push(`### ${p.id}: ${aLabel} ↔ ${bLabel}`);
+    lines.push(
+      `  jaccard=${p.match_evidence.jaccard.toFixed(3)} · intersection=${p.match_evidence.intersection_size}/${p.match_evidence.union_size} · novelty_score=${p.novelty_score.toFixed(3)}`,
+    );
+    if (p.match_evidence.shared_trigram_sample && p.match_evidence.shared_trigram_sample.length > 0) {
+      lines.push(`  shared trigrams (sample): ${p.match_evidence.shared_trigram_sample.slice(0, 5).join(" | ")}`);
+    }
+    const boundary: string[] = [];
+    if (p.cross_boundary.different_genre) boundary.push("different_genre");
+    if (p.cross_boundary.different_period) boundary.push("different_period");
+    if (p.cross_boundary.different_city) boundary.push("different_city");
+    if (p.cross_boundary.different_language) boundary.push("different_language");
+    if (boundary.length > 0) lines.push(`  cross-boundary: ${boundary.join(", ")}`);
+    lines.push(`  validation_status: ${p.validation_status}`);
+    lines.push("");
+  }
+  return lines.join("\n");
 }
 
 // ---------- tool handlers ----------
