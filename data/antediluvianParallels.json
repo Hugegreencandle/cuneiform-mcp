@@ -24,6 +24,11 @@
       "date": "2026-05-15",
       "new_queries_added": 3,
       "source": "Mesopotamia_Egypt_Comparative.md framework brief (Hebrew↔Egyptian Tier-1 recommendations)"
+    },
+    "v0_10_0_medical_expansion": {
+      "date": "2026-05-15",
+      "new_queries_added": 3,
+      "source": "Mesopotamia_Medical_Comparative.md framework brief (Hebrew-anchored medical parallels)"
     }
   },
   "parallels": [
@@ -801,6 +806,142 @@
           ],
           "transmission_hypothesis": "common_substrate",
           "notes": "Promoted from v0.9.0 Egyptian expansion (2026-05-15). The Negative Confession ↔ Decalogue parallel is one of the most-cited Egypt↔Hebrew Bible ethical-religious parallels. Note: the comparison is structural (judgment-by-ethical-criteria) rather than direct literary borrowing. Specific shared prohibitions (killing, theft, adultery, false witness) are well-attested in both texts but reflect common ANE ethical-religious vocabulary rather than direct dependence."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Leviticus 13:1-46",
+          "Leviticus 14:1-32"
+        ],
+        "topics": [
+          "sarat_diagnosis",
+          "priestly_diagnosis",
+          "skin_disease_classification"
+        ]
+      },
+      "passage_text": "And Jehovah spake unto Moses and unto Aaron, saying, When a man shall have in the skin of his flesh a rising, or a scab, or a bright spot, and it become in the skin of his flesh the plague of leprosy [ṣāraʿat], then he shall be brought unto Aaron the priest, or unto one of his sons the priests: and the priest shall look on the plague in the skin of the flesh: and if the hair in the plague be turned white, and the appearance of the plague be deeper than the skin of his flesh, it is the plague of leprosy [ṣāraʿat]; and the priest shall look on him, and pronounce him unclean.",
+      "passage_translator": "ASV 1901 — Leviticus 13:1-3",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Diagnostic Handbook (sa-gig) skin-disease entries — Tablets 33-35 cover dermatological conditions with detailed symptom-list + prognosis. The diagnostic format ('If a man's skin shows X, it is the hand of Y, he will Z') structurally parallels the Levitical priestly-diagnosis procedure.",
+            "citation": "Diagnostic Handbook Tablets 33-35 (Heeßel 2000 AOAT 43; Scurlock 2014 SBL WAW 36)",
+            "language": "Akkadian",
+            "approximate_date": "Esagil-kīn-apli's recension c. 1067 BCE; substrate older"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Milgrom 1991",
+              "publication": "Jacob Milgrom, Leviticus 1-16: A New Translation with Introduction and Commentary, Anchor Bible 3 (New York: Doubleday, 1991)",
+              "argument_summary": "The standard modern commentary on Leviticus 13-14. Treats the priestly diagnostic procedure as a Hebrew-tradition counterpart to Mesopotamian medical diagnostic procedure, both following the structural format 'if A then B (impurity/affliction classification).' The Hebrew text reorients the diagnostic frame around purity/impurity rather than divine-affliction, but the symptom-classification-by-priest-or-physician structural pattern is consistent."
+            },
+            {
+              "author_year": "Hoffmeier 1996",
+              "publication": "James K. Hoffmeier, Israel in Egypt: The Evidence for the Authenticity of the Exodus Tradition (New York: Oxford UP, 1996)",
+              "argument_summary": "Discusses Levitical skin-disease diagnosis in the context of broader ANE medical-diagnostic tradition. Both Egyptian (Ebers Papyrus skin-disease section) and Mesopotamian (Diagnostic Handbook Tablets 33-35) parallel the Levitical priestly-diagnostic procedure structurally, though Hebrew framing emphasizes ritual purity and Mesopotamian framing emphasizes divine-affliction attribution."
+            },
+            {
+              "author_year": "Scurlock 2014",
+              "publication": "JoAnn Scurlock, Sourcebook for Ancient Mesopotamian Medicine (SBL WAW 36; 2014)",
+              "argument_summary": "Translates and analyzes the Diagnostic Handbook skin-disease entries; notes the structural parallel to Levitical diagnostic procedure as one of the cleanest Mesopotamia↔Hebrew medical-text parallels."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.10.0 Medical expansion (2026-05-15). The Hebrew priest's diagnostic role parallels the Mesopotamian āšipu's diagnostic role (both invoke divine authority to classify the affliction). The 'isolation period' in Levitical procedure (7-day observation) parallels Mesopotamian Diagnostic Handbook daily-prognostic Tablets 15-25. Note: ṣāraʿat is traditionally translated 'leprosy' but modern scholarship (Milgrom 1991) prefers 'scaly skin disease' to avoid the modern Hansen's-disease connotation."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "Job 1:1-42:17"
+        ],
+        "topics": [
+          "theodicy",
+          "righteous_suffering",
+          "divine_test",
+          "restoration_after_affliction"
+        ]
+      },
+      "passage_text": "There was a man in the land of Uz, whose name was Job; and that man was perfect and upright, and one that feared God, and turned away from evil... So the LORD said unto Satan, Behold, all that he hath is in thy power; only upon himself put not forth thy hand. So Satan went forth from the presence of the LORD. Then there came a messenger unto Job, and said... And Job arose, and rent his robe, and shaved his head, and fell down upon the ground, and worshipped; and he said, Naked came I out of my mother's womb, and naked shall I return thither: the LORD gave, and the LORD hath taken away; blessed be the name of the LORD.",
+      "passage_translator": "ASV 1901 — Job 1:1, 12, 14, 20-21 (composite)",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Ludlul bēl nēmeqi ('I will praise the Lord of Wisdom') — Babylonian first-person poetic narrative attributed to a Kassite-period (c. 1300 BCE) Babylonian official Shubshi-meshre-Sakkan. Four-tablet composition. Sufferer is struck by mysterious physical + mental + social illness; abandoned by family + colleagues + gods; eventually restored by Marduk's intervention. The Mesopotamian psychological autobiography of righteous suffering.",
+            "citation": "Ludlul bēl nēmeqi Tablets I-IV (Lambert 1960 Babylonian Wisdom Literature; modern translation Foster 2005 Before the Muses)",
+            "language": "Akkadian",
+            "approximate_date": "Kassite period c. 1300 BCE; 66+ surviving manuscript fragments"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "strong",
+          "scholarly_attribution": [
+            {
+              "author_year": "Lambert 1960",
+              "publication": "W.G. Lambert, Babylonian Wisdom Literature (Oxford: Clarendon Press, 1960; reprint Eisenbrauns 1996)",
+              "argument_summary": "The foundational critical edition + translation of Ludlul bēl nēmeqi. Lambert explicitly identifies the structural parallel between Ludlul and the biblical Book of Job: both present a righteous sufferer struck by inexplicable affliction, abandoned by community + supposed friends, who eventually receives divine restoration. Both texts engage the theodicy problem (why do the righteous suffer?). Becomes the canonical 'Babylonian Job' identification in subsequent scholarship."
+            },
+            {
+              "author_year": "Hartley 1988",
+              "publication": "John E. Hartley, The Book of Job, New International Commentary on the Old Testament (Grand Rapids: Eerdmans, 1988)",
+              "argument_summary": "Standard modern Job commentary. Treats Ludlul bēl nēmeqi as one of the principal ANE comparative-literary references for Job. Notes specific structural parallels: divine wager / test framework, physical + social suffering, dialogue with interlocutors, restoration through divine intervention. Argues for shared ANE theodicy substrate rather than direct literary borrowing."
+            },
+            {
+              "author_year": "Annus & Lenzi 2010",
+              "publication": "Amar Annus & Alan Lenzi, Ludlul bēl nēmeqi: The Standard Babylonian Poem of the Righteous Sufferer, State Archives of Assyria Cuneiform Texts 7 (Helsinki: Neo-Assyrian Text Corpus Project, 2010)",
+              "argument_summary": "Modern critical edition reflecting 50+ years of subsequent manuscript discoveries since Lambert 1960. Confirms the Job comparative framework; the Ludlul text has substantial new material that strengthens specific Job parallels (the 'naked I came / naked I return' motif appears in Ludlul II.51-52 in a form Lambert 1960 didn't have)."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.10.0 Medical expansion (2026-05-15). One of the most-cited single ANE↔Hebrew Bible parallels. Both texts present a 'medical' dimension (physical illness as part of the test) alongside the theological/social dimensions. The Mesopotamian framing (Marduk's anger + restoration) and Hebrew framing (YHWH's wager with Satan + restoration) reflect different theological cosmologies but parallel narrative structures."
+        }
+      ]
+    },
+    {
+      "query_match": {
+        "text_id": "genesis",
+        "passages": [
+          "1 Samuel 16:14-23"
+        ],
+        "topics": [
+          "evil_spirit",
+          "demonic_affliction",
+          "music_therapy",
+          "mental_illness"
+        ]
+      },
+      "passage_text": "Now the Spirit of Jehovah had departed from Saul, and an evil spirit from Jehovah troubled him. And Saul's servants said unto him, Behold now, an evil spirit from God troubleth thee. Let our lord now command thy servants, that are before thee, to seek out a man who is a skilful player on the harp: and it shall come to pass, when the evil spirit from God is upon thee, that he shall play with his hand, and thou shalt be well... And it came to pass, when the evil spirit from God was upon Saul, that David took the harp, and played with his hand: so Saul was refreshed, and was well, and the evil spirit departed from him.",
+      "passage_translator": "ASV 1901 — 1 Samuel 16:14-16, 23",
+      "results": [
+        {
+          "mesopotamian_source": {
+            "text": "Eṭemmu-affliction tradition — the Mesopotamian medical category in which mental disturbance + somatic illness is attributed to the 'hand of the ghost' (qāt eṭemmi); ghost (eṭemmu) of a dead person attaches to a living person, causing mental + physical symptoms. Treatment is apotropaic (Bīt Mēseri ritual) + therapeutic (specific incantations to release the ghost). Music-as-therapy attested in Mesopotamian medical context (specific instruments invoked in healing rituals).",
+            "citation": "JoAnn Scurlock 2006 Magico-Medical Means of Treating Ghost-Induced Illnesses in Ancient Mesopotamia (AMD 3, Brill/Styx)",
+            "language": "Akkadian",
+            "approximate_date": "Continuous attestation c. 2000 BCE - 200 CE"
+          },
+          "parallel_type": "structural",
+          "correspondence_strength": "moderate",
+          "scholarly_attribution": [
+            {
+              "author_year": "Scurlock 2006",
+              "publication": "JoAnn Scurlock, Magico-Medical Means of Treating Ghost-Induced Illnesses in Ancient Mesopotamia, Ancient Magic and Divination 3 (Leiden: Brill/Styx, 2006)",
+              "argument_summary": "Comprehensive study of Mesopotamian eṭemmu-affliction medical category. Notes structural parallels to Hebrew Bible 'evil spirit' (rûaḥ rāʿâ) tradition (1 Samuel 16:14, 18:10; 1 Kings 22:21-23). Both traditions: attribute mental disturbance to discrete entity attaching to person; recommend specific therapeutic interventions including music; understand the affliction as removable through correct intervention."
+            },
+            {
+              "author_year": "Scurlock 2014",
+              "publication": "JoAnn Scurlock, Sourcebook for Ancient Mesopotamian Medicine (SBL WAW 36; 2014)",
+              "argument_summary": "Notes the structural parallel between Mesopotamian eṭemmu-affliction medical category and biblical 'evil spirit' affliction (especially Saul in 1 Samuel 16). Music-as-therapy (David's harp) parallels Mesopotamian use of specific instruments in healing rituals."
+            }
+          ],
+          "transmission_hypothesis": "common_substrate",
+          "notes": "Promoted from v0.10.0 Medical expansion (2026-05-15). The 1 Samuel passage is one of the cleanest biblical texts showing influence of broader ANE 'spirit-attribution' medical framework. Both Mesopotamian eṭemmu-tradition and Hebrew Bible 'evil spirit' tradition share: attribution of mental affliction to discrete spirit-entity; specific therapeutic interventions; recognition that affliction is removable. The Hebrew text is theologically distinctive in attributing the 'evil spirit' to YHWH ('from Jehovah') rather than to a discrete demon; the Mesopotamian text attributes eṭemmu-affliction to the unincorporated ghost of the dead."
         }
       ]
     }

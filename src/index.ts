@@ -118,7 +118,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.9.0";
+const VERSION = "0.10.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2549,7 +2549,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal retrieval; v0.9 Egyptian expansion adds Mesopotamia↔Egypt + Egypt↔Hebrew parallels to existing tools)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 14 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal retrieval; v0.9 Egyptian expansion + v0.10 medical expansion add cross-tradition parallels — 14 mesopotamian + 16 antediluvian query entries / 26 results / 36-brief research cluster)\n`,
     );
     process.exit(0);
   }

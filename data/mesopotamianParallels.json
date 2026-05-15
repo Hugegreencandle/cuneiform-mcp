@@ -8,6 +8,11 @@
       "date": "2026-05-15",
       "new_parallels_added": 4,
       "source": "Mesopotamia_Egypt_Comparative.md framework brief (Tier-1 + Tier-2 recommendations)"
+    },
+    "v0_10_0_medical_expansion": {
+      "date": "2026-05-15",
+      "new_parallels_added": 4,
+      "source": "Mesopotamia_Medical_Comparative.md framework brief (Tier-1 + Tier-2 + Tier-3 recommendations)"
     }
   },
   "parallels": [
@@ -582,6 +587,231 @@
         "discovery_candidate_pair": "v0.9 Egyptian expansion — curated from Mesopotamia_Egypt_Comparative.md framework brief"
       },
       "notes": "v0.9.0 Egyptian expansion. Note: the older myth-and-ritual reading (Frankfort, Hooke) overstated the cosmogonic-renewal dimension. Current consensus (Bidmead 2002, Hornung 1992) treats both rituals as political-theological royal-legitimation rituals with distinct mechanisms — Sed-festival emphasizes recrowning; Akitu emphasizes king-humiliation-and-renewal."
+    },
+    {
+      "id": "mp-named-physician-1",
+      "entity_a": {
+        "text": "Esagil-kīn-apli — Babylonian court physician under Adad-apla-iddina (c. 1067-1046 BCE); attributed authorship of the Diagnostic Handbook (sa-gig) + the Alamdimmû physiognomic-prognostic series. The 'Mesopotamian Hippocrates' — named scholar whose canonical recension was studied by subsequent generations of asû practitioners.",
+        "citation": "Heeßel 2000 Babylonisch-assyrische Diagnostik (AOAT 43); Scurlock 2014 Sourcebook (SBL WAW 36); Schmidtchen 2018",
+        "language": "Akkadian",
+        "tradition": "babylonian",
+        "approximate_date": "c. 1067-1046 BCE (reign of Adad-apla-iddina)"
+      },
+      "entity_b": {
+        "text": "Imhotep — Egyptian polymath under Djoser (3rd Dynasty, c. 2650 BCE); architect of the Step Pyramid, chief physician, later deified as healer-god (Hellenistic period equated with Asclepius). The 'Egyptian Hippocrates' — the foundational named figure of Egyptian medicine.",
+        "citation": "Hurry 1928 Imhotep (Oxford UP); Nunn 1996 Ancient Egyptian Medicine; Stevens 1975",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "3rd Dynasty c. 2650 BCE; deified c. Late Period; equated with Asclepius in Hellenistic period"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "named_authorship",
+        "named_medical_author",
+        "canonical_recension",
+        "deified_physician"
+      ],
+      "deities": [
+        "Imhotep",
+        "Gula",
+        "Asclepius",
+        "Marduk"
+      ],
+      "texts": [
+        "Diagnostic Handbook (sa-gig)",
+        "Alamdimmû"
+      ],
+      "correspondence_strength": "strong",
+      "scholarly_attribution": [
+        {
+          "author_year": "Scurlock 2014",
+          "publication": "JoAnn Scurlock, Sourcebook for Ancient Mesopotamian Medicine, SBL Writings from the Ancient World 36 (Atlanta: SBL Press, 2014)",
+          "argument_summary": "Treats Esagil-kīn-apli as the Mesopotamian counterpart to Imhotep — both named ANE physician-figures whose canonical works became the standard medical references for their respective traditions. Esagil-kīn-apli's c. 1067 BCE recension of sa-gig sets the canonical Mesopotamian diagnostic framework; Imhotep's legacy (transmitted through subsequent Egyptian medical tradition) sets the Egyptian framework. Both later deified in their respective religious contexts (Imhotep formally; Esagil-kīn-apli scholarly-revered)."
+        },
+        {
+          "author_year": "Nunn 1996",
+          "publication": "John F. Nunn, Ancient Egyptian Medicine (Norman, OK: University of Oklahoma Press, 1996)",
+          "argument_summary": "Discusses Imhotep as the canonical named-physician of Egyptian tradition; the structural parallel to Mesopotamian named-physician tradition (Esagil-kīn-apli) is widely noted in comparative ANE medical scholarship."
+        },
+        {
+          "author_year": "Geller 2010",
+          "publication": "Markham J. Geller, Ancient Babylonian Medicine: Theory and Practice (Chichester: Wiley-Blackwell, 2010)",
+          "argument_summary": "Treats the named-author tradition in Mesopotamian and Egyptian medicine as a shared ANE pattern: medicine systematized via canonical author-attributed works (Esagil-kīn-apli + Imhotep) parallel to scribal-literary tradition (Enheduanna + Kabti-ilāni-Marduk)."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.10 Medical expansion — Mesopotamia_Medical_Comparative.md Tier-1 recommendation"
+      },
+      "notes": "v0.10.0 Medical expansion. Extends the cluster's named-authorship axis: Enheduanna c. 2300 BCE (Mesopotamian-internal mp-named-authorship-1) → Imhotep c. 2650 BCE (Egyptian, deified) → Esagil-kīn-apli c. 1067 BCE (Mesopotamian, canonical recension) → Kabti-ilāni-Marduk c. 765 BCE → eventually Hippocrates c. 460-370 BCE (Greek). The named-physician tradition is one of the cleanest cross-tradition structural patterns in ANE intellectual history."
+    },
+    {
+      "id": "mp-healing-deity-1",
+      "entity_a": {
+        "text": "Gula / Ninkarrak / Bau — Mesopotamian healing goddess; depicted with dog-attribute; patron of the asû profession. Cult centers at Isin and Nippur. Combines healing (illness-curing) and disease-causing (illness-inflicting) attributes — ambivalent patroness of the medical profession.",
+        "citation": "Black & Green 1992; Scurlock 2014; Avalos 1995",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Attested from Sumerian period (c. 2500 BCE) onward; major cult c. 2000-500 BCE"
+      },
+      "entity_b": {
+        "text": "Sekhmet — Egyptian healing goddess; depicted as lioness; patron of physicians (swnw). Combines healing (illness-curing) and disease-causing (lion-headed plague-bringer) attributes — ambivalent patroness of medicine. Cult center at Memphis.",
+        "citation": "Hornung 1982; Nunn 1996; Stevens 1975",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Attested from Old Kingdom (c. 2500 BCE) onward; major cult throughout Egyptian history"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "healing_goddess",
+        "ambivalent_deity",
+        "medical_patron"
+      ],
+      "deities": [
+        "Gula",
+        "Ninkarrak",
+        "Bau",
+        "Sekhmet"
+      ],
+      "texts": [
+        "Sumerian + Akkadian medical incantations",
+        "Egyptian medical papyri"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Hornung 1982",
+          "publication": "Erik Hornung, Conceptions of God in Ancient Egypt: The One and the Many (Ithaca: Cornell UP, 1982; trans. John Baines from 1971 German)",
+          "argument_summary": "Treats Sekhmet as the prototypical Egyptian ambivalent-healing-goddess — both source of plague AND source of healing. Notes the structural parallel to Mesopotamian Gula tradition: both healing-goddesses combine illness-causation with illness-cure, both are patrons of medical practitioners, both have specific animal attributes (Sekhmet lioness; Gula dog)."
+        },
+        {
+          "author_year": "Avalos 1995",
+          "publication": "Hector Avalos, Illness and Health Care in the Ancient Near East: The Role of the Temple in Greece, Mesopotamia, and Israel (Atlanta: Scholars Press, 1995)",
+          "argument_summary": "Comparative-ANE study treating healing deities (Gula, Sekhmet, Asclepius) as parallel instances of temple-mediated medical practice. The ambivalent healing-deity (causing-and-curing) is a recurring ANE pattern."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.10 Medical expansion — Mesopotamia_Medical_Comparative.md Tier-1 recommendation"
+      },
+      "notes": "v0.10.0 Medical expansion. Both deities share: ambivalent healing/plague duality; cult-center medical institutions; named animal attributes; patron-role for medical practitioners. Differs from Asclepius (Greek) which is unambiguously positive-healing."
+    },
+    {
+      "id": "mp-dual-track-medicine-1",
+      "entity_a": {
+        "text": "Mesopotamian dual-track medicine: asû (empirical doctor, pharmacological/surgical, patron deity Gula) + āšipu (exorcist-priest, ritual/incantation, patron deity Asalluḫi/Marduk). Both professions used the same Diagnostic Handbook but applied different therapeutic frameworks. Modern consensus (Scurlock 2014, Geller 2010): complementary not opposed.",
+        "citation": "Scurlock 2014; Geller 2010; Lenzi 2008",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Continuous attestation c. 2000 BCE - 100 CE"
+      },
+      "entity_b": {
+        "text": "Egyptian dual-track medicine: swnw (empirical doctor, pharmacological/surgical, patron deity Sekhmet) + sau (priest-magician, ritual/incantation, patron deity Isis/Thoth). Both professions used the Ebers Papyrus + medical corpus; structurally parallel to Mesopotamian asû/āšipu split.",
+        "citation": "Nunn 1996; Westendorf 1999; Stevens 1975",
+        "language": "Egyptian",
+        "tradition": "egyptian",
+        "approximate_date": "Continuous attestation c. 2500 BCE - 200 CE"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "dual_track_medicine",
+        "medical_professions",
+        "empirical_ritual_complement"
+      ],
+      "deities": [
+        "Gula",
+        "Asalluḫi",
+        "Marduk",
+        "Sekhmet",
+        "Isis",
+        "Thoth"
+      ],
+      "texts": [
+        "Diagnostic Handbook",
+        "BAM",
+        "Ebers Papyrus",
+        "Edwin Smith Papyrus"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Scurlock 2014",
+          "publication": "JoAnn Scurlock, Sourcebook for Ancient Mesopotamian Medicine (SBL WAW 36; 2014)",
+          "argument_summary": "Treats Mesopotamian asû/āšipu dual-track as structurally parallel to Egyptian swnw/sau dual-track. Both ANE medical traditions deployed complementary empirical + ritual practitioners with shared canonical texts but distinct therapeutic frameworks. Modern consensus rejects older empirical-vs-magical opposition in favor of complementarity."
+        },
+        {
+          "author_year": "Nunn 1996",
+          "publication": "John F. Nunn, Ancient Egyptian Medicine (Univ. of Oklahoma Press, 1996)",
+          "argument_summary": "Documents the Egyptian swnw/sau dual-track and notes its structural parallel to Mesopotamian medical professional structure. Both traditions integrate empirical (pharmacological/surgical) and ritual (magical/incantational) approaches within a single medical-professional system."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.10 Medical expansion — Mesopotamia_Medical_Comparative.md Tier-2 recommendation"
+      },
+      "notes": "v0.10.0 Medical expansion. Both traditions share: paired empirical + ritual practitioners; shared canonical text-base; distinct therapeutic frameworks within single medical system; named patron deities for each track. Differs from Greek (Hippocratic) tradition which moved toward unified naturalistic medicine, explicitly opposing 'sacred-disease' framings."
+    },
+    {
+      "id": "mp-asipu-healing-deity-1",
+      "entity_a": {
+        "text": "Asalluḫi — Mesopotamian exorcist-healer god; son of Ea; later syncretized with Marduk. Patron of the āšipu profession. Magical-medical incantation-formula authority. Invoked in Bīt Mēseri + Maqlû + Šurpu ritual series for therapeutic + apotropaic purposes.",
+        "citation": "Wiggermann 1992; Geller 2010; ORACC AMGG entry on Asalluḫi",
+        "language": "Akkadian",
+        "tradition": "akkadian",
+        "approximate_date": "Attested from Old Babylonian (c. 1700 BCE); merged with Marduk by Kassite period"
+      },
+      "entity_b": {
+        "text": "Asclepius — Greek healing god; son of Apollo; staff with single serpent (the canonical medical-profession symbol). Asclepieia healing temples across Greco-Roman world. Combines divine-healing-power with named-physician-tradition (Hippocrates traced lineage to Asclepius).",
+        "citation": "Edelstein & Edelstein 1945 Asclepius (Johns Hopkins UP); Hart 2000",
+        "language": "Greek",
+        "tradition": "hellenistic_egyptian",
+        "approximate_date": "Greek attestation c. 700 BCE onward; Asclepieia cult flourished 500 BCE - 400 CE"
+      },
+      "parallel_type": "structural",
+      "themes": [
+        "healing_deity_succession",
+        "medical_lineage",
+        "divine_healer"
+      ],
+      "deities": [
+        "Asalluḫi",
+        "Marduk",
+        "Ea",
+        "Asclepius",
+        "Apollo"
+      ],
+      "texts": [
+        "Bīt Mēseri",
+        "Maqlû",
+        "Šurpu",
+        "Asclepieia inscriptions"
+      ],
+      "correspondence_strength": "moderate",
+      "scholarly_attribution": [
+        {
+          "author_year": "Geller 2010",
+          "publication": "Markham J. Geller, Ancient Babylonian Medicine: Theory and Practice (Wiley-Blackwell, 2010)",
+          "argument_summary": "Discusses Mesopotamian Asalluḫi as the prototypical exorcist-healer god whose ritual-medical authority structurally parallels later Greek Asclepius. Both gods are son-of-supreme-deity figures who become specialized medical-divine patrons; both have associated healing-temple traditions (Mesopotamian Esagila + Eanna therapeutic ritual; Greek Asclepieia)."
+        },
+        {
+          "author_year": "Avalos 1995",
+          "publication": "Hector Avalos, Illness and Health Care in the Ancient Near East (Atlanta: Scholars Press, 1995)",
+          "argument_summary": "Cross-ANE study of temple-mediated healing. Treats Mesopotamian Asalluḫi tradition + Greek Asclepieia + Israelite temple-medical-purity as parallel instances of religiously-mediated medical practice."
+        }
+      ],
+      "transmission_hypothesis": "common_substrate",
+      "discovery_origin": {
+        "discovered_by": "human_scholar",
+        "promoted_on": "2026-05-15",
+        "discovery_candidate_pair": "v0.10 Medical expansion — Mesopotamia_Medical_Comparative.md Tier-3 (structural-only)"
+      },
+      "notes": "v0.10.0 Medical expansion. Marked correspondence_strength as moderate because the typological parallel is real but direct genealogical transmission (Mesopotamia → Greece) is debated. Geller 2010 favors substrate influence; Edelstein & Edelstein 1945 emphasizes Greek-internal development. Both positions accept the structural-parallel framework."
     }
   ]
 }
