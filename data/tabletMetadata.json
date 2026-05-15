@@ -1,0 +1,4244 @@
+{
+  "_meta": {
+    "compiled": "2026-05-15",
+    "source": "eBL /fragments/<id> API",
+    "total_tablets": 226
+  },
+  "tablets": {
+    "K.5587": {
+      "museum_number": "K.5587",
+      "designation": null,
+      "genre": "literary",
+      "period": "Neo_Babylonian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Literature",
+        "Lamentations"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.18794": {
+      "museum_number": "K.18794",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Babylonian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.3719": {
+      "museum_number": "YBC.3719",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Neo_Babylonian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Uruk (Warka)"
+    },
+    "YBC.7393": {
+      "museum_number": "YBC.7393",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Neo_Babylonian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Uruk (Warka)"
+    },
+    "IM.183451.31": {
+      "museum_number": "IM.183451.31",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183451.25": {
+      "museum_number": "IM.183451.25",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.3316": {
+      "museum_number": "K.3316",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Udugḫul"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.9653": {
+      "museum_number": "K.9653",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Magic",
+        "Exorcistic",
+        "Udugḫul"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.3806": {
+      "museum_number": "YBC.3806",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir šihu ša belit ša Uruk"
+    },
+    "YBC.4058": {
+      "museum_number": "YBC.4058",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir"
+    },
+    "BM.121096": {
+      "museum_number": "BM.121096",
+      "designation": null,
+      "genre": "literary",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Literature",
+        "Lamentations"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.9560": {
+      "museum_number": "K.9560",
+      "designation": null,
+      "genre": "literary",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Literature",
+        "Lamentations"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183218.16": {
+      "museum_number": "IM.183218.16",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183451.29": {
+      "museum_number": "IM.183451.29",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.3716": {
+      "museum_number": "K.3716",
+      "designation": null,
+      "genre": "technical",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Technical",
+        "Commentary"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Asb.d": {
+      "museum_number": "Asb.d",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": null,
+      "raw_genres": [
+        "Catalogues",
+        "Catalogue of Texts and Authors",
+        "Divination",
+        "Celestial",
+        "Enūma Anu Enlil",
+        "Divination",
+        "Hemerology",
+        "Iqqur īpuš",
+        "Divination",
+        "Physiognomy",
+        "Alamdimmû",
+        "Divination",
+        "Physiognomy",
+        "Alamdimmû",
+        "5. Šumma liptu",
+        "Divination",
+        "Physiognomy",
+        "Alamdimmû",
+        "Šumma Ea liballiṭka",
+        "Divination",
+        "Teratological",
+        "Šumma izbu",
+        "Divination",
+        "Terrestrial",
+        "Šumma ālu",
+        "Lexicography",
+        "Acrographic word list",
+        "Izi",
+        "Lexicography",
+        "God List",
+        "Lexicography",
+        "God List",
+        "An = Anum",
+        "Lexicography",
+        "Synonym List",
+        "Malku = šarru (Explicit)",
+        "Lexicography",
+        "Synonym List",
+        "Malku = šarru",
+        "Lexicography",
+        "Thematic Word Lists",
+        "Lú",
+        "Lexicography",
+        "Thematic Word Lists",
+        "Murgud",
+        "Lexicography",
+        "Thematic Word Lists",
+        "Ura",
+        "Lexicography",
+        "Vocabularies",
+        "Erimhuš",
+        "Lexicography",
+        "Vocabularies",
+        "Nabnītu",
+        "Lexicography",
+        "Vocabularies",
+        "Šarru",
+        "Literature",
+        "Hymns",
+        "Divine",
+        "Literature",
+        "Lamentations",
+        "Eršaḫuĝa",
+        "Literature",
+        "Monologue and dialogue",
+        "Ludlul bēl nēmeqi",
+        "Literature",
+        "Monologue and dialogue",
+        "Proverbs",
+        "Bilingual Proverbs",
+        "Literature",
+        "Monologue and dialogue",
+        "Scribal",
+        "Examenstext B",
+        "Literature",
+        "Narrative",
+        "Anzû",
+        "Literature",
+        "Narrative",
+        "Enūma eliš",
+        "Literature",
+        "Narrative",
+        "Gilgameš",
+        "Literature",
+        "Narrative",
+        "Lugal-e",
+        "Literature",
+        "Narrative",
+        "Slaying of Labbu",
+        "Literature",
+        "Narrative",
+        "Toil of Babylon",
+        "Magic",
+        "Anti-witchcraft",
+        "Maqlû",
+        "Magic",
+        "Exorcistic",
+        "Bīt mēseri",
+        "Magic",
+        "Exorcistic",
+        "Muššuʾu",
+        "Magic",
+        "Exorcistic",
+        "Saĝba",
+        "Magic",
+        "Exorcistic",
+        "Saggigameš",
+        "Magic",
+        "Purification",
+        "Mīs pî",
+        "Technical",
+        "Medicine",
+        "Diagnostic and Prognostic",
+        "Sagig",
+        "MONUMENTAL",
+        "MONUMENTAL",
+        "Legal",
+        "Laws of Ḫammurāpi",
+        "OTHER",
+        "Uncertain"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": null
+    },
+    "BM.43159": {
+      "museum_number": "BM.43159",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Magic"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Babylon"
+    },
+    "K.2796": {
+      "museum_number": "K.2796",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183216.1": {
+      "museum_number": "IM.183216.1",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "YBC.3736": {
+      "museum_number": "YBC.3736",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir šihu ša belit ša Uruk"
+    },
+    "YBC.3758": {
+      "museum_number": "YBC.3758",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir šihu ša belit ša Uruk"
+    },
+    "IM.183218.18": {
+      "museum_number": "IM.183218.18",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "Asb.c": {
+      "museum_number": "Asb.c",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": null,
+      "raw_genres": [
+        "Divination",
+        "Celestial",
+        "Enūma Anu Enlil",
+        "Lexicography",
+        "Plant List",
+        "Uruanna",
+        "Literature",
+        "Hymns",
+        "Divine",
+        "Kiutu",
+        "Literature",
+        "Hymns",
+        "Divine",
+        "Šigû Prayer",
+        "Literature",
+        "Hymns",
+        "Divine",
+        "Šuʾila",
+        "Literature",
+        "Monologue and dialogue",
+        "Scribal",
+        "In Praise of Scribal Art",
+        "Literature",
+        "Narrative",
+        "Lugal-e",
+        "Magic",
+        "Magic",
+        "Anti-witchcraft",
+        "Maqlû",
+        "Magic",
+        "Exorcistic",
+        "Alan niŋ saŋ ila",
+        "Magic",
+        "Exorcistic",
+        "Asaggiga",
+        "Magic",
+        "Exorcistic",
+        "Bīt mēseri",
+        "Magic",
+        "Exorcistic",
+        "Compendium",
+        "Magic",
+        "Exorcistic",
+        "Ḫulbazizi",
+        "Magic",
+        "Exorcistic",
+        "Lamaštu",
+        "Magic",
+        "Exorcistic",
+        "Saggigameš",
+        "Magic",
+        "Exorcistic",
+        "Šurpu",
+        "Magic",
+        "Exorcistic",
+        "Udugḫul",
+        "Magic",
+        "Purification",
+        "Bīt rimki",
+        "Magic",
+        "Purification",
+        "Bīt salāʾ mê",
+        "Magic",
+        "Purification",
+        "Mīs pî",
+        "Magic",
+        "Medical",
+        "Sagalla",
+        "Magic",
+        "Medical",
+        "Šaziga",
+        "Magic",
+        "Varia",
+        "Building Rituals",
+        "Magic",
+        "Varia",
+        "Namburbi",
+        "Magic",
+        "Varia",
+        "Zuburudabeda",
+        "Technical",
+        "Medicine",
+        "Diagnostic and Prognostic",
+        "Sagig"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": null
+    },
+    "Sm.514": {
+      "museum_number": "Sm.514",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.4077": {
+      "museum_number": "YBC.4077",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir šihu ša belit ša Uruk"
+    },
+    "Sm.491": {
+      "museum_number": "Sm.491",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "U.4331": {
+      "museum_number": "U.4331",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21030": {
+      "museum_number": "U.21030",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "YBC.3825": {
+      "museum_number": "YBC.3825",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), bitqu ša Bel etir šihu ša belit ša Uruk"
+    },
+    "VAT.21810": {
+      "museum_number": "VAT.21810",
+      "designation": null,
+      "genre": "literary",
+      "period": "Old_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Literature",
+        "Hymns",
+        "Divine"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": "Babylon"
+    },
+    "IM.58541": {
+      "museum_number": "IM.58541",
+      "designation": null,
+      "genre": "literary",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "Literature",
+        "Hymns",
+        "Divine"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "BM.46116": {
+      "museum_number": "BM.46116",
+      "designation": null,
+      "genre": "astronomical",
+      "period": "Hellenistic",
+      "city": "Babylon",
+      "raw_genres": [
+        "Technical",
+        "Astronomy"
+      ],
+      "raw_script": {
+        "period": "Hellenistic",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 18
+      },
+      "raw_collection": "Babylon"
+    },
+    "BM.34134": {
+      "museum_number": "BM.34134",
+      "designation": null,
+      "genre": "astronomical",
+      "period": "Hellenistic",
+      "city": "Babylon",
+      "raw_genres": [
+        "Technical",
+        "Astronomy"
+      ],
+      "raw_script": {
+        "period": "Hellenistic",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 18
+      },
+      "raw_collection": "Babylon"
+    },
+    "K.8773": {
+      "museum_number": "K.8773",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Divination",
+        "Terrestrial",
+        "Šumma ālu"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Sm.168": {
+      "museum_number": "Sm.168",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.7097": {
+      "museum_number": "K.7097",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183213.3": {
+      "museum_number": "IM.183213.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "1881,1103.2244": {
+      "museum_number": "1881,1103.2244",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "Magic"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Newly Registered Fragments"
+    },
+    "K.11384": {
+      "museum_number": "K.11384",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Udugḫul"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "U.21017": {
+      "museum_number": "U.21017",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3880": {
+      "museum_number": "U.3880",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "IM.183451.18": {
+      "museum_number": "IM.183451.18",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183455.5": {
+      "museum_number": "IM.183455.5",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "Um.3508": {
+      "museum_number": "Um.3508",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.4969": {
+      "museum_number": "K.4969",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Saĝba"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.20504": {
+      "museum_number": "K.20504",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Rm-II.504": {
+      "museum_number": "Rm-II.504",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Celestial"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "BM.42125": {
+      "museum_number": "BM.42125",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Divination",
+        "Celestial"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Babylon"
+    },
+    "BM.34737": {
+      "museum_number": "BM.34737",
+      "designation": null,
+      "genre": "astronomical",
+      "period": "Hellenistic",
+      "city": "Babylon",
+      "raw_genres": [
+        "Technical",
+        "Astronomy"
+      ],
+      "raw_script": {
+        "period": "Hellenistic",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 18
+      },
+      "raw_collection": "Babylon"
+    },
+    "IM.183218.9": {
+      "museum_number": "IM.183218.9",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.7836": {
+      "museum_number": "K.7836",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Rm-II.523": {
+      "museum_number": "Rm-II.523",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.7872": {
+      "museum_number": "K.7872",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.4045": {
+      "museum_number": "YBC.4045",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu nar eššu"
+    },
+    "VAT.21808": {
+      "museum_number": "VAT.21808",
+      "designation": null,
+      "genre": "literary",
+      "period": "Old_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Literature",
+        "Narrative"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": "Babylon"
+    },
+    "IM.58462": {
+      "museum_number": "IM.58462",
+      "designation": null,
+      "genre": null,
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "BM.33600": {
+      "museum_number": "BM.33600",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Zi-pà-incantation"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Babylon"
+    },
+    "K.19623": {
+      "museum_number": "K.19623",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Zi-pà-incantation"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183205.8": {
+      "museum_number": "IM.183205.8",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183214.3": {
+      "museum_number": "IM.183214.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "BM.37885": {
+      "museum_number": "BM.37885",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Magic",
+        "Exorcistic",
+        "Udugḫul"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Babylon"
+    },
+    "IM.183216.7": {
+      "museum_number": "IM.183216.7",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.3982": {
+      "museum_number": "K.3982",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Extispicy",
+        "Bārûtu",
+        "1. Isru"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "BM.32494": {
+      "museum_number": "BM.32494",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Babylonian",
+      "city": "Babylon",
+      "raw_genres": [
+        "Divination",
+        "Extispicy",
+        "Bārûtu",
+        "1. Isru"
+      ],
+      "raw_script": {
+        "period": "Neo-Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 15
+      },
+      "raw_collection": "Babylon"
+    },
+    "YBC.4050": {
+      "museum_number": "YBC.4050",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu bab ašurritu"
+    },
+    "IM.183212.8": {
+      "museum_number": "IM.183212.8",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183218.13": {
+      "museum_number": "IM.183218.13",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183453.4": {
+      "museum_number": "IM.183453.4",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.15867": {
+      "museum_number": "K.15867",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183216.6": {
+      "museum_number": "IM.183216.6",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.7842": {
+      "museum_number": "K.7842",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.7908": {
+      "museum_number": "K.7908",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.4049": {
+      "museum_number": "YBC.4049",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL",
+        "Legal",
+        "Debt Note, Loan"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu gadeti"
+    },
+    "K.6198": {
+      "museum_number": "K.6198",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Technical",
+        "Medicine"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "U.4267": {
+      "museum_number": "U.4267",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4351": {
+      "museum_number": "U.4351",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "K.10608": {
+      "museum_number": "K.10608",
+      "designation": null,
+      "genre": "technical",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Celestial",
+        "Enūma Anu Enlil",
+        "Sîn (EAE 1–22)",
+        "Technical",
+        "Commentary"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.11244": {
+      "museum_number": "K.11244",
+      "designation": null,
+      "genre": "technical",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Celestial",
+        "Enūma Anu Enlil",
+        "Sîn (EAE 1–22)",
+        "Technical",
+        "Commentary"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.4066": {
+      "museum_number": "YBC.4066",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu kurbat"
+    },
+    "Um.3515": {
+      "museum_number": "Um.3515",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183205.3": {
+      "museum_number": "IM.183205.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183213.2": {
+      "museum_number": "IM.183213.2",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "Rm-II.121": {
+      "museum_number": "Rm-II.121",
+      "designation": null,
+      "genre": "divinatory",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Divination",
+        "Celestial",
+        "Enūma Anu Enlil",
+        "Adad (EAE 36–49)"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Sm.555": {
+      "museum_number": "Sm.555",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.4125": {
+      "museum_number": "YBC.4125",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), Kar Eanna alu ša Anu ah iddin!"
+    },
+    "YBC.3799": {
+      "museum_number": "YBC.3799",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu bitqu ša Bel etir eqel Nanaya šihu ša Belit ša Uru"
+    },
+    "IM.183451.14": {
+      "museum_number": "IM.183451.14",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183451.27": {
+      "museum_number": "IM.183451.27",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "U.30101": {
+      "museum_number": "U.30101",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.30619": {
+      "museum_number": "U.30619",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4273": {
+      "museum_number": "U.4273",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4065": {
+      "museum_number": "U.4065",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4088": {
+      "museum_number": "U.4088",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "K.3781.B": {
+      "museum_number": "K.3781.B",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.58607": {
+      "museum_number": "IM.58607",
+      "designation": null,
+      "genre": "literary",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "Literature"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.15805": {
+      "museum_number": "K.15805",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.8834": {
+      "museum_number": "K.8834",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.2541": {
+      "museum_number": "K.2541",
+      "designation": null,
+      "genre": "technical",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Technical",
+        "Ritual texts"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.15434": {
+      "museum_number": "K.15434",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.7123": {
+      "museum_number": "K.7123",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Asb.q": {
+      "museum_number": "Asb.q",
+      "designation": null,
+      "genre": null,
+      "period": "None",
+      "city": null,
+      "raw_genres": [],
+      "raw_script": {
+        "period": "None",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 0
+      },
+      "raw_collection": null
+    },
+    "IM.183451.8": {
+      "museum_number": "IM.183451.8",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "Rm.448": {
+      "museum_number": "Rm.448",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.19247": {
+      "museum_number": "K.19247",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "Sm.1374": {
+      "museum_number": "Sm.1374",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.3700": {
+      "museum_number": "YBC.3700",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), tamirtu nahallum"
+    },
+    "YBC.4093": {
+      "museum_number": "YBC.4093",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), alu nahallum"
+    },
+    "K.7883": {
+      "museum_number": "K.7883",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Technical",
+        "Medicine"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.5764": {
+      "museum_number": "K.5764",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183451.3": {
+      "museum_number": "IM.183451.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.7095": {
+      "museum_number": "K.7095",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183216.2": {
+      "museum_number": "IM.183216.2",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "W.15016.AI": {
+      "museum_number": "W.15016.AI",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Hellenistic",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Legal",
+        "Sale"
+      ],
+      "raw_script": {
+        "period": "Hellenistic",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 18
+      },
+      "raw_collection": null
+    },
+    "MLC.2148": {
+      "museum_number": "MLC.2148",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Hellenistic",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Hellenistic",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 18
+      },
+      "raw_collection": "Uruk (Warka)"
+    },
+    "K.20480": {
+      "museum_number": "K.20480",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.15448": {
+      "museum_number": "K.15448",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Technical",
+        "Medicine",
+        "Therapeutic"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183208.1": {
+      "museum_number": "IM.183208.1",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183218.2": {
+      "museum_number": "IM.183218.2",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.9277": {
+      "museum_number": "K.9277",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.8028": {
+      "museum_number": "K.8028",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Medical"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "YBC.7386": {
+      "museum_number": "YBC.7386",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Persian",
+      "city": "Uruk",
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Persian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 17
+      },
+      "raw_collection": "Uruk (Warka), Kar Eanna alu ša Anu ah iddin"
+    },
+    "IM.183454.3": {
+      "museum_number": "IM.183454.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.6830": {
+      "museum_number": "K.6830",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.10290": {
+      "museum_number": "K.10290",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "DT.282": {
+      "museum_number": "DT.282",
+      "designation": null,
+      "genre": "magical_ritual",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.9629": {
+      "museum_number": "K.9629",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "U.3955": {
+      "museum_number": "U.3955",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "K.7919": {
+      "museum_number": "K.7919",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.15863": {
+      "museum_number": "K.15863",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.174871": {
+      "museum_number": "IM.174871",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.174803": {
+      "museum_number": "IM.174803",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183205.1": {
+      "museum_number": "IM.183205.1",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.15443": {
+      "museum_number": "K.15443",
+      "designation": null,
+      "genre": "technical",
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [
+        "Magic",
+        "Technical",
+        "Ritual texts"
+      ],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "K.20483": {
+      "museum_number": "K.20483",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "IM.183216.3": {
+      "museum_number": "IM.183216.3",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "IM.183205.11": {
+      "museum_number": "IM.183205.11",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "K.15597": {
+      "museum_number": "K.15597",
+      "designation": null,
+      "genre": null,
+      "period": "Neo_Assyrian",
+      "city": "Nineveh",
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Neo-Assyrian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 14
+      },
+      "raw_collection": "Kuyunjik"
+    },
+    "U.21016": {
+      "museum_number": "U.21016",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4186": {
+      "museum_number": "U.4186",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3978": {
+      "museum_number": "U.3978",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4662": {
+      "museum_number": "U.4662",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4189": {
+      "museum_number": "U.4189",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3925": {
+      "museum_number": "U.3925",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4054": {
+      "museum_number": "U.4054",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21006": {
+      "museum_number": "U.21006",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3660": {
+      "museum_number": "U.3660",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21031": {
+      "museum_number": "U.21031",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4202": {
+      "museum_number": "U.4202",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4125": {
+      "museum_number": "U.4125",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4069": {
+      "museum_number": "U.4069",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4544": {
+      "museum_number": "U.4544",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.5133": {
+      "museum_number": "U.5133",
+      "designation": null,
+      "genre": null,
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3623": {
+      "museum_number": "U.3623",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4136": {
+      "museum_number": "U.4136",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3942": {
+      "museum_number": "U.3942",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4105": {
+      "museum_number": "U.4105",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4117": {
+      "museum_number": "U.4117",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4197": {
+      "museum_number": "U.4197",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21009": {
+      "museum_number": "U.21009",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3622": {
+      "museum_number": "U.3622",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3998": {
+      "museum_number": "U.3998",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4247": {
+      "museum_number": "U.4247",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3959": {
+      "museum_number": "U.3959",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4101": {
+      "museum_number": "U.4101",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4272": {
+      "museum_number": "U.4272",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3929": {
+      "museum_number": "U.3929",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4250": {
+      "museum_number": "U.4250",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3952": {
+      "museum_number": "U.3952",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4193": {
+      "museum_number": "U.4193",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21012": {
+      "museum_number": "U.21012",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4063.bis": {
+      "museum_number": "U.4063.bis",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4257": {
+      "museum_number": "U.4257",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3853": {
+      "museum_number": "U.3853",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3627": {
+      "museum_number": "U.3627",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4114": {
+      "museum_number": "U.4114",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4349": {
+      "museum_number": "U.4349",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3948": {
+      "museum_number": "U.3948",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21010": {
+      "museum_number": "U.21010",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21008": {
+      "museum_number": "U.21008",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4225": {
+      "museum_number": "U.4225",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3616": {
+      "museum_number": "U.3616",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3496": {
+      "museum_number": "U.3496",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21007": {
+      "museum_number": "U.21007",
+      "designation": null,
+      "genre": null,
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4056": {
+      "museum_number": "U.4056",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4199": {
+      "museum_number": "U.4199",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4113": {
+      "museum_number": "U.4113",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4636": {
+      "museum_number": "U.4636",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4018": {
+      "museum_number": "U.4018",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4182": {
+      "museum_number": "U.4182",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4248": {
+      "museum_number": "U.4248",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.5578": {
+      "museum_number": "U.5578",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21036": {
+      "museum_number": "U.21036",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3865": {
+      "museum_number": "U.3865",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4139": {
+      "museum_number": "U.4139",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4270": {
+      "museum_number": "U.4270",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4670": {
+      "museum_number": "U.4670",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4290": {
+      "museum_number": "U.4290",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4143": {
+      "museum_number": "U.4143",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.9467": {
+      "museum_number": "U.9467",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.5042": {
+      "museum_number": "U.5042",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4229": {
+      "museum_number": "U.4229",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "IM.174858": {
+      "museum_number": "IM.174858",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "Early",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "U.4122": {
+      "museum_number": "U.4122",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3625": {
+      "museum_number": "U.3625",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4256": {
+      "museum_number": "U.4256",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21024": {
+      "museum_number": "U.21024",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.30085": {
+      "museum_number": "U.30085",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21332.*": {
+      "museum_number": "U.21332.*",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.7180": {
+      "museum_number": "U.7180",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21011": {
+      "museum_number": "U.21011",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4292": {
+      "museum_number": "U.4292",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4516": {
+      "museum_number": "U.4516",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4289": {
+      "museum_number": "U.4289",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.2901": {
+      "museum_number": "U.2901",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.4717": {
+      "museum_number": "U.4717",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3566": {
+      "museum_number": "U.3566",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3771": {
+      "museum_number": "U.3771",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.7280": {
+      "museum_number": "U.7280",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Inventories"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21033": {
+      "museum_number": "U.21033",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.30137": {
+      "museum_number": "U.30137",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "IM.174817": {
+      "museum_number": "IM.174817",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    },
+    "U.4898": {
+      "museum_number": "U.4898",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.3542": {
+      "museum_number": "U.3542",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.5176": {
+      "museum_number": "U.5176",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "U.21385": {
+      "museum_number": "U.21385",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Ur_III",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Expenditure"
+      ],
+      "raw_script": {
+        "period": "Ur III",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 8
+      },
+      "raw_collection": null
+    },
+    "IM.174867": {
+      "museum_number": "IM.174867",
+      "designation": null,
+      "genre": "administrative",
+      "period": "Old_Babylonian",
+      "city": null,
+      "raw_genres": [
+        "ARCHIVAL",
+        "Administrative",
+        "Receipts"
+      ],
+      "raw_script": {
+        "period": "Old Babylonian",
+        "periodModifier": "None",
+        "uncertain": false,
+        "sortKey": 10
+      },
+      "raw_collection": null
+    }
+  }
+}
