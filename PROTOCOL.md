@@ -1,8 +1,8 @@
-# cuneiform-mcp Protocol — v0.14.4
+# cuneiform-mcp Protocol — v0.15.0
 
 > Every result should be inspectable, citeable, and reproducible.
 
-This is the published interface for cuneiform-mcp's **twenty-one** tools. Each tool
+This is the published interface for cuneiform-mcp's **twenty-two** tools. Each tool
 returns BOTH a human-readable rendered text block (in the standard MCP
 `content[0]` field) AND a typed `structuredContent` envelope. Downstream
 agents should chain on the structured fields; the rendered text is for
@@ -50,11 +50,13 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The twenty-one tools
+## The twenty-two tools
 
-> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel.
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3) + one Random-Indexing semantic-embeddings tool (v0.15.0). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel. The v0.15.0 `find_thematic_parallel` tool extends the discovery surface from lexical (trigram-Jaccard) to thematic (Random-Indexing distributional embeddings) — surfaces siblings that share zero exact trigrams.
 
-**v0.14.4** adds a corpus-exclusion pre-filter to the Discovery Engine v2.0 (`data/corpus-exclusions.json`). All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are now filtered out at index-build time so they cannot enter the candidate pool. This closes the colophon-template false-positive class identified in v0.13.4 calibration.
+**v0.15.0** adds Mode C semantic embeddings: Sahlgren 2005 Random Indexing over the 28,665-tablet eBL sign corpus, 300-dim, ±3 window, k=8 nonzeros, mean-centered (Mu & Viswanath 2018-lite, fixes mean-pooling collapse). Top-30 cosine neighbors precomputed per tablet. Foundation for v0.16 anomaly-surface tooling.
+
+**v0.14.4** added a corpus-exclusion pre-filter to the Discovery Engine v2.0 (`data/corpus-exclusions.json`). All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are filtered out at index-build time so they cannot enter the candidate pool. This closed the colophon-template false-positive class identified in v0.13.4 calibration.
 
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
@@ -668,6 +670,41 @@ A curated dataset of canonical Mesopotamian textual parallels to Hebrew Bible pa
 **Composition with the rest of the stack:** the `brief_in_vault` pointer chains directly to `get_brief` for full scholarly drill-down. Then `query_research` for cross-references, `find_synthesis_claims` for the author's interpretive positions.
 
 Provenance: `source: local`, `endpoint: local:biblicalParallels`.
+
+### `find_thematic_parallel` — schema: [find_thematic_parallel.schema.json](schemas/find_thematic_parallel.schema.json)
+
+```jsonc
+// example: find_thematic_parallel({tablet_id: "K.3982", top_k: 5}) → structuredContent.data
+{
+  "tablet_id": "K.3982",
+  "neighbors": [
+    {"id": "BM.32494", "score": 0.7821, "genre": "divinatory"},
+    {"id": "K.4136",   "score": 0.7654},
+    {"id": "BM.32207", "score": 0.7390},
+    {"id": "K.12295",  "score": 0.7188},
+    {"id": "Rm.729",   "score": 0.6975}
+  ],
+  "filters_applied": {"min_cosine": 0.5},
+  "index_stats": {
+    "total_tablets": 28665,
+    "embedding_dim": 300,
+    "method": "random_indexing",
+    "vocab_size": 2082,
+    "generated_at": "2026-05-16T…Z"
+  },
+  "warnings": []
+}
+```
+
+**Method:** Sahlgren 2005 Random Indexing. Each sign in the vocab (filtered to ≥3 corpus occurrences; 2,082 signs) gets a deterministic random sparse index vector (k=8 nonzeros over 300 dims, ±1 values, seed=42). Each sign's context vector accumulates the index vectors of its window neighbors (window=±3). L2-normalized. Per-tablet embedding = IDF-weighted mean of sign vectors, then corpus-mean-centered (Mu & Viswanath 2018 lite — without this step every cosine collapses to 0.97+; with it, random-pair median is ~0), then L2-normalized. Top-30 cosine neighbors precomputed per tablet by `scripts/build-embeddings.mjs` and cached at `$CUNEIFORM_MCP_CACHE_DIR/tablet-neighbors.json`.
+
+**What this surfaces that lexical methods miss:** tablets sharing zero exact trigrams but using signs that pattern-out the same distributional roles. E.g., two literary tablets using different vocabularies to describe the same scene (Akkadian/Sumerian bilingual parallels; alternate-spelling witnesses; cross-period reworkings of the same composition).
+
+**What this does NOT surface:** very-short tablets (< 20 sign tokens — excluded by `MIN_TABLET_SIGNS`); the v0.14.4 Asb.* colophon-template prototypes (excluded). Re-build the index with `node scripts/build-embeddings.mjs` if the exclusion list or the all-signs cache changes.
+
+**Composition with the rest of the stack:** pair with `discover_primary_source_parallels` to combine lexical + thematic discovery — tablets that appear in *both* result sets are the highest-confidence parallels; tablets that appear in only one are the most-interesting discovery candidates. v0.16 will operationalize this with `find_anomalous_tablets`.
+
+Provenance: `source: local`, `endpoint: local:semantic-embeddings-random-indexing`.
 
 ## v0.14.4 — Corpus-exclusion pre-filter (Discovery Engine v2.0)
 

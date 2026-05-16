@@ -25,6 +25,11 @@ import {
   datasetStats as biblicalParallelsStats,
 } from "./biblicalParallels.js";
 import {
+  findThematicParallel,
+  embeddingStats,
+  hasTabletEmbedding,
+} from "./semanticEmbeddings.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -137,7 +142,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.14.4";
+const VERSION = "0.15.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3113,6 +3118,102 @@ server.registerTool(
   },
 );
 
+// ─── v0.15.0 — Mode C semantic embeddings (Random Indexing) ────────────────
+
+server.registerTool(
+  "find_thematic_parallel",
+  {
+    description:
+      "Find tablets thematically similar to a given tablet using Random-Indexing distributional embeddings over the eBL sign corpus. Unlike `discover_primary_source_parallels` (lexical/trigram-Jaccard) and `find_parallel_text` (line-level n-gram), this tool surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts — i.e., thematic rather than lexical similarity. Method: Sahlgren 2005 Random Indexing, 300-dim, ±3 window, k=8 nonzeros per index vector, deterministic seed. Tablet vectors are IDF-weighted means of sign vectors. Top-30 cosine neighbors precomputed per tablet (built by scripts/build-embeddings.mjs); ~20K tablets in index after MIN_TABLET_SIGNS=20 + v0.14.4 exclusion filter. Pair with `discover_primary_source_parallels` for compound discovery: lexical AND thematic siblings together cover the parallel surface.",
+    inputSchema: {
+      tablet_id: z
+        .string()
+        .describe("Museum number of the seed tablet (e.g., 'K.3982', 'BM.41255'). Must be in the embedding index — short tablets (<20 sign tokens) and v0.14.4 exclusions are absent."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe("Number of thematic neighbors to return. Default 10. Hard cap 30 (the precomputed neighbor-list depth)."),
+      min_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum cosine similarity to include a neighbor. Default 0.5. Random-Indexing cosines are typically 0.6–0.9 for clear thematic siblings, 0.4–0.6 for weak parallels, <0.4 for unrelated tablets."),
+      filter_period: z
+        .enum(["Old_Akkadian", "Ur_III", "Old_Babylonian", "Old_Assyrian", "Middle_Babylonian", "Middle_Assyrian", "Neo_Assyrian", "Neo_Babylonian", "Late_Babylonian", "Hellenistic"])
+        .optional()
+        .describe("Optional period filter — only return neighbors whose metadata period matches. Only effective for tablets in v0.13.1 tabletMetadata.json."),
+      filter_genre: z
+        .enum(["literary", "divinatory", "magical_ritual", "lexical", "administrative", "mathematical", "astronomical", "royal_inscription", "technical"])
+        .optional()
+        .describe("Optional genre filter. Use for cross-period thematic discovery within a single genre, or for genre-misfit detection by filtering to a genre the seed tablet is NOT classified as."),
+    },
+  },
+  async ({ tablet_id, top_k, min_cosine, filter_period, filter_genre }) => {
+    const SCHEMA = schemaId("find_thematic_parallel");
+    try {
+      const result = findThematicParallel(tablet_id, {
+        topK: top_k,
+        minCosine: min_cosine,
+        filterPeriod: filter_period,
+        filterGenre: filter_genre,
+      });
+
+      const lines: string[] = [
+        `Seed tablet: ${tablet_id}`,
+        `Method: ${result.index_stats.method} · dim ${result.index_stats.embedding_dim} · ${result.index_stats.total_tablets} tablets indexed`,
+        result.filters_applied.period || result.filters_applied.genre
+          ? `Filters: period=${result.filters_applied.period ?? "—"}, genre=${result.filters_applied.genre ?? "—"}`
+          : `Filter: min_cosine ≥ ${result.filters_applied.min_cosine}`,
+        ``,
+        `Thematic neighbors: ${result.neighbors.length}`,
+        ``,
+      ];
+      for (const n of result.neighbors) {
+        const tags = [
+          n.period ? `period:${n.period}` : null,
+          n.genre ? `genre:${n.genre}` : null,
+          n.city ? `city:${n.city}` : null,
+        ].filter(Boolean);
+        lines.push(
+          `   ${n.id.padEnd(20)} cos=${n.score.toFixed(4)}${tags.length > 0 ? "  [" + tags.join(" · ") + "]" : ""}${n.designation ? "  — " + n.designation : ""}`,
+        );
+      }
+      if (result.warnings.length > 0) {
+        lines.push(``);
+        lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:semantic-embeddings-random-indexing", VERSION, {
+          citation:
+            "Sahlgren 2005 Random Indexing over eBL all-signs-full.json corpus. v0.15.0. 300-dim, ±3 window, k=8 nonzeros, deterministic seed.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_thematic_parallel error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id,
+          neighbors: [] as never[],
+          filters_applied: { min_cosine: min_cosine ?? 0.5, period: filter_period, genre: filter_genre },
+          index_stats: embeddingStats(),
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:semantic-embeddings-random-indexing", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3133,7 +3234,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 21 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 22 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C)\n`,
     );
     process.exit(0);
   }
@@ -3143,7 +3244,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (15 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (16 tools)\n`);
 }
 
 main().catch((err) => {

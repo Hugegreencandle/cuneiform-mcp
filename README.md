@@ -1,12 +1,13 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, and a curated Mesopotamian ↔ Hebrew Bible parallel database — to LLM agents. **21 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, and a Random-Indexing semantic-embeddings layer over the eBL sign corpus — to LLM agents. **22 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
 
-## What's new — v0.14.4
+## What's new — v0.15.0
 
-Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-template false-positive class identified in v0.13.4 calibration. All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are now filtered out of the Discovery Engine's candidate pool at index-build time. Reduces v0.13 false-positive surface to zero on this class.
+`find_thematic_parallel` — Random-Indexing distributional embeddings (Sahlgren 2005) over the 28,665-tablet eBL sign corpus. Surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts — *thematic* rather than lexical similarity. 300-dim, ±3 window, k=8 nonzeros per index vector, mean-centered (fixes mean-pooling collapse), top-30 cosine neighbors precomputed per tablet. Pair with `discover_primary_source_parallels` for compound discovery: lexical + thematic together cover the full parallel surface. Foundation for the v0.16 anomaly-surface tooling.
 
 **Recent v0.14 train:**
+- **v0.14.4** — Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-template false-positive class identified in v0.13.4 calibration.
 - **v0.14.3** — `find_biblical_parallel`: 15 canonical Mesopotamian ↔ Hebrew Bible parallels (Flood, Creation, Eden/Adapa, Babel, Job/Theodicy, Eccl/Šiduri, Daniel 7 beasts, Ezekiel 1 chariot, Leviathan, Song of Songs, Isaiah 14 hubris, Proverbs, plant of life, sacrifice-flies, healing serpent) with named-Assyriologist attribution + transmission hypothesis + brief-in-vault pointer.
 - **v0.14.2** — `infer_damaged_sign`: bigram-context inference engine over the 36,498-tablet eBL corpus (4.69 M bigram pairs). Suggests ranked sign-candidates for each `X` damaged-position token with optional period/genre conditioning.
 - **v0.14.1** — Apsû Explorer backend integration: hard-coded entity panels now pull full brief content from the research vault via `get_brief`.
@@ -16,7 +17,8 @@ Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-
 
 | Version | Headline |
 |---|---|
-| **v0.14.4** | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
+| **v0.15.0** | `find_thematic_parallel` — Random-Indexing distributional semantic embeddings (Mode C). Foundation for v0.16 anomaly surface. |
+| v0.14.4 | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
 | **v0.14.3** | `find_biblical_parallel` — 15 canonical Mesopotamian ↔ Hebrew Bible parallels |
 | **v0.14.2** | `infer_damaged_sign` — bigram-context sign-inference engine |
 | **v0.14.1** | Apsû Explorer backend integration (apsu-explorer repo) |
@@ -30,7 +32,7 @@ Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 21 tools live
+## 22 tools live
 
 ### Corpus retrieval (v0.1–v0.5)
 
@@ -87,6 +89,12 @@ Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-
 | Tool | What it does |
 |---|---|
 | `find_biblical_parallel` | 15 canonical Mesopotamian ↔ Hebrew Bible parallels with named-Assyriologist attribution + transmission hypothesis + `brief_in_vault` pointer. Look up by biblical reference (`Gen 6:9`, `Job 3`), theme (`flood`, `wisdom`, `throne-chariot`), or Mesopotamian source (`Atrahasis`, `Gilgamesh`, `Enuma Elish`). Strong-consensus (12) + moderate-consensus (3) parallels. Composes with `get_brief` for drill-down. |
+
+### Semantic embeddings — Mode C (v0.15.0)
+
+| Tool | What it does |
+|---|---|
+| `find_thematic_parallel` | Random-Indexing distributional embeddings (Sahlgren 2005) over the eBL sign corpus. Returns top-30 cosine-similar tablets per seed. Unlike the lexical/trigram methods, surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts. 300-dim, ±3 window, k=8 nonzeros, mean-centered (fixes mean-pooling collapse). 28,665 tablets in index after MIN_TABLET_SIGNS=20 + v0.14.4 exclusion filter. Build with `node scripts/build-embeddings.mjs` (~4 min). Pair with `discover_primary_source_parallels` for compound lexical+thematic discovery. |
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
 

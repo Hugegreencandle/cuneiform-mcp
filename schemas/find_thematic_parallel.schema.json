@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_thematic_parallel.schema.json",
+  "title": "find_thematic_parallel data payload",
+  "description": "Random-Indexing distributional semantic embeddings (Sahlgren 2005) over the eBL 28,665-tablet sign corpus. Returns top-K cosine-similar tablets per seed. 300-dim, ±3 window, k=8 nonzeros, mean-centered (Mu & Viswanath 2018 lite). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["tablet_id", "neighbors", "filters_applied", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": {
+      "type": "string",
+      "description": "Museum number of the seed tablet."
+    },
+    "neighbors": {
+      "type": "array",
+      "description": "Top-K thematic neighbors ranked by cosine similarity (descending). Empty if the seed is not in the embedding index.",
+      "items": {
+        "type": "object",
+        "required": ["id", "score"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Museum number of the neighbor tablet." },
+          "score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity. Mean-centered, so ~0 = unrelated, > 0.5 = clearly thematic siblings, < 0 = anti-correlated distributional profile."
+          },
+          "period": { "type": "string", "description": "v0.13.1 tabletMetadata period, if known." },
+          "genre": { "type": "string", "description": "v0.13.1 tabletMetadata genre, if known." },
+          "designation": { "type": "string", "description": "Tablet designation/title, if known." },
+          "city": { "type": "string", "description": "Provenance city, if known." }
+        }
+      }
+    },
+    "filters_applied": {
+      "type": "object",
+      "required": ["min_cosine"],
+      "additionalProperties": false,
+      "properties": {
+        "min_cosine": { "type": "number" },
+        "period": { "type": "string" },
+        "genre": { "type": "string" }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_tablets", "embedding_dim", "method", "vocab_size", "generated_at"],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets": { "type": "integer", "description": "Tablets in the embedding index." },
+        "embedding_dim": { "type": "integer", "description": "Random-Indexing dimensionality (e.g., 300)." },
+        "method": { "type": "string", "enum": ["random_indexing"] },
+        "vocab_size": { "type": "integer", "description": "Distinct signs in the embedding vocab after MIN_SIGN_FREQ filter." },
+        "generated_at": {
+          "type": ["string", "null"],
+          "description": "ISO 8601 timestamp when the embedding index was built. Null if not loaded."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Truncations, fallback paths, or missing-index notes. Empty when the seed was found and matched the filter."
+    }
+  }
+}
