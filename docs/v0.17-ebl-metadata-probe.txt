@@ -1,0 +1,39 @@
+## BM.77056 cluster members
+BM.77056 :: BM.77056|Clay tablet; fragment; incantation and ritual; Late Babylonian.|Neo-Babylonian|Sippar|||0 joins
+BM.74130 :: BM.74130|Clay tablet; fragment; incantation; Late Babylonian.|Neo-Babylonian|Sippar|||0 joins
+BM.39088 :: BM.39088|Bilingual incantation.|Neo-Babylonian|Babylon|||0 joins
+K.15325 :: K.15325|Fragment of a clay tablet; from middle. directions for ceremonies, 7 lines of inscription, Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL/Magic/Purification/Mīs pî||0 joins
+K.8994 :: K.8994|Fragment of a clay tablet, 7 lines of inscription. Neo-Assyrian.Fragment from the middle. Fragment of a text containing regulations for making offerings.|Neo-Assyrian|Kuyunjik|CANONICAL/Magic/Purification/Mīs pî||0 joins
+K.11920 :: K.11920|Fragment of a clay tablet, 7 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL/Magic/Purification/Mīs pî; CANONICAL/Technical/Ritual texts||0 joins
+BM.32462 :: BM.32462|Literary; mythological narrative involving Marduk and [Enme]šarra; two columns. Lambert, MC 24, no. 46.|Late Babylonian|Babylon|CANONICAL/Literature/Narrative||0 joins
+CBS.511 :: CBS.511|Exorcism. 17 lines|Neo-Babylonian||||0 joins
+BM.47910 :: BM.47910|Literary cylinder; hymn to Nabû. Lambert, Fs Matouš II, 75-111; Gesche, AOAT 275, 689.|Neo-Babylonian|Babylon|CANONICAL/Literature/Hymns/Divine|Lambert, Fs Matouš 2, 76-111; Gesche, AOAT 275, 689|0 joins
+Sm.882 :: Sm.882|Fragment of a clay tablet, 4 lines of inscription, Neo-Assyrian. Fragment of the left half, end of a religious text.|Neo-Assyrian|Kuyunjik|CANONICAL/Literature/Hymns/Divine||0 joins
+BM.44414 :: BM.44414|Incantation.|Neo-Babylonian|Babylon|CANONICAL/Magic/Exorcistic/Udugḫul||0 joins
+BM.44035 :: BM.44035|Astronomical.|Neo-Babylonian|Babylon|CANONICAL/Magic/Anti-witchcraft||0 joins
+K.15142 :: K.15142|Fragment of a clay tablet; from middle. incantations ?, 12 lines of inscription, Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL/Magic||0 joins
+BM.47782 :: BM.47782|Namburbû?; colophon.|Neo-Babylonian|Babylon|CANONICAL/Literature/Hymns/Divine; CANONICAL/Literature/Hymns/Divine/Šuʾila||0 joins
+BM.16745 :: BM.16745||Neo-Babylonian||CANONICAL/Magic/Anti-witchcraft|Sigrist M et al 1996a|0 joins
+K.2798 :: K.2798|Fragment of a clay tablet, 11 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL/Magic/Purification/Bīt salāʾ mê||1 joins
+Si.776 :: Si.776|Small tablet preserving the beginning of the ritual tablet of Bīt šalāʾ mê. Written in Assyrian script.|Neo-Assyrian||CANONICAL/Magic/Purification/Bīt salāʾ mê||0 joins
+
+## 11 isolates
+BM.35503 :: BM.35503|Lexical; Ḫḫ IX-XI. CT 14, 47; MSL 7, 34, 73, 122.|Neo-Babylonian|Babylon|CANONICAL/Lexicography/Thematic Word Lists/Ura; CANONICAL/Magic/Exorcistic/Saĝba|CT 14, 47; MSL 7, 34, 73, 122
+BM.32544 :: BM.32544|Bilingual prayer; tablet XX of eme.gi7 (cf. ThureauDangin, Rituels accadiens, p. 150 vi 28).|Late Babylonian|Babylon|CANONICAL/Technical/Ritual texts|
+K.3677 :: K.3677|Fragment of a clay tablet, omen, 9 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL|CT 39, pl. 43, K 03677
+BM.39454 :: BM.39454|Literary.|Neo-Babylonian|Babylon|CANONICAL/Literature/Monologue and dialogue/Proverbs/Bilingual Proverbs|
+K.10908 :: K.10908|Fragment of a clay tablet, 9 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|ARCHIVAL/Letter|CT 53, 417
+K.6439 :: K.6439|Fragment of a clay tablet, 16 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik||
+BM.46372 :: BM.46372|Joined to 46338.|Neo-Babylonian|Babylon||
+K.7260 :: K.7260|Fragment of a clay tablet, 13 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|CANONICAL/Technical/Astronomy/MUL.APIN|
+BM.35656 :: BM.35656|Astronomical.|Neo-Babylonian|Babylon||
+K.2818 :: K.2818|Fragment of a clay tablet, 11 lines of inscription. Neo-Assyrian.|Neo-Assyrian|Kuyunjik|ARCHIVAL/Administrative; CANONICAL/Historiography|
+BM.48903 :: BM.48903|Literary.|Neo-Babylonian|Babylon|CANONICAL/Magic/Varia/Egalkura|
+
+## Extras (high-lift fuzzy)
+BM.35512 :: BM.35512|Medical prescriptions; colophon. + Sp-III.77.|Neo-Babylonian|Babylon||
+K.2581 :: K.2581|Fragment out of middle of a clay tablet, relating to the reciting of prayers and to symbolic ceremonies. Late Babylonian.|Neo-Babylonian|Kuyunjik|CANONICAL/Technical/Medicine/Therapeutic/Recipe/Prescription (Šumma amēlu)|Geers Heft J p. 104 (obv.), Heft Ah p. 022 (rev.)
+[CDLI: Sin and Sanction 135-136 + plts. 1-2, Geers Heft J p. 104 (obv.), Heft Ah p. 022 (rev.); cf. Labat, RA 56 (1962) 2]
+BM.45641 :: BM.45641|Ritual and colophon. SE Antiochus III 1/7/1[]7?|Hellenistic|Babylon|CANONICAL/Magic; CANONICAL/Technical/Ritual texts|
+BM.34795 :: BM.34795|Astrological omens; Enūma Anu Enlil, Sin. + SpII.440. LBAT 1533; Reiner, Fs Borger (CM 10), 294.|Neo-Babylonian|Babylon|CANONICAL/Divination/Celestial/Enūma Anu Enlil/Sîn (EAE 1–22)|Reiner, Fs Borger (CM 10) p. 294
+BM.38295 :: BM.38295|Astrological omens; Enūma Anu Enlil, Sin. Reiner, Fs Borger (CM 10), 297.|Neo-Babylonian|Babylon|CANONICAL/Divination/Celestial/Enūma Anu Enlil/Sîn (EAE 1–22)|Reiner, Fs Borger (CM 10) p. 297
