@@ -163,7 +163,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.2";
+const VERSION = "0.18.3";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2087,7 +2087,7 @@ server.registerTool(
     };
     const targetId = normalize(museum_number.trim());
 
-    const { loadSignsIndex, trigramsFromSigns, jaccard } = await import(
+    const { loadSignsIndex, trigramsFromSigns, trigramsOrderedFromSigns, jaccard } = await import(
       "./signsIndex.js"
     );
     const idx = await loadSignsIndex();
@@ -2128,6 +2128,7 @@ server.registerTool(
       );
     }
     let targetTrigrams = idx.fragments.get(targetEnriched.museumNumber);
+    let targetTrigramsOrdered = idx.fragmentsOrdered.get(targetEnriched.museumNumber) ?? [];
     if (!targetTrigrams || targetTrigrams.size === 0) {
       // Re-fetch live signs in case the index is stale for this fragment.
       const liveRes = await fetch(
@@ -2138,6 +2139,7 @@ server.registerTool(
         const liveBody = (await liveRes.json()) as { signs?: string };
         if (typeof liveBody.signs === "string") {
           targetTrigrams = trigramsFromSigns(liveBody.signs);
+          targetTrigramsOrdered = trigramsOrderedFromSigns(liveBody.signs);
         }
       }
     }
@@ -2172,6 +2174,10 @@ server.registerTool(
       union: number;
       candFingerprint: number;
       shared: string[]; // small deterministic sample
+      // v0.18.3 run-bonus calibration
+      longest_run: number;
+      run_bonus: number;
+      final_score: number;
     };
     const SHARED_SAMPLE_CAP = 10;
     const hits: Hit[] = [];
@@ -2189,6 +2195,24 @@ server.registerTool(
       const shared = sharedAll.slice(0, SHARED_SAMPLE_CAP);
       const intersection = sharedAll.length;
       const union = targetTrigrams.size + candSet.size - intersection;
+
+      // v0.18.3 — longest contiguous run of matching trigrams in the target's
+      // ordered position stream. Same pattern as fuzzyParallels v0.18.2.
+      let longestRun = 0;
+      let currentRun = 0;
+      for (const tri of targetTrigramsOrdered) {
+        if (candSet.has(tri)) {
+          currentRun++;
+          if (currentRun > longestRun) longestRun = currentRun;
+        } else {
+          currentRun = 0;
+        }
+      }
+      // Run-bonus: capped 0.5 lift; normalized by sqrt(target_trigrams).
+      const runFactor = Math.min(1, longestRun / Math.max(1, Math.sqrt(targetTrigrams.size)));
+      const runBonus = 0.5 * runFactor;
+      const finalScore = j * (1 + runBonus);
+
       hits.push({
         museumNumber: mn,
         jaccard: j,
@@ -2196,9 +2220,13 @@ server.registerTool(
         union,
         candFingerprint: candSet.size,
         shared,
+        longest_run: longestRun,
+        run_bonus: +runBonus.toFixed(4),
+        final_score: +finalScore.toFixed(4),
       });
     }
-    hits.sort((a, b) => b.jaccard - a.jaccard);
+    // v0.18.3: rank by final_score (jaccard × run-bonus) instead of bare jaccard
+    hits.sort((a, b) => b.final_score - a.final_score);
 
     const poolMns: string[] = [];
     for (const h of hits.slice(0, k * 3)) {
@@ -2230,7 +2258,8 @@ server.registerTool(
       const cand = enrichmentCache.get(h.museumNumber);
       const out: string[] = [];
       out.push(
-        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} jaccard=${h.jaccard.toFixed(4)} ` +
+        `${String(i + 1).padStart(3, " ")}. ${h.museumNumber.padEnd(20)} final=${h.final_score.toFixed(4)} ` +
+          `jaccard=${h.jaccard.toFixed(4)} run=${h.longest_run} bonus=${h.run_bonus.toFixed(3)} ` +
           `(∩=${h.intersection}, ∪=${h.union})` +
           (cand?.designation ? `   ${cand.designation}` : ""),
       );

@@ -15,6 +15,11 @@
 // sibling into top-30, compresses median rank of known siblings from 89→26
 // (3.4×), and only costs visibility on siblings already ranked ≥1700
 // (effectively unreachable). Recall@15 is unchanged at 22/87.
+//
+// v0.18.3 calibration: the index now also stores fragmentsOrdered (ordered
+// trigram lists) for the run-bonus calibration. Same pattern that lifted
+// fuzzyParallels in v0.18.2 — contiguous trigram runs evidence text-section
+// sibling pairs over scattered noise.
 
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -45,6 +50,25 @@ export function trigramsFromSigns(signs: string): Set<string> {
   return out;
 }
 
+// v0.18.3 — also return the ordered trigram list (positional) for the run-bonus
+// calibration that lifts text-section sibling pairs over scattered noise.
+export function trigramsOrderedFromSigns(signs: string): string[] {
+  const out: string[] = [];
+  if (!signs) return out;
+  for (const line of signs.split(/\r?\n/)) {
+    const toks = line.trim().split(/\s+/).filter(Boolean);
+    for (let i = 0; i + 2 < toks.length; i++) {
+      const a = toks[i],
+        b = toks[i + 1],
+        c = toks[i + 2];
+      const xCount = (a === "X" ? 1 : 0) + (b === "X" ? 1 : 0) + (c === "X" ? 1 : 0);
+      if (xCount >= 2) continue;
+      out.push(a + " " + b + " " + c);
+    }
+  }
+  return out;
+}
+
 export function jaccard(a: Set<string>, b: Set<string>): number {
   if (a.size === 0 || b.size === 0) return 0;
   const [small, big] = a.size <= b.size ? [a, b] : [b, a];
@@ -57,6 +81,7 @@ export function jaccard(a: Set<string>, b: Set<string>): number {
 export type SignsRecord = { _id: string; signs: string };
 export type SignsIndex = {
   fragments: Map<string, Set<string>>; // museum_number -> trigram set
+  fragmentsOrdered: Map<string, string[]>; // v0.18.3: ordered trigram list per tablet (for run-bonus)
   cachePath: string;
   ageMs: number | null;
   missing: boolean;
@@ -79,19 +104,23 @@ export async function loadSignsIndex(): Promise<SignsIndex> {
     try {
       stat = await fs.stat(cachePath);
     } catch {
-      cached = { fragments: new Map(), cachePath, ageMs: null, missing: true };
+      cached = { fragments: new Map(), fragmentsOrdered: new Map(), cachePath, ageMs: null, missing: true };
       return cached;
     }
     const raw = await fs.readFile(cachePath, "utf8");
     const records = JSON.parse(raw) as SignsRecord[];
     const fragments = new Map<string, Set<string>>();
+    const fragmentsOrdered = new Map<string, string[]>();
     for (const r of records) {
       if (!r._id || typeof r.signs !== "string") continue;
       const set = trigramsFromSigns(r.signs);
-      if (set.size > 0) fragments.set(r._id, set);
+      if (set.size === 0) continue;
+      fragments.set(r._id, set);
+      fragmentsOrdered.set(r._id, trigramsOrderedFromSigns(r.signs));
     }
     cached = {
       fragments,
+      fragmentsOrdered,
       cachePath,
       ageMs: Date.now() - stat.mtimeMs,
       missing: fragments.size === 0,
