@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/infer_damaged_sign.schema.json",
+  "title": "infer_damaged_sign data payload",
+  "description": "For each `X` (damaged-position token) in an eBL transliteration, suggest the most-probable sign based on bigram context across the eBL corpus. Scoring: geometric mean of P(sign | prev_sign) and P(sign | next_sign), with optional period/genre conditioning from the v0.13.1 metadata enrichment dataset. Bigram index built lazily from all-signs-full.json (36,498 tablets, ~1.8M bigrams). Wrapped in the StructuredEnvelope from envelope.schema.json.",
+  "type": "object",
+  "required": ["input_signs_length", "damaged_positions", "inferences", "conditioning", "index_stats"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": {
+      "type": ["string", "null"],
+      "description": "Museum number when the caller passed a tablet_id; null when raw signs were passed inline."
+    },
+    "input_signs_length": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of whitespace-separated tokens in the input signs string."
+    },
+    "damaged_positions": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0 },
+      "description": "Indices of all X/x tokens in the input. If `position` was passed in the call, only that single position is inferred (but this array still lists all damage positions in the input)."
+    },
+    "inferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["position", "context", "candidates"],
+        "additionalProperties": false,
+        "properties": {
+          "position": { "type": "integer", "minimum": 0 },
+          "context": {
+            "type": "object",
+            "required": ["prev_sign", "next_sign", "snippet"],
+            "additionalProperties": false,
+            "properties": {
+              "prev_sign": { "type": ["string", "null"] },
+              "next_sign": { "type": ["string", "null"] },
+              "snippet": { "type": "string", "description": "5-7 token window around the damaged position with [?] marking the inference target." }
+            }
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["sign", "score", "evidence"],
+              "additionalProperties": false,
+              "properties": {
+                "sign": { "type": "string" },
+                "score": { "type": "number", "description": "Combined probability score (higher = more likely). Geometric mean of P(sign|prev) and P(sign|next) with optional period/genre boosts." },
+                "evidence": {
+                  "type": "object",
+                  "required": ["forward_prob", "backward_prob", "forward_count", "backward_count", "total_corpus_count"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "forward_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "P(sign | prev_sign)." },
+                    "backward_prob": { "type": "number", "minimum": 0, "maximum": 1, "description": "P(sign | next_sign)." },
+                    "forward_count": { "type": "integer", "minimum": 0, "description": "Corpus count of bigram (prev_sign, candidate)." },
+                    "backward_count": { "type": "integer", "minimum": 0, "description": "Corpus count of bigram (candidate, next_sign)." },
+                    "total_corpus_count": { "type": "integer", "minimum": 0, "description": "Unconditional corpus frequency of the candidate sign." }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "conditioning": {
+      "type": "object",
+      "required": ["applied"],
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string", "description": "Period the caller requested (Neo_Assyrian, Neo_Babylonian, Old_Babylonian, etc.). Present only when caller passed it." },
+        "genre": { "type": "string", "description": "Genre the caller requested (literary, divinatory, magical_ritual, administrative, etc.). Present only when caller passed it." },
+        "applied": { "type": "boolean", "description": "True if conditioning was actually applied (only works when v0.13.1 tablet metadata covers the requested period/genre)." }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_tablets", "total_signs", "distinct_signs", "bigram_pairs"],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets": { "type": "integer" },
+        "total_signs": { "type": "integer" },
+        "distinct_signs": { "type": "integer" },
+        "bigram_pairs": { "type": "integer" }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional warnings about out-of-range positions, missing conditioning metadata, etc."
+    }
+  }
+}

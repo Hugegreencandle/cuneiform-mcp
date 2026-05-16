@@ -16,6 +16,11 @@ import {
   knownClusters,
 } from "./researchVault.js";
 import {
+  inferDamagedSigns,
+  getCachedSigns,
+  indexStats as signInferenceStats,
+} from "./signInference.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -128,7 +133,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.14.0";
+const VERSION = "0.14.2";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2885,6 +2890,140 @@ server.registerTool(
   },
 );
 
+// ─── v0.14.2 — Damaged-Tablet Sign-Inference Engine ────────────────────────
+
+server.registerTool(
+  "infer_damaged_sign",
+  {
+    description:
+      "For each `X` damaged-position token in an eBL transliteration, suggest the most-probable sign based on bigram context across the 36,498-tablet sign corpus. Scoring: geometric mean of P(sign | prev_sign) × P(sign | next_sign) with Laplace smoothing, plus optional period/genre conditioning from the v0.13.1 tablet metadata. Input either a museum number (e.g. 'K.3982') to fetch the cached signs, or a raw signs string. Index built lazily on first call (~3 sec), then cached. Useful for scholarly join/parallel work where you have a partial tablet and want to know what likely fills the gaps.",
+    inputSchema: {
+      tablet_id: z
+        .string()
+        .optional()
+        .describe("Museum number to fetch signs for (e.g., 'K.3982', 'BM.41255.C'). Mutually exclusive with `signs`."),
+      signs: z
+        .string()
+        .optional()
+        .describe("Raw signs string (whitespace + newline separated tokens, with `X` marking damaged positions). Mutually exclusive with `tablet_id`."),
+      position: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Specific position to infer (0-indexed token position). If omitted, all X positions in the input are inferred."),
+      period: z
+        .enum(["Old_Akkadian", "Ur_III", "Old_Babylonian", "Old_Assyrian", "Middle_Babylonian", "Middle_Assyrian", "Neo_Assyrian", "Neo_Babylonian", "Late_Babylonian", "Hellenistic"])
+        .optional()
+        .describe("Period to condition the inference on (boosts signs typical of that period). Only effective when the period is represented in v0.13.1 tablet metadata."),
+      genre: z
+        .enum(["literary", "divinatory", "magical_ritual", "lexical", "administrative", "mathematical", "astronomical", "royal_inscription", "technical"])
+        .optional()
+        .describe("Genre to condition the inference on. Only effective when the genre is represented in v0.13.1 tablet metadata."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe("Number of candidates returned per damaged position. Default 8."),
+      candidate_pool: z
+        .enum(["intersection", "union", "next_of_prev", "prev_of_next"])
+        .optional()
+        .describe("How to assemble the candidate pool. `intersection` (default, strictest): signs that follow `prev_sign` AND precede `next_sign`. Falls back to union if the intersection is empty. `union`: all candidates from either side. `next_of_prev`/`prev_of_next`: one side only (use when the other side is unavailable)."),
+    },
+  },
+  async ({ tablet_id, signs, position, period, genre, top_k, candidate_pool }) => {
+    const SCHEMA = schemaId("infer_damaged_sign");
+    try {
+      // Resolve signs source
+      let signsRaw: string;
+      let resolvedTabletId: string | null = null;
+      if (tablet_id) {
+        const cached = getCachedSigns(tablet_id);
+        if (!cached) {
+          return structuredResult(
+            `tablet_id '${tablet_id}' not found in the sign cache. Either the museum number is unknown or the cache hasn't been built. Run --prefetch or pass \`signs\` directly.`,
+            {
+              schema: SCHEMA,
+              data: {
+                tablet_id,
+                input_signs_length: 0,
+                damaged_positions: [] as number[],
+                inferences: [] as never[],
+                conditioning: { applied: false },
+                index_stats: signInferenceStats(),
+                warnings: [`tablet_id '${tablet_id}' not in cache`],
+              },
+              provenance: provenance("local", `local:sign-inference:${tablet_id}`, VERSION),
+            },
+          );
+        }
+        signsRaw = cached;
+        resolvedTabletId = tablet_id;
+      } else if (signs) {
+        signsRaw = signs;
+      } else {
+        throw new Error("must provide either tablet_id or signs");
+      }
+
+      const result = inferDamagedSigns(signsRaw, {
+        position,
+        period,
+        genre,
+        topK: top_k,
+        candidatePool: candidate_pool,
+      });
+
+      // Render
+      const lines = [
+        resolvedTabletId ? `Tablet: ${resolvedTabletId}` : "Inline signs input",
+        `Tokens: ${result.input_signs_length} · Damaged positions: ${result.damaged_positions.length}`,
+        period || genre ? `Conditioning: period=${period ?? "—"}, genre=${genre ?? "—"} (applied: ${result.conditioning.applied})` : null,
+        `Index: ${result.index_stats.total_tablets} tablets · ${result.index_stats.bigram_pairs.toLocaleString()} bigram pairs · ${result.index_stats.distinct_signs} distinct signs`,
+        ``,
+      ].filter((l) => l !== null);
+      for (const inf of result.inferences) {
+        lines.push(`── position ${inf.position}: ${inf.context.snippet}`);
+        if (inf.context.prev_sign) lines.push(`   prev: ${inf.context.prev_sign}`);
+        if (inf.context.next_sign) lines.push(`   next: ${inf.context.next_sign}`);
+        for (const c of inf.candidates) {
+          lines.push(`   ${c.sign.padEnd(16)} score=${c.score.toFixed(5)}  (fwd ${c.evidence.forward_prob.toFixed(4)} from ${c.evidence.forward_count} · bwd ${c.evidence.backward_prob.toFixed(4)} from ${c.evidence.backward_count} · total ${c.evidence.total_corpus_count})`);
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) {
+        lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: { tablet_id: resolvedTabletId, ...result },
+        provenance: provenance("local", "local:sign-inference-bigram-index", VERSION, {
+          citation: "Bigram inference over eBL all-signs-full.json corpus (36,498 tablets). v0.14.2.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`infer_damaged_sign error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id: tablet_id ?? null,
+          input_signs_length: 0,
+          damaged_positions: [] as never[],
+          inferences: [] as never[],
+          conditioning: { applied: false },
+          index_stats: { total_tablets: 0, total_signs: 0, distinct_signs: 0, bigram_pairs: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:sign-inference-bigram-index", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2905,7 +3044,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 19 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14 RAG over cuneiform-research vault)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 20 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine)\n`,
     );
     process.exit(0);
   }
