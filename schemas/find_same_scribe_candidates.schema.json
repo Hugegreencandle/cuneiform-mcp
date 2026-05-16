@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_same_scribe_candidates.schema.json",
+  "title": "find_same_scribe_candidates data payload",
+  "description": "v0.18 scribal-fingerprint clustering via per-tablet log-likelihood-ratio signature.",
+  "type": "object",
+  "required": ["query_tablet_id", "query_signature_size", "candidates", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query_tablet_id": { "type": "string" },
+    "query_signature_size": { "type": "integer", "minimum": 0 },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "signature_overlap_count", "signature_jaccard", "signature_cosine", "shared_top_signs"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "signature_overlap_count": { "type": "integer", "minimum": 0 },
+          "signature_jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+          "signature_cosine": { "type": "number", "minimum": -1, "maximum": 1 },
+          "shared_top_signs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["sign", "query_llr", "target_llr"],
+              "additionalProperties": false,
+              "properties": {
+                "sign": { "type": "string" },
+                "query_llr": { "type": "number" },
+                "target_llr": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_tablets", "candidates_examined"],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets": { "type": "integer", "minimum": 0 },
+        "candidates_examined": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

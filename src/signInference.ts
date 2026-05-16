@@ -397,3 +397,16 @@ export function indexStats() {
     genre_buckets: [...idx.byGenre.keys()],
   };
 }
+
+// v0.17.1 / v0.18 — expose the internal bigram index for downstream tools
+// (lacuna restorer + others that need the prev_sign/next_sign tables).
+export type BigramIndexHandle = {
+  prevOf: Map<string, Map<string, number>>;
+  nextOf: Map<string, Map<string, number>>;
+  totals: Map<string, number>;
+};
+
+export function getBigramIndex(): BigramIndexHandle {
+  const idx = buildIndex();
+  return { prevOf: idx.prevOf, nextOf: idx.nextOf, totals: idx.totals };
+}

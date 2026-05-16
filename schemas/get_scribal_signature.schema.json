@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_scribal_signature.schema.json",
+  "title": "get_scribal_signature data payload",
+  "description": "v0.18 per-tablet scribal-signature retrieval: top-30 signs by log-likelihood ratio.",
+  "type": "object",
+  "required": ["tablet_id", "signature_signs", "total_signs_in_tablet", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "signature_signs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sign", "count_in_tablet", "share_in_tablet", "corpus_share", "llr"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": { "type": "string" },
+          "count_in_tablet": { "type": "integer", "minimum": 0 },
+          "share_in_tablet": { "type": "number", "minimum": 0, "maximum": 1 },
+          "corpus_share": { "type": "number", "minimum": 0, "maximum": 1 },
+          "llr": { "type": "number" }
+        }
+      }
+    },
+    "total_signs_in_tablet": { "type": "integer", "minimum": 0 },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

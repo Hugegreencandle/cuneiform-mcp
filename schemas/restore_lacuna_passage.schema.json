@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/restore_lacuna_passage.schema.json",
+  "title": "restore_lacuna_passage data payload",
+  "description": "v0.18 multi-sign lacuna restoration via parallel-template alignment + bigram beam-search fallback.",
+  "type": "object",
+  "required": ["tablet_id", "lacuna", "context", "candidates", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": ["string", "null"] },
+    "lacuna": {
+      "type": "object",
+      "required": ["start", "end", "size"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "size": { "type": "integer" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["prefix", "suffix", "prefix_trigrams_count", "suffix_trigrams_count"],
+      "additionalProperties": false,
+      "properties": {
+        "prefix": { "type": "array", "items": { "type": "string" } },
+        "suffix": { "type": "array", "items": { "type": "string" } },
+        "prefix_trigrams_count": { "type": "integer", "minimum": 0 },
+        "suffix_trigrams_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["signs", "signs_str", "fill_length", "score", "method", "evidence"],
+        "additionalProperties": false,
+        "properties": {
+          "signs": { "type": "array", "items": { "type": "string" } },
+          "signs_str": { "type": "string" },
+          "fill_length": { "type": "integer", "minimum": 0 },
+          "score": { "type": "number" },
+          "method": { "type": "string", "enum": ["parallel_template", "beam_search"] },
+          "evidence": { "type": "object", "additionalProperties": true }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_tablets", "templates_examined", "template_matches_found", "fallback_to_beam_search"],
+      "additionalProperties": true
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

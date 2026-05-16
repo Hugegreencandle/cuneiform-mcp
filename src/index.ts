@@ -42,6 +42,15 @@ import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
+  restoreLacunaPassage,
+  lacunaIndexStats,
+} from "./lacunaRestore.js";
+import {
+  getScribalSignature,
+  findSameScribeCandidates,
+  scribalIndexStats,
+} from "./scribalFingerprint.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -154,7 +163,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.17.1";
+const VERSION = "0.18.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3670,6 +3679,177 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.0 — Lacuna restoration (multi-sign damaged-passage predictor) ───
+
+server.registerTool(
+  "restore_lacuna_passage",
+  {
+    description:
+      "Predict the most-probable sign sequence for a multi-sign damaged passage. Extends v0.14.2's single-sign infer_damaged_sign to multi-sign lacunae via parallel-template alignment (find templates whose local sign sequence contains BOTH a prefix-trigram and a suffix-trigram within distance k ± tolerance, extract the intervening signs as candidate fills) + bigram beam-search fallback when no parallel templates exist.",
+    inputSchema: {
+      tablet_id: z.string().optional().describe("Museum number to fetch signs for. Auto-detects the longest X stretch."),
+      signs: z.string().optional().describe("Raw signs string with X markers."),
+      lacuna_start: z.number().int().min(0).optional().describe("0-indexed start of the lacuna."),
+      lacuna_end: z.number().int().min(0).optional().describe("0-indexed end (exclusive)."),
+      prefix_window: z.number().int().min(3).max(20).optional().describe("Default 6."),
+      suffix_window: z.number().int().min(3).max(20).optional().describe("Default 6."),
+      top_k_candidates: z.number().int().min(1).max(30).optional().describe("Default 10."),
+      lacuna_size_tolerance: z.number().int().min(0).max(5).optional().describe("Default 2."),
+    },
+  },
+  async ({ tablet_id, signs, lacuna_start, lacuna_end, prefix_window, suffix_window, top_k_candidates, lacuna_size_tolerance }) => {
+    const SCHEMA = schemaId("restore_lacuna_passage");
+    try {
+      const result = restoreLacunaPassage({
+        tabletId: tablet_id, signs,
+        lacunaStart: lacuna_start, lacunaEnd: lacuna_end,
+        prefixWindow: prefix_window, suffixWindow: suffix_window,
+        topKCandidates: top_k_candidates, lacunaSizeTolerance: lacuna_size_tolerance,
+      });
+      const lines: string[] = [
+        `Tablet: ${result.tablet_id ?? "(inline)"}`,
+        `Lacuna: positions ${result.lacuna.start}-${result.lacuna.end} (size ${result.lacuna.size})`,
+        `Prefix: ${result.context.prefix.slice(-6).join(" ")}`,
+        `Suffix: ${result.context.suffix.slice(0, 6).join(" ")}`,
+        `Templates: ${result.index_stats.templates_examined} examined, ${result.index_stats.template_matches_found} matches, fallback=${result.index_stats.fallback_to_beam_search}`,
+        ``,
+        `Top candidates (${result.candidates.length}):`,
+      ];
+      for (const c of result.candidates) {
+        lines.push(`  [${c.method}] score=${c.score} fill_len=${c.fill_length}  signs: ${c.signs_str}`);
+        if (c.evidence.template_tablet) {
+          lines.push(`    template: ${c.evidence.template_tablet} jac=${c.evidence.local_jaccard} coh=${c.evidence.bigram_coherence}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA, data: result,
+        provenance: provenance("local", "local:lacuna-restore", VERSION, {
+          citation: "Multi-sign lacuna restoration via parallel-template alignment + bigram beam-search. v0.18.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`restore_lacuna_passage error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id: tablet_id ?? null,
+          lacuna: { start: -1, end: -1, size: 0 },
+          context: { prefix: [] as never[], suffix: [] as never[], prefix_trigrams_count: 0, suffix_trigrams_count: 0 },
+          candidates: [] as never[],
+          index_stats: { total_tablets: 0, templates_examined: 0, template_matches_found: 0, fallback_to_beam_search: false },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lacuna-restore", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.0 — Scribal fingerprint (orthographic-preference clustering) ────
+
+server.registerTool(
+  "find_same_scribe_candidates",
+  {
+    description:
+      "Find tablets with similar orthographic preferences — candidate same-scribe or same-scribal-school pairs. Computes per-tablet 'scribal signature' = top-30 signs by log-likelihood ratio of in-tablet vs. corpus-baseline frequency. Two tablets with overlapping signatures share unusual orthographic preferences (variant-sign choices, logogram-vs-syllabic habits, sign-compound preferences). NB: eBL transliterations normalize paleographic variation, so this measures 'spelling-preference fingerprint' rather than handwriting paleography.",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number. Must be ≥30 non-X sign tokens."),
+      top_k: z.number().int().min(1).max(30).optional().describe("Default 10."),
+      min_overlap: z.number().int().min(1).max(30).optional().describe("Min signature signs in common. Default 3."),
+      min_jaccard: z.number().min(0).max(1).optional().describe("Min signature Jaccard. Default 0.10."),
+    },
+  },
+  async ({ tablet_id, top_k, min_overlap, min_jaccard }) => {
+    const SCHEMA = schemaId("find_same_scribe_candidates");
+    try {
+      const result = findSameScribeCandidates({
+        tabletId: tablet_id, topK: top_k, minOverlap: min_overlap, minJaccard: min_jaccard,
+      });
+      const lines: string[] = [
+        `Query: ${tablet_id} · signature size: ${result.query_signature_size}`,
+        `Index: ${result.index_stats.total_tablets} tablets · examined: ${result.index_stats.candidates_examined}`,
+        ``,
+        `Candidates: ${result.candidates.length}`,
+      ];
+      for (const c of result.candidates) {
+        lines.push(``);
+        lines.push(`── ${c.tablet_id}  overlap=${c.signature_overlap_count} jac=${c.signature_jaccard} cos=${c.signature_cosine}`);
+        if (c.shared_top_signs.length > 0) {
+          lines.push(`   shared:`);
+          for (const s of c.shared_top_signs) {
+            lines.push(`     · ${s.sign.padEnd(16)} qLLR=${s.query_llr.toFixed(2)} tLLR=${s.target_llr.toFixed(2)}`);
+          }
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA, data: result,
+        provenance: provenance("local", "local:scribal-fingerprint", VERSION, {
+          citation: "Orthographic-preference fingerprint via per-tablet LLR signature. v0.18.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_same_scribe_candidates error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query_tablet_id: tablet_id, query_signature_size: 0,
+          candidates: [] as never[],
+          index_stats: { total_tablets: 0, candidates_examined: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:scribal-fingerprint", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "get_scribal_signature",
+  {
+    description:
+      "Retrieve the scribal-signature profile for a tablet: top-30 signs whose in-tablet frequency is unusually high (log-likelihood ratio) vs. corpus baseline. Use to inspect a tablet's orthographic preferences or to cross-check shared signs flagging a find_same_scribe_candidates pair.",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number."),
+    },
+  },
+  async ({ tablet_id }) => {
+    const SCHEMA = schemaId("get_scribal_signature");
+    try {
+      const result = getScribalSignature(tablet_id);
+      const lines: string[] = [
+        `Tablet: ${tablet_id}  · total signs: ${result.total_signs_in_tablet} · signature: ${result.signature_signs.length}`,
+        ``,
+      ];
+      if (result.signature_signs.length > 0) {
+        lines.push(`Top signature signs (sign · corpus_share · LLR):`);
+        for (const s of result.signature_signs) {
+          lines.push(`  ${s.sign.padEnd(20)} corpus=${s.corpus_share.toFixed(6)}  LLR=${s.llr}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA, data: result,
+        provenance: provenance("local", "local:scribal-fingerprint", VERSION),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`get_scribal_signature error: ${msg}`, {
+        schema: SCHEMA,
+        data: { tablet_id, signature_signs: [] as never[], total_signs_in_tablet: 0, warnings: [msg] },
+        provenance: provenance("local", "local:scribal-fingerprint", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3690,7 +3870,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 27 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 30 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint)\n`,
     );
     process.exit(0);
   }
@@ -3700,7 +3880,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (27 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (30 tools)\n`);
 }
 
 main().catch((err) => {
