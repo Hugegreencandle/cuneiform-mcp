@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_synthesis_claims.schema.json",
+  "title": "find_synthesis_claims data payload",
+  "description": "Returns paragraphs from the cuneiform-research vault that carry [my synthesis] / [unverified] / [Cluster synthesis…] markers. These are the novel-but-unsettled interpretive claims that the brief author has explicitly flagged as their own synthesis (not scholarly consensus). Wrapped in the StructuredEnvelope from envelope.schema.json.",
+  "type": "object",
+  "required": ["query", "claim_count", "claims"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": ["string", "null"], "description": "Optional question used to filter claims by BM25 relevance. Null when returning all claims." },
+    "claim_count": { "type": "integer", "minimum": 0 },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["brief", "section_path", "marker", "paragraph"],
+        "additionalProperties": false,
+        "properties": {
+          "brief": { "type": "string" },
+          "section_path": { "type": "string" },
+          "marker": { "type": "string", "description": "The exact marker text used (e.g. '[my synthesis]', '[Cluster synthesis — my reading]')." },
+          "paragraph": { "type": "string", "description": "The paragraph that contains the marker." }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/query_research.schema.json",
+  "title": "query_research data payload",
+  "description": "Structured payload returned by the `query_research` tool. BM25 retrieval over the cuneiform-research markdown vault. Wrapped in the StructuredEnvelope from envelope.schema.json. Source: local Research/ markdown vault, indexed at process startup.",
+  "type": "object",
+  "required": ["query", "hit_count", "hits"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": "string", "description": "The raw question text the caller passed." },
+    "cluster_filter": {
+      "type": "string",
+      "description": "Optional cluster constraint applied (one of: cosmology, theology, royal_myth, divination_science, reception_comparative, monuments, infrastructure, uncategorized)."
+    },
+    "brief_filter": {
+      "type": "string",
+      "description": "Optional substring filter against brief names."
+    },
+    "hit_count": { "type": "integer", "minimum": 0 },
+    "hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["brief", "section_path", "text", "score", "scholar_citations", "synthesis_flag", "cluster"],
+        "additionalProperties": false,
+        "properties": {
+          "brief": { "type": "string", "description": "Brief filename (without .md)." },
+          "section_path": { "type": "string", "description": "Heading of the section this chunk came from." },
+          "text": { "type": "string", "description": "Chunk text (up to ~1500 chars, paragraph-aligned)." },
+          "score": { "type": "number", "description": "BM25 relevance score; higher = more relevant." },
+          "scholar_citations": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Named-Assyriologist citations extracted from this chunk (e.g. 'Lambert 2013', 'George 2003')."
+          },
+          "synthesis_flag": {
+            "type": "boolean",
+            "description": "True if this chunk contains [my synthesis] or [unverified] markers."
+          },
+          "cluster": { "type": "string" }
+        }
+      }
+    }
+  }
+}

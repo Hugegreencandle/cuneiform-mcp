@@ -8,6 +8,14 @@ import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
 import { provenance, schemaId, type Provenance } from "./types.js";
 import {
+  queryResearch,
+  getBrief,
+  listBriefs,
+  findSynthesisClaims,
+  vaultStats,
+  knownClusters,
+} from "./researchVault.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -120,7 +128,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.13.4";
+const VERSION = "0.14.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -2607,6 +2615,276 @@ server.registerTool(
   },
 );
 
+// ─── v0.14.0 — RAG over the cuneiform-research markdown vault ─────────────
+
+server.registerTool(
+  "query_research",
+  {
+    description:
+      "Semantic-keyword search over the cuneiform-research vault — ~50 Mesopotamian scholarly briefs (cosmology, theology, royal myth, divination/science, reception, monuments). BM25 retrieval over section-chunked markdown. Each hit returns the chunk text, brief name, section heading, scholarly citations (named Assyriologists like Lambert 2013, George 2003), and a synthesis-flag indicating whether the chunk carries `[my synthesis]` / `[unverified]` markers. Index built lazily on first call from CUNEIFORM_RESEARCH_DIR (default ~/Desktop/Research).",
+    inputSchema: {
+      query: z
+        .string()
+        .min(1)
+        .describe("The question or phrase to search for. Examples: 'Inanna descent seven gates', 'Tablet of Shamash river preservation', 'apkallu Bīt mēseri figurines'."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe("Number of top hits to return. Default 6."),
+      cluster: z
+        .enum(["cosmology", "theology", "royal_myth", "divination_science", "reception_comparative", "monuments", "infrastructure", "uncategorized"])
+        .optional()
+        .describe("Restrict to one topical cluster. Default: all clusters."),
+      brief: z
+        .string()
+        .optional()
+        .describe("Substring filter against brief filenames (case-insensitive). E.g. 'Gilgamesh' to search only Gilgamesh_Epic.md."),
+    },
+  },
+  async ({ query, top_k, cluster, brief }) => {
+    const SCHEMA = schemaId("query_research");
+    try {
+      const hits = queryResearch(query, { topK: top_k, cluster, briefFilter: brief });
+      const lines = [
+        `Query: "${query}"`,
+        cluster ? `Cluster filter: ${cluster}` : null,
+        brief ? `Brief filter: ${brief}` : null,
+        ``,
+        `Hits: ${hits.length}`,
+        ``,
+      ].filter((l) => l !== null);
+      for (const h of hits) {
+        const synth = h.chunk.synthesis_flag ? "  [synthesis]" : "";
+        lines.push(`— ${h.chunk.brief}.md > ${h.chunk.section_path}   (score ${h.score.toFixed(3)})${synth}`);
+        if (h.chunk.scholar_citations.length > 0) {
+          lines.push(`  scholars: ${h.chunk.scholar_citations.slice(0, 6).join(", ")}${h.chunk.scholar_citations.length > 6 ? ", …" : ""}`);
+        }
+        const snippet = h.chunk.text.length > 360 ? h.chunk.text.slice(0, 360).trim() + "…" : h.chunk.text.trim();
+        lines.push(`  ${snippet.replace(/\n/g, " ")}`);
+        lines.push(``);
+      }
+      const data = {
+        query,
+        ...(cluster ? { cluster_filter: cluster } : {}),
+        ...(brief ? { brief_filter: brief } : {}),
+        hit_count: hits.length,
+        hits: hits.map((h) => ({
+          brief: h.chunk.brief,
+          section_path: h.chunk.section_path,
+          text: h.chunk.text,
+          score: h.score,
+          scholar_citations: h.chunk.scholar_citations,
+          synthesis_flag: h.chunk.synthesis_flag,
+          cluster: h.chunk.cluster,
+        })),
+      };
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data,
+        provenance: provenance("local", "local:cuneiform-research", VERSION, {
+          citation: "BM25 over the cuneiform-research markdown vault. CUNEIFORM_RESEARCH_DIR configurable.",
+        }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`query_research error: ${msg}`, {
+        schema: SCHEMA,
+        data: { query, hit_count: 0, hits: [] as never[] },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "get_brief",
+  {
+    description:
+      "Retrieve a specific research brief from the cuneiform-research vault by name. Returns paginated chunks (5 chunks per page) with section headings, citation lists, and synthesis-claim flags. Filenames are case-insensitive and the .md suffix is tolerated. Examples: 'Adapa', 'Royal_Descents', 'Tablet_of_Shamash'.",
+    inputSchema: {
+      name: z.string().min(1).describe("Brief name (without .md suffix). Case-insensitive."),
+      page: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("1-indexed page number. 5 chunks per page. Default 1."),
+    },
+  },
+  async ({ name, page }) => {
+    const SCHEMA = schemaId("get_brief");
+    try {
+      const result = getBrief(name, page ?? 1);
+      if (!result) {
+        const available = listBriefs().map((b) => b.name);
+        const near = available.filter((n) => n.toLowerCase().includes(name.toLowerCase().replace(/\.md$/i, ""))).slice(0, 10);
+        return structuredResult(
+          `Brief "${name}" not found in cuneiform-research vault.\n` +
+            (near.length > 0 ? `Near matches: ${near.join(", ")}\n` : "") +
+            `Use list_briefs to see all ${available.length} briefs.`,
+          {
+            schema: SCHEMA,
+            data: {
+              query: name,
+              found: false,
+              ...(near.length > 0 ? { available_briefs: near } : {}),
+            },
+            provenance: provenance("local", "local:cuneiform-research", VERSION),
+          },
+        );
+      }
+      const lines = [
+        `Brief: ${result.name}.md   (cluster: ${result.cluster})`,
+        `Page ${result.page} of ${result.total_pages}   (total chunks: ${result.total_chunks})`,
+        ``,
+      ];
+      for (const c of result.chunks) {
+        lines.push(`── ${c.section_path}${c.synthesis_flag ? "   [synthesis]" : ""}`);
+        if (c.scholar_citations.length > 0) {
+          lines.push(`   scholars: ${c.scholar_citations.slice(0, 8).join(", ")}${c.scholar_citations.length > 8 ? ", …" : ""}`);
+        }
+        lines.push(``);
+        lines.push(c.text.trim());
+        lines.push(``);
+      }
+      const data = {
+        query: name,
+        found: true,
+        name: result.name,
+        cluster: result.cluster,
+        page: result.page,
+        total_pages: result.total_pages,
+        total_chunks: result.total_chunks,
+        chunks: result.chunks.map((c) => ({
+          section_path: c.section_path,
+          text: c.text,
+          scholar_citations: c.scholar_citations,
+          synthesis_flag: c.synthesis_flag,
+        })),
+      };
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data,
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`get_brief error: ${msg}`, {
+        schema: SCHEMA,
+        data: { query: name, found: false },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "list_briefs",
+  {
+    description:
+      "Enumerate briefs in the cuneiform-research vault, optionally filtered by topical cluster. Returns per-brief summaries: name, cluster, section count, chunk count, total chars, unique scholarly citation count, and whether the brief contains [my synthesis] claims. Use this to discover what's in the vault before calling query_research or get_brief.",
+    inputSchema: {
+      cluster: z
+        .enum(["cosmology", "theology", "royal_myth", "divination_science", "reception_comparative", "monuments", "infrastructure", "uncategorized"])
+        .optional()
+        .describe("Restrict to one cluster. Omit to list all briefs across all clusters."),
+    },
+  },
+  async ({ cluster }) => {
+    const SCHEMA = schemaId("list_briefs");
+    try {
+      const briefs = listBriefs(cluster);
+      const stats = vaultStats();
+      const lines = [
+        `cuneiform-research vault — ${stats.dir}`,
+        `${stats.briefs} briefs total · ${stats.chunks} chunks · ${stats.total_chars.toLocaleString()} chars`,
+        cluster ? `Filter: cluster=${cluster}` : null,
+        ``,
+        `Briefs (${briefs.length}):`,
+        ``,
+      ].filter((l) => l !== null);
+      for (const b of briefs) {
+        const synth = b.has_synthesis_claims ? "  [synthesis]" : "";
+        lines.push(`  ${b.name.padEnd(40)} ${b.cluster.padEnd(24)} ${String(b.chunk_count).padStart(3)} chunks · ${String(b.citation_count).padStart(3)} cites${synth}`);
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: {
+          cluster_filter: cluster ?? null,
+          brief_count: briefs.length,
+          briefs,
+          clusters_available: knownClusters(),
+          vault_stats: {
+            dir: stats.dir,
+            total_briefs: stats.briefs,
+            total_chunks: stats.chunks,
+            total_chars: stats.total_chars,
+          },
+        },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`list_briefs error: ${msg}`, {
+        schema: SCHEMA,
+        data: { cluster_filter: cluster ?? null, brief_count: 0, briefs: [] as never[], clusters_available: knownClusters() },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_synthesis_claims",
+  {
+    description:
+      "Find all `[my synthesis]` / `[unverified]` / `[Cluster synthesis — my reading]` flagged paragraphs across the cuneiform-research vault. These are the novel interpretive claims the brief author has explicitly marked as their own synthesis (vs. scholarly consensus) — the structural readings worth defending or testing. Optional query string filters to claims relevant to a topic via BM25.",
+    inputSchema: {
+      query: z
+        .string()
+        .optional()
+        .describe("Optional question to filter synthesis claims by BM25 relevance. Omit to return all flagged claims."),
+    },
+  },
+  async ({ query }) => {
+    const SCHEMA = schemaId("find_synthesis_claims");
+    try {
+      const claims = findSynthesisClaims(query);
+      const lines = [
+        query ? `Query: "${query}"` : `All synthesis-flagged claims:`,
+        ``,
+        `Claims: ${claims.length}`,
+        ``,
+      ];
+      for (const c of claims) {
+        lines.push(`── ${c.brief}.md > ${c.section_path}   ${c.marker}`);
+        const trimmed = c.paragraph.length > 500 ? c.paragraph.slice(0, 500).trim() + "…" : c.paragraph.trim();
+        lines.push(trimmed.replace(/\n/g, " "));
+        lines.push(``);
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: { query: query ?? null, claim_count: claims.length, claims },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_synthesis_claims error: ${msg}`, {
+        schema: SCHEMA,
+        data: { query: query ?? null, claim_count: 0, claims: [] as never[] },
+        provenance: provenance("local", "local:cuneiform-research", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -2627,7 +2905,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 15 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 19 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14 RAG over cuneiform-research vault)\n`,
     );
     process.exit(0);
   }

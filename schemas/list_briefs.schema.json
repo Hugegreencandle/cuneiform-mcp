@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/list_briefs.schema.json",
+  "title": "list_briefs data payload",
+  "description": "Enumerates briefs in the cuneiform-research vault, optionally filtered by topical cluster. Wrapped in the StructuredEnvelope from envelope.schema.json.",
+  "type": "object",
+  "required": ["cluster_filter", "brief_count", "briefs", "clusters_available"],
+  "additionalProperties": false,
+  "properties": {
+    "cluster_filter": {
+      "type": ["string", "null"],
+      "description": "Cluster constraint applied; null when listing all clusters."
+    },
+    "brief_count": { "type": "integer", "minimum": 0 },
+    "briefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "cluster", "section_count", "chunk_count", "total_chars", "citation_count", "has_synthesis_claims"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "cluster": { "type": "string" },
+          "section_count": { "type": "integer", "minimum": 0 },
+          "chunk_count": { "type": "integer", "minimum": 0 },
+          "total_chars": { "type": "integer", "minimum": 0 },
+          "citation_count": { "type": "integer", "minimum": 0, "description": "Unique scholarly citations detected." },
+          "has_synthesis_claims": { "type": "boolean" }
+        }
+      }
+    },
+    "clusters_available": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "The canonical cluster names recognized by the classifier."
+    },
+    "vault_stats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dir": { "type": "string" },
+        "total_briefs": { "type": "integer" },
+        "total_chunks": { "type": "integer" },
+        "total_chars": { "type": "integer" }
+      }
+    }
+  }
+}

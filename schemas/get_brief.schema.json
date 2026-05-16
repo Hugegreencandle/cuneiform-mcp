@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_brief.schema.json",
+  "title": "get_brief data payload",
+  "description": "Returns a specific research brief by name, paginated. Wrapped in the StructuredEnvelope from envelope.schema.json. Source: local Research/ markdown vault.",
+  "type": "object",
+  "required": ["query", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "query": { "type": "string", "description": "Brief name as requested (case-insensitive, .md suffix tolerated)." },
+    "found": { "type": "boolean" },
+    "name": { "type": "string", "description": "Canonical brief filename (without .md) when found=true." },
+    "cluster": { "type": "string" },
+    "page": { "type": "integer", "minimum": 1 },
+    "total_pages": { "type": "integer", "minimum": 1 },
+    "total_chunks": { "type": "integer", "minimum": 0 },
+    "chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section_path", "text", "scholar_citations", "synthesis_flag"],
+        "additionalProperties": false,
+        "properties": {
+          "section_path": { "type": "string" },
+          "text": { "type": "string" },
+          "scholar_citations": { "type": "array", "items": { "type": "string" } },
+          "synthesis_flag": { "type": "boolean" }
+        }
+      }
+    },
+    "available_briefs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "When found=false: a short list of similar brief names that DO exist in the vault."
+    }
+  }
+}
