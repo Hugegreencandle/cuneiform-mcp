@@ -45,6 +45,18 @@
       "novel_methodological_discovery": "Engine failure mode identified: COLOPHON-TEMPLATE FALSE POSITIVES. This is a real (and reportable) discovery about the failure modes of trigram-Jaccard parallel-detection over the eBL corpus. The engine WILL flag any Ashurbanipal-library tablet as a 'parallel' to the Asb.* prototype because they share the colophon vocabulary. v0.13.5 must add a corpus pre-filter excluding prototype entries.",
       "outcome_summary": "Mid-tier (rank 6-22) validation yielded 4 validated_as_known (Udug Hul IX + Ninmešara + ACT 207a/b + ACT 207a/c) and 2 rejected_as_artifact (colophon-template false positives). Combined with v0.13.2 (5/5 validated_as_known), the engine's CONFIRMED CALIBRATION is: 9/11 candidates evaluated → real intertextual parallels (all already documented by eBL editors or in published canonical editions), 2/11 candidates → colophon-template artifacts. The novel-findings rate remains 0/11 in the top tier; v0.13.5 corpus-cleaning + v0.13.6 deeper-tier validation are the next steps.",
       "next_steps": "v0.13.5 — corpus pre-filter excluding Asb.*/MB.*/colophon-template prototype records; re-score the entire corpus. v0.13.6 — validate jaccard 0.20-0.30 candidates (deeper tier where eBL editors are less likely to have curated). v0.13.3 (deferred from v0.13.2) — full-corpus pass beyond the 200-tablet sample."
+    },
+    "v0_14_4_exclusion_pass": {
+      "pass_date": "2026-05-16",
+      "pass_by": "v0.14.4 corpus-exclusion pass — closes task #67",
+      "exclusion_list_source": "data/corpus-exclusions.json",
+      "excluded_record_count": 22,
+      "candidates_reviewed": 335,
+      "candidates_involving_excluded_records": 3,
+      "newly_marked_rejected": 1,
+      "already_rejected": 2,
+      "rationale": "v0.13.4 calibration identified the colophon-template false-positive class: 2 of 11 top candidates were Asb.* prototype-record matches rather than real intertextual parallels. The Asb.* records in eBL are colophon-type prototypes (Hunger 1968 BAK Types A-Z) that aggregate standardized colophon language across 100-200+ Ashurbanipal-library manuscripts each. Any Kuyunjik tablet trigram-matches them because both share the palace-colophon vocabulary. v0.14.4 (a) excludes all 20 known prototype records from the Discovery Engine corpus at index-build time (scripts/discovery-primary-v2.mjs), and (b) retroactively marks all surfaced Asb.* parallels in the current dataset as rejected_as_artifact.",
+      "next_steps": "v0.14.5 (queued) — extend the exclusion taxonomy to any other corpus-artifact classes that surface in future validation passes. v0.13.6 (queued) — validate jaccard 0.20-0.30 mid-tier candidates, now that prototype-class noise is filtered."
     }
   },
   "parallels": [
@@ -864,7 +876,15 @@
       "novelty_score": 0.4269,
       "discovered_by": "ai_corpus_traversal",
       "discovery_date": "2026-05-15",
-      "validation_status": "pending"
+      "validation_status": "rejected_as_artifact",
+      "validation_log": {
+        "validated_on": "2026-05-16",
+        "validated_by": "v0.14.4 corpus-exclusion pass — closes task #67",
+        "validation_method": "v0.14.4 corpus-exclusion pass. Asb.q is on the prototype-exclusion list (see data/corpus-exclusions.json). Hunger 1968 BAK colophon-type prototype; aggregates standardized Ashurbanipal-library palace-colophon language across many manuscripts. Sign-trigram similarity with any Kuyunjik tablet reflects formulaic colophon-language match, not meaningful intertextual content.",
+        "known_publication": null,
+        "rejection_reason": "colophon_template_false_positive"
+      },
+      "notes": "v0.14.4 exclusion pass: Asb.q is a Hunger 1968 BAK Type-Q Ashurbanipal-library palace colophon prototype, not an individual tablet."
     },
     {
       "id": "psp-2026-05-15-0162",

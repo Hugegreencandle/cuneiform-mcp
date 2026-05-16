@@ -10,6 +10,17 @@ import { join } from "node:path";
 const CACHE_DIR = process.env.CUNEIFORM_MCP_CACHE_DIR || join(homedir(), ".cache", "cuneiform-mcp");
 const SIGNS_CACHE = join(CACHE_DIR, "all-signs-full.json");
 const OUT_PATH = "/Users/danebrown/Desktop/cuneiform-mcp/data/primarySourceParallels.json";
+const EXCLUSIONS_PATH = "/Users/danebrown/Desktop/cuneiform-mcp/data/corpus-exclusions.json";
+
+// v0.14.4 (task #67) — corpus pre-filter for colophon-template prototype records
+let EXCLUDED_IDS = new Set();
+try {
+  const ex = JSON.parse(readFileSync(EXCLUSIONS_PATH, "utf-8"));
+  EXCLUDED_IDS = new Set((ex.excluded_records ?? []).map((r) => r.id));
+  console.error(`Loaded exclusion list: ${EXCLUDED_IDS.size} prototype records will be filtered out`);
+} catch (e) {
+  console.error(`(no exclusion list found at ${EXCLUSIONS_PATH}; running without prototype filter)`);
+}
 
 // CLI args
 const args = process.argv.slice(2);
@@ -61,12 +72,15 @@ function trigramsFromSigns(signs) {
 console.error("Building trigram index...");
 const t1 = Date.now();
 const fragments = new Map();
+let skippedExcluded = 0;
 for (const r of records) {
   if (!r._id || typeof r.signs !== "string") continue;
+  if (EXCLUDED_IDS.has(r._id)) { skippedExcluded++; continue; } // v0.14.4 — skip prototype records
   const set = trigramsFromSigns(r.signs);
   if (set.size >= MIN_TRIGRAM_COUNT) fragments.set(r._id, set);
 }
 console.error(`  ${fragments.size} tablets with >=${MIN_TRIGRAM_COUNT} trigrams (${((Date.now() - t1) / 1000).toFixed(1)}s)`);
+if (skippedExcluded > 0) console.error(`  filtered out ${skippedExcluded} excluded prototype records`);
 
 // Sample query tablets (deterministic via seed)
 function* lcg(seed) {

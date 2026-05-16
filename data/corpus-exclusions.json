@@ -1,0 +1,153 @@
+{
+  "_meta": {
+    "compiled": "2026-05-16",
+    "version": "v0.14.4",
+    "compiler": "cuneiform-mcp v0.14.4 (closes task #67)",
+    "discipline": "Records excluded from Discovery Engine v2.0 (discover_primary_source_parallels) because they are CORPUS ARTIFACTS — colophon-type prototypes, format templates, or other meta-records that aggregate standardized language across many manuscripts rather than representing individual tablets. Sign-trigram parallels involving these records generate systematic false positives (the v0.13.4 calibration pass surfaced the colophon-template false-positive class explicitly). Loaded by scripts/discovery-primary-v2.mjs and applied at index-build time so excluded records never enter the candidate pool.",
+    "total_exclusions": 20,
+    "exclusion_categories": [
+      "colophon_template_prototype — Ashurbanipal-colophon type prototypes (Hunger 1968 BAK Types A-Z) that aggregate standardized AN.ŠÁR-DÙ-A É.GAL colophon vocabulary across 100-200 manuscripts each. Their trigram-similarity to any Kuyunjik tablet reflects formulaic colophon-language match, not meaningful intertextual content."
+    ],
+    "discovered_by": "Discovery Engine v0.13.4 mid-tier validation pass (2026-05-15) — K.3716 ↔ Asb.d and K.3716 ↔ Asb.c surfaced as cross-genre 'parallels' between an unidentified Kuyunjik fragment and what turned out to be colophon-type prototypes (Asb.d = 116 manuscripts; Asb.c = 212 manuscripts; per eBL editor notes 'SC'). These are formulaic artifacts, not true intertextual parallels. v0.14.4 closes the loop by excluding all 20 Asb.* prototype records from the discovery corpus.",
+    "scholarly_anchor": "Hunger, H. 1968. *Babylonische und assyrische Kolophone*. AOAT 2. Neukirchen-Vluyn. The canonical typology of Mesopotamian colophons. The 'Asb' prefix denotes Ashurbanipal-library colophon types A through Z; eBL records each type as a virtual record aggregating the standardized colophon language across all manuscripts of that type."
+  },
+  "excluded_records": [
+    {
+      "id": "Asb.a",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "manuscript_count_eBL": null,
+      "rationale": "Hunger 1968 BAK Type-A Ashurbanipal-library palace colophon prototype. Not an individual tablet."
+    },
+    {
+      "id": "Asb.b",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-B Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.c",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "manuscript_count_eBL": 212,
+      "manuscript_count_source": "eBL editor note SC: '212 records: 54% magic, 4% medicine, 1% literature, 1% lexicography, 0% astrology, 0% hemerology?, 39% uncertain'",
+      "rationale": "Hunger 1968 BAK Type-C Ashurbanipal-library palace colophon. Aggregates colophon language across 212 manuscripts. v0.13.4 first identified the false-positive class via the K.3716 ↔ Asb.c parallel."
+    },
+    {
+      "id": "Asb.d",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "manuscript_count_eBL": 116,
+      "manuscript_count_source": "eBL editor note: '116 records: Literature 16%, Lexicography 15%, Magic 11%, Hymn 7%, Astrology 5%, Terrestrial 5%, Medicine (diagnostics) 4%, Teratological texts 4%, Physiognomy 3%, historiography 3%, Hemerology 1%, Kalûtu 1%, Catalogue 1%, Astronomy 1%, Unclear 22%'",
+      "rationale": "Hunger 1968 BAK Type-D Ashurbanipal-library palace colophon. Aggregates colophon language across 116 manuscripts."
+    },
+    {
+      "id": "Asb.e",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-E Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.f",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-F Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.g",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-G Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.group.1",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_aggregate",
+      "rationale": "eBL Asb-group aggregate record. Combines colophon language across a sub-group of Ashurbanipal manuscripts."
+    },
+    {
+      "id": "Asb.h",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-H Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.i",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-I Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.k",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-K Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.k.var",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type_variant",
+      "rationale": "Variant of Asb.k. eBL records Type-K variants separately when the colophon language differs in a meaningful way."
+    },
+    {
+      "id": "Asb.l",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-L Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.m",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-M Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.n",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-N Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.o",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-O Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.p",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-P Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.q",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-Q Ashurbanipal-library palace colophon prototype. v0.13.4 identified K.3716 ↔ Asb.q + K.7836 ↔ Asb.q as false positives."
+    },
+    {
+      "id": "Asb.r",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-R Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.s",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-S Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.t",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-T Ashurbanipal-library palace colophon prototype."
+    },
+    {
+      "id": "Asb.v",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "rationale": "Hunger 1968 BAK Type-V Ashurbanipal-library palace colophon prototype."
+    }
+  ]
+}
