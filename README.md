@@ -1,18 +1,26 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus a Discovery Engine and an indexed scholarly-research vault — to LLM agents. 19 tools, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, and a curated Mesopotamian ↔ Hebrew Bible parallel database — to LLM agents. **21 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
 
-## What's new — v0.14.0 · RAG over the research vault
+## What's new — v0.14.4
 
-Added BM25 retrieval over a local cuneiform-research markdown vault (default `~/Desktop/Research/`, overridable via `CUNEIFORM_RESEARCH_DIR`). Four new tools — `query_research`, `get_brief`, `list_briefs`, `find_synthesis_claims` — turn ~50 Mesopotamian scholarly briefs into a queryable knowledge surface with named-Assyriologist citation extraction and explicit `[my synthesis]` flagging. Index built lazily, cached for process lifetime. No new dependencies.
+Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-template false-positive class identified in v0.13.4 calibration. All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are now filtered out of the Discovery Engine's candidate pool at index-build time. Reduces v0.13 false-positive surface to zero on this class.
 
-Sample: 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims indexed.
+**Recent v0.14 train:**
+- **v0.14.3** — `find_biblical_parallel`: 15 canonical Mesopotamian ↔ Hebrew Bible parallels (Flood, Creation, Eden/Adapa, Babel, Job/Theodicy, Eccl/Šiduri, Daniel 7 beasts, Ezekiel 1 chariot, Leviathan, Song of Songs, Isaiah 14 hubris, Proverbs, plant of life, sacrifice-flies, healing serpent) with named-Assyriologist attribution + transmission hypothesis + brief-in-vault pointer.
+- **v0.14.2** — `infer_damaged_sign`: bigram-context inference engine over the 36,498-tablet eBL corpus (4.69 M bigram pairs). Suggests ranked sign-candidates for each `X` damaged-position token with optional period/genre conditioning.
+- **v0.14.1** — Apsû Explorer backend integration: hard-coded entity panels now pull full brief content from the research vault via `get_brief`.
+- **v0.14.0** — RAG over cuneiform-research vault: 4 tools (`query_research`, `get_brief`, `list_briefs`, `find_synthesis_claims`) indexing 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims.
 
 ## Release lineage
 
 | Version | Headline |
 |---|---|
-| v0.14.0 | RAG over the cuneiform-research markdown vault (4 tools) |
+| **v0.14.4** | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
+| **v0.14.3** | `find_biblical_parallel` — 15 canonical Mesopotamian ↔ Hebrew Bible parallels |
+| **v0.14.2** | `infer_damaged_sign` — bigram-context sign-inference engine |
+| **v0.14.1** | Apsû Explorer backend integration (apsu-explorer repo) |
+| **v0.14.0** | RAG over the cuneiform-research markdown vault (4 tools) |
 | v0.13.4 | Discovery Engine v2.0 mid-tier validation — 9/11 known + 2/11 colophon-template artifact |
 | v0.13.0 | Primary-Source Discovery Engine — corpus traversal with cross-boundary scoring |
 | v0.8–v0.12 | Mesopotamian-internal expansions (flood narratives, apkallū attestations, antediluvian parallels, candidate discovery) |
@@ -22,7 +30,7 @@ Sample: 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims indexed.
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 19 tools live
+## 21 tools live
 
 ### Corpus retrieval (v0.1–v0.5)
 
@@ -59,7 +67,7 @@ Sample: 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims indexed.
 |---|---|
 | `discover_primary_source_parallels` | Pairwise sign-trigram Jaccard over the eBL 36,498-tablet sign corpus, with cross-boundary scoring (genre/period/city) and validation-status filtering. Calibrated 9/11 true-positive rate on top-tier candidates (2026-05-15). |
 
-### RAG over the cuneiform-research vault (v0.14) — NEW
+### RAG over the cuneiform-research vault (v0.14.0)
 
 | Tool | What it does |
 |---|---|
@@ -67,6 +75,18 @@ Sample: 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims indexed.
 | `get_brief` | Retrieve a specific brief by name (case-insensitive, .md tolerated), paginated 5 chunks per page. |
 | `list_briefs` | Enumerate briefs by cluster (cosmology / theology / royal_myth / divination_science / reception_comparative / monuments / infrastructure). |
 | `find_synthesis_claims` | Surface all paragraphs flagged `[my synthesis]` / `[unverified]` / `[Cluster synthesis]` — the author's explicitly-novel interpretive claims (vs. scholarly consensus). 82 currently indexed. |
+
+### Sign-inference engine (v0.14.2)
+
+| Tool | What it does |
+|---|---|
+| `infer_damaged_sign` | For each `X` damaged-position token in an eBL transliteration, suggest the most-probable sign via bigram context (`P(sign\|prev) × P(sign\|next)`) with Laplace smoothing + optional period/genre conditioning. Bigram index: 36,498 tablets, 4.69 M pairs, 8,757 distinct signs. Built lazily on first call (~5 sec). Real assyriological tool. |
+
+### Biblical-parallel finder (v0.14.3)
+
+| Tool | What it does |
+|---|---|
+| `find_biblical_parallel` | 15 canonical Mesopotamian ↔ Hebrew Bible parallels with named-Assyriologist attribution + transmission hypothesis + `brief_in_vault` pointer. Look up by biblical reference (`Gen 6:9`, `Job 3`), theme (`flood`, `wisdom`, `throne-chariot`), or Mesopotamian source (`Atrahasis`, `Gilgamesh`, `Enuma Elish`). Strong-consensus (12) + moderate-consensus (3) parallels. Composes with `get_brief` for drill-down. |
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
 
@@ -91,12 +111,12 @@ Add to `~/.claude.json` (or the equivalent MCP-config path for your client) unde
 }
 ```
 
-Restart Claude Code. The 19 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 21 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "19 tools registered" and exits
+npm run smoke   # prints "21 tools registered" and exits
 ```
 
 ## Environment variables

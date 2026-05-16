@@ -1,8 +1,8 @@
-# cuneiform-mcp Protocol — v0.14.0
+# cuneiform-mcp Protocol — v0.14.4
 
 > Every result should be inspectable, citeable, and reproducible.
 
-This is the published interface for cuneiform-mcp's **nineteen** tools. Each tool
+This is the published interface for cuneiform-mcp's **twenty-one** tools. Each tool
 returns BOTH a human-readable rendered text block (in the standard MCP
 `content[0]` field) AND a typed `structuredContent` envelope. Downstream
 agents should chain on the structured fields; the rendered text is for
@@ -50,9 +50,11 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The nineteen tools
+## The twenty-one tools
 
-> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus.
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel.
+
+**v0.14.4** adds a corpus-exclusion pre-filter to the Discovery Engine v2.0 (`data/corpus-exclusions.json`). All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are now filtered out at index-build time so they cannot enter the candidate pool. This closes the colophon-template false-positive class identified in v0.13.4 calibration.
 
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
@@ -566,6 +568,141 @@ Surface all paragraphs flagged `[my synthesis]`, `[unverified]`, or `[Cluster sy
 
 82 synthesis claims currently indexed across the vault (2026-05-16). Provenance: `source: local`, `endpoint: local:cuneiform-research`.
 
+## v0.14.2 — Damaged-Tablet Sign-Inference Engine
+
+For each `X` damaged-position token in an eBL transliteration, suggest the most-probable sign via bigram context across the 36,498-tablet eBL corpus. Score = geometric mean of `P(sign | prev_sign)` and `P(sign | next_sign)` with Laplace smoothing (ε = 1e-5). Optional period/genre conditioning soft-boosts candidates typical of the queried context.
+
+Index built lazily on first call (~5 seconds): 36,498 tablets · 4,874,046 sign tokens · 8,757 distinct signs · 4,688,092 bigram pairs · 7 period buckets · 6 genre buckets. v0.13.1 tablet metadata provides the period/genre conditioning when available.
+
+### `infer_damaged_sign` — schema: [infer_damaged_sign.schema.json](schemas/infer_damaged_sign.schema.json)
+
+```jsonc
+// example: infer_damaged_sign({tablet_id: "K.3982", top_k: 3}) → structuredContent.data
+{
+  "tablet_id": "K.3982",
+  "input_signs_length": 312,
+  "damaged_positions": [20, 215, 317],
+  "inferences": [
+    {
+      "position": 20,
+      "context": {
+        "prev_sign": "ABZ319",
+        "next_sign": "ABZ411",
+        "snippet": "ABZ230 ABZ332 ABZ319 [?] ABZ411 ABZ69 ABZ230"
+      },
+      "candidates": [
+        {"sign": "ABZ411", "score": 0.07498, "evidence": {"forward_prob": 0.0223, "backward_prob": 0.2519, "forward_count": 327, "backward_count": 76308, "total_corpus_count": 84127}},
+        {"sign": "ABZ13",  "score": 0.05184, "evidence": {"forward_prob": 0.1180, "backward_prob": 0.0228, "forward_count": 1728, "backward_count": 6905, "total_corpus_count": 9482}}
+        // …more
+      ]
+    }
+    // …more positions
+  ],
+  "conditioning": {"applied": false},
+  "index_stats": {"total_tablets": 36498, "total_signs": 4874046, "distinct_signs": 8757, "bigram_pairs": 4688092}
+}
+```
+
+**Candidate-pool selection** (controlled via `candidate_pool` argument):
+- `intersection` (default, strictest) — signs that followed `prev_sign` AND preceded `next_sign`. Falls back to union if intersection is empty.
+- `union` — all signs from either side.
+- `next_of_prev` — only signs that followed `prev_sign` (use when `next_sign` is missing / unreliable).
+- `prev_of_next` — symmetric to above.
+
+Provenance: `source: local`, `endpoint: local:sign-inference-bigram-index`, `citation` notes v0.14.2 corpus version.
+
+## v0.14.3 — Mesopotamian ↔ Hebrew Bible Parallel Finder
+
+A curated dataset of canonical Mesopotamian textual parallels to Hebrew Bible passages, with named-Assyriologist attribution + transmission hypothesis + `brief_in_vault` pointer per parallel for drill-down via `get_brief`. 15 parallels initial dataset (compiled 2026-05-16): 12 strong-consensus + 3 moderate-consensus. 63 unique scholarly citations.
+
+**Coverage:** Flood (Gen 6-9 ↔ Atrahasis + Sumerian Flood + Gilgamesh XI + Berossus) · Creation (Gen 1 ↔ Enuma Elish) · Eden (Gen 2-3 ↔ Adapa + Gilgamesh plant of rejuvenation) · Babel (Gen 11 ↔ Etemenanki + Enmerkar's spell of Nudimmud) · Theodicy (Job ↔ Babylonian Theodicy + Ludlul Bel Nemeqi) · Vanity (Ecclesiastes ↔ Šiduri's speech in Gilg X + Šamaš Hymn) · Apocalyptic Beasts (Daniel 7 ↔ Enuma Elish monsters + Anzu) · Throne-Chariot (Ezekiel 1 ↔ Apkallū iconography + Lamassu) · Cosmic Dragon (Leviathan ↔ Tiamat + Ugaritic Lotan) · Sacred Marriage (Song of Songs ↔ Inanna-Dumuzi liturgy) · Royal Hubris (Isaiah 14 ↔ Etana ascent + Mesopotamian royal-deification) · Wisdom (Proverbs ↔ Sumerian + Akkadian wisdom literature) · Plant of Life (Gen 3:22-24 ↔ Gilgamesh's plant) · Sacrifice Savor (Gen 8:21 ↔ Atra-ḫasīs III v 35 "gods like flies") · Healing Serpent (Numbers 21 Nehushtan ↔ Ningishzida iconography).
+
+### `find_biblical_parallel` — schema: [find_biblical_parallel.schema.json](schemas/find_biblical_parallel.schema.json)
+
+```jsonc
+// example: find_biblical_parallel({biblical_reference: "Gen 6:9"}) → structuredContent.data
+{
+  "query": {"biblical_reference": "Gen 6:9"},
+  "match_count": 1,
+  "parallels": [
+    {
+      "id": "bp-flood-1",
+      "biblical": {
+        "reference": "Genesis 6:9–9:17",
+        "theme": "The Great Flood",
+        "summary": "Noah is warned by Yahweh of an impending universal flood. He builds an ark of gopher wood …"
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Atra-ḫasīs Epic",
+          "tablet_reference": "Atra-ḫasīs III (Old Babylonian, c. 1700 BCE)",
+          "summary": "Atra-ḫasīs warned by Enki through the reed wall of his hut, builds a boat. Loads animals + family …",
+          "brief_in_vault": "Atrahasis"
+        },
+        {"text": "Sumerian Flood Story (Ziusudra)", "tablet_reference": "WB 62", "brief_in_vault": "Sumerian_Flood_Story", "summary": "…"},
+        {"text": "Standard Babylonian Gilgamesh, Tablet XI", "brief_in_vault": "Gilgamesh_Epic", "summary": "…"},
+        {"text": "Berossus, Babyloniaca", "brief_in_vault": "Berossus", "summary": "…"}
+      ],
+      "shared_elements": [
+        "Divine warning to a chosen mortal",
+        "Construction of a large boat by divine instruction",
+        "Bird-sending sequence to test the receding waters (raven + dove)",
+        "Landing on a mountain (Ararat / Niṣir)",
+        "Burnt offering sacrifice upon emerging",
+        "…"
+      ],
+      "scholarly_attribution": [
+        "Smith 1872 — original public recognition of the Gen 6-9 ↔ Gilgamesh XI parallel",
+        "Lambert & Millard 1969 — *Atra-ḫasīs: The Babylonian Story of the Flood*",
+        "George 2003 — *The Babylonian Gilgamesh Epic*",
+        "Sparks 2007 — *Ancient Texts for the Study of the Hebrew Bible*",
+        "Heidel 1949 — *The Gilgamesh Epic and Old Testament Parallels*"
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission_via_west_semitic_intermediary"
+    }
+  ]
+}
+```
+
+**Composition with the rest of the stack:** the `brief_in_vault` pointer chains directly to `get_brief` for full scholarly drill-down. Then `query_research` for cross-references, `find_synthesis_claims` for the author's interpretive positions.
+
+Provenance: `source: local`, `endpoint: local:biblicalParallels`.
+
+## v0.14.4 — Corpus-exclusion pre-filter (Discovery Engine v2.0)
+
+A `data/corpus-exclusions.json` table lists records that must be filtered out of the Discovery Engine v2.0 candidate pool at index-build time. Loaded by `scripts/discovery-primary-v2.mjs` on every run.
+
+**Initial 20 exclusions (all Asb.* prototypes):** Asb.a, .b, .c, .d, .e, .f, .g, .group.1, .h, .i, .k, .k.var, .l, .m, .n, .o, .p, .q, .r, .s, .t, .v. Each is a Hunger 1968 BAK colophon-type prototype that aggregates standardized Ashurbanipal-library palace-colophon language across 100-200 manuscripts. Their trigram-similarity to any Kuyunjik tablet reflects formulaic colophon match, not meaningful intertextual content.
+
+**Why excluded:** v0.13.4 calibration surfaced these explicitly. Of 11 top-tier candidates evaluated, 2 (`K.3716 ↔ Asb.c` and `K.3716 ↔ Asb.d`) were colophon-template false positives. v0.14.4 closes this class permanently — re-runs of the Discovery Engine cannot produce Asb.*-touching parallels.
+
+**Schema (`data/corpus-exclusions.json`):**
+
+```jsonc
+{
+  "_meta": {
+    "compiled": "2026-05-16",
+    "version": "v0.14.4",
+    "total_exclusions": 20,
+    "exclusion_categories": ["colophon_template_prototype"],
+    "scholarly_anchor": "Hunger 1968 — Babylonische und assyrische Kolophone (AOAT 2)"
+  },
+  "excluded_records": [
+    {
+      "id": "Asb.c",
+      "reason": "colophon_template_prototype",
+      "category": "Ashurbanipal_colophon_type",
+      "manuscript_count_eBL": 212,
+      "rationale": "Hunger 1968 BAK Type-C Ashurbanipal-library palace colophon. Aggregates 212 manuscripts. …"
+    }
+    // …19 more
+  ]
+}
+```
+
+`scripts/apply-exclusion-pass-v144.mjs` is the retroactive pass that updates `data/primarySourceParallels.json`: any existing parallel involving an excluded record is marked `rejected_as_artifact` with the canonical rejection reason. The 2026-05-15 + 2026-05-16 passes have processed all currently-surfaced cases.
+
 ## Citation
 
 If you build on this protocol, cite the repo and the version in the
@@ -577,6 +714,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.14.0}
+  version = {0.14.4}
 }
 ```
