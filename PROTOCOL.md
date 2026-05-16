@@ -1,8 +1,8 @@
-# cuneiform-mcp Protocol — v0.8
+# cuneiform-mcp Protocol — v0.14.0
 
 > Every result should be inspectable, citeable, and reproducible.
 
-This is the published interface for cuneiform-mcp's nine tools. Each tool
+This is the published interface for cuneiform-mcp's **nineteen** tools. Each tool
 returns BOTH a human-readable rendered text block (in the standard MCP
 `content[0]` field) AND a typed `structuredContent` envelope. Downstream
 agents should chain on the structured fields; the rendered text is for
@@ -50,9 +50,9 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The fourteen tools
+## The nineteen tools
 
-> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + one generative Discovery Engine tool (v0.7) + one Mesopotamian-internal retrieval tool (v0.8). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The v0.7 Discovery Engine inverts that discipline: returns machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to v0.6 or v0.8 retrieval-tier datasets depending on whether the parallel anchors to a Jewish biblical passage (v0.6) or stays Mesopotamian-internal (v0.8).
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus.
 
 
 ### `lookup_sign` — schema: [lookup_sign.schema.json](schemas/lookup_sign.schema.json)
@@ -421,6 +421,151 @@ v0.8.0 dataset ships with **6 parallels** promoted from the Discovery Engine v0.
 
 Provenance: `source: local`, `endpoint: local:mesopotamianParallelsIndex`.
 
+### `discover_primary_source_parallels` — schema: [discover_primary_source_parallels.schema.json](schemas/discover_primary_source_parallels.schema.json)
+
+The Discovery Engine **v2.0** — primary-source corpus traversal. Operates over the full eBL `/fragments/all-signs` cache (36,498 tablets), computing pairwise sign-trigram Jaccard with size-bound early termination, then enriches via per-tablet metadata (script.period, collection-as-city proxy, genres_flat) and applies cross-boundary scoring (`+0.15·diff_genre +0.10·diff_period +0.10·diff_city − 0.30·formulaic_genre_penalty`).
+
+```jsonc
+// example: discover_primary_source_parallels({min_jaccard: 0.35, validation_status: "validated_as_known"}) → structuredContent.data
+{
+  "query_summary": {"min_jaccard": 0.35, "validation_status": "validated_as_known"},
+  "total_in_dataset": 335,
+  "returned": 9,
+  "parallels": [
+    {
+      "tablet_a": {"museum_number": "BM.43159", "period": "Neo_Babylonian", "city": "Babylon", "genre": "magical_ritual"},
+      "tablet_b": {"museum_number": "K.2796",   "period": "Neo_Assyrian",  "city": "Nineveh", "genre": "magical_ritual"},
+      "match_evidence": {"jaccard": 0.50, "intersection_size": 12, "union_size": 24},
+      "cross_boundary": {"different_genre": false, "different_period": true, "different_city": true},
+      "novelty_score": 0.700,
+      "validation_status": "validated_as_known",
+      "validation_log": {
+        "validated_on": "2026-05-15",
+        "validation_method": "Subagent WebFetched eBL records — bidirectional editor cross-reference …",
+        "known_publication": "Leichty/Finkel/Walker 2019 CBT IV-V p. 536; eBL fragment records (Peterson/Jiménez/Földi 2018-2019)"
+      },
+      "notes": "v0.13.2 validation: 3-witness bilingual Enki incantation cluster …"
+    }
+    // …8 more
+  ]
+}
+```
+
+Calibration (2026-05-15): 11 top cross-boundary candidates manually validated. 9/11 confirmed as already-documented eBL editor cross-references (100% true-positive rate on real intertextual parallels). 2/11 surfaced a methodological discovery — Asb.* records in eBL are colophon-template prototypes (Asb.c = 212 manuscripts, Asb.d = 116 manuscripts), not individual tablets, producing systematic false-positive matches. v0.13.5 corpus-cleaning task tracks the prototype-exclusion fix.
+
+Provenance: `source: local`, `endpoint: local:primarySourceParallelsIndex`, `citation` notes machine-discovery + pending-validation status.
+
+## v0.14 — RAG over the cuneiform-research markdown vault
+
+Four tools that turn ~50 author-maintained Mesopotamian scholarly briefs into a queryable knowledge surface. BM25 retrieval over chunked markdown, with named-Assyriologist citation extraction and explicit `[my synthesis]` flagging. Index built lazily on first call, cached for the process lifetime. Source directory configurable via `CUNEIFORM_RESEARCH_DIR` env var (default `~/Desktop/Research/`).
+
+Cluster classifications (auto-detected from filename patterns):
+- **cosmology** — Apsu_*, Royal_Descents, Subterranean_Cities, Anunnaki, Igigi
+- **theology** — Apkallu*, Adapa, Enki*, Enlil, Inanna*, Bit_Meseri
+- **royal_myth** — Gilgamesh*, Enuma_Elish, Atrahasis, Erra*, Sumerian_King_List, Sumerian_Flood, Lagash_King_List, Sumerian_Me
+- **divination_science** — Hepatoscopy, Diagnostic_Handbook, Late_Babylonian_Astrology
+- **reception_comparative** — Berossus, 1Enoch*, Amarna_Religion, Book_of_the_Dead, Coffin_Texts
+- **monuments** — Tablet_of_Shamash
+- **infrastructure** — Cuneiform_API*, Cuneiform_Sumer, Cuneiform_Tools*
+
+### `query_research` — schema: [query_research.schema.json](schemas/query_research.schema.json)
+
+BM25 retrieval over chunked briefs. Each hit returns the chunk text, brief name, section heading, extracted scholarly citations, synthesis-flag, and BM25 score.
+
+```jsonc
+// example: query_research({query: "Tablet of Shamash river preservation", top_k: 3}) → structuredContent.data
+{
+  "query": "Tablet of Shamash river preservation",
+  "hit_count": 3,
+  "hits": [
+    {
+      "brief": "Tablet_of_Shamash",
+      "section_path": "3.3 The miraculous recovery",
+      "text": "The inscription then describes the recovery. King Simbar-Šipak (Second Dynasty of Isin, c. 1025–1008 BCE) attempted a partial restoration but had to abandon the work — no proper model of the original statue existed. …",
+      "score": 14.775,
+      "scholar_citations": ["Lambert 2013", "Frame 1995"],
+      "synthesis_flag": false,
+      "cluster": "monuments"
+    }
+    // …2 more
+  ]
+}
+```
+
+Provenance: `source: local`, `endpoint: local:cuneiform-research`.
+
+### `get_brief` — schema: [get_brief.schema.json](schemas/get_brief.schema.json)
+
+Retrieve a specific brief by name (case-insensitive, `.md` suffix tolerated). Paginated 5 chunks per page. Returns near-match suggestions on miss.
+
+```jsonc
+// example: get_brief({name: "Royal_Descents", page: 1}) → structuredContent.data
+{
+  "query": "Royal_Descents",
+  "found": true,
+  "name": "Royal_Descents",
+  "cluster": "cosmology",
+  "page": 1,
+  "total_pages": 8,
+  "total_chunks": 38,
+  "chunks": [
+    {
+      "section_path": "TL;DR",
+      "text": "Three downward descent narratives (Gilgamesh through Mashu, Inanna through the seven gates, Nergal to Ereshkigal) produce structurally similar outcomes …",
+      "scholar_citations": ["George 2003", "Sladek 1974", "Lapinkivi 2010", "Hutter 1985"],
+      "synthesis_flag": false
+    }
+    // …4 more chunks per page
+  ]
+}
+```
+
+Provenance: `source: local`, `endpoint: local:cuneiform-research`.
+
+### `list_briefs` — schema: [list_briefs.schema.json](schemas/list_briefs.schema.json)
+
+Enumerate briefs in the vault with per-brief summaries: name, cluster, section count, chunk count, total chars, unique citation count, synthesis-claim flag.
+
+```jsonc
+// example: list_briefs({cluster: "cosmology"}) → structuredContent.data
+{
+  "cluster_filter": "cosmology",
+  "brief_count": 5,
+  "briefs": [
+    {"name": "Anunnaki",              "cluster": "cosmology", "section_count": 7,  "chunk_count": 14, "total_chars": 12657, "citation_count": 22, "has_synthesis_claims": false},
+    {"name": "Apsu_Exchange_Network", "cluster": "cosmology", "section_count": 12, "chunk_count": 64, "total_chars": 78912, "citation_count": 41, "has_synthesis_claims": true},
+    // …
+  ],
+  "clusters_available": ["cosmology", "theology", "royal_myth", "divination_science", "reception_comparative", "monuments", "infrastructure", "uncategorized"],
+  "vault_stats": {"dir": "/Users/danebrown/Desktop/Research", "total_briefs": 58, "total_chunks": 2364, "total_chars": 2126505}
+}
+```
+
+Provenance: `source: local`, `endpoint: local:cuneiform-research`.
+
+### `find_synthesis_claims` — schema: [find_synthesis_claims.schema.json](schemas/find_synthesis_claims.schema.json)
+
+Surface all paragraphs flagged `[my synthesis]`, `[unverified]`, or `[Cluster synthesis — my reading]`. These are the author's explicit interpretive claims that go beyond scholarly consensus — the structural readings worth testing or defending. Optional `query` filters claims by BM25 relevance.
+
+```jsonc
+// example: find_synthesis_claims({query: "river preservation apkallu"}) → structuredContent.data
+{
+  "query": "river preservation apkallu",
+  "claim_count": 4,
+  "claims": [
+    {
+      "brief": "Tablet_of_Shamash",
+      "section_path": "3.3 The miraculous recovery",
+      "marker": "[Cluster synthesis — my reading]",
+      "paragraph": "The river-preservation cosmic-mechanism in the Tablet's narrative is structurally identical to the apkallū-knowledge preservation through the Flood — both place the river/Apsû as the cosmic preserver of critical religious-civilizational material across catastrophic disruption …"
+    }
+    // …3 more
+  ]
+}
+```
+
+82 synthesis claims currently indexed across the vault (2026-05-16). Provenance: `source: local`, `endpoint: local:cuneiform-research`.
+
 ## Citation
 
 If you build on this protocol, cite the repo and the version in the
@@ -432,6 +577,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.8.0}
+  version = {0.14.0}
 }
 ```
