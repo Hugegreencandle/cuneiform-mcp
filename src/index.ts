@@ -35,6 +35,10 @@ import {
   surfaceStats,
 } from "./anomalySurface.js";
 import {
+  findFuzzyParallels,
+  fuzzyIndexStats,
+} from "./fuzzyParallels.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -147,7 +151,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.16.0";
+const VERSION = "0.17.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3466,6 +3470,93 @@ server.registerTool(
   },
 );
 
+// ─── v0.17.0 — Fuzzy trigram-Jaccard parallel finder ───────────────────────
+
+server.registerTool(
+  "find_fuzzy_parallels",
+  {
+    description:
+      "Find parallel tablets to a given tablet via fuzzy (1-substitution) trigram matching. Two trigrams match fuzzily if exactly 2 of 3 positions are equal — this catches manuscript siblings whose lexical-trigram-Jaccard is too low because of localized sign-form variants (e.g., the K.2798 ↔ Si.776 pair which shares 12 of the first 14 signs but was missed by exact-trigram-Jaccard due to single-sign substitutions at positions 4 and 5). v0.17 motivation: 2026-05-16 bi-orphan inspection showed this is the #1 false-negative class in v0.16's lexical methodology. Use as a complement to discover_primary_source_parallels (which is strictly exact) when you suspect a missed sibling. Returns up to 5 concrete fuzzy-match examples per candidate.",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number of the query tablet (e.g., 'K.2798'). Must be in the eBL signs cache."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("Number of parallel candidates to return. Default 10. Hard cap 50."),
+      min_fuzzy_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum fuzzy Jaccard score for inclusion. Default 0.10. Fuzzy Jaccard is typically 1.5-3× higher than exact Jaccard for true manuscript siblings."),
+      min_fuzzy_intersect: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Minimum number of fuzzy-matching trigrams. Default 5. Filters out coincidental short overlaps."),
+    },
+  },
+  async ({ tablet_id, top_k, min_fuzzy_jaccard, min_fuzzy_intersect }) => {
+    const SCHEMA = schemaId("find_fuzzy_parallels");
+    try {
+      const result = findFuzzyParallels({
+        tabletId: tablet_id,
+        topK: top_k,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minFuzzyIntersect: min_fuzzy_intersect,
+      });
+      const lines: string[] = [
+        `Query tablet: ${tablet_id}`,
+        `Index: ${result.index_stats.total_tablets_indexed} tablets · query has ${result.index_stats.query_trigram_count} trigrams`,
+        `Candidates examined: ${result.index_stats.candidates_examined} · with any fuzzy overlap: ${result.index_stats.candidates_with_overlap}`,
+        ``,
+        `Fuzzy parallels returned: ${result.parallels.length}`,
+        ``,
+      ];
+      for (const p of result.parallels) {
+        const lift = p.exact_jaccard > 0 ? (p.fuzzy_jaccard / p.exact_jaccard).toFixed(2) + "×" : "∞";
+        lines.push(`── ${p.tablet_id}`);
+        lines.push(`   fuzzy: ${p.fuzzy_intersect}/${p.query_trigrams + p.target_trigrams - p.fuzzy_intersect} = ${p.fuzzy_jaccard}  ·  exact: ${p.exact_intersect}/${p.query_trigrams + p.target_trigrams - p.exact_intersect} = ${p.exact_jaccard}  ·  fuzzy/exact lift: ${lift}`);
+        if (p.shared_fuzzy_examples.length > 0) {
+          lines.push(`   examples (query → target):`);
+          for (const ex of p.shared_fuzzy_examples) {
+            lines.push(`     · '${ex.query}' ↔ '${ex.target}'`);
+          }
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:fuzzy-trigram-parallels", VERSION, {
+          citation:
+            "Fuzzy (1-substitution) trigram-Jaccard over the eBL all-signs-full.json corpus. v0.17.0. Catches manuscript siblings missed by exact trigram-Jaccard due to localized sign-form variants.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_fuzzy_parallels error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id,
+          parallels: [] as never[],
+          index_stats: { total_tablets_indexed: 0, query_trigram_count: 0, candidates_examined: 0, candidates_with_overlap: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:fuzzy-trigram-parallels", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3486,7 +3577,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 25 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 26 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels)\n`,
     );
     process.exit(0);
   }
@@ -3496,7 +3587,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (25 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (26 tools)\n`);
 }
 
 main().catch((err) => {

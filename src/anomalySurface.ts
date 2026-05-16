@@ -1,4 +1,6 @@
 // v0.16.0 — Anomaly Surface (bi-orphan detector + cluster-misfit + describe).
+// v0.17.0 — Refinement: 4 quality filters from the 2026-05-16 inspection of
+// the v0.16 top-15 candidates.
 //
 // Joins the corpus-viz lexical-graph (17,486 components) with the v0.15
 // thematic-embedding index (28,665 tablets × top-30 cosine neighbors)
@@ -8,9 +10,19 @@
 // Discovery thesis: ~88% of tablets are lexical singletons; ~475 are
 // thematic orphans; the intersection — **bi-orphans** — are 167 tablets
 // that lack neighbors in BOTH the trigram AND embedding spaces. After
-// filtering to sign_count ≥ 100, ~42 candidates remain. These are the
-// highest-priority manually-inspectable discoveries — candidates for
-// unknown compositions, miscatalogued fragments, or rare witnesses.
+// filtering to sign_count ≥ 100, ~42 candidates remain.
+//
+// v0.17 refinements (false-positive reduction):
+//   - formulaic: top1_sign_share > 0.12 — one sign dominates the tablet
+//     (e.g., SU-1951.21 has ABZ480 = 20% of all signs). Excluded by default.
+//   - refrain_heavy: max_3gram_repeat > 3 — a 3-sign sequence recurs > 3×
+//     in the first 50 tokens (e.g., BM.33333.B refrain). Excluded by default.
+//   - heavily_damaged: x_ratio > 0.50 — too damaged for reliable methodology.
+//     Score-penalized at any x_ratio > 0.20; excluded when > 0.50.
+//   - provenance_cluster: neighbor_prefix_concentration > 0.80 — all top
+//     thematic neighbors share a museum prefix (e.g., IM.* cluster). The
+//     tablet isn't really isolated — it's in a niche prefix cluster.
+//     Excluded by default.
 //
 // Pure stdlib — no new dependencies.
 
@@ -42,6 +54,18 @@ export type AnomalyRecord = {
     cluster_size?: number;
     cluster_genre_consistency?: number;
     cluster_period_consistency?: number;
+    // v0.17 quality metrics
+    x_ratio?: number;
+    top1_sign_share?: number;
+    max_3gram_repeat?: number;
+    neighbor_prefix_concentration?: number;
+  };
+  // v0.17 quality flags (true = problematic, excluded unless override)
+  quality_flags: {
+    is_formulaic: boolean;
+    is_refrain_heavy: boolean;
+    is_heavily_damaged: boolean;
+    is_provenance_cluster: boolean;
   };
   metadata: {
     period?: string;
@@ -101,6 +125,18 @@ export type DescribeAnomalyResult = {
     is_genre_misfit: boolean;
     is_period_misfit: boolean;
   };
+  quality_flags: {
+    is_formulaic: boolean;
+    is_refrain_heavy: boolean;
+    is_heavily_damaged: boolean;
+    is_provenance_cluster: boolean;
+  };
+  quality_metrics: {
+    x_ratio?: number;
+    top1_sign_share?: number;
+    max_3gram_repeat?: number;
+    neighbor_prefix_concentration?: number;
+  };
   reasons: string[];
   follow_up: string[];
   ebl_url: string;
@@ -134,6 +170,10 @@ type TabletRecord = {
   them_max_cos: number | null;
   them_total: number | null;
   sign_count: number;
+  x_ratio?: number;
+  top1_sign_share?: number;
+  max_3gram_repeat?: number;
+  neighbor_prefix_concentration?: number;
   period: string | null;
   genre: string | null;
   city: string | null;
@@ -215,6 +255,40 @@ function componentInfo(idx: AnomalyIndex, compId: number | null) {
   return idx.components[String(compId)] ?? null;
 }
 
+// v0.17 quality-flag thresholds
+const FORMULAIC_TOP1_THRESHOLD = 0.12;
+const REFRAIN_3GRAM_THRESHOLD = 3;
+const HEAVILY_DAMAGED_THRESHOLD = 0.5;
+const X_RATIO_PENALTY_FROM = 0.2;
+const PROVENANCE_CLUSTER_THRESHOLD = 0.8;
+
+function isFormulaic(t: TabletRecord): boolean {
+  return (t.top1_sign_share ?? 0) > FORMULAIC_TOP1_THRESHOLD;
+}
+function isRefrainHeavy(t: TabletRecord): boolean {
+  return (t.max_3gram_repeat ?? 0) > REFRAIN_3GRAM_THRESHOLD;
+}
+function isHeavilyDamaged(t: TabletRecord): boolean {
+  return (t.x_ratio ?? 0) > HEAVILY_DAMAGED_THRESHOLD;
+}
+function isProvenanceCluster(t: TabletRecord): boolean {
+  return (t.neighbor_prefix_concentration ?? 0) > PROVENANCE_CLUSTER_THRESHOLD;
+}
+function qualityFlags(t: TabletRecord) {
+  return {
+    is_formulaic: isFormulaic(t),
+    is_refrain_heavy: isRefrainHeavy(t),
+    is_heavily_damaged: isHeavilyDamaged(t),
+    is_provenance_cluster: isProvenanceCluster(t),
+  };
+}
+function xRatioScorePenalty(t: TabletRecord): number {
+  const x = t.x_ratio ?? 0;
+  if (x <= X_RATIO_PENALTY_FROM) return 1;
+  // Linear penalty from 1.0 at x=0.2 to 0.0 at x=1.0
+  return Math.max(0, 1 - (x - X_RATIO_PENALTY_FROM) / (1 - X_RATIO_PENALTY_FROM));
+}
+
 function isGenreMisfit(idx: AnomalyIndex, t: TabletRecord): boolean {
   if (!t.genre || t.component_id == null) return false;
   const c = componentInfo(idx, t.component_id);
@@ -276,10 +350,27 @@ export function findAnomalousTablets(opts: {
   periodFilter?: string;
   genreFilter?: string;
   maxResults?: number;
+  // v0.17 quality-filter overrides (defaults are SET BELOW per anomaly type)
+  excludeFormulaic?: boolean;
+  excludeRefrainHeavy?: boolean;
+  excludeHeavilyDamaged?: boolean;
+  excludeProvenanceClusters?: boolean;
 }): FindAnomalousResult {
   const minSign = opts.minSignCount ?? 100;
   const maxResults = Math.max(1, Math.min(100, opts.maxResults ?? 20));
   const warnings: string[] = [];
+
+  // v0.17 defaults — apply all 4 filters by default for bi_orphan + thematic_orphan
+  // since the 2026-05-16 inspection showed they're dominated by these false-positive
+  // classes. For other anomaly types, the filters are off by default but still
+  // overridable.
+  const applyQualityFilters = opts.anomalyType === "bi_orphan" ||
+    opts.anomalyType === "thematic_orphan" ||
+    opts.anomalyType === "lexical_singleton";
+  const excludeFormulaic = opts.excludeFormulaic ?? applyQualityFilters;
+  const excludeRefrainHeavy = opts.excludeRefrainHeavy ?? applyQualityFilters;
+  const excludeHeavilyDamaged = opts.excludeHeavilyDamaged ?? true;
+  const excludeProvenanceClusters = opts.excludeProvenanceClusters ?? applyQualityFilters;
 
   const idx = loadIndex();
   if (!idx) {
@@ -298,11 +389,22 @@ export function findAnomalousTablets(opts: {
     };
   }
 
+  let filteredFormulaic = 0;
+  let filteredRefrain = 0;
+  let filteredDamaged = 0;
+  let filteredProvenance = 0;
+
   const matches: { t: TabletRecord; score: number }[] = [];
   for (const t of idx.tablets) {
     if (t.sign_count < minSign) continue;
     if (opts.periodFilter && t.period !== opts.periodFilter) continue;
     if (opts.genreFilter && t.genre !== opts.genreFilter) continue;
+
+    // v0.17 quality filters (applied BEFORE anomaly-type check so counts are accurate)
+    if (excludeFormulaic && isFormulaic(t)) { filteredFormulaic++; continue; }
+    if (excludeRefrainHeavy && isRefrainHeavy(t)) { filteredRefrain++; continue; }
+    if (excludeHeavilyDamaged && isHeavilyDamaged(t)) { filteredDamaged++; continue; }
+    if (excludeProvenanceClusters && isProvenanceCluster(t)) { filteredProvenance++; continue; }
 
     let included = false;
     let score = 0; // higher = better candidate
@@ -311,13 +413,14 @@ export function findAnomalousTablets(opts: {
       case "bi_orphan":
         if (t.in_lex_graph && t.in_them_index && t.lex_count === 0 && (t.them_max_cos ?? 1) < 0.6) {
           included = true;
-          score = t.sign_count - (t.them_max_cos ?? 0) * 100; // prefer longer + lower max_cos
+          // Score with x_ratio penalty (v0.17)
+          score = (t.sign_count - (t.them_max_cos ?? 0) * 100) * xRatioScorePenalty(t);
         }
         break;
       case "lexical_singleton":
         if (t.in_lex_graph && t.lex_count === 0) {
           included = true;
-          score = t.sign_count;
+          score = t.sign_count * xRatioScorePenalty(t);
         }
         break;
       case "thematic_orphan":
@@ -373,7 +476,13 @@ export function findAnomalousTablets(opts: {
         ...(c?.size != null ? { cluster_size: c.size } : {}),
         ...(c?.dominant_genre_share != null ? { cluster_genre_consistency: c.dominant_genre_share } : {}),
         ...(c?.dominant_period_share != null ? { cluster_period_consistency: c.dominant_period_share } : {}),
+        // v0.17 quality scores
+        ...(t.x_ratio != null ? { x_ratio: t.x_ratio } : {}),
+        ...(t.top1_sign_share != null ? { top1_sign_share: t.top1_sign_share } : {}),
+        ...(t.max_3gram_repeat != null ? { max_3gram_repeat: t.max_3gram_repeat } : {}),
+        ...(t.neighbor_prefix_concentration != null ? { neighbor_prefix_concentration: t.neighbor_prefix_concentration } : {}),
       },
+      quality_flags: qualityFlags(t),
       metadata: {
         ...(t.period ? { period: t.period } : {}),
         ...(t.genre ? { genre: t.genre } : {}),
@@ -386,6 +495,15 @@ export function findAnomalousTablets(opts: {
       ebl_url: eblUrl(t.id),
     };
   });
+
+  if (filteredFormulaic + filteredRefrain + filteredDamaged + filteredProvenance > 0) {
+    const parts: string[] = [];
+    if (filteredFormulaic > 0) parts.push(`${filteredFormulaic} formulaic`);
+    if (filteredRefrain > 0) parts.push(`${filteredRefrain} refrain-heavy`);
+    if (filteredDamaged > 0) parts.push(`${filteredDamaged} heavily-damaged`);
+    if (filteredProvenance > 0) parts.push(`${filteredProvenance} provenance-cluster`);
+    warnings.push(`v0.17 quality filters excluded: ${parts.join(", ")}`);
+  }
 
   return {
     query: {
@@ -424,6 +542,7 @@ export function describeAnomaly(tabletId: string): DescribeAnomalyResult {
     is_genre_misfit: isGenreMisfit(idx, t),
     is_period_misfit: isPeriodMisfit(idx, t),
   };
+  const qFlags = qualityFlags(t);
 
   const reasons: string[] = [];
   if (flags.is_bi_orphan) reasons.push(`bi_orphan: no neighbors above min thresholds in EITHER lexical (jaccard≥0.30) OR thematic (cos≥0.6) graph`);
@@ -433,7 +552,12 @@ export function describeAnomaly(tabletId: string): DescribeAnomalyResult {
   }
   if (flags.is_genre_misfit) reasons.push(`genre_misfit: tablet genre "${t.genre}" ≠ cluster dominant "${c?.dominant_genre}" (${((c?.dominant_genre_share ?? 0) * 100).toFixed(0)}%)`);
   if (flags.is_period_misfit) reasons.push(`period_misfit: tablet period "${t.period}" ≠ cluster dominant "${c?.dominant_period}" (${((c?.dominant_period_share ?? 0) * 100).toFixed(0)}%)`);
-  if (reasons.length === 0) reasons.push("not anomalous on any of the v0.16 criteria");
+  // v0.17 quality flag reasons
+  if (qFlags.is_formulaic) reasons.push(`formulaic (v0.17): top-1 sign share ${((t.top1_sign_share ?? 0) * 100).toFixed(1)}% > 12% — one sign dominates the tablet (likely false-positive class A)`);
+  if (qFlags.is_refrain_heavy) reasons.push(`refrain_heavy (v0.17): max 3-gram repeat in first 50 tokens = ${t.max_3gram_repeat} (> 3) — recurring refrain pattern (likely false-positive class A)`);
+  if (qFlags.is_heavily_damaged) reasons.push(`heavily_damaged (v0.17): x_ratio ${((t.x_ratio ?? 0) * 100).toFixed(1)}% > 50% — too damaged for reliable methodology`);
+  if (qFlags.is_provenance_cluster) reasons.push(`provenance_cluster (v0.17): ${((t.neighbor_prefix_concentration ?? 0) * 100).toFixed(0)}% of top-30 thematic neighbors share a museum prefix — tablet is in a niche prefix cluster, not isolated`);
+  if (reasons.length === 0) reasons.push("not anomalous on any of the v0.16 / v0.17 criteria");
 
   const followUp: string[] = [];
   if (flags.is_bi_orphan) followUp.push(`Check ${eblUrl(t.id)} for catalog notes + partial publication history`);
@@ -467,6 +591,13 @@ export function describeAnomaly(tabletId: string): DescribeAnomalyResult {
       max_cosine: t.them_max_cos,
     },
     flags,
+    quality_flags: qFlags,
+    quality_metrics: {
+      ...(t.x_ratio != null ? { x_ratio: t.x_ratio } : {}),
+      ...(t.top1_sign_share != null ? { top1_sign_share: t.top1_sign_share } : {}),
+      ...(t.max_3gram_repeat != null ? { max_3gram_repeat: t.max_3gram_repeat } : {}),
+      ...(t.neighbor_prefix_concentration != null ? { neighbor_prefix_concentration: t.neighbor_prefix_concentration } : {}),
+    },
     reasons,
     follow_up: followUp,
     ebl_url: eblUrl(t.id),
@@ -489,6 +620,13 @@ function emptyDescribe(tabletId: string, warnings: string[]): DescribeAnomalyRes
       is_genre_misfit: false,
       is_period_misfit: false,
     },
+    quality_flags: {
+      is_formulaic: false,
+      is_refrain_heavy: false,
+      is_heavily_damaged: false,
+      is_provenance_cluster: false,
+    },
+    quality_metrics: {},
     reasons: [],
     follow_up: [],
     ebl_url: eblUrl(tabletId),

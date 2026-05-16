@@ -128,25 +128,60 @@ if (existsSync(EXCLUSIONS_PATH)) {
   } catch {}
 }
 
-// ─── Sign counts from all-signs-full.json ──────────────────────────────────
+// ─── Sign counts + repetition metrics (v0.17) ──────────────────────────────
 
 console.error("");
-console.error("Computing per-tablet sign counts (filtering X)...");
+console.error("Computing per-tablet metrics (sign count, x_ratio, top1 share, max 3gram repeat)...");
 const t2 = Date.now();
 const records = JSON.parse(readFileSync(SIGNS_CACHE, "utf-8"));
-const signCountById = new Map();
+const metricsById = new Map();
 for (const r of records) {
   if (!r._id || typeof r.signs !== "string") continue;
   if (excluded.has(r._id)) continue;
   let n = 0;
+  let xCount = 0;
+  const freq = new Map();
+  const allTokens = [];
   for (const line of r.signs.split(/\r?\n/)) {
     for (const t of line.trim().split(/\s+/).filter(Boolean)) {
-      if (t !== "X") n++;
+      allTokens.push(t);
+      if (t === "X") xCount++;
+      else {
+        n++;
+        freq.set(t, (freq.get(t) ?? 0) + 1);
+      }
     }
   }
-  signCountById.set(r._id, n);
+  const totalTokens = n + xCount;
+  const xRatio = totalTokens > 0 ? xCount / totalTokens : 0;
+  let top1 = 0;
+  for (const c of freq.values()) if (c > top1) top1 = c;
+  const top1Share = n > 0 ? top1 / n : 0;
+
+  // Max 3-gram repeat over the first 50 NON-X tokens (refrain detector).
+  // Compute the count of the single most-frequent 3-gram in that window.
+  const headWindow = [];
+  for (const t of allTokens) {
+    if (t === "X") continue;
+    headWindow.push(t);
+    if (headWindow.length >= 50) break;
+  }
+  const trigramCounts = new Map();
+  for (let i = 0; i + 2 < headWindow.length; i++) {
+    const tri = headWindow[i] + " " + headWindow[i + 1] + " " + headWindow[i + 2];
+    trigramCounts.set(tri, (trigramCounts.get(tri) ?? 0) + 1);
+  }
+  let max3gramRepeat = 0;
+  for (const c of trigramCounts.values()) if (c > max3gramRepeat) max3gramRepeat = c;
+
+  metricsById.set(r._id, {
+    sign_count: n,
+    x_ratio: +xRatio.toFixed(3),
+    top1_sign_share: +top1Share.toFixed(3),
+    max_3gram_repeat: max3gramRepeat,
+  });
 }
-console.error(`  ${signCountById.size} tablets sign-counted (${((Date.now() - t2) / 1000).toFixed(1)}s)`);
+console.error(`  ${metricsById.size} tablets metric-counted (${((Date.now() - t2) / 1000).toFixed(1)}s)`);
 
 // ─── Build unified per-tablet records ──────────────────────────────────────
 
@@ -155,8 +190,37 @@ console.error("Joining per-tablet records...");
 const allIds = new Set([
   ...lexById.keys(),
   ...themById.keys(),
-  ...signCountById.keys(),
+  ...metricsById.keys(),
 ]);
+
+// Provenance prefix extractor: K.3982 → "K", BM.41255.C → "BM", 1881,0204.196 → "1881"
+function prefixOf(id) {
+  const m = /^([^.,]+)/.exec(id);
+  return m ? m[1] : id;
+}
+
+// Provenance concentration: among the top-K (here, all top-30) thematic
+// neighbors of a tablet, what fraction share the SAME prefix as either the
+// tablet or each other? If a tablet is a provenance-cluster member, this
+// goes ~1.0 (all neighbors share a prefix), which means the bi_orphan flag
+// is misleading — the tablet IS connected, just to a niche prefix cluster.
+const neighborPrefixConc = new Map();
+for (const [id, list] of Object.entries(themRaw.neighbors)) {
+  if (list.length === 0) { neighborPrefixConc.set(id, 0); continue; }
+  const ownPrefix = prefixOf(id);
+  const prefixCounts = new Map();
+  for (const n of list) {
+    const p = prefixOf(n.id);
+    prefixCounts.set(p, (prefixCounts.get(p) ?? 0) + 1);
+  }
+  let domShare = 0;
+  for (const c of prefixCounts.values()) {
+    const s = c / list.length;
+    if (s > domShare) domShare = s;
+  }
+  void ownPrefix;
+  neighborPrefixConc.set(id, +domShare.toFixed(3));
+}
 
 const tablets = [];
 for (const id of allIds) {
@@ -164,7 +228,7 @@ for (const id of allIds) {
   const lex = lexById.get(id);
   const them = themById.get(id);
   const meta = metaById.get(id);
-  const signCount = signCountById.get(id) ?? 0;
+  const metrics = metricsById.get(id) ?? { sign_count: 0, x_ratio: 0, top1_sign_share: 0, max_3gram_repeat: 0 };
   tablets.push({
     id,
     lex_count: lex?.lex_count ?? null,
@@ -173,7 +237,11 @@ for (const id of allIds) {
     them_count: them?.them_count ?? null,
     them_max_cos: them ? +them.them_max_cos.toFixed(4) : null,
     them_total: them?.them_total ?? null,
-    sign_count: signCount,
+    sign_count: metrics.sign_count,
+    x_ratio: metrics.x_ratio,
+    top1_sign_share: metrics.top1_sign_share,
+    max_3gram_repeat: metrics.max_3gram_repeat,
+    neighbor_prefix_concentration: them ? (neighborPrefixConc.get(id) ?? 0) : 0,
     period: meta?.period ?? null,
     genre: meta?.genre ?? null,
     city: meta?.city ?? null,

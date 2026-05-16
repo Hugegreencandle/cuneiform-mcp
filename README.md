@@ -1,10 +1,12 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, and a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions — to LLM agents. **25 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions, and a fuzzy trigram-Jaccard parallel finder for catching missed manuscript siblings — to LLM agents. **26 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
 
-## What's new — v0.16.0
+## What's new — v0.17.0
 
-**Anomaly Surface** — three tools (`find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`) that join the corpus-viz lexical graph (17,486 components) with the v0.15 thematic-embedding index (28,665 tablets) + tabletMetadata + v0.14.4 exclusions. Surfaces *bi-orphans* — tablets isolated in BOTH the lexical AND thematic neighbor graphs — as the highest-priority discovery candidates. **167 bi-orphans corpus-wide; 42 with sign_count ≥ 100**. Six secondary anomaly types cover cluster-genre/period misfits, low-lex-high-thematic paraphrase candidates, and low-thematic-high-lex formulaic outliers. Top-30 candidate list at [`docs/v0.16-bi-orphan-candidates.md`](docs/v0.16-bi-orphan-candidates.md).
+**Anomaly Surface refinement + fuzzy parallels.** Four quality filters (`formulaic`, `refrain_heavy`, `heavily_damaged`, `provenance_cluster`) cut bi-orphan candidates 42 → 28 by removing false-positive classes identified in the 2026-05-16 inspection. Plus a new tool `find_fuzzy_parallels` for catching manuscript siblings that exact trigram-Jaccard misses because of localized sign-form variants. Validation: `K.2798 ↔ Si.776` (the publishable test case from the v0.16 inspection) ranks **#1 with fuzzy_J=0.41 vs exact_J=0.15 — 2.67× lift**, 129 of 311 query trigrams match fuzzily. Several candidates with 17× and 32× lifts also surface (BM.35512, BM.34795) as new investigation targets.
+
+- **v0.16.0** — Anomaly Surface: three tools (`find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`) that join the corpus-viz lexical graph with the v0.15 thematic-embedding index + tabletMetadata. Surfaces bi-orphans (167 corpus-wide).
 
 - **v0.15.0** — `find_thematic_parallel` — Random-Indexing distributional embeddings (Sahlgren 2005) over the 28,665-tablet eBL sign corpus. Surfaces siblings sharing zero trigrams but with similar distributional sign contexts. 300-dim, ±3 window, mean-centered (fixes mean-pooling collapse).
 
@@ -19,7 +21,8 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 
 | Version | Headline |
 |---|---|
-| **v0.16.0** | Anomaly Surface — `find_anomalous_tablets` + `describe_anomaly` + `discovery_surface_stats`. 167 bi-orphans surfaced (42 long-form). |
+| **v0.17.0** | Anomaly refinement (4 quality filters) + `find_fuzzy_parallels`. K.2798 ↔ Si.776 rescued at 2.67× exact-J lift. |
+| v0.16.0 | Anomaly Surface — `find_anomalous_tablets` + `describe_anomaly` + `discovery_surface_stats`. 167 bi-orphans surfaced. |
 | v0.15.0 | `find_thematic_parallel` — Random-Indexing distributional semantic embeddings (Mode C). |
 | v0.14.4 | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
 | **v0.14.3** | `find_biblical_parallel` — 15 canonical Mesopotamian ↔ Hebrew Bible parallels |
@@ -35,7 +38,7 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 25 tools live
+## 26 tools live
 
 ### Corpus retrieval (v0.1–v0.5)
 
@@ -99,13 +102,19 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 |---|---|
 | `find_thematic_parallel` | Random-Indexing distributional embeddings (Sahlgren 2005) over the eBL sign corpus. Returns top-30 cosine-similar tablets per seed. Unlike the lexical/trigram methods, surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts. 300-dim, ±3 window, k=8 nonzeros, mean-centered (fixes mean-pooling collapse). 28,665 tablets in index after MIN_TABLET_SIGNS=20 + v0.14.4 exclusion filter. Build with `node scripts/build-embeddings.mjs` (~4 min). Pair with `discover_primary_source_parallels` for compound lexical+thematic discovery. |
 
-### Anomaly Surface — discovery joiner (v0.16.0)
+### Anomaly Surface — discovery joiner (v0.16.0, refined v0.17.0)
 
 | Tool | What it does |
 |---|---|
-| `find_anomalous_tablets` | Surfaces tablets that don't fit anywhere — candidates for previously-unknown compositions. Joins corpus-viz lexical graph with v0.15 embedding index + metadata. 7 anomaly criteria: `bi_orphan` (no lex AND no thematic — highest priority, **167 corpus-wide**), `lexical_singleton`, `thematic_orphan`, `cluster_genre_misfit`, `cluster_period_misfit`, `low_lexical_high_thematic` (paraphrase candidates), `low_thematic_high_lexical` (formulaic outliers). Returns ranked list with interpretation + follow-up + eBL URL. Build with `node scripts/build-anomaly-index.mjs`. |
-| `describe_anomaly` | Per-tablet drill-down: lex + thematic neighbor counts, cluster membership + dominants, anomaly-flag evaluation, reasons, follow-up steps. Use after `find_anomalous_tablets` or to evaluate any tablet by museum number. |
-| `discovery_surface_stats` | Top-level stats: how many tablets in each index, lexical singletons, thematic orphans, bi-orphans by sign-length bucket. No inputs. |
+| `find_anomalous_tablets` | Surfaces tablets that don't fit anywhere — candidates for previously-unknown compositions. Joins corpus-viz lexical graph with v0.15 embedding index + metadata. 7 anomaly criteria: `bi_orphan` (no lex AND no thematic — highest priority, **167 corpus-wide**), `lexical_singleton`, `thematic_orphan`, `cluster_genre_misfit`, `cluster_period_misfit`, `low_lexical_high_thematic`, `low_thematic_high_lexical`. **v0.17 quality filters** (default ON for bi_orphan/lex_singleton/thematic_orphan): excludes formulaic tablets (top1 sign-share > 12%), refrain-heavy tablets (3-gram repeats > 3× in head), heavily-damaged tablets (x_ratio > 50%), and provenance-cluster members (top neighbors > 80% same prefix). Returns ranked list with interpretation + follow-up + eBL URL. Build with `node scripts/build-anomaly-index.mjs`. |
+| `describe_anomaly` | Per-tablet drill-down: lex + thematic neighbor counts, cluster membership + dominants, anomaly-flag evaluation, **v0.17 quality flags** + metrics, reasons, follow-up steps. |
+| `discovery_surface_stats` | Top-level stats: how many tablets in each index, lexical singletons, thematic orphans, bi-orphans by sign-length bucket. |
+
+### Fuzzy parallel finder (v0.17.0)
+
+| Tool | What it does |
+|---|---|
+| `find_fuzzy_parallels` | Finds manuscript siblings exact trigram-Jaccard misses. Two trigrams match fuzzily iff exactly 2 of 3 positions are equal (1-substitution neighbors). Validation: `K.2798 ↔ Si.776` (the publishable test case from the v0.16 inspection) ranks #1 with fuzzy_J=0.41 vs exact_J=0.15 — **2.67× lift**, 129 of 311 query trigrams match fuzzily. Returns up to 5 concrete fuzzy-match examples per candidate so callers can verify the substitution pattern. Pair with `discover_primary_source_parallels` (exact) for compound discovery. ~7 sec first call to build the inverted index over 35,308 tablets; subsequent calls are <1 sec. |
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
 

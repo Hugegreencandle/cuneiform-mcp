@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_fuzzy_parallels.schema.json",
+  "title": "find_fuzzy_parallels data payload",
+  "description": "v0.17 fuzzy trigram-Jaccard parallel finder. Two trigrams match fuzzily iff exactly 2 of 3 positions are equal (1-substitution neighbors). Catches manuscript siblings missed by exact-trigram-Jaccard due to localized sign-form variants. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["tablet_id", "parallels", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "parallels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "exact_jaccard", "fuzzy_jaccard", "exact_intersect", "fuzzy_intersect", "query_trigrams", "target_trigrams", "shared_fuzzy_examples"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "exact_jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+          "fuzzy_jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+          "exact_intersect": { "type": "integer", "minimum": 0 },
+          "fuzzy_intersect": { "type": "integer", "minimum": 0 },
+          "query_trigrams": { "type": "integer", "minimum": 0 },
+          "target_trigrams": { "type": "integer", "minimum": 0 },
+          "shared_fuzzy_examples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["query", "target"],
+              "additionalProperties": false,
+              "properties": {
+                "query": { "type": "string" },
+                "target": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_tablets_indexed", "query_trigram_count", "candidates_examined", "candidates_with_overlap"],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets_indexed": { "type": "integer" },
+        "query_trigram_count": { "type": "integer" },
+        "candidates_examined": { "type": "integer" },
+        "candidates_with_overlap": { "type": "integer" }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
