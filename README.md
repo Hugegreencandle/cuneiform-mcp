@@ -1,6 +1,10 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions, and a fuzzy trigram-Jaccard parallel finder for catching missed manuscript siblings — to LLM agents. **26 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions, a fuzzy trigram-Jaccard parallel finder for catching missed manuscript siblings, and a recursive cluster reconstructor — to LLM agents. **27 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+
+## What's new — v0.17.1
+
+**`reconstruct_cluster`** — recursive BFS expansion from a seed tablet via fuzzy parallels to reconstruct full manuscript-witness clusters. Validation: seeded at `BM.77056`, reconstructs a **100+ tablet manuscript-witness cluster spanning 20 museum prefixes** (BM, K, Sm, CBS, ND, N, IM, VAT, SU, UM, Rm-IV, Rm-II, Ni, W, + multiple BM accession ranges 1880–2023). 34 fuzzy calls reach 100 members; the actual underlying composition is wider. Seeded at `K.2798`, reconstructs a 20-tablet cluster with depth-2 sub-hub `K.15325` whose depth-3 members include K.8994 (fuzzy_J=0.49) and K.11920 (fuzzy_J=0.41) — peripheral-witness pattern. **Per-member topology** (depth from seed, parent that brought it in, fuzzy_j to parent) makes the cluster relationships fully inspectable.
 
 ## What's new — v0.17.0
 
@@ -21,7 +25,8 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 
 | Version | Headline |
 |---|---|
-| **v0.17.0** | Anomaly refinement (4 quality filters) + `find_fuzzy_parallels`. K.2798 ↔ Si.776 rescued at 2.67× exact-J lift. |
+| **v0.17.1** | `reconstruct_cluster` — recursive BFS via fuzzy parallels. BM.77056 → 100+ tablet cluster across 20 collection prefixes. |
+| v0.17.0 | Anomaly refinement (4 quality filters) + `find_fuzzy_parallels`. K.2798 ↔ Si.776 rescued at 2.67× exact-J lift. |
 | v0.16.0 | Anomaly Surface — `find_anomalous_tablets` + `describe_anomaly` + `discovery_surface_stats`. 167 bi-orphans surfaced. |
 | v0.15.0 | `find_thematic_parallel` — Random-Indexing distributional semantic embeddings (Mode C). |
 | v0.14.4 | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
@@ -38,7 +43,7 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 26 tools live
+## 27 tools live
 
 ### Corpus retrieval (v0.1–v0.5)
 
@@ -110,11 +115,12 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | `describe_anomaly` | Per-tablet drill-down: lex + thematic neighbor counts, cluster membership + dominants, anomaly-flag evaluation, **v0.17 quality flags** + metrics, reasons, follow-up steps. |
 | `discovery_surface_stats` | Top-level stats: how many tablets in each index, lexical singletons, thematic orphans, bi-orphans by sign-length bucket. |
 
-### Fuzzy parallel finder (v0.17.0)
+### Fuzzy parallel finder + cluster reconstructor (v0.17.0–v0.17.1)
 
 | Tool | What it does |
 |---|---|
-| `find_fuzzy_parallels` | Finds manuscript siblings exact trigram-Jaccard misses. Two trigrams match fuzzily iff exactly 2 of 3 positions are equal (1-substitution neighbors). Validation: `K.2798 ↔ Si.776` (the publishable test case from the v0.16 inspection) ranks #1 with fuzzy_J=0.41 vs exact_J=0.15 — **2.67× lift**, 129 of 311 query trigrams match fuzzily. Returns up to 5 concrete fuzzy-match examples per candidate so callers can verify the substitution pattern. Pair with `discover_primary_source_parallels` (exact) for compound discovery. ~7 sec first call to build the inverted index over 35,308 tablets; subsequent calls are <1 sec. |
+| `find_fuzzy_parallels` | Finds manuscript siblings exact trigram-Jaccard misses. Two trigrams match fuzzily iff exactly 2 of 3 positions are equal (1-substitution neighbors). Validation: `K.2798 ↔ Si.776` ranks #1 at fuzzy_J=0.41 vs exact_J=0.15 — **2.67× lift**. Returns up to 5 concrete fuzzy-match examples per candidate. ~7 sec first call; <1 sec thereafter. |
+| `reconstruct_cluster` | Given a seed tablet, recursively expand via fuzzy parallels until the cluster closes. BFS with configurable depth + size caps. Output: per-member topology (depth, parent, fuzzy_j_to_parent) + full edge set + prefix/depth distributions. Validated on BM.77056 → **100+ tablet cluster spanning 20 museum prefixes** at depth 4. Use to reconstruct full manuscript-witness clusters from any seed point. |
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
 

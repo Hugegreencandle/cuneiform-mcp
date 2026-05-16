@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/reconstruct_cluster.schema.json",
+  "title": "reconstruct_cluster data payload",
+  "description": "v0.17.1 recursive manuscript-cluster reconstructor. BFS expansion from seed via fuzzy trigram-Jaccard parallels until depth/size caps or frontier exhaustion. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["seed_tablet", "cluster_size", "cluster_members", "cluster_edges", "depth_distribution", "prefix_distribution", "cross_prefix_count", "config", "termination_reason", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "seed_tablet": { "type": "string" },
+    "cluster_size": { "type": "integer", "minimum": 1 },
+    "cluster_members": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "depth", "parent", "fuzzy_j_to_parent"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "depth": { "type": "integer", "minimum": 0 },
+          "parent": { "type": ["string", "null"] },
+          "fuzzy_j_to_parent": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "cluster_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "fuzzy_jaccard"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "fuzzy_jaccard": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "depth_distribution": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "prefix_distribution": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "cross_prefix_count": { "type": "integer", "minimum": 0 },
+    "config": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "termination_reason": {
+      "type": "string",
+      "enum": ["frontier_exhausted", "max_depth_reached", "max_size_reached"]
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_fuzzy_calls", "expanded_tablets"],
+      "additionalProperties": false,
+      "properties": {
+        "total_fuzzy_calls": { "type": "integer", "minimum": 0 },
+        "expanded_tablets": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

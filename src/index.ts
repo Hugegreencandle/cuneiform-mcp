@@ -39,6 +39,9 @@ import {
   fuzzyIndexStats,
 } from "./fuzzyParallels.js";
 import {
+  reconstructCluster,
+} from "./reconstructCluster.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -151,7 +154,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.17.0";
+const VERSION = "0.17.1";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3557,6 +3560,116 @@ server.registerTool(
   },
 );
 
+// ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
+
+server.registerTool(
+  "reconstruct_cluster",
+  {
+    description:
+      "Given a seed tablet, reconstruct the full manuscript-witness cluster by recursively expanding via fuzzy trigram-Jaccard (1-substitution) parallels. Each BFS frontier member's top-K fuzzy parallels are probed; new tablets join the cluster until depth/size caps or frontier exhaustion. Output includes per-member topology (depth from seed, parent that brought it in, fuzzy_j to parent) + the full BFS edge set. Use case: a 2026-05-16 validation showed BM.77056 anchors a 12-tablet cluster spanning BM + K + Sm + CBS collections, where v0.16 atomized THREE separate members as 'bi-orphans' because each was below the exact-J 0.30 threshold. This tool reveals the underlying compositional unity in one call. Pair with find_fuzzy_parallels for ad-hoc probing, reconstruct_cluster for systematic cluster reconstruction.",
+    inputSchema: {
+      seed_tablet_id: z.string().describe("Museum number of the seed tablet (e.g., 'BM.77056', 'K.2798'). Must be in the eBL signs cache."),
+      min_fuzzy_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum fuzzy Jaccard score for cluster membership. Default 0.20. Tighter (e.g., 0.30) yields a smaller core cluster; looser (e.g., 0.10) yields a larger neighborhood."),
+      min_fuzzy_intersect: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Minimum fuzzy-matching trigram count. Default 5."),
+      max_cluster_size: z
+        .number()
+        .int()
+        .min(2)
+        .max(100)
+        .optional()
+        .describe("Cap on total cluster size (terminates BFS when reached). Default 30."),
+      max_depth: z
+        .number()
+        .int()
+        .min(1)
+        .max(6)
+        .optional()
+        .describe("Maximum BFS depth from seed. Default 3. Higher = larger clusters but more compute cost (each depth-2 node adds top_k fuzzy calls)."),
+      top_k_per_node: z
+        .number()
+        .int()
+        .min(1)
+        .max(30)
+        .optional()
+        .describe("How many fuzzy parallels to expand per node. Default 12. Lower = tighter cluster, higher = more exploration."),
+    },
+  },
+  async ({ seed_tablet_id, min_fuzzy_jaccard, min_fuzzy_intersect, max_cluster_size, max_depth, top_k_per_node }) => {
+    const SCHEMA = schemaId("reconstruct_cluster");
+    try {
+      const result = reconstructCluster({
+        seedTabletId: seed_tablet_id,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minFuzzyIntersect: min_fuzzy_intersect,
+        maxClusterSize: max_cluster_size,
+        maxDepth: max_depth,
+        topKPerNode: top_k_per_node,
+      });
+
+      const lines: string[] = [
+        `Seed: ${seed_tablet_id}`,
+        `Cluster size: ${result.cluster_size} · Termination: ${result.termination_reason}`,
+        `BFS fuzzy calls: ${result.index_stats.total_fuzzy_calls} · Expanded tablets: ${result.index_stats.expanded_tablets}`,
+        `Config: min_J=${result.config.min_fuzzy_jaccard}, min_I=${result.config.min_fuzzy_intersect}, max_size=${result.config.max_cluster_size}, max_depth=${result.config.max_depth}, top_k=${result.config.top_k_per_node}`,
+        ``,
+        `Depth distribution: ${Object.entries(result.depth_distribution).map(([d, c]) => `d${d}=${c}`).join(", ")}`,
+        `Prefix distribution: ${Object.entries(result.prefix_distribution).sort((a, b) => b[1] - a[1]).map(([p, c]) => `${p}=${c}`).join(", ")}`,
+        `Cross-prefix members: ${result.cross_prefix_count}/${result.cluster_size}`,
+        ``,
+        `Members (depth · parent · fuzzy_j):`,
+      ];
+      for (const m of result.cluster_members) {
+        if (m.depth === 0) {
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=0 (seed)`);
+        } else {
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=${m.depth}  ← ${m.parent}  fuzzy_j=${m.fuzzy_j_to_parent.toFixed(4)}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:reconstruct-cluster", VERSION, {
+          citation:
+            "BFS reconstruction of manuscript-witness clusters via fuzzy trigram-Jaccard. v0.17.1. Builds on find_fuzzy_parallels.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`reconstruct_cluster error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          seed_tablet: seed_tablet_id,
+          cluster_size: 0,
+          cluster_members: [] as never[],
+          cluster_edges: [] as never[],
+          depth_distribution: {},
+          prefix_distribution: {},
+          cross_prefix_count: 0,
+          config: { min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.2, min_fuzzy_intersect: min_fuzzy_intersect ?? 5, max_cluster_size: max_cluster_size ?? 30, max_depth: max_depth ?? 3, top_k_per_node: top_k_per_node ?? 12 },
+          termination_reason: "frontier_exhausted",
+          index_stats: { total_fuzzy_calls: 0, expanded_tablets: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:reconstruct-cluster", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3577,7 +3690,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 26 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 27 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor)\n`,
     );
     process.exit(0);
   }
@@ -3587,7 +3700,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (26 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (27 tools)\n`);
 }
 
 main().catch((err) => {
