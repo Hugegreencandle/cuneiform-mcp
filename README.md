@@ -2,9 +2,23 @@
 
 MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions, a fuzzy trigram-Jaccard parallel finder for catching missed manuscript siblings, and a recursive cluster reconstructor — to LLM agents. **27 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
 
+## What's new — v0.18.3
+
+**Calibration-audit train complete.** Two rounds of calibration audit produced six fixes shipped and two no-ops confirmed across the toolchain. Key results:
+
+- **v0.18.1 lacuna restorer length-factor**: top-1 precision lifted from 22.9% → **91.7%** on the same 48-test synthetic-gap benchmark, from one line of scoring code. Top-10 recall preserved at 100%.
+- **v0.18.2 three-fix audit train**: bi-orphan thematic threshold tightened (0.60 → 0.50), bi-orphan scoring rebalanced (sign_count was dominating 78%), fuzzy_parallels run-bonus added. Bi-orphan discovery surface converged **167 → 2 candidates** (IM.49220 + K.3306).
+- **v0.18.3 methodology-agnostic run-bonus**: ported the v0.18.2 fuzzy run-bonus to `find_parallel_text`. Independently surfaces the SAME K.5896 + K.2761 cross-subseries discovery (both Mīs pî manuscripts with shared continuous text passages to K.2798 / Bīt salāʾ mê) from both fuzzy AND exact methodologies. The calibration pattern itself transfers across underlying algorithms.
+
+`docs/methods-paper-cdlj-submission.md` consolidates v0.16-v0.18.3 into a ~3,800-word camera-ready Cuneiform Digital Library Journal submission. `docs/methods-paper-draft.md` keeps the working version with 13 `[my synthesis]` claims labeled.
+
+## What's new — v0.18.0
+
+**`restore_lacuna_passage`** — multi-sign damaged-passage predictor via parallel-template alignment + bigram beam-search fallback. **`find_same_scribe_candidates`** + **`get_scribal_signature`** — orthographic-preference clustering via per-tablet log-likelihood-ratio signature. Tools: 27 → 30.
+
 ## What's new — v0.17.1
 
-**`reconstruct_cluster`** — recursive BFS expansion from a seed tablet via fuzzy parallels to reconstruct full manuscript-witness clusters. Validation: seeded at `BM.77056`, reconstructs a **100+ tablet manuscript-witness cluster spanning 20 museum prefixes** (BM, K, Sm, CBS, ND, N, IM, VAT, SU, UM, Rm-IV, Rm-II, Ni, W, + multiple BM accession ranges 1880–2023). 34 fuzzy calls reach 100 members; the actual underlying composition is wider. Seeded at `K.2798`, reconstructs a 20-tablet cluster with depth-2 sub-hub `K.15325` whose depth-3 members include K.8994 (fuzzy_J=0.49) and K.11920 (fuzzy_J=0.41) — peripheral-witness pattern. **Per-member topology** (depth from seed, parent that brought it in, fuzzy_j to parent) makes the cluster relationships fully inspectable.
+**`reconstruct_cluster`** — recursive BFS expansion from a seed tablet via fuzzy parallels to reconstruct full manuscript-witness clusters. Validation: seeded at `BM.77056`, reconstructs a **100+ tablet manuscript-witness cluster spanning 20 museum prefixes** (BM, K, Sm, CBS, ND, N, IM, VAT, SU, UM, Rm-IV, Rm-II, Ni, W, + multiple BM accession ranges 1880–2023). 34 fuzzy calls reach 100 members; the actual underlying composition is wider. **The BM.77056 cluster is the late-Mesopotamian *āšipūtu* (exorcist) library** — confirmed via eBL genre metadata pulls.
 
 ## What's new — v0.17.0
 
@@ -25,7 +39,10 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 
 | Version | Headline |
 |---|---|
-| **v0.18.0** | `restore_lacuna_passage` (multi-sign damaged-passage predictor) + `find_same_scribe_candidates` + `get_scribal_signature` (orthographic-preference clustering via per-tablet LLR signature). |
+| **v0.18.3** | `find_parallel_text` run-bonus calibration. Methodology-agnostic. K.5896 + K.2761 Mīs pî discoveries surface from BOTH fuzzy AND exact methods. |
+| **v0.18.2** | Three-fix calibration audit. Bi-orphan surface 167 → 2. Bi-orphan threshold tightening + score rebalance + fuzzy run-bonus. |
+| **v0.18.1** | Lacuna restorer length-factor calibration. Top-1 precision 22.9% → 91.7% from one line of code. |
+| v0.18.0 | `restore_lacuna_passage` (multi-sign damaged-passage predictor) + `find_same_scribe_candidates` + `get_scribal_signature` (orthographic-preference clustering via per-tablet LLR signature). |
 | v0.17.1 | `reconstruct_cluster` — recursive BFS via fuzzy parallels. BM.77056 → 100+ tablet cluster across 20 collection prefixes. |
 | v0.17.0 | Anomaly refinement (4 quality filters) + `find_fuzzy_parallels`. K.2798 ↔ Si.776 rescued at 2.67× exact-J lift. |
 | v0.16.0 | Anomaly Surface — `find_anomalous_tablets` + `describe_anomaly` + `discovery_surface_stats`. 167 bi-orphans surfaced. |

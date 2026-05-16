@@ -1,4 +1,4 @@
-# cuneiform-mcp Protocol — v0.18.0
+# cuneiform-mcp Protocol — v0.18.3
 
 > Every result should be inspectable, citeable, and reproducible.
 
@@ -53,6 +53,12 @@ type MuseumNumberObject = {
 ## The thirty tools
 
 > Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3) + one Random-Indexing semantic-embeddings tool (v0.15.0) + three Anomaly Surface tools (v0.16.0). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel. The v0.15.0 `find_thematic_parallel` tool extends the discovery surface from lexical (trigram-Jaccard) to thematic (Random-Indexing distributional embeddings). The v0.16.0 Anomaly Surface joins both into a single discovery surface: tablets isolated in BOTH spaces are the highest-priority candidates for previously-unknown compositions.
+
+**v0.18.3** completes the calibration-audit arc. Three calibration trains shipped between v0.18.1 and v0.18.3: (a) lacuna restorer length-factor multiplier lifted top-1 precision 22.9% → 91.7% from one line; (b) bi-orphan thematic threshold tightened 0.60 → 0.50, bi-orphan scoring rebalanced, and fuzzy_parallels run-bonus added — discovery surface converged 167 → 2 candidates; (c) the same run-bonus calibration pattern ported to find_parallel_text independently surfaces the same K.5896 + K.2761 Mīs pî discovery from both fuzzy AND exact methodologies. The calibration pattern itself is methodology-agnostic. After two audit rounds: six fixes shipped, two no-ops confirmed, all deferrals resolved. Final tally documented at `docs/v0.18.3-parallel-text-run-bonus.md`. The consolidated methods paper at `docs/methods-paper-cdlj-submission.md` (CDLJ camera-ready, ~3,800 words) is the canonical methodological output.
+
+**v0.18.0** added three tools: `restore_lacuna_passage` (multi-sign damaged-passage predictor via parallel-template alignment + bigram beam-search fallback), `find_same_scribe_candidates` + `get_scribal_signature` (orthographic-preference clustering via per-tablet log-likelihood-ratio signature). Tools: 27 → 30.
+
+**v0.17.1** added `reconstruct_cluster`: recursive BFS via fuzzy parallels reconstructs full manuscript-witness clusters. Seeded at BM.77056, recovers a **100+ tablet *āšipūtu* (exorcist) canon cluster spanning 20 museum-collection prefixes** — confirmed via eBL genre metadata pulls.
 
 **v0.17.0** refines the v0.16 Anomaly Surface with 4 quality filters (formulaic / refrain_heavy / heavily_damaged / provenance_cluster) that cut bi-orphan candidates 42 → 28 by removing the false-positive classes identified in the 2026-05-16 inspection (`docs/v0.16-bi-orphan-inspection.md`). Plus a new tool `find_fuzzy_parallels` for catching manuscript siblings missed by exact trigram-Jaccard — validated on the K.2798 ↔ Si.776 pair (2.67× exact-J lift, 129 of 311 query trigrams match fuzzily). Combined with the v0.16 Anomaly Surface, this completes the discovery feedback loop: surface candidates → inspect → identify false-positive classes → filter + rescue.
 
@@ -755,6 +761,6 @@ If you build on this protocol, cite the repo and the version in the
   title  = {cuneiform-mcp: an MCP server for cuneiform corpora},
   year   = {2026},
   url    = {https://github.com/danebrown/cuneiform-mcp},
-  version = {0.14.4}
+  version = {0.18.3}
 }
 ```
