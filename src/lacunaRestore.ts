@@ -344,8 +344,15 @@ export function restoreLacunaPassage(opts: LacunaRestoreOptions): LacunaRestoreR
         const localJac = jaccardSets(localContextTris, tempLocalTris);
         const coherence = bigramCoherence(fillTokens, prefixLast, suffixFirst, idx);
 
-        // Combined score: weighted geometric mean of local_jaccard and bigram_coherence
-        const score = Math.sqrt(Math.max(0, localJac) * Math.max(0, coherence));
+        // v0.18.1 — length-match factor. The 2026-05-16 stress test showed
+        // top-1 precision was 23% because longer-fill templates were
+        // displacing exact-length matches to rank #2-#7. Length factor:
+        // 1.0 for exact, 0.7 for off-by-1, 0.5 for off-by-2.
+        const lenDelta = Math.abs(fillTokens.length - lacunaSize);
+        const lengthFactor = lenDelta === 0 ? 1.0 : lenDelta === 1 ? 0.7 : 0.5;
+
+        // Combined score: weighted geometric mean × length factor
+        const score = Math.sqrt(Math.max(0, localJac) * Math.max(0, coherence)) * lengthFactor;
 
         candidateMap.set(fillKey, {
           signs: fillTokens,
