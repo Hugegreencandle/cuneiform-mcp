@@ -1,0 +1,562 @@
+{
+  "_meta": {
+    "compiled": "2026-05-16",
+    "compiler": "cuneiform-mcp v0.14.1",
+    "discipline": "Named-scholar attribution on every parallel. Confidence is the modern scholarly consensus (Lambert, George, Sparks, Smith, Heidel, etc.). Transmission hypotheses are flagged as scribal_transmission / common_substrate / independent_typological_match per the standard scholarly typology; the tool does NOT commit to any one transmission theory unless the consensus is strong.",
+    "notes": "Initial 15-parallel dataset covers the well-established canonical parallels. Excludes weaker/contested cases. brief_in_vault references map to the cuneiform-research/*.md files where the parallel is discussed in fuller context."
+  },
+  "parallels": [
+    {
+      "id": "bp-flood-1",
+      "biblical": {
+        "reference": "Genesis 6:9–9:17",
+        "theme": "The Great Flood",
+        "summary": "Noah is warned by Yahweh of an impending universal flood. He builds an ark of gopher wood, takes his family + pairs of animals on board, survives the 40-day rain + waters that cover the highest mountains, sends a raven then a dove to test the receding waters, lands on Mount Ararat, offers sacrifice, receives a covenant promise from Yahweh that the world will never again be destroyed by water — symbolized by the rainbow."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Atra-ḫasīs Epic",
+          "tablet_reference": "Atra-ḫasīs III (Old Babylonian, c. 1700 BCE)",
+          "summary": "Atra-ḫasīs (\"exceeding wise\"), warned by Enki through the reed wall of his hut, builds a boat. Loads animals + family. Flood is divine population-control measure (humans had multiplied + their noise disturbed the gods). Survives. Sacrifices upon descent. The gods, ravenous from days without offerings, gather around the sacrifice \"like flies\" (Atra-ḫasīs III v 35) — an image preserved almost verbatim in Genesis 8:21.",
+          "brief_in_vault": "Atrahasis"
+        },
+        {
+          "text": "Sumerian Flood Story (Ziusudra)",
+          "tablet_reference": "WB 62 (Eridu Genesis, Old Babylonian)",
+          "summary": "Ziusudra (\"life of long days\") is the Sumerian equivalent. Warned by Enki. After flood, he is granted immortality + exiled to Dilmun (the cosmic Eastern paradise) — analog of Noah's distinct post-flood status.",
+          "brief_in_vault": "Sumerian_Flood_Story"
+        },
+        {
+          "text": "Standard Babylonian Gilgamesh, Tablet XI",
+          "tablet_reference": "SB Gilgamesh XI (Neo-Assyrian recension, ~7th c. BCE — but composed earlier)",
+          "summary": "Utnapishtim (the Akkadian Atra-ḫasīs / Ziusudra) tells the flood story to Gilgamesh. Builds boat 7 stories high, 120 cubits each side. Storm lasts 6 days + 7 nights. Boat grounds on Mount Niṣir. Sends out dove → returns; swallow → returns; raven → does not return (echoed in Gen 8:6-12 with raven first, then dove). Offers sacrifice; gods \"gathered like flies.\"",
+          "brief_in_vault": "Gilgamesh_Epic"
+        },
+        {
+          "text": "Berossus, Babyloniaca",
+          "tablet_reference": "Berossus Book II (3rd c. BCE Greek redaction by a Babylonian priest)",
+          "summary": "Xisouthros (= Ziusudra) survives the flood by warning from Kronos (= Enki). Berossus preserves the Mesopotamian tradition for Hellenistic + later transmission — a likely conduit to Hellenistic Jewish + Christian readers.",
+          "brief_in_vault": "Berossus"
+        }
+      ],
+      "shared_elements": [
+        "Divine warning to a chosen mortal",
+        "Construction of a large boat by divine instruction",
+        "Loading of animals + family + craft-knowledge",
+        "Universal flood as divine retribution / overpopulation control",
+        "Bird-sending sequence to test the receding waters (raven + dove)",
+        "Landing on a mountain (Ararat / Niṣir)",
+        "Burnt offering sacrifice upon emerging",
+        "Divine recognition of the savor of sacrifice",
+        "Post-flood divine commitment to not destroy humanity again"
+      ],
+      "scholarly_attribution": [
+        "Smith 1872 — original public recognition of the Gen 6-9 ↔ Gilgamesh XI parallel after recovering the Flood Tablet from Nineveh",
+        "Lambert & Millard 1969 — *Atra-ḫasīs: The Babylonian Story of the Flood* (Oxford). The standard critical edition. Their introduction lays out the textual relationships.",
+        "George 2003 — *The Babylonian Gilgamesh Epic* (Oxford, 2 vols), esp. Tablet XI commentary",
+        "Sparks 2007 — *Ancient Texts for the Study of the Hebrew Bible* (Hendrickson). Standard textbook treatment.",
+        "Heidel 1949 — *The Gilgamesh Epic and Old Testament Parallels* (Chicago). Influential mid-20th-century synthesis."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission_via_west_semitic_intermediary"
+    },
+    {
+      "id": "bp-creation-1",
+      "biblical": {
+        "reference": "Genesis 1:1–2:3",
+        "theme": "Cosmogony — creation from primordial waters",
+        "summary": "God creates the world in six days. Day 1: light. Day 2: firmament separating waters above + below. Day 3: dry land + vegetation. Day 4: sun + moon + stars. Day 5: sea creatures + birds. Day 6: land animals + humans (in God's image). Day 7: rest."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Enūma Eliš",
+          "tablet_reference": "Enūma Eliš I–VII (Standard Babylonian, c. 12th c. BCE; recited annually at the Akītu festival)",
+          "summary": "At the beginning, only Apsû (sweet water) + Tiamat (salt water) exist; from their mixing the gods are born. Cosmic conflict: Marduk defeats Tiamat, splits her body — upper half becomes the firmament (the *šamû*, \"heavens\"), lower half becomes the earth. Eyes become Tigris + Euphrates sources. Sun, moon, stars set in their stations. Humans created from the blood of the rebel god Qingu mixed with clay. The text's order — primordial waters, separation into upper/lower waters, establishment of celestial luminaries, creation of humans — strikingly parallels Gen 1's sequence.",
+          "brief_in_vault": "Enuma_Elish"
+        }
+      ],
+      "shared_elements": [
+        "Beginning with primordial waters (tehôm in Gen 1:2 is cognate with Tiamat)",
+        "Separation of upper waters from lower waters by a firmament",
+        "Sequential cosmic ordering by divine speech / command",
+        "Celestial luminaries set in their stations as time-markers",
+        "Creation of humanity as the culminating act",
+        "Cosmic order established through the defeat of chaos"
+      ],
+      "scholarly_attribution": [
+        "Heidel 1942 — *The Babylonian Genesis* (Chicago). The foundational comparative study.",
+        "Speiser 1964 — *Genesis* (Anchor Bible). Argues for tehôm-Tiamat linguistic dependence.",
+        "Lambert 1965 — \"A New Look at the Babylonian Background of Genesis,\" *JTS* 16. Tempers the Heidel reading by noting Gen 1's transformations of the Babylonian material.",
+        "Lambert 2013 — *Babylonian Creation Myths* (Eisenbrauns). The current standard edition of *Enūma Eliš*.",
+        "Day 1985 — *God's Conflict with the Dragon and the Sea* (Cambridge). Tracks the chaos-conflict motif's transmission."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "common_substrate_or_scribal_transmission"
+    },
+    {
+      "id": "bp-eden-adapa-1",
+      "biblical": {
+        "reference": "Genesis 2:4–3:24",
+        "theme": "Garden of Eden, the first human, the lost chance at immortality",
+        "summary": "Yahweh forms Adam from dust, places him in Eden with the tree of life + the tree of knowledge of good and evil. Adam + Eve eat the forbidden fruit, are expelled, lose access to the tree of life, become mortal. The first human's failure becomes the etiology of human mortality."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Adapa Myth",
+          "tablet_reference": "Adapa fragments (Amarna recension EA 356, Neo-Assyrian library copies)",
+          "summary": "Adapa, sage of Eridu (first apkallu), breaks the South Wind's wing. Summoned to Anu's heavenly court. Ea (Enki) coaches him: refuse any food or drink offered, which will be \"food of death.\" Anu instead offers \"food of life\" and \"water of life.\" Adapa, following Ea's coaching, refuses — and so loses immortality forever. The first human (= Adapa as primal sage) is offered immortality but fails to accept it, becoming the etiology of human mortality.",
+          "brief_in_vault": "Adapa"
+        },
+        {
+          "text": "Gilgamesh's plant of rejuvenation",
+          "tablet_reference": "SB Gilgamesh XI (the plant episode)",
+          "summary": "Utnapishtim tells Gilgamesh of a plant that restores youth, growing at the bottom of the cosmic waters. Gilgamesh retrieves it. As he bathes, a serpent steals it + sheds its skin (etiology of serpent regeneration). Gilgamesh loses his last hope of immortality. The role of a SERPENT in depriving the human protagonist of immortality is structurally identical to Gen 3.",
+          "brief_in_vault": "Gilgamesh_Epic"
+        }
+      ],
+      "shared_elements": [
+        "The first man is offered immortality by a high god",
+        "Loses it through a mistake / misadvice / disobedience",
+        "Result is the etiology of universal human mortality",
+        "Serpent figure plays a key deprivation role (Gen 3 / Gilgamesh XI)",
+        "Garden / forest setting as cosmic source-place"
+      ],
+      "scholarly_attribution": [
+        "Izre'el 2001 — *Adapa and the South Wind* (Eisenbrauns). The standard critical edition.",
+        "Sanders 2017 — *From Adapa to Enoch: Scribal Culture and Religious Vision in Judea and Babylon* (Mohr Siebeck). The most systematic comparative study.",
+        "Liverani 2004 — *Myth and Politics in Ancient Near Eastern Historiography* (Cornell). Adapa as ideological text.",
+        "Annus 2016 — \"On the Origin of Watchers\" in *Outside of the Box*. Watchers / apkallū / Eden serpent comparative analysis."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "common_substrate_first_man_topos"
+    },
+    {
+      "id": "bp-babel-1",
+      "biblical": {
+        "reference": "Genesis 11:1–9",
+        "theme": "Tower of Babel — divine confusion of languages",
+        "summary": "Humanity, speaking one language, settles in Shinar (Babylonia). They build a tower \"with its top in the heavens\" to make a name for themselves. Yahweh descends, confuses their language, scatters them across the earth. The unity of pre-Babel humanity is broken; many languages emerge."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Etemenanki — the ziggurat of Babylon",
+          "tablet_reference": "Etemenanki = \"House of the Foundation of Heaven and Earth.\" 7-tier ziggurat in Babylon, rebuilt by Nebuchadnezzar II (605-562 BCE). The biblical Tower of Babel is widely identified with Etemenanki.",
+          "summary": "Etemenanki was THE iconic Babylonian temple-tower in the period when Genesis 11 was likely composed. Its name (\"foundation of heaven and earth\") + its sheer height (~90 m at its peak) + its association with Babylon make the biblical reference virtually unambiguous.",
+          "brief_in_vault": "Subterranean_Cities"
+        },
+        {
+          "text": "Enmerkar and the Lord of Aratta",
+          "tablet_reference": "Sumerian epic, c. 2000 BCE",
+          "summary": "Contains the \"Spell of Nudimmud\": after a golden age of unified speech, Enki confuses humanity's languages (the spell explicitly attributes language-confusion to Enki). One of the clearest Mesopotamian antecedents to the Babel motif.",
+          "brief_in_vault": "Sumerian_King_List"
+        }
+      ],
+      "shared_elements": [
+        "A great tower reaching toward heaven",
+        "Located in Mesopotamia (Babel = Babylon = Etemenanki)",
+        "Divine action confuses human language",
+        "Etiology of linguistic diversity",
+        "Theme of human hubris challenging the divine sphere"
+      ],
+      "scholarly_attribution": [
+        "Speiser 1964 — *Genesis* (Anchor Bible). Etemenanki identification.",
+        "Vanstiphout 2003 — *Epics of Sumerian Kings* (SBL). Standard translation of *Enmerkar and the Lord of Aratta*.",
+        "Uehlinger 1990 — *Weltreich und \"eine Rede\"* (OBO 101). Comprehensive monograph on the Babel narrative + ancient Near Eastern parallels.",
+        "Sparks 2007 — *Ancient Texts for the Study of the Hebrew Bible*."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "topical_response_to_known_landmark"
+    },
+    {
+      "id": "bp-theodicy-1",
+      "biblical": {
+        "reference": "Job (entire book, esp. chapters 3, 9, 21, 38–41)",
+        "theme": "The suffering of the righteous + divine inscrutability",
+        "summary": "Job, a blameless man, suffers catastrophic loss. His friends argue he must have sinned. Job protests his innocence + demands divine accounting. God answers from the whirlwind, asserting cosmic majesty without explaining the suffering directly. Job repents in dust + ashes. The book interrogates the moral structure of the universe."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Babylonian Theodicy (Šamaš-šum-ukīn version)",
+          "tablet_reference": "Acrostic poem, ~1000 BCE",
+          "summary": "A sufferer + his friend debate the justice of the gods. The sufferer recounts his unjust losses; the friend defends divine justice. The sufferer eventually concedes that human capacity to understand the gods is limited. The dialectical structure + the resolution-by-divine-inscrutability is strikingly parallel to Job.",
+          "brief_in_vault": "uncategorized"
+        },
+        {
+          "text": "Ludlul Bēl Nēmeqi (\"I Will Praise the Lord of Wisdom\")",
+          "tablet_reference": "Acrostic poem, ~1300 BCE (Kassite period)",
+          "summary": "The sufferer Šubši-mešrē-Šakkan describes his catastrophic illness + abandonment, then his eventual restoration by Marduk. The first-person lament + the eventual divine vindication closely parallel the Job framework.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Righteous sufferer protests divine injustice",
+        "Dialogue with comforter / friend who defends divine justice",
+        "Catalogue of inexplicable suffering",
+        "Appeal to divine cosmic majesty rather than explanation",
+        "Eventual divine vindication or chastened acceptance"
+      ],
+      "scholarly_attribution": [
+        "Lambert 1960 — *Babylonian Wisdom Literature* (Oxford). The foundational edition of both *Theodicy* + *Ludlul*.",
+        "Annus & Lenzi 2010 — *Ludlul Bēl Nēmeqi: The Standard Babylonian Poem of the Righteous Sufferer* (SAACT 7). Recent critical edition.",
+        "Pope 1965 — *Job* (Anchor Bible). Comparative readings.",
+        "Sparks 2007 — *Ancient Texts*."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "common_topos_with_independent_developments"
+    },
+    {
+      "id": "bp-vanity-1",
+      "biblical": {
+        "reference": "Ecclesiastes 1:9–11; 3:18–22; 9:7–10",
+        "theme": "Vanity / mortality / 'nothing new under the sun'",
+        "summary": "Qohelet (the Preacher) declares all human striving meaningless: \"there is nothing new under the sun.\" Death erases distinctions between wise and foolish. Eat, drink, enjoy your portion + your wife — for mortality erases all. The brief permissive hedonism in the face of inevitable death."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Standard Babylonian Gilgamesh, Tablet X — Šiduri's speech",
+          "tablet_reference": "SB Gilgamesh X (~3.32-13 in some versions)",
+          "summary": "The tavern-keeper Šiduri tells Gilgamesh, in his despair after Enkidu's death: \"Gilgamesh, where do you wander? You shall not find the life that you seek. When the gods made humans, they appointed death for them; life they kept in their own hands. So fill your belly, make merry day + night, dance + play, wash + anoint yourself with oil, dress in fine clothes, love your wife + the child holding your hand.\" The carpe-diem-in-the-face-of-mortality message is essentially identical to Eccl 9:7-10.",
+          "brief_in_vault": "Gilgamesh_Epic"
+        },
+        {
+          "text": "Šamaš Hymn — *The Great Hymn to Šamaš*",
+          "tablet_reference": "Edited Lambert 1960 BWL, lines 121-145",
+          "summary": "Reflects on the cyclical futility of human striving + the unchanging cosmic order under the sun-god's gaze. The phrasing about the sun seeing everything + nothing being hidden has resonance with Qohelet's \"under the sun\" framing.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Recognition of universal human mortality",
+        "Prescription of carpe-diem hedonism (eat, drink, enjoy)",
+        "Specific commands: enjoy food, drink, fine clothes, your wife, your work",
+        "Cyclical / 'nothing new' phrasing",
+        "Cosmic / sun-eye framing"
+      ],
+      "scholarly_attribution": [
+        "Lambert 1960 — *Babylonian Wisdom Literature*",
+        "Loretz 1964 — *Qohelet und der alte Orient* (Herder). Comprehensive comparative monograph.",
+        "Seow 1997 — *Ecclesiastes* (Anchor Bible). Discusses the Gilgamesh parallel directly.",
+        "Greenstein 2007 — \"Sages with a Sense of Humor: The Babylonian Dialogue Between a Master + His Servant + the Book of Qohelet,\" in *Wisdom Literature in Mesopotamia and Israel*."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission_via_aramaic_intermediary"
+    },
+    {
+      "id": "bp-daniel-beasts-1",
+      "biblical": {
+        "reference": "Daniel 7:1–14",
+        "theme": "Apocalyptic vision — four beasts rising from the sea",
+        "summary": "Daniel sees four beasts rising from the great sea: a lion with eagle's wings; a bear; a four-headed leopard with bird wings; a fourth dreadful beast with iron teeth + ten horns. After their dominion, the \"Ancient of Days\" judges + the \"one like a son of man\" comes with clouds + receives eternal dominion. Apocalyptic-cosmic vision of empire + divine sovereignty."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Enūma Eliš — Tiamat's monsters",
+          "tablet_reference": "Enūma Eliš I.130-160; III.6-25",
+          "summary": "Tiamat gives birth to eleven monstrous creatures to fight Marduk: the *bašmu* serpent-dragon, the *mušḫuššu* dragon, the *ušumgallu* great-dragon, the lion-demon, the scorpion-man, the storm-demon, etc. Each is a composite beast. Marduk defeats them; their effigies are displayed at his temple gate (visible at the Ishtar Gate of Babylon). The IMAGERY of composite beasts rising in cosmic-evil arrangement is the iconographic background for Daniel 7's vision.",
+          "brief_in_vault": "Enuma_Elish"
+        },
+        {
+          "text": "Anzu Epic",
+          "tablet_reference": "Anzu Old Babylonian + Standard Babylonian",
+          "summary": "Anzu, the lion-headed eagle, steals the Tablet of Destinies + must be defeated by Ninurta. The lion-with-eagle-wings composition is iconographically identical to Daniel 7:4's first beast.",
+          "brief_in_vault": "uncategorized"
+        },
+        {
+          "text": "Ningirsu / Imdugud iconography",
+          "tablet_reference": "Cylinder seals + boundary stones, throughout Mesopotamian art",
+          "summary": "Composite cosmic beasts (lion-eagle, bull-man, scorpion-man, storm-bird) populate the cosmic-conflict iconography of Mesopotamian art for two millennia. Daniel 7's visionary imagery is drawing on this iconographic vocabulary.",
+          "brief_in_vault": "Apkallu_Iconography"
+        }
+      ],
+      "shared_elements": [
+        "Composite cosmic-evil beasts (lion + eagle wings, bear, leopard, dreadful tenth-horned)",
+        "Rising from the primordial / cosmic sea",
+        "Sequential dominion of evil regimes",
+        "Divine judgment from the high throne",
+        "Cosmic order restored through a divine champion figure"
+      ],
+      "scholarly_attribution": [
+        "Collins 1977 — *The Apocalyptic Vision of the Book of Daniel* (Harvard). Foundational study.",
+        "Lambert 2013 — *Babylonian Creation Myths* (the *Enūma Eliš* monsters)",
+        "Annus 2001 — *The God Ninurta in the Mythology and Royal Ideology of Ancient Mesopotamia* (SAAS 14). On Anzu + cosmic-conflict imagery.",
+        "Sanders 2017 — *From Adapa to Enoch* (Mohr Siebeck). Daniel 7 ↔ Mesopotamian apocalyptic continuity."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission_via_late_babylonian_judean_priestly_circle"
+    },
+    {
+      "id": "bp-ezekiel-chariot-1",
+      "biblical": {
+        "reference": "Ezekiel 1:1–28",
+        "theme": "The throne-chariot vision — four living creatures + wheels-within-wheels + the glory of the Lord",
+        "summary": "By the river Chebar (in Babylonia, during the exile), Ezekiel sees four living creatures, each with four faces (man, lion, ox, eagle) + four wings. Beside them are wheels within wheels, full of eyes. Above is a firmament + a sapphire throne with a human-form figure radiating fire — \"the glory of the Lord.\""
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Apkallū iconography",
+          "tablet_reference": "Bīt Mēseri Tablet III + Neo-Assyrian palace reliefs (Khorsabad, Nineveh)",
+          "summary": "The seven apkallū are depicted as composite genii: fish-cloaked sages (the *purādu* form), eagle-headed winged spirits (the *Nisroch*-type), human-headed bird-men, lion-headed eagles. Ezekiel's four faces (man, lion, ox, eagle) map nearly exactly onto the four-faced apkallū-typology preserved at Nineveh + Nimrud throughout the Neo-Assyrian period — which is precisely the imperial visual environment of the Judean exiles.",
+          "brief_in_vault": "Apkallu_Iconography"
+        },
+        {
+          "text": "Lamassu winged-bull guardians",
+          "tablet_reference": "Khorsabad, Nineveh, Nimrud palace doorways (9th-7th c. BCE)",
+          "summary": "Colossal stone composite beings: human head + bull body + eagle wings + lion paws. The four-aspect composite (human face + lion + bull + eagle) is the visual genome of Mesopotamian doorway-protection iconography. Ezekiel sees this in vision.",
+          "brief_in_vault": "Apkallu_Iconography"
+        }
+      ],
+      "shared_elements": [
+        "Four faces / four aspects: human + lion + ox/bull + eagle",
+        "Composite beings with wings",
+        "Throne-room vision with cosmic-court figures",
+        "Fiery / lightning-like presence",
+        "Divine glory above the throne"
+      ],
+      "scholarly_attribution": [
+        "Halperin 1988 — *The Faces of the Chariot: Early Jewish Responses to Ezekiel's Vision* (Mohr). Standard monograph.",
+        "Greenberg 1983 — *Ezekiel 1-20* (Anchor Bible). Discusses the Mesopotamian iconographic background directly.",
+        "Wiggermann 1992 — *Mesopotamian Protective Spirits* (Styx). The standard catalog of apkallū-types.",
+        "Black & Green 1992 — *Gods, Demons and Symbols of Ancient Mesopotamia* (BMP)."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "direct_visual_environment_of_exilic_Judean"
+    },
+    {
+      "id": "bp-leviathan-1",
+      "biblical": {
+        "reference": "Isaiah 27:1; Psalm 74:13–14; Job 41",
+        "theme": "Leviathan — the cosmic dragon Yahweh defeats",
+        "summary": "Yahweh kills the dragon Leviathan (Hebrew *liwyātān*) — the multi-headed cosmic sea-monster of primordial chaos. In Psalm 74:13-14, Yahweh \"crushed the heads of Leviathan\" at creation. In Isaiah 27:1, Yahweh will slay Leviathan \"the fleeing serpent, the twisting serpent\" at the eschaton."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Tiamat — primordial chaos-dragon",
+          "tablet_reference": "Enūma Eliš I-V",
+          "summary": "Tiamat is the salt-water primordial chaos. Marduk fights + kills her, splits her body to form the cosmos. The serpentine / dragon form + the cosmic-conflict role is the same template as Leviathan.",
+          "brief_in_vault": "Enuma_Elish"
+        },
+        {
+          "text": "Lotan / Litanu — the Ugaritic seven-headed dragon",
+          "tablet_reference": "Ugaritic Baal Cycle (KTU 1.5 i.1-3)",
+          "summary": "Baal defeats \"the dragon Lotan, the twisting serpent, the powerful one with seven heads.\" The phrasing in Isaiah 27:1 (\"the fleeing serpent, the twisting serpent\") is essentially identical to the Ugaritic. The West Semitic intermediary form between Mesopotamian Tiamat + Hebrew Leviathan.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Primordial sea-dragon as cosmic evil",
+        "Defeat by the high god as the moment of cosmic ordering",
+        "Multi-headed / serpentine / twisting form",
+        "Re-defeat at the eschaton (myth + apocalyptic reflex)"
+      ],
+      "scholarly_attribution": [
+        "Gunkel 1895 — *Schöpfung und Chaos in Urzeit und Endzeit*. The foundational *Chaoskampf* monograph.",
+        "Day 1985 — *God's Conflict with the Dragon and the Sea* (Cambridge).",
+        "Lambert 2013 — *Babylonian Creation Myths*",
+        "Smith 1994 — *The Ugaritic Baal Cycle* (Brill, 2 vols).",
+        "Cross 1973 — *Canaanite Myth and Hebrew Epic* (Harvard)."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission_via_west_semitic"
+    },
+    {
+      "id": "bp-song-of-songs-1",
+      "biblical": {
+        "reference": "Song of Songs (entire book)",
+        "theme": "Erotic dialogue between lover + beloved",
+        "summary": "A dialogue between a male lover + female beloved, with the female voice dominant. Garden imagery, anatomical praise, courtship + consummation, mutual seeking + finding. Often read allegorically (Yahweh + Israel; Christ + Church) but the surface text is erotic."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Sumerian Sacred Marriage liturgy — Inanna and Dumuzi",
+          "tablet_reference": "Sumerian love songs (ETCSL category 4.08, ~Old Babylonian)",
+          "summary": "Ritual + literary dialogues between Inanna (goddess of love) + Dumuzi (the shepherd) celebrate their sexual union. The garden imagery, the female-dominant voice, the anatomical praise, the alternating speakers, the seeking-finding motif — all match the Song of Songs structure. The Mesopotamian *sacred marriage* (*hieros gamos*) ritual at Uruk was the celebrated cultic enactment.",
+          "brief_in_vault": "Inanna_Ishtar"
+        }
+      ],
+      "shared_elements": [
+        "Dialogue between male + female lover",
+        "Female voice dominant + initiating",
+        "Garden / fertile-land setting + imagery",
+        "Anatomical praise (description of the beloved's body)",
+        "Mutual seeking + finding pattern",
+        "Erotic + reproductive themes intertwined with cosmic / royal symbolism"
+      ],
+      "scholarly_attribution": [
+        "Lapinkivi 2008 — *The Sumerian Sacred Marriage in the Light of Comparative Evidence* (SAAS 15). Standard treatment.",
+        "Westenholz 1995 — \"Love Lyrics from the Ancient Near East,\" in *Civilizations of the Ancient Near East*.",
+        "Pope 1977 — *Song of Songs* (Anchor Bible).",
+        "Sefati 1998 — *Love Songs in Sumerian Literature* (Bar-Ilan)."
+      ],
+      "confidence": "moderate",
+      "transmission_hypothesis": "common_substrate_west_semitic_love_lyric_tradition"
+    },
+    {
+      "id": "bp-helel-fall-1",
+      "biblical": {
+        "reference": "Isaiah 14:12–15",
+        "theme": "The fall of Helel ben Shahar — the morning-star king's hubris",
+        "summary": "\"How you have fallen from heaven, O Helel ben Shahar (\"shining one, son of the dawn\")! You said in your heart, 'I will ascend to heaven; I will set my throne above the stars of God ... I will be like the Most High.' But you are brought down to Sheol.\" The taunt against the king of Babylon takes a cosmic-mythical form."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Etana epic — the ascension to heaven on an eagle",
+          "tablet_reference": "Etana Old Babylonian + Standard Babylonian recensions",
+          "summary": "Etana, king of Kish, ascends to heaven on an eagle's back to seek the plant of birth. Reaches the gates of Anu. The narrative is structurally an ascent to the divine throne. In the Late-Babylonian receptions, this becomes a topos for royal hubris reaching for divinity.",
+          "brief_in_vault": "Royal_Descents"
+        },
+        {
+          "text": "Mesopotamian astral-deification of kings",
+          "tablet_reference": "Various royal inscriptions of Naram-Sin, Shulgi, Hammurabi",
+          "summary": "Naram-Sin of Akkad (c. 2250 BCE) was the first known Mesopotamian king to deify himself — to write his name with the divine determinative *dingir*. Later kings continued the practice intermittently. The pattern of a king claiming celestial / divine status is a deep Mesopotamian motif that Isaiah 14 satirizes.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Royal claim to divine / celestial status",
+        "Ascent toward heaven / throne above the stars",
+        "Divine pushback + casting down",
+        "Morning-star imagery (Helel = Venus = Inanna's astral form)",
+        "Ending in the realm of the dead"
+      ],
+      "scholarly_attribution": [
+        "Annus 2007 — \"The Story of the Drinking Demon Sušikku in the Babylonian Liturgical Calendar,\" *State Archives of Assyria Bulletin* 16. On Mesopotamian hubris-narratives.",
+        "Kinnier Wilson 1985 — *The Legend of Etana* (Aris & Phillips). The standard edition.",
+        "Wiseman 1985 — *Nebuchadrezzar and Babylon* (Schweich Lectures). On the royal-divinity dynamic that Isaiah 14 critiques.",
+        "Sparks 2007 — *Ancient Texts*."
+      ],
+      "confidence": "moderate",
+      "transmission_hypothesis": "topical_critique_of_known_imperial_royal_ideology"
+    },
+    {
+      "id": "bp-proverbs-1",
+      "biblical": {
+        "reference": "Proverbs (esp. ch. 1-9, 22:17-24:22)",
+        "theme": "Wisdom literature — gnomic teaching about right conduct",
+        "summary": "Father-to-son instruction. Praise of Wisdom personified as a woman (*Sophia*). Warnings against the foolish woman / strange woman. Gnomic two-line proverbs on right conduct, work, speech, social relations. The 'Instruction of Amenemope' (Egyptian) is one direct source; but Mesopotamian wisdom traditions also feed in."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Sumerian Proverb Collections",
+          "tablet_reference": "Edited by Alster 1997 in *Proverbs of Ancient Sumer* (CDL Press, 2 vols)",
+          "summary": "Hundreds of Sumerian proverbs preserved as scribal-school exercise tablets. Same two-line gnomic format as Proverbs 10-22. Same topics: work, speech, social relations, the foolish wife, the diligent vs. lazy worker.",
+          "brief_in_vault": "uncategorized"
+        },
+        {
+          "text": "Counsels of Wisdom (Akkadian)",
+          "tablet_reference": "Edited Lambert 1960 BWL pp. 96-107",
+          "summary": "Akkadian father-to-son wisdom instruction. Topics: avoid the wrong companions, beware of women, speak truthfully, treat the poor + the destitute fairly, fear the gods. Direct structural + topical parallels to Prov 1-9.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Father-to-son instructional voice",
+        "Two-line gnomic proverb format",
+        "Personified Wisdom + Folly",
+        "Topics of right speech, right work, right companions",
+        "Theological framing: 'fear of the LORD' / 'fear of the gods' as wisdom's beginning"
+      ],
+      "scholarly_attribution": [
+        "Lambert 1960 — *Babylonian Wisdom Literature* (Oxford). Standard edition of Akkadian wisdom.",
+        "Alster 1997 — *Proverbs of Ancient Sumer*",
+        "Sparks 2007 — *Ancient Texts*.",
+        "Fox 2000-2009 — *Proverbs* (Anchor Bible, 2 vols).",
+        "Greenstein 2007 — Mesopotamian + Israelite wisdom comparative essays."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "common_scribal_curriculum_tradition"
+    },
+    {
+      "id": "bp-flies-sacrifice-1",
+      "biblical": {
+        "reference": "Genesis 8:20–21",
+        "theme": "Noah's sacrifice + Yahweh's pleased smelling of the savor",
+        "summary": "After landing on Ararat, Noah builds an altar + offers burnt sacrifices of every clean animal + bird. \"And the LORD smelled the pleasing aroma, and said in his heart: I will never again curse the ground because of man.\""
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Atra-ḫasīs III v 35-36 and parallel in Gilgamesh XI",
+          "tablet_reference": "Atra-ḫasīs III v 35-36; SB Gilgamesh XI 161-163",
+          "summary": "After Atra-ḫasīs / Utnapishtim emerges from the boat, he offers sacrifice. The gods, who have been without offerings for the duration of the flood, are RAVENOUS: \"The gods smelled the savor; / the gods smelled the sweet savor; / the gods gathered like flies over the sacrifice.\" The simile \"gods gathered like flies\" is preserved nearly verbatim in the genre that Gen 8:21 inherits — Gen 8:21's 'pleasing aroma' is the toned-down monotheistic version of the Mesopotamian gods-as-flies image.",
+          "brief_in_vault": "Atrahasis"
+        }
+      ],
+      "shared_elements": [
+        "Sacrifice immediately after surviving the flood",
+        "Divine response keyed to the SAVOR / SMELL of the offering",
+        "Divine acceptance + post-flood covenant promise"
+      ],
+      "scholarly_attribution": [
+        "Lambert & Millard 1969 — *Atra-ḫasīs*. The famous \"gods like flies\" passage is at III v 35-36.",
+        "George 2003 — *Gilgamesh*, esp. Tablet XI 161-163.",
+        "Sparks 2007 — *Ancient Texts*.",
+        "Heidel 1949 — *Gilgamesh and Old Testament Parallels*."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "scribal_transmission"
+    },
+    {
+      "id": "bp-plant-of-life-1",
+      "biblical": {
+        "reference": "Genesis 3:22–24",
+        "theme": "The tree of life + the cherub guardian",
+        "summary": "After Adam's transgression, Yahweh expels him from Eden \"lest he reach out his hand and take also from the tree of life, and eat, and live forever.\" Yahweh places cherubim + a flaming sword to guard the way to the tree of life."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Gilgamesh's plant of rejuvenation",
+          "tablet_reference": "SB Gilgamesh XI (the plant episode)",
+          "summary": "Utnapishtim tells Gilgamesh of a plant at the bottom of the cosmic ocean that restores youth. Gilgamesh retrieves it. As he bathes en route home, a SERPENT eats / steals it, sheds its skin (etiology of serpent regeneration), and disappears into the water. Gilgamesh loses his last hope of immortality. The plant-of-life topos + the serpent-deprivation are structurally identical to Gen 3:22-24's tree of life.",
+          "brief_in_vault": "Gilgamesh_Epic"
+        },
+        {
+          "text": "Apkallū guardian-figures at temple thresholds",
+          "tablet_reference": "Bīt Mēseri ritual deposits + palace reliefs (Khorsabad, Nimrud)",
+          "summary": "Apotropaic apkallū-figurines — winged composite beings — guard temple + house thresholds in Mesopotamian practice. The Hebrew CHERUBIM guarding Eden are visually + functionally identical to these apkallū guardian-figures. Wiggermann 1992 lays out the iconographic correspondences.",
+          "brief_in_vault": "Apkallu_Iconography"
+        }
+      ],
+      "shared_elements": [
+        "A cosmic plant / tree that confers immortality",
+        "Loss of the plant through a serpent figure",
+        "Guardian winged-composite beings at the threshold of the cosmic source-place",
+        "Theme: humans were almost-immortal but lost it"
+      ],
+      "scholarly_attribution": [
+        "George 2003 — *The Babylonian Gilgamesh Epic*.",
+        "Wiggermann 1992 — *Mesopotamian Protective Spirits* (Styx). Cherubim / apkallū correspondence.",
+        "Speiser 1964 — *Genesis* (Anchor Bible).",
+        "Sparks 2007 — *Ancient Texts*."
+      ],
+      "confidence": "strong",
+      "transmission_hypothesis": "common_substrate_first_man_topos"
+    },
+    {
+      "id": "bp-healing-serpent-1",
+      "biblical": {
+        "reference": "Numbers 21:6–9 (the bronze serpent / Nehushtan)",
+        "theme": "Healing through gazing on a bronze serpent",
+        "summary": "When the Israelites are plagued by fiery serpents in the wilderness, Moses fashions a bronze serpent on a pole. Anyone bitten who looks at it is healed. Later (2 Kings 18:4), Hezekiah destroys this Nehushtan as idolatrous."
+      },
+      "mesopotamian_sources": [
+        {
+          "text": "Apotropaic serpent iconography",
+          "tablet_reference": "Mesopotamian cylinder seals + amulets across periods",
+          "summary": "Serpents are simultaneously chthonic-dangerous AND healing-renewal symbols in Mesopotamian magic. Ningishzida (\"Lord of the Good Tree\") is a serpent-god of healing + the underworld; his caduceus-emblem (two serpents intertwined on a staff) is the direct ancestor of the modern medical caduceus. The serpent-on-pole healing motif sits in this exact iconographic tradition.",
+          "brief_in_vault": "uncategorized"
+        }
+      ],
+      "shared_elements": [
+        "Serpent as healing emblem",
+        "Mounted on a pole / staff",
+        "Apotropaic function (looking at it cures)"
+      ],
+      "scholarly_attribution": [
+        "Wiggermann 1992 — *Mesopotamian Protective Spirits*. Ningishzida + serpent-iconography.",
+        "Joines 1968 — \"The Bronze Serpent in the Israelite Cult,\" *JBL* 87.",
+        "Black & Green 1992 — *Gods, Demons and Symbols of Ancient Mesopotamia*."
+      ],
+      "confidence": "moderate",
+      "transmission_hypothesis": "common_substrate_serpent_iconography"
+    }
+  ]
+}
