@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_biblical_parallel.schema.json",
+  "title": "find_biblical_parallel data payload",
+  "description": "Find Mesopotamian textual parallels to a Hebrew Bible passage / theme / Mesopotamian source. Returns 15 canonical scholarly parallels (curated dataset, staged 2026-05-16) with named-Assyriologist attribution, transmission hypothesis, shared narrative elements, and pointers to the relevant brief in the cuneiform-research vault. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "match_count", "parallels"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "description": "The lookup inputs the caller passed.",
+      "additionalProperties": true
+    },
+    "match_count": { "type": "integer", "minimum": 0 },
+    "parallels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "biblical", "mesopotamian_sources", "shared_elements", "scholarly_attribution", "confidence", "transmission_hypothesis"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "description": "Stable parallel ID, e.g. 'bp-flood-1', 'bp-eden-adapa-1'." },
+          "biblical": {
+            "type": "object",
+            "required": ["reference", "theme", "summary"],
+            "additionalProperties": false,
+            "properties": {
+              "reference": { "type": "string", "description": "Canonical Bible reference (e.g., 'Genesis 6:9-9:17')." },
+              "theme": { "type": "string" },
+              "summary": { "type": "string" }
+            }
+          },
+          "mesopotamian_sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["text", "tablet_reference", "summary", "brief_in_vault"],
+              "additionalProperties": false,
+              "properties": {
+                "text": { "type": "string", "description": "Canonical text name (e.g., 'Atra-ḫasīs Epic', 'Standard Babylonian Gilgamesh, Tablet XI')." },
+                "tablet_reference": { "type": "string", "description": "Specific tablet / recension reference." },
+                "summary": { "type": "string", "description": "What the Mesopotamian text says + how it parallels the biblical passage." },
+                "brief_in_vault": { "type": "string", "description": "Filename (without .md) of the cuneiform-research vault brief that discusses this source in fuller context. Pair with get_brief or query_research to drill down." }
+              }
+            }
+          },
+          "shared_elements": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Specific narrative elements shared between the biblical passage and the Mesopotamian source(s)."
+          },
+          "scholarly_attribution": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Named-Assyriologist citations for this parallel."
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["weak", "moderate", "strong"],
+            "description": "Scholarly-consensus confidence: 'strong' for parallels with multi-decade established consensus (Flood, Creation, Theodicy), 'moderate' for parallels under active scholarly discussion (Song of Songs, Isaiah 14 fall, Healing Serpent)."
+          },
+          "transmission_hypothesis": {
+            "type": "string",
+            "description": "How scholars hypothesize the parallel arose: scribal_transmission, common_substrate, common_topos_with_independent_developments, topical_critique_of_known_imperial_royal_ideology, direct_visual_environment_of_exilic_Judean, etc."
+          }
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,10 @@ import {
   indexStats as signInferenceStats,
 } from "./signInference.js";
 import {
+  findBiblicalParallel,
+  datasetStats as biblicalParallelsStats,
+} from "./biblicalParallels.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -133,7 +137,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.14.2";
+const VERSION = "0.14.3";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3024,6 +3028,91 @@ server.registerTool(
   },
 );
 
+// ─── v0.14.3 — Mesopotamian ↔ Hebrew Bible parallel finder ─────────────────
+
+server.registerTool(
+  "find_biblical_parallel",
+  {
+    description:
+      "Find Mesopotamian textual parallels to a Hebrew Bible passage, theme, or Mesopotamian source. Returns canonical scholarly parallels from a curated dataset (15 parallels staged 2026-05-16) with named-Assyriologist attribution, transmission hypothesis, shared narrative elements, and pointers to the relevant brief in the cuneiform-research vault. Coverage: Flood (Gen 6-9 ↔ Atrahasis + Gilgamesh XI + Berossus), Creation (Gen 1 ↔ Enuma Elish), Eden (Gen 2-3 ↔ Adapa), Babel (Gen 11 ↔ Etemenanki), Theodicy (Job ↔ Babylonian Theodicy + Ludlul), Vanity (Eccl ↔ Šiduri's speech + Šamaš Hymn), Daniel 7 beasts ↔ Enuma Elish + Anzu, Ezekiel 1 throne-chariot ↔ Apkallū iconography, Leviathan ↔ Tiamat + Lotan, Song of Songs ↔ Inanna-Dumuzi sacred-marriage, Isaiah 14 hubris fall ↔ Mesopotamian royal-deification, Proverbs ↔ Sumerian + Akkadian wisdom, plant of life, sacrifice/gods-as-flies, healing serpent. Use `get_brief` with the returned `brief_in_vault` field to read the fuller scholarly context.",
+    inputSchema: {
+      biblical_reference: z
+        .string()
+        .optional()
+        .describe("A Hebrew Bible reference. Tolerant of abbreviations: 'Gen 6:9', 'Genesis 6', 'Job 3', 'Eccl 1:9', 'Isa 14', 'Daniel 7', 'Ezekiel 1'."),
+      theme: z
+        .string()
+        .optional()
+        .describe("A theme to match against parallels: 'flood', 'creation', 'wisdom', 'descent', 'kingship', 'throne-chariot', 'sacred marriage', 'plant of life', 'serpent', 'dragon'."),
+      mesopotamian_source: z
+        .string()
+        .optional()
+        .describe("Search by Mesopotamian source: 'Atrahasis', 'Gilgamesh', 'Enuma Elish', 'Adapa', 'Babylonian Theodicy', 'Apkallu', 'Sacred Marriage'."),
+      confidence_min: z
+        .enum(["weak", "moderate", "strong"])
+        .optional()
+        .describe("Minimum scholarly-consensus confidence. Default: weak (no filter)."),
+      max_results: z
+        .number()
+        .int()
+        .min(1)
+        .max(20)
+        .optional()
+        .describe("Cap on results. Default 10."),
+    },
+  },
+  async ({ biblical_reference, theme, mesopotamian_source, confidence_min, max_results }) => {
+    const SCHEMA = schemaId("find_biblical_parallel");
+    try {
+      const result = findBiblicalParallel({
+        biblical_reference,
+        theme,
+        mesopotamian_source,
+        confidence_min,
+        max_results,
+      });
+
+      const lines = [
+        biblical_reference ? `Biblical reference: ${biblical_reference}` : null,
+        theme ? `Theme: ${theme}` : null,
+        mesopotamian_source ? `Mesopotamian source: ${mesopotamian_source}` : null,
+        confidence_min ? `Min confidence: ${confidence_min}` : null,
+        ``,
+        `Matches: ${result.match_count}`,
+        ``,
+      ].filter((l) => l !== null);
+      for (const p of result.parallels) {
+        lines.push(`── ${p.id}   [${p.confidence}]`);
+        lines.push(`   ${p.biblical.reference} — ${p.biblical.theme}`);
+        lines.push(`   Mesopotamian sources:`);
+        for (const src of p.mesopotamian_sources) {
+          lines.push(`     · ${src.text} (${src.tablet_reference}) → brief: ${src.brief_in_vault}.md`);
+        }
+        lines.push(`   Shared elements: ${p.shared_elements.length}`);
+        lines.push(`   Scholars: ${p.scholarly_attribution.slice(0, 3).join(" · ")}${p.scholarly_attribution.length > 3 ? ` · …(+${p.scholarly_attribution.length - 3} more)` : ""}`);
+        lines.push(`   Transmission: ${p.transmission_hypothesis}`);
+        lines.push(``);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:biblicalParallels", VERSION, {
+          citation: "Curated Mesopotamian ↔ Hebrew Bible parallels dataset. Named-Assyriologist attribution required for every entry. See data/biblicalParallels.json _meta.",
+        }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_biblical_parallel error: ${msg}`, {
+        schema: SCHEMA,
+        data: { query: { biblical_reference, theme, mesopotamian_source, confidence_min, max_results }, match_count: 0, parallels: [] as never[] },
+        provenance: provenance("local", "local:biblicalParallels", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3044,7 +3133,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 20 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 21 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder)\n`,
     );
     process.exit(0);
   }
