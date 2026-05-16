@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/describe_anomaly.schema.json",
+  "title": "describe_anomaly data payload",
+  "description": "Per-tablet anomaly drill-down: presence in each index, lexical + thematic neighbor stats, lexical-cluster membership + dominants, anomaly-flag evaluation across all v0.16 criteria.",
+  "type": "object",
+  "required": ["tablet_id", "exists_in_lex_graph", "exists_in_them_index", "metadata", "lexical", "thematic", "flags", "reasons", "follow_up", "ebl_url", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "exists_in_lex_graph": { "type": "boolean" },
+    "exists_in_them_index": { "type": "boolean" },
+    "metadata": { "type": "object", "required": ["sign_count"], "additionalProperties": true },
+    "lexical": { "type": "object", "additionalProperties": true },
+    "thematic": { "type": "object", "additionalProperties": true },
+    "flags": {
+      "type": "object",
+      "required": ["is_bi_orphan", "is_lex_singleton", "is_them_orphan", "is_genre_misfit", "is_period_misfit"],
+      "additionalProperties": false,
+      "properties": {
+        "is_bi_orphan": { "type": "boolean" },
+        "is_lex_singleton": { "type": "boolean" },
+        "is_them_orphan": { "type": "boolean" },
+        "is_genre_misfit": { "type": "boolean" },
+        "is_period_misfit": { "type": "boolean" }
+      }
+    },
+    "reasons": { "type": "array", "items": { "type": "string" } },
+    "follow_up": { "type": "array", "items": { "type": "string" } },
+    "ebl_url": { "type": "string" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

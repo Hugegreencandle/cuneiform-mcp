@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/discovery_surface_stats.schema.json",
+  "title": "discovery_surface_stats data payload",
+  "description": "Top-level v0.16 anomaly-surface stats: index sizes, singleton/orphan/bi-orphan counts, and bi-orphan distribution by sign-length bucket.",
+  "type": "object",
+  "required": ["loaded", "load_error", "generated_at", "totals", "bi_orphans_by_length"],
+  "additionalProperties": false,
+  "properties": {
+    "loaded": { "type": "boolean" },
+    "load_error": { "type": ["string", "null"] },
+    "generated_at": { "type": ["string", "null"] },
+    "totals": {
+      "type": "object",
+      "required": ["tablets", "in_lex_graph", "in_them_index", "in_both", "lex_singletons", "them_orphans", "bi_orphans"],
+      "additionalProperties": true
+    },
+    "bi_orphans_by_length": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

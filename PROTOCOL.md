@@ -1,8 +1,8 @@
-# cuneiform-mcp Protocol — v0.15.0
+# cuneiform-mcp Protocol — v0.16.0
 
 > Every result should be inspectable, citeable, and reproducible.
 
-This is the published interface for cuneiform-mcp's **twenty-two** tools. Each tool
+This is the published interface for cuneiform-mcp's **twenty-five** tools. Each tool
 returns BOTH a human-readable rendered text block (in the standard MCP
 `content[0]` field) AND a typed `structuredContent` envelope. Downstream
 agents should chain on the structured fields; the rendered text is for
@@ -50,11 +50,13 @@ type MuseumNumberObject = {
 // e.g. "K.5065.A", "Rm.111", "BM.41255.C"
 ```
 
-## The twenty-two tools
+## The twenty-five tools
 
-> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3) + one Random-Indexing semantic-embeddings tool (v0.15.0). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel. The v0.15.0 `find_thematic_parallel` tool extends the discovery surface from lexical (trigram-Jaccard) to thematic (Random-Indexing distributional embeddings) — surfaces siblings that share zero exact trigrams.
+> Nine corpus tools (v0.5) + three comparative-religion retrieval tools (v0.6) + two generative Discovery Engine tools (v0.7 secondary literature, v0.13 primary-source eBL corpus) + one Mesopotamian-internal retrieval tool (v0.8) + four RAG tools over the cuneiform-research markdown vault (v0.14.0) + one damaged-sign inference tool (v0.14.2) + one Mesopotamian ↔ Hebrew Bible parallel finder (v0.14.3) + one Random-Indexing semantic-embeddings tool (v0.15.0) + three Anomaly Surface tools (v0.16.0). The v0.6 + v0.8 retrieval tools require named scholarly attribution. The Discovery Engines invert that discipline: they return machine-discovered candidates flagged for human-scholar validation, with full reasoning trace. Validated discoveries promote to retrieval-tier datasets. The v0.14 RAG tools surface the author's accumulated scholarly briefs as a queryable knowledge surface, with explicit `[my synthesis]` flagging to separate the author's interpretive claims from named-scholar consensus. The v0.14.2 sign-inference engine is the first ML/statistical tool in the suite. The v0.14.3 biblical-parallel finder is a curated retrieval tool with named-Assyriologist attribution per parallel. The v0.15.0 `find_thematic_parallel` tool extends the discovery surface from lexical (trigram-Jaccard) to thematic (Random-Indexing distributional embeddings). The v0.16.0 Anomaly Surface joins both into a single discovery surface: tablets isolated in BOTH spaces are the highest-priority candidates for previously-unknown compositions.
 
-**v0.15.0** adds Mode C semantic embeddings: Sahlgren 2005 Random Indexing over the 28,665-tablet eBL sign corpus, 300-dim, ±3 window, k=8 nonzeros, mean-centered (Mu & Viswanath 2018-lite, fixes mean-pooling collapse). Top-30 cosine neighbors precomputed per tablet. Foundation for v0.16 anomaly-surface tooling.
+**v0.16.0** adds the Anomaly Surface: three tools (`find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`) that join the corpus-viz lexical graph (17,486 components) with the v0.15 thematic-embedding index (28,665 tablets) + tabletMetadata + v0.14.4 exclusions. Surface yields 167 corpus-wide *bi-orphans* (isolated in both lexical AND thematic spaces); 42 with sign_count ≥ 100 are high-priority manual-inspection candidates. Top-30 list documented at `docs/v0.16-bi-orphan-candidates.md`.
+
+**v0.15.0** added Mode C semantic embeddings: Sahlgren 2005 Random Indexing over the 28,665-tablet eBL sign corpus, 300-dim, ±3 window, k=8 nonzeros, mean-centered (Mu & Viswanath 2018-lite, fixes mean-pooling collapse). Top-30 cosine neighbors precomputed per tablet. Foundation for v0.16 anomaly-surface tooling.
 
 **v0.14.4** added a corpus-exclusion pre-filter to the Discovery Engine v2.0 (`data/corpus-exclusions.json`). All 20 Asb.* Ashurbanipal-colophon-type prototype records (Hunger 1968 BAK) are filtered out at index-build time so they cannot enter the candidate pool. This closed the colophon-template false-positive class identified in v0.13.4 calibration.
 

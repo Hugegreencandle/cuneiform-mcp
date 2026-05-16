@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_anomalous_tablets.schema.json",
+  "title": "find_anomalous_tablets data payload",
+  "description": "v0.16 Anomaly Surface — bi-orphan detector + 6 secondary criteria over the joined corpus-viz lexical graph + v0.15 thematic embedding index + tabletMetadata + v0.14.4 exclusions.",
+  "type": "object",
+  "required": ["query", "anomaly_count", "anomalies", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["anomaly_type", "min_sign_count", "max_results"],
+      "additionalProperties": true
+    },
+    "anomaly_count": { "type": "integer", "minimum": 0 },
+    "anomalies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "anomaly_type", "scores", "metadata", "interpretation", "follow_up", "ebl_url"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "anomaly_type": { "type": "string" },
+          "scores": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "metadata": {
+            "type": "object",
+            "required": ["sign_count"],
+            "additionalProperties": true
+          },
+          "interpretation": { "type": "string" },
+          "follow_up": { "type": "string" },
+          "ebl_url": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "index_stats": { "type": "object", "additionalProperties": true },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

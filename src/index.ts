@@ -30,6 +30,11 @@ import {
   hasTabletEmbedding,
 } from "./semanticEmbeddings.js";
 import {
+  findAnomalousTablets,
+  describeAnomaly,
+  surfaceStats,
+} from "./anomalySurface.js";
+import {
   compareFloodNarratives,
   findAntediluvianParallel,
   apkalluAttestations,
@@ -142,7 +147,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.15.0";
+const VERSION = "0.16.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3214,6 +3219,253 @@ server.registerTool(
   },
 );
 
+// ─── v0.16.0 — Anomaly Surface (bi-orphan detector + describe + stats) ────
+
+server.registerTool(
+  "find_anomalous_tablets",
+  {
+    description:
+      "Surface tablets that don't fit anywhere — candidates for previously-unknown compositions, miscatalogued fragments, or rare witnesses of poorly-attested texts. Joins the corpus-viz lexical-graph (trigram-Jaccard ≥ 0.30) with the v0.15 thematic-embedding index (cosine ≥ 0.5) + tabletMetadata + v0.14.4 exclusions. Discovery thesis: ~88% of tablets are lexical singletons; tablets isolated in BOTH lexical AND thematic spaces (**bi-orphans**) are the highest-priority discovery candidates. Current surface (2026-05-16 build): 167 bi-orphans corpus-wide, 42 with sign_count ≥ 100. Rebuild with `node scripts/build-anomaly-index.mjs` after corpus-viz or v0.15 embeddings change. Pair with describe_anomaly for per-tablet drill-down.",
+    inputSchema: {
+      anomaly_type: z
+        .enum([
+          "bi_orphan",
+          "lexical_singleton",
+          "thematic_orphan",
+          "cluster_genre_misfit",
+          "cluster_period_misfit",
+          "low_lexical_high_thematic",
+          "low_thematic_high_lexical",
+        ])
+        .describe(
+          "Anomaly criterion. `bi_orphan` (recommended starter): no lex AND no thematic neighbors — highest-priority. `lexical_singleton`: zero trigram neighbors above min-jaccard=0.30. `thematic_orphan`: max embedding cos < 0.6. `cluster_genre_misfit`: tablet genre ≠ lexical-cluster dominant genre (cluster size ≥ 3, dominant share ≥ 60%). `cluster_period_misfit`: same for period. `low_lexical_high_thematic`: ≤ 1 lex neighbor but ≥ 10 thematic — paraphrase / bilingual / alt-spelling candidate. `low_thematic_high_lexical`: ≥ 5 lex but ≤ 2 thematic — formulaic-text outlier.",
+        ),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .max(10000)
+        .optional()
+        .describe("Minimum sign-token count (excluding X). Default 100. Drops short fragments where methodology is unreliable. Set 0 to disable filtering."),
+      period_filter: z
+        .enum(["Old_Akkadian", "Ur_III", "Old_Babylonian", "Old_Assyrian", "Middle_Babylonian", "Middle_Assyrian", "Neo_Assyrian", "Neo_Babylonian", "Late_Babylonian", "Hellenistic"])
+        .optional()
+        .describe("Restrict to tablets with this metadata period (subset that has v0.13.1 metadata)."),
+      genre_filter: z
+        .enum(["literary", "divinatory", "magical_ritual", "lexical", "administrative", "mathematical", "astronomical", "royal_inscription", "technical"])
+        .optional()
+        .describe("Restrict to tablets with this metadata genre."),
+      max_results: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Cap on results. Default 20."),
+    },
+  },
+  async ({ anomaly_type, min_sign_count, period_filter, genre_filter, max_results }) => {
+    const SCHEMA = schemaId("find_anomalous_tablets");
+    try {
+      const result = findAnomalousTablets({
+        anomalyType: anomaly_type,
+        minSignCount: min_sign_count,
+        periodFilter: period_filter,
+        genreFilter: genre_filter,
+        maxResults: max_results,
+      });
+
+      const lines: string[] = [
+        `Anomaly type: ${anomaly_type}`,
+        `Filters: min_sign_count=${result.query.min_sign_count}${period_filter ? `, period=${period_filter}` : ""}${genre_filter ? `, genre=${genre_filter}` : ""}`,
+        ``,
+        `Total matching anomalies: ${result.anomaly_count}`,
+        `Returned: ${result.anomalies.length}`,
+        ``,
+      ];
+      for (const a of result.anomalies) {
+        const tags = [
+          a.metadata.period ? `period:${a.metadata.period}` : null,
+          a.metadata.genre ? `genre:${a.metadata.genre}` : null,
+          a.metadata.city ? `city:${a.metadata.city}` : null,
+        ].filter(Boolean);
+        lines.push(`── ${a.tablet_id}   signs=${a.metadata.sign_count}${tags.length ? "  [" + tags.join(" · ") + "]" : ""}`);
+        lines.push(
+          `   lex: count=${a.scores.lex_count ?? "—"}, max_jaccard=${a.scores.lex_max_jaccard ?? "—"}  ·  them: count=${a.scores.them_count ?? "—"}, max_cos=${a.scores.them_max_cos ?? "—"}`,
+        );
+        lines.push(`   ${a.interpretation}`);
+        lines.push(`   Follow-up: ${a.follow_up}`);
+        lines.push(``);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:anomaly-surface", VERSION, {
+          citation:
+            "Joined index over corpus-viz lexical graph (Jaccard-trigram) + v0.15 Random-Indexing embeddings + tabletMetadata + v0.14.4 exclusions. v0.16.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_anomalous_tablets error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            anomaly_type,
+            min_sign_count: min_sign_count ?? 100,
+            period_filter,
+            genre_filter,
+            max_results: max_results ?? 20,
+          },
+          anomaly_count: 0,
+          anomalies: [] as never[],
+          index_stats: surfaceStats(),
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:anomaly-surface", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "describe_anomaly",
+  {
+    description:
+      "For a specific tablet, return a structured anomaly report: lexical + thematic neighbor counts, lexical-cluster membership + dominants, anomaly-flag evaluation across all v0.16 criteria, human-readable reasons, and ordered follow-up steps. Use after `find_anomalous_tablets` to drill into a specific candidate, or to evaluate any tablet known by museum-number for anomaly status.",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number (e.g., 'K.3982', 'BM.41255'). Tablet must be present in either the lexical graph or thematic embedding index."),
+    },
+  },
+  async ({ tablet_id }) => {
+    const SCHEMA = schemaId("describe_anomaly");
+    try {
+      const result = describeAnomaly(tablet_id);
+      const lines: string[] = [
+        `Tablet: ${tablet_id}`,
+        `In lex graph: ${result.exists_in_lex_graph} · In thematic index: ${result.exists_in_them_index}`,
+        `Sign count: ${result.metadata.sign_count}`,
+        result.metadata.period ? `Period: ${result.metadata.period}` : null,
+        result.metadata.genre ? `Genre: ${result.metadata.genre}` : null,
+        result.metadata.designation ? `Designation: ${result.metadata.designation}` : null,
+        ``,
+        `Lexical: ${result.lexical.neighbor_count ?? "—"} neighbors (max jaccard ${result.lexical.max_jaccard ?? "—"})`,
+        result.lexical.component_id != null
+          ? `  component ${result.lexical.component_id}, size ${result.lexical.component_size}, dominant genre: ${result.lexical.component_dominant_genre ?? "—"} (${result.lexical.component_dominant_genre_share ?? "—"})`
+          : null,
+        `Thematic: ${result.thematic.neighbor_count ?? "—"} neighbors above cos≥0.5 (max cos ${result.thematic.max_cosine ?? "—"})`,
+        ``,
+        `Flags:`,
+        `  bi_orphan:        ${result.flags.is_bi_orphan}`,
+        `  lex_singleton:    ${result.flags.is_lex_singleton}`,
+        `  thematic_orphan:  ${result.flags.is_them_orphan}`,
+        `  genre_misfit:     ${result.flags.is_genre_misfit}`,
+        `  period_misfit:    ${result.flags.is_period_misfit}`,
+        ``,
+        `Reasons:`,
+        ...result.reasons.map((r) => `  · ${r}`),
+        ``,
+        `Follow-up:`,
+        ...result.follow_up.map((f) => `  · ${f}`),
+        ``,
+        `eBL: ${result.ebl_url}`,
+      ].filter((l): l is string => l !== null);
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:anomaly-surface", VERSION),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`describe_anomaly error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id,
+          exists_in_lex_graph: false,
+          exists_in_them_index: false,
+          metadata: { sign_count: 0 },
+          lexical: { neighbor_count: null, max_jaccard: null, component_id: null, component_size: null },
+          thematic: { neighbor_count: null, max_cosine: null },
+          flags: {
+            is_bi_orphan: false,
+            is_lex_singleton: false,
+            is_them_orphan: false,
+            is_genre_misfit: false,
+            is_period_misfit: false,
+          },
+          reasons: [] as never[],
+          follow_up: [] as never[],
+          ebl_url: "",
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:anomaly-surface", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "discovery_surface_stats",
+  {
+    description:
+      "Top-level stats on the v0.16 discovery surface: how many tablets are in each index, how many are lexical singletons, how many are thematic orphans, how many are bi-orphans, and bi-orphan counts bucketed by sign length. Useful for tracking how the discovery surface evolves as the exclusion list + thresholds change. No inputs.",
+    inputSchema: {},
+  },
+  async () => {
+    const SCHEMA = schemaId("discovery_surface_stats");
+    try {
+      const stats = surfaceStats();
+      const totals = stats.totals;
+      const lines: string[] = [
+        `Anomaly index loaded: ${stats.loaded}`,
+        stats.generated_at ? `Built: ${stats.generated_at}` : `(not built)`,
+        ``,
+        `Total tablets considered:     ${totals.tablets}`,
+        `In lexical (trigram) graph:   ${totals.in_lex_graph}`,
+        `In thematic embedding index:  ${totals.in_them_index}`,
+        `In BOTH (intersection):       ${totals.in_both}`,
+        ``,
+        `Lexical singletons (no jaccard ≥0.30 nbr): ${totals.lex_singletons}`,
+        `Thematic orphans (max cos < 0.6):          ${totals.them_orphans}`,
+        `BI-ORPHANS (both at once):                 ${totals.bi_orphans}`,
+        ``,
+        `Bi-orphans by sign-length bucket:`,
+      ];
+      for (const [bucket, [bi, total]] of Object.entries(stats.bi_orphans_by_length)) {
+        lines.push(`  ${bucket.padEnd(10)} ${bi}/${total}`);
+      }
+      if (stats.load_error) lines.push(``, `Load error: ${stats.load_error}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: stats,
+        provenance: provenance("local", "local:anomaly-surface", VERSION),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`discovery_surface_stats error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          loaded: false,
+          load_error: msg,
+          generated_at: null,
+          totals: { tablets: 0, in_lex_graph: 0, in_them_index: 0, in_both: 0, lex_singletons: 0, them_orphans: 0, bi_orphans: 0 },
+          bi_orphans_by_length: {},
+        },
+        provenance: provenance("local", "local:anomaly-surface", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 async function runPrefetch(): Promise<void> {
   // Imported lazily so the MCP server's hot path doesn't pull fs/path deps.
   const { crawlFragments, getCacheDir } = await import("./cache.js");
@@ -3234,7 +3486,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 22 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 25 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface)\n`,
     );
     process.exit(0);
   }
@@ -3244,7 +3496,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (16 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (25 tools)\n`);
 }
 
 main().catch((err) => {

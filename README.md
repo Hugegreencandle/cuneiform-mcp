@@ -1,10 +1,12 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, and a Random-Indexing semantic-embeddings layer over the eBL sign corpus — to LLM agents. **22 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, and a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions — to LLM agents. **25 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
 
-## What's new — v0.15.0
+## What's new — v0.16.0
 
-`find_thematic_parallel` — Random-Indexing distributional embeddings (Sahlgren 2005) over the 28,665-tablet eBL sign corpus. Surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts — *thematic* rather than lexical similarity. 300-dim, ±3 window, k=8 nonzeros per index vector, mean-centered (fixes mean-pooling collapse), top-30 cosine neighbors precomputed per tablet. Pair with `discover_primary_source_parallels` for compound discovery: lexical + thematic together cover the full parallel surface. Foundation for the v0.16 anomaly-surface tooling.
+**Anomaly Surface** — three tools (`find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`) that join the corpus-viz lexical graph (17,486 components) with the v0.15 thematic-embedding index (28,665 tablets) + tabletMetadata + v0.14.4 exclusions. Surfaces *bi-orphans* — tablets isolated in BOTH the lexical AND thematic neighbor graphs — as the highest-priority discovery candidates. **167 bi-orphans corpus-wide; 42 with sign_count ≥ 100**. Six secondary anomaly types cover cluster-genre/period misfits, low-lex-high-thematic paraphrase candidates, and low-thematic-high-lex formulaic outliers. Top-30 candidate list at [`docs/v0.16-bi-orphan-candidates.md`](docs/v0.16-bi-orphan-candidates.md).
+
+- **v0.15.0** — `find_thematic_parallel` — Random-Indexing distributional embeddings (Sahlgren 2005) over the 28,665-tablet eBL sign corpus. Surfaces siblings sharing zero trigrams but with similar distributional sign contexts. 300-dim, ±3 window, mean-centered (fixes mean-pooling collapse).
 
 **Recent v0.14 train:**
 - **v0.14.4** — Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-template false-positive class identified in v0.13.4 calibration.
@@ -17,7 +19,8 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 
 | Version | Headline |
 |---|---|
-| **v0.15.0** | `find_thematic_parallel` — Random-Indexing distributional semantic embeddings (Mode C). Foundation for v0.16 anomaly surface. |
+| **v0.16.0** | Anomaly Surface — `find_anomalous_tablets` + `describe_anomaly` + `discovery_surface_stats`. 167 bi-orphans surfaced (42 long-form). |
+| v0.15.0 | `find_thematic_parallel` — Random-Indexing distributional semantic embeddings (Mode C). |
 | v0.14.4 | Corpus-exclusion pre-filter (Asb.* prototype records). Closes task #67 false-positive class. |
 | **v0.14.3** | `find_biblical_parallel` — 15 canonical Mesopotamian ↔ Hebrew Bible parallels |
 | **v0.14.2** | `infer_damaged_sign` — bigram-context sign-inference engine |
@@ -32,7 +35,7 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 22 tools live
+## 25 tools live
 
 ### Corpus retrieval (v0.1–v0.5)
 
@@ -95,6 +98,14 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | Tool | What it does |
 |---|---|
 | `find_thematic_parallel` | Random-Indexing distributional embeddings (Sahlgren 2005) over the eBL sign corpus. Returns top-30 cosine-similar tablets per seed. Unlike the lexical/trigram methods, surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts. 300-dim, ±3 window, k=8 nonzeros, mean-centered (fixes mean-pooling collapse). 28,665 tablets in index after MIN_TABLET_SIGNS=20 + v0.14.4 exclusion filter. Build with `node scripts/build-embeddings.mjs` (~4 min). Pair with `discover_primary_source_parallels` for compound lexical+thematic discovery. |
+
+### Anomaly Surface — discovery joiner (v0.16.0)
+
+| Tool | What it does |
+|---|---|
+| `find_anomalous_tablets` | Surfaces tablets that don't fit anywhere — candidates for previously-unknown compositions. Joins corpus-viz lexical graph with v0.15 embedding index + metadata. 7 anomaly criteria: `bi_orphan` (no lex AND no thematic — highest priority, **167 corpus-wide**), `lexical_singleton`, `thematic_orphan`, `cluster_genre_misfit`, `cluster_period_misfit`, `low_lexical_high_thematic` (paraphrase candidates), `low_thematic_high_lexical` (formulaic outliers). Returns ranked list with interpretation + follow-up + eBL URL. Build with `node scripts/build-anomaly-index.mjs`. |
+| `describe_anomaly` | Per-tablet drill-down: lex + thematic neighbor counts, cluster membership + dominants, anomaly-flag evaluation, reasons, follow-up steps. Use after `find_anomalous_tablets` or to evaluate any tablet by museum number. |
+| `discovery_surface_stats` | Top-level stats: how many tablets in each index, lexical singletons, thematic orphans, bi-orphans by sign-length bucket. No inputs. |
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
 
