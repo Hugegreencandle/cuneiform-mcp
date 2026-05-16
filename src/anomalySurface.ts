@@ -411,10 +411,18 @@ export function findAnomalousTablets(opts: {
 
     switch (opts.anomalyType) {
       case "bi_orphan":
-        if (t.in_lex_graph && t.in_them_index && t.lex_count === 0 && (t.them_max_cos ?? 1) < 0.6) {
+        // v0.18.2: thematic threshold lowered 0.60 → 0.50 (calibration audit:
+        // K.2798↔Si.776 confirmed-sibling pair scores at cos=0.56, so 0.60
+        // captures genuine siblings as false-positive orphans). At 0.50, the
+        // bi_orphan count drops from 167 to 11 — much tighter true-isolation
+        // surface, matches the v0.17 fuzzy-rescue residual.
+        if (t.in_lex_graph && t.in_them_index && t.lex_count === 0 && (t.them_max_cos ?? 1) < 0.5) {
           included = true;
-          // Score with x_ratio penalty (v0.17)
-          score = (t.sign_count - (t.them_max_cos ?? 0) * 100) * xRatioScorePenalty(t);
+          // v0.18.2 scoring: isolation_strength × sqrt(sign_count) instead of
+          // the v0.17 raw-difference formula where sign_count dominated 80%
+          // of the score. Now both axes contribute meaningfully.
+          const isolationStrength = 1 - (t.them_max_cos ?? 0);
+          score = isolationStrength * Math.sqrt(t.sign_count) * xRatioScorePenalty(t);
         }
         break;
       case "lexical_singleton":
@@ -424,7 +432,8 @@ export function findAnomalousTablets(opts: {
         }
         break;
       case "thematic_orphan":
-        if (t.in_them_index && (t.them_max_cos ?? 1) < 0.6) {
+        // v0.18.2: matching the bi_orphan threshold change
+        if (t.in_them_index && (t.them_max_cos ?? 1) < 0.5) {
           included = true;
           score = -(t.them_max_cos ?? 0); // lower max_cos = stronger orphan
         }
@@ -536,9 +545,9 @@ export function describeAnomaly(tabletId: string): DescribeAnomalyResult {
 
   const c = componentInfo(idx, t.component_id);
   const flags = {
-    is_bi_orphan: t.in_lex_graph && t.in_them_index && t.lex_count === 0 && (t.them_max_cos ?? 1) < 0.6,
+    is_bi_orphan: t.in_lex_graph && t.in_them_index && t.lex_count === 0 && (t.them_max_cos ?? 1) < 0.5,
     is_lex_singleton: t.in_lex_graph && t.lex_count === 0,
-    is_them_orphan: t.in_them_index && (t.them_max_cos ?? 1) < 0.6,
+    is_them_orphan: t.in_them_index && (t.them_max_cos ?? 1) < 0.5,
     is_genre_misfit: isGenreMisfit(idx, t),
     is_period_misfit: isPeriodMisfit(idx, t),
   };

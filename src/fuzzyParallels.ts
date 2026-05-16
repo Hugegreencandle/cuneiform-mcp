@@ -37,6 +37,10 @@ export type FuzzyParallel = {
   fuzzy_intersect: number;
   query_trigrams: number;
   target_trigrams: number;
+  // v0.18.2 calibration audit: contiguous-run signal
+  longest_contiguous_run: number;
+  contiguous_run_bonus: number;
+  final_score: number;
   shared_fuzzy_examples: Array<{ query: string; target: string }>; // up to 5
 };
 
@@ -56,6 +60,7 @@ export type FuzzyParallelsResult = {
 
 type CorpusEntry = {
   trigrams: Set<string>;
+  trigrams_ordered: string[]; // v0.18.2: ordered list for contiguous-run analysis
   // 2-of-3 partial keys
   ab: Set<string>; // "a b"
   bc: Set<string>; // "b c"
@@ -80,6 +85,7 @@ function dataDir(): string {
 
 function trigramsAndProjections(signsRaw: string): CorpusEntry {
   const trigrams = new Set<string>();
+  const trigrams_ordered: string[] = [];
   const ab = new Set<string>();
   const bc = new Set<string>();
   const ac = new Set<string>();
@@ -89,13 +95,15 @@ function trigramsAndProjections(signsRaw: string): CorpusEntry {
       const a = toks[i], b = toks[i + 1], c = toks[i + 2];
       const xCount = (a === "X" ? 1 : 0) + (b === "X" ? 1 : 0) + (c === "X" ? 1 : 0);
       if (xCount >= 2) continue;
-      trigrams.add(a + " " + b + " " + c);
+      const tri = a + " " + b + " " + c;
+      trigrams.add(tri);
+      trigrams_ordered.push(tri);
       if (a !== "X" && b !== "X") ab.add(a + " " + b);
       if (b !== "X" && c !== "X") bc.add(b + " " + c);
       if (a !== "X" && c !== "X") ac.add(a + " " + c);
     }
   }
-  return { trigrams, ab, bc, ac };
+  return { trigrams, trigrams_ordered, ab, bc, ac };
 }
 
 function loadCorpus(): Map<string, CorpusEntry> | null {
@@ -155,17 +163,22 @@ function loadCorpus(): Map<string, CorpusEntry> | null {
 function fuzzyIntersection(
   queryEntry: CorpusEntry,
   target: CorpusEntry,
-): { exact: number; fuzzy: number; examples: Array<{ query: string; target: string }> } {
+): { exact: number; fuzzy: number; longest_run: number; examples: Array<{ query: string; target: string }> } {
   let exact = 0;
   let fuzzy = 0;
   const examples: Array<{ query: string; target: string }> = [];
-  for (const qTri of queryEntry.trigrams) {
+  // v0.18.2: track matched positions for contiguous-run analysis
+  // Iterate position-ordered query trigrams (NOT the set) so we know positions.
+  const matchedPositions: boolean[] = new Array(queryEntry.trigrams_ordered.length).fill(false);
+  const seenTrigrams = new Set<string>(); // dedupe Set-semantics scoring
+  for (let pos = 0; pos < queryEntry.trigrams_ordered.length; pos++) {
+    const qTri = queryEntry.trigrams_ordered[pos];
+    const isDupe = seenTrigrams.has(qTri);
     if (target.trigrams.has(qTri)) {
-      exact++;
-      fuzzy++;
+      matchedPositions[pos] = true;
+      if (!isDupe) { exact++; fuzzy++; seenTrigrams.add(qTri); }
       continue;
     }
-    // Decompose query trigram and look up 2-of-3 projections in target
     const parts = qTri.split(" ");
     const a = parts[0], b = parts[1], c = parts[2];
     const matched =
@@ -173,7 +186,8 @@ function fuzzyIntersection(
       target.bc.has(b + " " + c) ||
       target.ac.has(a + " " + c);
     if (matched) {
-      fuzzy++;
+      matchedPositions[pos] = true;
+      if (!isDupe) { fuzzy++; seenTrigrams.add(qTri); }
       if (examples.length < 5) {
         // Best-effort: find ONE concrete target trigram that matches at 2 positions
         for (const tTri of target.trigrams) {
@@ -194,7 +208,20 @@ function fuzzyIntersection(
       }
     }
   }
-  return { exact, fuzzy, examples };
+  // v0.18.2: compute longest contiguous run of matched positions in the
+  // ordered query trigram stream. Long runs evidence text-section sibling
+  // sharing (vs. scattered noise from common-vocabulary co-occurrence).
+  let longest_run = 0;
+  let current_run = 0;
+  for (const matched of matchedPositions) {
+    if (matched) {
+      current_run++;
+      if (current_run > longest_run) longest_run = current_run;
+    } else {
+      current_run = 0;
+    }
+  }
+  return { exact, fuzzy, longest_run, examples };
 }
 
 // ─── Public API ────────────────────────────────────────────────────────────
@@ -252,13 +279,21 @@ export function findFuzzyParallels(opts: FuzzyParallelOptions): FuzzyParallelsRe
   let withOverlap = 0;
   for (const cid of candidates) {
     const target = corpus.get(cid)!;
-    const { exact, fuzzy, examples } = fuzzyIntersection(queryEntry, target);
+    const { exact, fuzzy, longest_run, examples } = fuzzyIntersection(queryEntry, target);
     if (fuzzy === 0) continue;
     withOverlap++;
     if (fuzzy < minFuzzyI) continue;
     const fuzzyJ = fuzzy / (queryEntry.trigrams.size + target.trigrams.size - fuzzy);
     if (fuzzyJ < minFuzzyJ) continue;
     const exactJ = exact / (queryEntry.trigrams.size + target.trigrams.size - exact);
+    // v0.18.2: contiguous-run bonus. Normalized by sqrt(query_trigrams) so the
+    // bonus scales sub-linearly with tablet length; capped at a meaningful
+    // 0.5 max so it can lift but not dominate fuzzy_jaccard.
+    // Multiplier: final_score = fuzzy_jaccard × (1 + 0.5 × run_factor)
+    // where run_factor = min(1, longest_run / sqrt(query_trigrams))
+    const runFactor = Math.min(1, longest_run / Math.max(1, Math.sqrt(queryEntry.trigrams.size)));
+    const runBonus = 0.5 * runFactor;
+    const finalScore = fuzzyJ * (1 + runBonus);
     results.push({
       tablet_id: cid,
       exact_jaccard: +exactJ.toFixed(4),
@@ -267,11 +302,15 @@ export function findFuzzyParallels(opts: FuzzyParallelOptions): FuzzyParallelsRe
       fuzzy_intersect: fuzzy,
       query_trigrams: queryEntry.trigrams.size,
       target_trigrams: target.trigrams.size,
+      longest_contiguous_run: longest_run,
+      contiguous_run_bonus: +runBonus.toFixed(4),
+      final_score: +finalScore.toFixed(4),
       shared_fuzzy_examples: examples,
     });
   }
 
-  results.sort((a, b) => b.fuzzy_jaccard - a.fuzzy_jaccard);
+  // v0.18.2: rank by final_score (fuzzy_jaccard × run-bonus) instead of bare fuzzy_jaccard
+  results.sort((a, b) => b.final_score - a.final_score);
 
   return {
     tablet_id: opts.tabletId,
