@@ -103,7 +103,7 @@ Cite both the paper and the software archive:
 
 **Software** (this release):
 
-> Brown, D. (2026). *cuneiform-mcp v0.18.3* [Software]. Zenodo. https://doi.org/[Zenodo-DOI-on-release]
+> Brown, D. (2026). *cuneiform-mcp v0.18.3* [Software]. Zenodo. https://doi.org/10.5281/zenodo.20250520
 
 `CITATION.cff` and `.zenodo.json` ship with the repo and auto-populate citation managers.
 

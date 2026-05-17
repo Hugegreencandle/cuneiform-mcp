@@ -281,7 +281,7 @@ Other natural extensions include compound-discovery tooling combining all four s
 
 ## 6. Reproducibility
 
-All code is available at the cuneiform-mcp repository: [github.com/Hugegreencandle/cuneiform-mcp](https://github.com/Hugegreencandle/cuneiform-mcp). Commit `4976266` (v0.18.3) is the head documented here. The repository is archived at Zenodo with DOI `[to be assigned by Zenodo on first release]`. All probes are deterministic (Random Indexing seed = 42; BFS frontier order sorted by score within each depth). Re-running reproduces the 100+ tablet BM.77056 cluster, the 17/31 fuzzy-rescue pairs, the 3 reciprocal same-scribe pairs, the 91.7% lacuna-restoration top-1 precision, the 2-tablet final bi-orphan surface, and the K.5896 + K.2761 cross-subseries discoveries identically.
+All code is available at the cuneiform-mcp repository: [github.com/Hugegreencandle/cuneiform-mcp](https://github.com/Hugegreencandle/cuneiform-mcp). Commit `4976266` (v0.18.3) is the head documented here. The repository is archived at Zenodo with DOI `10.5281/zenodo.20250520`. All probes are deterministic (Random Indexing seed = 42; BFS frontier order sorted by score within each depth). Re-running reproduces the 100+ tablet BM.77056 cluster, the 17/31 fuzzy-rescue pairs, the 3 reciprocal same-scribe pairs, the 91.7% lacuna-restoration top-1 precision, the 2-tablet final bi-orphan surface, and the K.5896 + K.2761 cross-subseries discoveries identically.
 
 Supplementary validation documents in the repository:
 

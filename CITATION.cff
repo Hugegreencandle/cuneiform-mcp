@@ -37,3 +37,8 @@ preferred-citation:
   year: 2026
   month: 5
   notes: "arXiv preprint; concurrent submission to Cuneiform Digital Library Journal."
+
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.20250520
+    description: "Zenodo software archive (v0.18.3)"
