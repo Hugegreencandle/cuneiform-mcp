@@ -5,3 +5,6 @@ dist/
 .env
 .env.local
 .letta/
+
+# private working notes — not for public flip
+_private/
