@@ -1,0 +1,38 @@
+{
+  "title": "cuneiform-mcp: Four-Axis Computational Discovery in the eBL Cuneiform Corpus",
+  "description": "<p>A four-axis computational discovery pipeline for the electronic Babylonian Library (eBL) transliteration corpus of ~36,500 cuneiform tablets. Operates on raw sign-token sequences without metadata and produces manuscript-sibling rescues, full manuscript-witness cluster reconstruction, scribal-lineage candidates, and lacuna restorations.</p><p>Headline findings: 55% sibling-rescue rate on lexical false-negatives; 100+ tablet <em>āšipūtu</em> (exorcist) library cluster recovered from a single seed; 3 reciprocal same-scribe pairs with cross-axis discrimination; 91.7% top-1 precision in synthetic-gap lacuna restoration.</p><p>v0.18.3 — 30 MCP tools, deterministic seeds, full reproducibility scripts. See <code>docs/methods-paper-arxiv.md</code> for the methods paper.</p>",
+  "creators": [
+    {
+      "name": "Brown, Dane",
+      "affiliation": "Independent researcher, Tokyo, Japan"
+    }
+  ],
+  "keywords": [
+    "cuneiform",
+    "computational philology",
+    "Assyriology",
+    "Babylonian",
+    "manuscript reconstruction",
+    "sign-trigram methods",
+    "random indexing",
+    "calibration audit",
+    "asipūtu canon",
+    "Mīs pî",
+    "Bīt salāʾ mê",
+    "digital humanities",
+    "MCP",
+    "Model Context Protocol"
+  ],
+  "license": "CC-BY-4.0",
+  "upload_type": "software",
+  "access_right": "open",
+  "communities": [],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/Hugegreencandle/cuneiform-mcp",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ],
+  "notes": "Concurrent submission to Cuneiform Digital Library Journal (methods paper). Corresponds to commit 4976266 (v0.18.3)."
+}

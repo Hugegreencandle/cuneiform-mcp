@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Four-Axis Computational Discovery in the eBL Cuneiform Corpus</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Four-Axis Computational Discovery in the eBL Cuneiform
+Corpus</h1>
+</header>
+<h1
+id="four-axis-computational-discovery-in-the-ebl-cuneiform-corpus">Four-Axis
+Computational Discovery in the eBL Cuneiform Corpus</h1>
+<h2
+id="recovering-manuscript-sibling-false-negatives-reconstructing-the-late-mesopotamian-exorcists-library-discriminating-scribal-lineages-and-restoring-damaged-passages">Recovering
+Manuscript-Sibling False Negatives, Reconstructing the Late-Mesopotamian
+Exorcist’s Library, Discriminating Scribal Lineages, and Restoring
+Damaged Passages</h2>
+<hr />
+<p><strong>Author</strong>: Dane Brown — Independent researcher, Tokyo,
+Japan — <code>dane@kairovault.com</code> <strong>Code</strong>: <a
+href="https://github.com/Hugegreencandle/cuneiform-mcp">github.com/Hugegreencandle/cuneiform-mcp</a>
+(commit <code>4976266</code>, v0.18.3) <strong>License</strong>: CC-BY
+4.0 <strong>Version</strong>: arXiv preprint, 2026-05-17 (concurrent
+submission to <em>Cuneiform Digital Library Journal</em>)</p>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>This paper documents a four-axis computational discovery pipeline
+(<code>cuneiform-mcp</code> v0.16–v0.18.3) for the electronic Babylonian
+Library transliteration corpus of approximately 36,500 tablets. The
+pipeline operates on raw sign-token sequences without metadata and
+produces four categories of finding: manuscript siblings missed by
+lexical methods (fuzzy trigram-Jaccard with one-substitution tolerance
+plus contiguous-run signaling), full manuscript-witness clusters of
+canonical compositions (recursive breadth-first search via fuzzy
+parallels), scribal-lineage candidates (orthographic-preference
+clustering via log-likelihood-ratio signatures), and multi-sign lacuna
+restorations (parallel-template alignment with bigram beam-search
+fallback).</p>
+<p>Four validated metrics result: a 55% manuscript-sibling rescue rate
+on candidates the strict 0.30 trigram-Jaccard methodology surfaces as
+isolated; a 100+ tablet <em>āšipūtu</em> (exorcist) canon cluster
+spanning 20 museum-collection prefixes recovered from a single seed
+tablet (BM.77056); three reciprocal same-scribe pairs in 34 probed
+tablets with empirically-validated discrimination from same-composition
+pairs; and 91.7% top-1 precision with 100% top-10 recall in
+synthetic-gap lacuna restoration across 48 test cases.</p>
+<p>The paper’s primary methodological contribution is the demonstration
+that exact lexical methods at the conventional 0.30 Jaccard threshold
+systematically under-recover wide-transmission compositions, and that
+the underlying <em>āšipūtu</em> canon described in textual-evidence
+consensus (Lenzi 2008; Geller 2010; Maul 1994) is recoverable
+empirically from pure-orthographic clustering. A separate methodological
+contribution emerges from two calibration audits demonstrating that
+precision in cuneiform-discovery tooling is often calibration-limited
+rather than signal-limited: a one-line scoring change lifted
+lacuna-restoration top-1 precision from 22.9% to 91.7% without altering
+the underlying recovery algorithm, and a threshold audit converged the
+bi-orphan discovery surface from 167 candidates to 2 without altering
+any underlying method. A third contribution demonstrates that the
+contiguous-run bonus is methodology-agnostic: applied independently to
+fuzzy-trigram and exact-trigram methodologies, both surface the same
+cross-subseries manuscript-section sibling pair (K.5896 and K.2761, both
+Mīs pî, sharing continuous text passages with K.2798, Bīt salāʾ mê) —
+the calibration pattern itself transfers across underlying
+algorithms.</p>
+<p><strong>Keywords</strong>: cuneiform; computational philology;
+manuscript-witness reconstruction; sign-trigram methods; calibration
+audit; <em>āšipūtu</em> canon; Mīs pî; Bīt salāʾ mê.</p>
+<hr />
+<h2 id="introduction-the-k.2798-si.776-case-study">1. Introduction: The
+K.2798 ↔︎ Si.776 Case Study</h2>
+<p>K.2798 is a Neo-Assyrian tablet from Kuyunjik classified by the
+electronic Babylonian Library (eBL) as
+<code>CANONICAL/Magic/Purification/Bīt salāʾ mê</code>. Si.776 is a
+Sippar tablet whose eBL description reads: “Small tablet preserving the
+beginning of the ritual tablet of Bīt šalāʾ mê. Written in Assyrian
+script.” They are confirmed manuscript siblings of the same canonical
+purification ritual.</p>
+<p>Yet lexical trigram-Jaccard rates the K.2798 ↔︎ Si.776 pair at 0.15 —
+below the conventional 0.30 discovery threshold (eBL’s
+<code>LineToVecRanker</code> default) — because of two localized
+sign-form variants at positions 4 and 5 that broke too many overlapping
+trigrams. The first 12 of the first 14 sign tokens are identical between
+the two tablets, but lexical methods at the standard threshold fail to
+surface the relationship.</p>
+<p>This pair motivates the entire methodology train documented here.
+Each successive tool in the <code>cuneiform-mcp</code> pipeline performs
+a specific function on this confirmed-sibling case:</p>
+<ol type="1">
+<li>The bi-orphan anomaly surface (v0.16) flags K.2798 as a candidate
+worth probing.</li>
+<li>The fuzzy parallel finder (v0.17) rescues the pair at fuzzy-Jaccard
+0.41 (a 2.67× lift over the exact-Jaccard score).</li>
+<li>The cluster reconstructor (v0.17.1) reveals K.2798 as a peripheral
+witness of a wider Mīs pî + Bīt salāʾ mê cluster anchored at
+K.15325.</li>
+<li>The scribal fingerprint (v0.18) confirms K.2798 and Si.776 are NOT
+same-scribe — correctly distinguishing “same composition” from “same
+scribe.”</li>
+<li>The lacuna restorer (v0.18.1) correctly recovers synthetic gaps in
+K.2798 via the Si.776 template at 100% top-10 recall.</li>
+<li>The v0.18.2 thematic threshold audit lowers the bi-orphan threshold
+from 0.60 to 0.50 — K.2798 ↔︎ Si.776 was thematic cosine 0.56, so the
+0.60 setting had been misclassifying confirmed sibling pairs as
+orphans.</li>
+<li>The v0.18.3 run-bonus calibration ports a previously-shipped
+fuzzy-method scoring refinement to the exact-trigram tool, surfacing
+additional cross-subseries siblings (K.5896 and K.2761, both Mīs pî
+manuscripts) within K.2798’s top-15.</li>
+</ol>
+<p>The K.2798 ↔︎ Si.776 case is the test case that validates each tool
+does what it claims and motivates the calibration audits that produced
+this paper’s secondary methodological contribution.</p>
+<hr />
+<h2 id="the-discovery-pipeline">2. The Discovery Pipeline</h2>
+<h3 id="corpus-and-filtering">2.1 Corpus and Filtering</h3>
+<p>The pipeline operates on the eBL
+<code>/api/fragments/all-signs</code> endpoint dump (36,498
+transliterated tablets, ~33 MB), filtered through a 20-record exclusion
+list of Asb.* colophon-template prototype records that aggregate
+standardized Ashurbanipal-palace colophon vocabulary across 200+
+manuscripts each (Hunger 1968). After exclusion and per-tool
+minimum-size filters, the working indices contain 28,665 tablets
+(thematic embeddings), 19,787 (lexical graph), 35,308 (fuzzy parallels),
+and 25,150 (scribal fingerprint).</p>
+<h3 id="lexical-layer">2.2 Lexical Layer</h3>
+<p>Standard sign-trigram-Jaccard pairwise scoring with X-token filtering
+(trigrams with ≥2 X positions skipped, per the 2026-05-14 X-FILTER
+calibration). Threshold 0.30 (eBL’s <code>LineToVecRanker</code>
+default). The validation benchmark on 50 targets and 87 known siblings
+(combined seed=42 + seed=137, N=267, 95% CI [17%, 28%]) places exact
+trigram-Jaccard at recall@15 of 22.5%. Seventy-seven and a half percent
+of known siblings score below top-15; most fall below 0.20 Jaccard.</p>
+<h3 id="thematic-layer">2.3 Thematic Layer</h3>
+<p>Distributional semantic embeddings via Sahlgren (2005) Random
+Indexing: 300-dimensional, ±3 sign window, k=8 sparse nonzeros per index
+vector, deterministic seed=42. Per-tablet vectors are IDF-weighted means
+of sign-context vectors, mean-centered following Mu, Bhat, and Viswanath
+(2018). Without mean-centering, random-pair cosine median was 0.97;
+after, 0.00 with full spread from −0.70 to +0.80. Top-30 cosine
+neighbors are precomputed per tablet.</p>
+<h3 id="anomaly-surface-and-quality-filters">2.4 Anomaly Surface and
+Quality Filters</h3>
+<p>A tablet with zero lexical neighbors at Jaccard ≥ 0.30 AND zero
+thematic neighbors at cosine ≥ T (where T evolves through calibration)
+is a <em>bi-orphan</em>: isolated in both lexical and thematic
+spaces.</p>
+<pre><code>v0.16 threshold T = 0.60            → 167 bi-orphans corpus-wide
+v0.18.2 threshold T = 0.50          → 11 bi-orphans
+v0.18.2 + quality filters           → 2 bi-orphans (IM.49220 and K.3306)</code></pre>
+<p>The threshold tightening from 0.60 to 0.50 is one of three
+calibration audit results documented in §3. The K.2798 ↔︎ Si.776
+confirmed-sibling pair scores at thematic cosine 0.56 — below 0.60 but
+above 0.50 — so the v0.16 setting was systematically capturing confirmed
+sibling pairs as orphans.</p>
+<p>Four quality filters apply default-ON for bi-orphan classification,
+derived from a 2026-05-16 inspection of the top-15 bi-orphans: formulaic
+(top-1 sign frequency &gt; 12%), refrain-heavy (max 3-gram repetition
+&gt; 3 in first 50 tokens), heavily-damaged (X-ratio &gt; 50%), and
+provenance-cluster (&gt; 80% of top-30 thematic neighbors share a museum
+prefix).</p>
+<h3 id="fuzzy-lexical-layer">2.5 Fuzzy Lexical Layer</h3>
+<p>Two trigrams <code>(a, b, c)</code> and <code>(a', b', c')</code> are
+fuzzy 1-substitution neighbors iff exactly 2 of 3 positions are equal.
+For each tablet, three 2-of-3 inverted indices are built:
+<code>(a,b)</code>, <code>(b,c)</code>, <code>(a,c)</code>. Fuzzy
+intersection is the number of query trigrams with at least one fuzzy
+match in the target.</p>
+<p>The v0.18.2 calibration observed that bare fuzzy-Jaccard treated
+scattered matches identically to contiguous runs. For K.2798 ↔︎ Si.776,
+the 129 fuzzy matches form a 29-position contiguous run plus smaller
+runs — strong text-section sibling evidence the bare-Jaccard score did
+not reflect. The calibration adds a run-bonus multiplier:</p>
+<pre><code>runFactor    = min(1, longest_run / sqrt(query_trigrams))
+runBonus     = 0.5 × runFactor              (capped at +50% lift)
+final_score  = fuzzy_jaccard × (1 + runBonus)</code></pre>
+<h3 id="cluster-reconstructor">2.6 Cluster Reconstructor</h3>
+<p>Breadth-first search from a seed tablet. Each frontier node’s top-K
+fuzzy parallels with fuzzy-Jaccard ≥ threshold join the cluster and the
+next frontier. Per-member topology preserved:
+<code>(tablet_id, depth, parent, fuzzy_J_to_parent)</code>. Termination
+occurs at depth-cap, size-cap, or frontier exhaustion.</p>
+<h3 id="scribal-fingerprint">2.7 Scribal Fingerprint</h3>
+<p>Per-tablet <em>scribal signature</em> = top-30 signs by
+log-likelihood ratio of in-tablet vs. corpus-baseline frequency:</p>
+<pre><code>LLR(s, T) = N_T(s) × log( P_T(s) / P_corpus(s) )</code></pre>
+<p>filtered to signs with corpus frequency ≥ 5 and in-tablet count ≥ 2.
+Two tablets with overlapping signatures share unusual orthographic
+preferences — variant-sign choices, logogram-vs-syllabic spelling
+habits, sign-compound preferences. Comparison via signature cosine plus
+signature Jaccard.</p>
+<p>Because eBL transliterations normalize paleographic variation, this
+measure captures spelling-preference fingerprint rather than handwriting
+paleography in the strict sense.</p>
+<h3 id="lacuna-restorer">2.8 Lacuna Restorer</h3>
+<p>For a damaged stretch of length k between known boundary signs: build
+prefix and suffix context fingerprints from the ±W known signs adjacent
+to the lacuna; scan the corpus for templates whose local sign sequence
+contains BOTH a prefix-trigram AND a suffix-trigram within distance k ±
+tolerance; extract intervening signs as candidate fills; score by:</p>
+<pre><code>score = sqrt(local_jaccard × bigram_coherence) × length_factor</code></pre>
+<p>The length_factor calibration is 1.0 for exact-length fills, 0.7 for
+off-by-one, and 0.5 for off-by-two. This single-line refinement lifted
+top-1 precision from 22.9% (v0.18.0) to 91.7% (v0.18.1) on the same
+48-test benchmark without altering the underlying parallel-template
+alignment algorithm.</p>
+<p>If no parallel templates exist for a damaged passage, the methodology
+falls back to bigram beam-search; this fallback is less reliable and
+produces repetitive output on truly-novel material.</p>
+<hr />
+<h2 id="findings">3. Findings</h2>
+<h3 id="the-bm.77056-cluster-the-late-mesopotamian-āšipūtu-library">3.1
+The BM.77056 Cluster: The Late-Mesopotamian <em>āšipūtu</em>
+Library</h3>
+<p>Seeded at BM.77056 with <code>min_fuzzy_jaccard = 0.20</code>, the
+cluster reconstructor at <code>max_depth = 4</code>,
+<code>max_size = 100</code> terminates at max-size-reached with 100
+cluster members — i.e., the underlying composition is wider than 100
+manuscript witnesses.</p>
+<p>The cluster spans 20 museum-collection prefixes: BM (31 members), K
+(32), Sm (6), CBS (2), ND (2), N (1), IM (2), VAT (2), SU-1952 (1), UM
+(1), Rm-IV (1), Rm-II (2), Ni (1), W (2), plus six accession-year ranges
+in the British Museum’s nineteenth-century acquisitions (1880, 1881,
+1882, 1883, 1884) and one in modern accession (2023). Sixty-nine of 100
+members are in a different prefix than the seed.</p>
+<p>eBL metadata pulls on the top-fuzzy-Jaccard cluster members reveal
+compositional content (table 1).</p>
+<p><strong>Table 1</strong>. eBL genre classifications for BM.77056
+cluster top members.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Tablet</th>
+<th>fuzzy-Jaccard</th>
+<th>eBL genre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>K.15325, K.8994, K.11920</td>
+<td>—</td>
+<td><code>CANONICAL/Magic/Purification/Mīs pî</code></td>
+</tr>
+<tr>
+<td>K.2798, Si.776</td>
+<td>—</td>
+<td><code>CANONICAL/Magic/Purification/Bīt salāʾ mê</code></td>
+</tr>
+<tr>
+<td>BM.44414</td>
+<td>0.23</td>
+<td><code>CANONICAL/Magic/Exorcistic/Udugḫul</code></td>
+</tr>
+<tr>
+<td>BM.47782</td>
+<td>0.21</td>
+<td><code>CANONICAL/Literature/Hymns/Divine/Šuʾila</code> (Namburbû?
+colophon)</td>
+</tr>
+<tr>
+<td>BM.44035, BM.16745</td>
+<td>0.22, 0.21</td>
+<td><code>CANONICAL/Magic/Anti-witchcraft</code></td>
+</tr>
+<tr>
+<td>BM.47910</td>
+<td>0.24</td>
+<td>hymn to Nabû → <code>CANONICAL/Literature/Hymns/Divine</code></td>
+</tr>
+<tr>
+<td>Sm.882</td>
+<td>0.23</td>
+<td><code>CANONICAL/Literature/Hymns/Divine</code></td>
+</tr>
+<tr>
+<td>BM.48903 (an isolate)</td>
+<td>&lt;0.20</td>
+<td><code>CANONICAL/Magic/Varia/Egalkura</code></td>
+</tr>
+<tr>
+<td>BM.35512 ↔︎ K.2581 (high-lift fuzzy pair)</td>
+<td>0.31</td>
+<td><code>CANONICAL/Technical/Medicine/Therapeutic/Recipe/Prescription (Šumma amēlu)</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is the integrated <em>āšipūtu</em> (exorcist) library — the
+canonical professional curriculum the exorcist’s manual KAR 44 (Lenzi
+2008) lists as comprising Mīs pî + Bīt salāʾ mê + Udugḫul + Šuʾila +
+Namburbû + anti-witchcraft series + <em>Šumma amēlu</em> medical
+prescriptions + Egalkura palace-entering ritual. The corpus’s
+compositional unity, long recognized from textual and colophon evidence
+(Lenzi 2008; Geller 2010; Maul 1994), is here demonstrated empirically
+through pure-orthographic clustering at the sign-trigram level, with no
+metadata input.</p>
+<p>The exact-trigram-Jaccard methodology at the conventional 0.30
+threshold cannot recover this cluster as a connected component because
+peripheral pair-similarities fall below threshold. Fuzzy 1-substitution
+Jaccard plus BFS cluster reconstruction together produce the
+recovery.</p>
+<h3 id="manuscript-sibling-rescue-55-of-filtered-candidates">3.2
+Manuscript-Sibling Rescue: 55% of Filtered Candidates</h3>
+<p>For the 28 cleaned bi-orphans plus 3 high-lift fuzzy candidates (31
+total) from the v0.17.0 surface, fuzzy parallels identify strong sibling
+pairs (fuzzy-Jaccard ≥ 0.20) for 17 cases (55%). Strongest rescued pairs
+are listed in table 2.</p>
+<p><strong>Table 2</strong>. Top fuzzy-rescued sibling pairs with
+exact-Jaccard lift.</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr>
+<th>Seed → Sibling</th>
+<th>fuzzy-J</th>
+<th>exact-J</th>
+<th>exact-J lift</th>
+<th>Composition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>K.2798 → Si.776</td>
+<td>0.4082</td>
+<td>0.1528</td>
+<td>2.67×</td>
+<td>Bīt salāʾ mê</td>
+</tr>
+<tr>
+<td>BM.34795 → BM.38295</td>
+<td>0.3593</td>
+<td>0.0115</td>
+<td>31.2×</td>
+<td>EAE Sîn (Reiner &amp; Pingree 1998–2005)</td>
+</tr>
+<tr>
+<td>BM.117666 → YBC.7455</td>
+<td>0.3265</td>
+<td>—</td>
+<td>—</td>
+<td>Cross-collection</td>
+</tr>
+<tr>
+<td>BM.35512 → K.2581</td>
+<td>0.3096</td>
+<td>0.0174</td>
+<td>17.8×</td>
+<td><em>Šumma amēlu</em> medical</td>
+</tr>
+<tr>
+<td>BM.45641 → BM.77056</td>
+<td>0.2973</td>
+<td>0.0180</td>
+<td>16.5×</td>
+<td>Joins the <em>āšipūtu</em> hub</td>
+</tr>
+</tbody>
+</table>
+<p>The pattern of extreme exact-Jaccard lifts (17× and 31×) on confirmed
+sibling pairs is methodologically significant: these are tablets where
+exact methods score near-zero because sign-form variants do not
+co-locate in trigram windows, even though compositional identity is
+preserved.</p>
+<h3 id="cross-subseries-discoveries-through-run-bonus-signaling">3.3
+Cross-Subseries Discoveries Through Run-Bonus Signaling</h3>
+<p>After the v0.18.2 fuzzy-parallels run-bonus calibration, the K.2798
+ranking surfaces a previously-buried candidate: K.5896 at fuzzy-Jaccard
+0.134 (below the typical 0.20 threshold) but contiguous run of 28
+positions. The run-bonus lifts K.5896 to a strong-confidence discovery
+candidate (final score 0.20). eBL probe confirms
+<code>K.5896 → CANONICAL/Magic/Purification/Mīs pî</code> (Neo-Assyrian
+Kuyunjik).</p>
+<p>The v0.18.3 port of the same calibration to
+<code>find_parallel_text</code> (exact-trigram-Jaccard, the original
+v0.4 tool) independently confirms K.5896 — and additionally promotes
+K.2761 (rank #13 → #9, run = 16 trigrams) into the top-10. eBL probe
+confirms <code>K.2761 → CANONICAL/Magic/Purification/Mīs pî</code>
+(Neo-Assyrian Kuyunjik): another Mīs pî manuscript with a shared
+continuous text passage to K.2798.</p>
+<p>K.5896 and K.2761 are both Mīs pî manuscripts with continuous trigram
+runs shared with K.2798 (Bīt salāʾ mê). The two compositions are sibling
+subseries within the late-Mesopotamian purification-ritual canon — and
+the run-bonus signaling reveals empirically-real cross-subseries
+manuscript-section siblings that bare aggregate-similarity scoring
+buried in both methodologies. The independent convergence of v0.18.2
+fuzzy and v0.18.3 exact methodologies on the same two Mīs pî tablets is
+the strongest empirical validation that the calibration pattern itself
+is the transferable contribution, not the specific algorithm.</p>
+<h3
+id="scribal-validation-reciprocal-pairs-and-negative-discrimination">3.4
+Scribal Validation: Reciprocal Pairs and Negative Discrimination</h3>
+<p>In the v0.18 scribal-fingerprint scale validation on 34 probed
+tablets, three reciprocal same-scribe pairs emerged (table 3).</p>
+<p><strong>Table 3</strong>. Reciprocal same-scribe pairs (average
+signature cosine).</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Composition</th>
+<th>Average cosine</th>
+<th>Combined evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BM.77056 ↔︎ BM.74130</td>
+<td><em>āšipūtu</em> (Sippar)</td>
+<td>0.78</td>
+<td>fuzzy-J 0.48 + reciprocal scribal — probable physical same
+scribe</td>
+</tr>
+<tr>
+<td>K.15325 ↔︎ K.8994</td>
+<td>Mīs pî (Kuyunjik)</td>
+<td>0.77</td>
+<td>fuzzy-J 0.49 + reciprocal scribal at #1/#3 — strongest pair</td>
+</tr>
+<tr>
+<td>BM.35512 ↔︎ K.2581</td>
+<td><em>Šumma amēlu</em> medical</td>
+<td>0.59</td>
+<td>Cross-collection same scribe candidate</td>
+</tr>
+</tbody>
+</table>
+<p>The critical negative result: K.2798 ↔︎ Si.776 are NOT in each other’s
+same-scribe top-15. They are confirmed manuscript siblings (caught by
+<code>find_fuzzy_parallels</code>) but the methodology correctly
+identifies them as different scribes — exactly as Assyriological theory
+predicts for two scribes copying the same canonical text. This negative
+result operationalizes the long-recognized distinction between textual
+transmission and scribal lineage as two independent computational
+objects: <code>find_fuzzy_parallels</code> answers “what composition?”;
+<code>find_same_scribe_candidates</code> answers “who copied?”</p>
+<p>A secondary discovery from the scribal pass concerns scribal-style
+geography: Si.776 (Sippar provenance) has Kuyunjik-leaning scribal style
+(K=5 of top-10 same-scribe candidates), corroborating eBL’s catalog note
+that it is “written in Assyrian script.” K.2798 (Kuyunjik provenance)
+conversely has Babylonian-leaning scribal style (BM=5 of top-10). This
+inverted pattern fits the Neo-Assyrian practice of importing Babylonian
+scholarly material to Kuyunjik plus the reciprocal Neo-Babylonian
+copying-from-Assyrian-models tradition (cf. Beaulieu 2000).</p>
+<h3 id="lacuna-restoration-92-top-1-precision">3.5 Lacuna Restoration:
+92% Top-1 Precision</h3>
+<p>Synthetic-gap stress test: 16 tablets × 3 lacuna sizes (3, 5, 7) = 48
+test cases. Methodology: cut a clean window from a tablet’s signs,
+replace with X tokens, run the restorer, score against ground truth.</p>
+<p><strong>Table 4</strong>. Lacuna restorer performance by tablet and
+lacuna size, before and after v0.18.1 length-factor calibration.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>v0.18.0</th>
+<th>v0.18.1</th>
+<th>Lift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Top-1 exact-match precision</td>
+<td>22.9%</td>
+<td><strong>91.7%</strong></td>
+<td>+68.8 pts</td>
+</tr>
+<tr>
+<td>Top-10 exact-match recall</td>
+<td>100.0%</td>
+<td>100.0%</td>
+<td>preserved</td>
+</tr>
+<tr>
+<td>Size 3 top-1</td>
+<td>18.8%</td>
+<td>87.5%</td>
+<td>+68.7</td>
+</tr>
+<tr>
+<td>Size 5 top-1</td>
+<td>31.3%</td>
+<td>93.8%</td>
+<td>+62.5</td>
+</tr>
+<tr>
+<td>Size 7 top-1</td>
+<td>18.8%</td>
+<td>93.8%</td>
+<td>+75.0</td>
+</tr>
+</tbody>
+</table>
+<p>The v0.18.0 → v0.18.1 calibration is the cleanest single illustration
+of the broader methodological point: the underlying parallel-template
+alignment had 100% top-10 recall from v0.18.0 — the signal was present.
+Top-1 precision was 23% because longer-fill templates displaced
+exact-length matches to rank #2–#7. A single-line length-factor
+multiplier lifted top-1 to 92% on identical inputs.</p>
+<p>The lacuna restorer also functions as a secondary
+manuscript-sibling-recovery method: BM.46372 (a v0.17-filtered
+“isolate”) is actually a join partner of BM.46338 per eBL’s own catalog,
+and the lacuna restorer recovers all three test windows at top-1 because
+the join provides parallel templates.</p>
+<h3 id="discovery-surface-convergence-to-two-candidates">3.6 Discovery
+Surface Convergence to Two Candidates</h3>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Bi-orphan count (≥100 signs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.16 raw</td>
+<td>42</td>
+</tr>
+<tr>
+<td>v0.17 (4 quality filters ON)</td>
+<td>28</td>
+</tr>
+<tr>
+<td>v0.17 + fuzzy rescue (55%)</td>
+<td>11 still-isolated</td>
+</tr>
+<tr>
+<td>v0.18.2 (threshold 0.50)</td>
+<td><strong>2</strong></td>
+</tr>
+</tbody>
+</table>
+<p>After all calibration, exactly two tablets remain: IM.49220 and
+K.3306. These are the Class D
+“numerical/metrological/zero-thematic-neighbors” candidates from the
+original v0.16 inspection. The methodology converges from a
+36,500-tablet corpus to a 2-tablet genuinely-novel-composition surface
+via empirical convergence — three independent calibrations (filter
+classes, threshold tightening, fuzzy rescue) all point to the same final
+set.</p>
+<p>The actual previously-unknown-composition yield is at most 2 of 42
+candidates (approximately 5%) — well below the original v0.16
+specification’s target of 5/20. The bi-orphan methodology’s real value
+lies not in novelty discovery but in QA, cataloging-gap identification,
+and manuscript-sibling false-negative recovery. Of the original 42
+candidates: eight were already-published, known compositions (Ḫḫ IX-XI
+lexical, eme.gi7 prayer XX, MUL.APIN astronomical, CT-published omens
+and letters); one (BM.46372) was an explicit missed-join recorded in
+eBL’s own catalog. The methodology is QA tooling.</p>
+<hr />
+<h2 id="the-calibration-audit-methodology">4. The Calibration Audit
+Methodology</h2>
+<p>A separate methodological contribution emerges from two calibration
+audits that demonstrated precision in cuneiform-discovery tooling is
+often calibration-limited rather than signal-limited.</p>
+<h3 id="the-lacuna-restorer-calibration-v0.18.0-v0.18.1">4.1 The Lacuna
+Restorer Calibration (v0.18.0 → v0.18.1)</h3>
+<p>The underlying parallel-template alignment had 100% top-10 recall
+from v0.18.0 — the signal was present. Top-1 precision was limited to
+23% by a boundary-off-by-one bug in the ranking heuristic. A single-line
+length-factor multiplier lifted top-1 to 92% on identical inputs.</p>
+<h3 id="the-bi-orphan-surface-calibration-v0.16-v0.18.2">4.2 The
+Bi-Orphan Surface Calibration (v0.16 → v0.18.2)</h3>
+<p>Three concurrent fixes: (a) thematic threshold 0.60 → 0.50 (K.2798 ↔︎
+Si.776 sibling pair was scoring at 0.56 and being misclassified as
+orphan); (b) score-component rebalance (<code>sign_count</code> was
+77.7% of raw bi-orphan score; isolation strength was a minor modifier;
+rebalanced to <code>isolation × sqrt(sign_count)</code>); (c) run-bonus
+signaling for fuzzy-parallels (contiguous fuzzy-match runs were treated
+identically to scattered noise; K.5896 Mīs pî discovery surfaced from
+rank ~9 to top-tier).</p>
+<h3 id="the-methodology-agnostic-run-bonus-v0.18.3">4.3 The
+Methodology-Agnostic Run-Bonus (v0.18.3)</h3>
+<p>Porting the v0.18.2 fuzzy run-bonus to
+<code>find_parallel_text</code> (the v0.4 exact-trigram-Jaccard tool)
+independently surfaces the same K.5896 cross-subseries discovery AND
+adds K.2761 to K.2798’s top-15. Both methodologies converge on the same
+Mīs pî ↔︎ Bīt salāʾ mê manuscript-section-sibling pattern when given the
+same calibration pattern. The calibration is methodology-agnostic.</p>
+<h3 id="general-methodology">4.4 General Methodology</h3>
+<p>For each tool’s scoring heuristic, the audit pattern: (1) decompose
+the formula’s component terms; (2) quantify per-component contribution
+on real outputs (if one term dominates &gt;70%, investigate); (3) test
+edge cases against known-positive pairs; (4) test with synthetic ground
+truth; (5) ship empirically-validated fixes.</p>
+<p>The v0.18.1 + v0.18.2 + v0.18.3 calibration trains collectively
+establish that the signal is present; the ranking heuristic is the
+lever. The independent convergence of v0.18.2 fuzzy and v0.18.3 exact
+methodologies on the same K.5896 + K.2761 discovery — driven by the same
+run-bonus calibration pattern applied to two different underlying
+algorithms — is the strongest demonstration: the calibration pattern
+itself is the transferable contribution.</p>
+<h3 id="audit-completion-six-fixes-two-no-ops">4.5 Audit Completion: Six
+Fixes, Two No-Ops</h3>
+<p>After two audit rounds, the cumulative tally is six fixes shipped
+(lacuna length-factor; bi-orphan threshold tightening; bi-orphan score
+rebalance; fuzzy run-bonus; find_parallel_text run-bonus; plus the
+previously-shipped Mu &amp; Viswanath thematic mean-centering at index
+build time) and two no-ops confirmed (thematic length-bias audit found
+no bias; scribal threshold tuning found current calibration
+optimal).</p>
+<p>The audit methodology correctly identified five of six tools with
+ranking-stage biases that admit single-line or limited-scope fixes. Two
+tools were confirmed clean — themselves valuable findings: build-time
+fixes (such as the v0.15 thematic-embedding mean-centering) do not
+necessarily require ranking-stage calibration as well; and the
+zero-triangle-clique result in scribal-fingerprint validation reflects a
+real corpus structural property (scribes in the late-Mesopotamian record
+predominantly worked in pairs of close orthographic kinship rather than
+larger collaborative ateliers visible at LLR-signature level).</p>
+<hr />
+<h2 id="discussion">5. Discussion</h2>
+<h3 id="what-the-pipeline-does-well">5.1 What the Pipeline Does
+Well</h3>
+<ol type="1">
+<li><strong>Recovers wide-transmission manuscripts that exact methods
+miss.</strong> Conventional 0.30 trigram-Jaccard is calibrated for
+nearby manuscripts; fuzzy 1-substitution plus recursive cluster
+expansion close the gap on peripheral witnesses.</li>
+<li><strong>Surfaces compositional unity at the corpus level.</strong>
+The BM.77056 result demonstrates that the late-Mesopotamian exorcist
+canon can be recovered as a single connected component by automated
+tooling, validating textual-evidence consensus with computational
+precision.</li>
+<li><strong>Distinguishes orthogonal axes computationally.</strong> The
+composition / scribe separation is validated cleanly by the K.2798 ↔︎
+Si.776 negative-result test.</li>
+<li><strong>Achieves near-canonical precision in lacuna
+restoration.</strong> 91.7% top-1 with 100% top-10 recall on tablets
+with parallel templates.</li>
+<li><strong>Converges the discovery surface via empirical
+calibration.</strong> Three independent passes (quality filters, fuzzy
+rescue, threshold audit) collapse the bi-orphan surface to exactly the
+same 2 candidates.</li>
+</ol>
+<h3 id="what-the-pipeline-does-not-do">5.2 What the Pipeline Does Not
+Do</h3>
+<ol type="1">
+<li><strong>Does not discover previously-unknown compositions</strong>
+at a rate above approximately 5%. eBL editors have already curated
+genuinely-novel material; the bi-orphan surface mostly catches
+manuscript-sibling false negatives plus short-fragment material.</li>
+<li><strong>Does not reconstruct full scribal ateliers.</strong> Three
+reciprocal same-scribe pairs in 34 probed tablets but zero triangle
+cliques. The methodology surfaces strong pairs rather than entire
+collaborative groupings.</li>
+<li><strong>Cannot handle joins that depend on metadata outside the
+indexed signs corpus</strong> (the BM.46372 → BM.46338 case where the
+join is recorded in eBL’s catalog but the linked tablet falls outside
+the signs corpus index).</li>
+<li><strong>Beam-search fallback for truly-novel lacuna restoration is
+weak.</strong> When no parallel templates exist, bigram beam-search
+collapses to repetitive high-frequency-sign output.</li>
+</ol>
+<h3 id="general-principles-surfaced">5.3 General Principles
+Surfaced</h3>
+<p>Five general principles emerged from the v0.16 → v0.18.3 build
+sequence:</p>
+<ol type="1">
+<li>Lexical thresholds calibrated for nearby manuscripts systematically
+under-recover wide-transmission canonical compositions.</li>
+<li>Methodological precision in discovery tooling is often
+calibration-limited rather than signal-limited.</li>
+<li>Threshold-calibration audits surface systematic mis-classification
+of genuine positives.</li>
+<li>Score-component decomposition reveals single-axis dominance
+bugs.</li>
+<li>The textual-transmission vs. scribal-lineage distinction is
+operationalizable as two independent computational objects.</li>
+</ol>
+<h3 id="implications-for-future-tooling">5.4 Implications for Future
+Tooling</h3>
+<p>The most natural next-step improvement is sign-form variant
+normalization at tokenization time. The 2026-05-14 sign-variant
+normalization experiment found zero rank-improvement from naive collapse
+rules on an 87-sibling benchmark, but that experiment did not test
+position-aware substitution at the trigram level — which is what the
+fuzzy method effectively does. A pre-pass that canonicalizes documented
+sign-form-variant pairs into single tokens would yield equivalent
+results at exact-Jaccard with lower compute cost.</p>
+<p>Other natural extensions include compound-discovery tooling combining
+all four signal axes; atelier reconstruction via recursive BFS in the
+scribal-fingerprint graph; cross-corpus comparative tooling for Hebrew
+Bible, Ugaritic, and Hittite parallels at the n-gram level; and
+calibration audits on the lexical baseline
+(<code>find_parallel_text</code> recall@15) and corpus-viz scoring.</p>
+<hr />
+<h2 id="reproducibility">6. Reproducibility</h2>
+<p>All code is available at the cuneiform-mcp repository: <a
+href="https://github.com/Hugegreencandle/cuneiform-mcp">github.com/Hugegreencandle/cuneiform-mcp</a>.
+Commit <code>4976266</code> (v0.18.3) is the head documented here. The
+repository is archived at Zenodo with DOI
+<code>[to be assigned by Zenodo on first release]</code>. All probes are
+deterministic (Random Indexing seed = 42; BFS frontier order sorted by
+score within each depth). Re-running reproduces the 100+ tablet BM.77056
+cluster, the 17/31 fuzzy-rescue pairs, the 3 reciprocal same-scribe
+pairs, the 91.7% lacuna-restoration top-1 precision, the 2-tablet final
+bi-orphan surface, and the K.5896 + K.2761 cross-subseries discoveries
+identically.</p>
+<p>Supplementary validation documents in the repository:</p>
+<ul>
+<li><code>v0.16-bi-orphan-candidates.md</code> — top-30 bi-orphan list
+(pre-filter)</li>
+<li><code>v0.16-bi-orphan-inspection.md</code> — five-class
+false-positive analysis</li>
+<li><code>v0.17-validation-findings.md</code> — 17/31 fuzzy-rescue
+results</li>
+<li><code>v0.17-ebl-metadata-probe.txt</code> — raw eBL metadata pull
+for cluster identification</li>
+<li><code>v0.18-scribal-validation.md</code> — three reciprocal pairs
+plus cross-axis discrimination</li>
+<li><code>v0.18-lacuna-stress-test.md</code> — 48-test stress test,
+v0.18.0 / v0.18.1 side-by-side</li>
+<li><code>v0.18.2-calibration-audit.md</code> — three-fix audit details
+plus K.5896 discovery</li>
+<li><code>v0.18.3-calibration-round2.md</code> — round-2 audit findings
+(two no-ops, one deferral resolved)</li>
+<li><code>v0.18.3-parallel-text-run-bonus.md</code> — find_parallel_text
+calibration validation plus K.2761 discovery</li>
+</ul>
+<hr />
+<h2 id="conclusion">7. Conclusion</h2>
+<p>This paper documents a four-axis computational discovery pipeline
+operating on the eBL cuneiform corpus. The pipeline’s primary
+substantive contribution is the empirical reconstruction of the
+late-Mesopotamian <em>āšipūtu</em> (exorcist) library — long recognized
+from textual evidence — as a 100+ tablet manuscript-witness cluster
+recoverable from pure-orthographic clustering at the sign-trigram level.
+The paper’s primary methodological contribution is the demonstration
+that exact lexical methods at conventional thresholds systematically
+under-recover wide-transmission compositions, and that this
+under-recovery is calibration-limited rather than signal-limited: a
+one-line length-factor change lifted lacuna-restoration top-1 precision
+from 22.9% to 91.7%, and a threshold audit converged the bi-orphan
+discovery surface from 167 candidates to 2. A third contribution
+demonstrates that the run-bonus calibration pattern is
+methodology-agnostic, applying equivalently to fuzzy and exact
+methodologies and surfacing the same K.5896 + K.2761 cross-subseries
+discovery from both.</p>
+<p>The pipeline’s validated metrics — 55% sibling rescue rate, 100+
+tablet cluster reconstruction, 3 reciprocal scribal pairs with
+cross-axis discrimination, 91.7% lacuna restoration top-1 — establish
+the methodology train as suitable for direct scholarly use on the eBL
+corpus and as a transferable methodological pattern for other
+ancient-text discovery tooling.</p>
+<hr />
+<h2 id="bibliography">Bibliography</h2>
+<p>Beaulieu, P.-A. 2000. “The Astronomers of the Esagil Temple in the
+Fourth Century BC.” In <em>Assyriologica et Semitica: Festschrift für
+Joachim Oelsner</em>. Münster: Ugarit-Verlag.</p>
+<p>Geller, M. J. 2010. <em>Ancient Babylonian Medicine: Theory and
+Practice</em>. Chichester: Wiley-Blackwell.</p>
+<p>Geller, M. J. 2016. <em>Healing Magic and Evil Demons: Canonical
+Udug-hul Incantations</em>. Berlin: De Gruyter. (Babylonisch-Assyrische
+Medizin in Texten und Untersuchungen 8.)</p>
+<p>Hunger, H. 1968. <em>Babylonische und assyrische Kolophone</em>.
+Kevelaer / Neukirchen-Vluyn. (Alter Orient und Altes Testament 2.)</p>
+<p>Lambert, W. G. 2007. <em>Babylonian Oracle Questions</em>. Winona
+Lake, IN: Eisenbrauns.</p>
+<p>Lenzi, A. 2008. <em>Secrecy and the Gods: Secret Knowledge in Ancient
+Mesopotamia and Biblical Israel</em>. Helsinki: Neo-Assyrian Text Corpus
+Project. (State Archives of Assyria Studies XIX.)</p>
+<p>Maul, S. M. 1994. <em>Zukunftsbewältigung: Eine Untersuchung
+altorientalischen Denkens anhand der babylonisch-assyrischen Löserituale
+(Namburbi)</em>. Mainz: P. von Zabern. (Baghdader Forschungen 18.)</p>
+<p>Mu, J., Bhat, S., and Viswanath, P. 2018. “All-but-the-Top: Simple
+and Effective Postprocessing for Word Representations.” In
+<em>Proceedings of the International Conference on Learning
+Representations (ICLR)</em>.</p>
+<p>Reiner, E., and Pingree, D. 1998–2005. <em>Babylonian Planetary
+Omens</em> 1–4. Leiden: Brill. (Cuneiform Monographs.)</p>
+<p>Sahlgren, M. 2005. “An Introduction to Random Indexing.” Paper
+presented at the Methods and Applications of Semantic Indexing Workshop
+at the 7th International Conference on Terminology and Knowledge
+Engineering (TKE).</p>
+<p>Walker, C., and Dick, M. 2001. <em>The Induction of the Cult Image in
+Ancient Mesopotamia: The Mesopotamian Mīs Pî Ritual</em>. Helsinki:
+Neo-Assyrian Text Corpus Project. (State Archives of Assyria Literary
+Texts 1.)</p>
+<hr />
+<h2 id="appendix-a-build-sequence-supplementary">Appendix A: Build
+Sequence (Supplementary)</h2>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Fetch eBL all-signs cache (~26 s, ~33 MB)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> dist/index.js <span class="at">--prefetch</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Build corpus-viz lexical graph (~7 min)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Desktop/corpus-viz <span class="kw">&amp;&amp;</span> <span class="ex">node</span> build-graph.mjs</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Build v0.15 thematic embeddings (~4 min)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Desktop/cuneiform-mcp <span class="kw">&amp;&amp;</span> <span class="ex">node</span> scripts/build-embeddings.mjs</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Build v0.16 anomaly-surface joined index (~10 s)</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> scripts/build-anomaly-index.mjs</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Reconstruct the BM.77056 cluster — single MCP call</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&#39;{&quot;jsonrpc&quot;:&quot;2.0&quot;,&quot;id&quot;:1,&quot;method&quot;:&quot;tools/call&quot;,&quot;params&quot;:{&quot;name&quot;:&quot;reconstruct_cluster&quot;,&quot;arguments&quot;:{&quot;seed_tablet_id&quot;:&quot;BM.77056&quot;,&quot;max_cluster_size&quot;:100,&quot;max_depth&quot;:4}}}&#39;</span> <span class="dt">\</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">|</span> <span class="ex">node</span> dist/index.js</span></code></pre></div>
+<h2 id="appendix-b-validation-benchmark">Appendix B: Validation
+Benchmark</h2>
+<p>Validation benchmark for exact trigram-Jaccard recall@15 = 22.5%
+(combined seed=42 + seed=137, N=267, 95% CI [17%, 28%]). Internal
+documentation: <code>VALIDATION-2026-05-14.md</code> and
+<code>TRIGRAM-EXPERIMENT-2026-05-14.md</code>.</p>
+</body>
+</html>

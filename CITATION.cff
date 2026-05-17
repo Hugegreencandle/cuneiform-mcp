@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software or methodology, please cite both the paper and the software archive."
+title: "cuneiform-mcp: Four-Axis Computational Discovery in the eBL Cuneiform Corpus"
+abstract: >
+  A four-axis computational discovery pipeline for the electronic Babylonian Library (eBL)
+  transliteration corpus of approximately 36,500 cuneiform tablets. Produces manuscript-sibling
+  rescues (fuzzy trigram with one-substitution tolerance), full manuscript-witness clusters of
+  canonical compositions (recursive BFS), scribal-lineage candidates (LLR signatures), and
+  multi-sign lacuna restorations (parallel-template alignment with bigram beam-search fallback).
+authors:
+  - family-names: Brown
+    given-names: Dane
+    email: dane@kairovault.com
+    affiliation: "Independent researcher, Tokyo, Japan"
+type: software
+license: CC-BY-4.0
+repository-code: "https://github.com/Hugegreencandle/cuneiform-mcp"
+version: "0.18.3"
+date-released: "2026-05-16"
+keywords:
+  - cuneiform
+  - computational philology
+  - Assyriology
+  - manuscript reconstruction
+  - sign-trigram methods
+  - calibration audit
+  - digital humanities
+  - Model Context Protocol
+preferred-citation:
+  type: article
+  title: "Four-Axis Computational Discovery in the eBL Cuneiform Corpus: Recovering Manuscript-Sibling False Negatives, Reconstructing the Late-Mesopotamian Exorcist's Library, Discriminating Scribal Lineages, and Restoring Damaged Passages"
+  authors:
+    - family-names: Brown
+      given-names: Dane
+      email: dane@kairovault.com
+      affiliation: "Independent researcher, Tokyo, Japan"
+  year: 2026
+  month: 5
+  notes: "arXiv preprint; concurrent submission to Cuneiform Digital Library Journal."
