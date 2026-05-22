@@ -31,7 +31,7 @@
 
 import { reconstructCluster, type ClusterResult } from "./reconstructCluster.js";
 import { clusterPairSimilarityMatrix, type ClusterMatrixResult, type TabletDegree } from "./clusterMatrix.js";
-import { findShortFragments, type ShortFragment } from "./collectionCoverage.js";
+import { type ShortFragment } from "./collectionCoverage.js";
 import { getTabletSignCount, getAllTabletRecords } from "./anomalySurface.js";
 
 // ─── Public types ──────────────────────────────────────────────────────────
@@ -333,21 +333,35 @@ export function auditCluster(opts: AuditClusterOptions): AuditClusterResult {
     count: sortedAsc.length,
   };
 
-  // Use findShortFragments to enumerate at-or-below-threshold candidates
-  // across the whole corpus then intersect with our member set. This reuses
-  // the canonical quality-filter primitive rather than re-implementing it.
+  // v0.18.18 fix — directly check each cluster member's sign_count against
+  // the threshold via getTabletSignCount. The earlier intersection approach
+  // (call findShortFragments corpus-wide with topN=500, then filter to
+  // members) was broken: the corpus has ~17,000 tablets below 50 signs,
+  // so the top-500 SHORTEST were all 0-2-sign placeholder records, and
+  // cluster members at sign_count 5-49 never appeared in the intersected
+  // set. Result: marginal_signal_count stayed 0 even when min=5 members
+  // existed in the cluster (validated 2026-05-22 against BM.77056 audit).
   let marginalSignal: ShortFragment[] = [];
   if (minSignCount > 0) {
-    const memberSet = new Set(memberIds);
-    const shortRes = findShortFragments({
-      maxSignCount: minSignCount,
-      sortOrder: "asc",
-      topN: 500,
-    });
-    if (shortRes.warnings.length > 0) {
-      warnings.push(...shortRes.warnings.map((w) => `find_short_fragments: ${w}`));
+    const memberPrefix = (id: string): string => {
+      const m = /^([^.,]+)/.exec(id);
+      return m ? m[1] : id;
+    };
+    for (const id of memberIds) {
+      const sc = getTabletSignCount(id);
+      if (sc === null) continue; // already tracked in membersWithoutSignCount
+      if (sc <= minSignCount) {
+        marginalSignal.push({
+          id,
+          prefix: memberPrefix(id),
+          sign_count: sc,
+          in_lex_graph: false, // not needed for marginal-flag use; consumers should use getAllTabletRecords for the boolean if they care
+          in_them_index: false,
+        });
+      }
     }
-    marginalSignal = shortRes.fragments.filter((f) => memberSet.has(f.id));
+    // Sort ascending by sign_count so the WORST offenders surface first
+    marginalSignal.sort((a, b) => a.sign_count - b.sign_count);
   }
   const quality: AuditQualityBlock = {
     sign_count: signCountStats,
