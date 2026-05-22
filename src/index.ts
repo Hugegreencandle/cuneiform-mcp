@@ -44,6 +44,7 @@ import {
 import {
   collectionCoverage,
   listCollectionPrefixes,
+  findShortFragments,
 } from "./collectionCoverage.js";
 import {
   restoreLacunaPassage,
@@ -167,7 +168,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.5";
+const VERSION = "0.18.6";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3722,6 +3723,92 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.6 — Quality-audit: surface short fragments below threshold ──────
+
+server.registerTool(
+  "find_short_fragments",
+  {
+    description:
+      "Quality-audit tool — surface tablets at or below a sign-count threshold. Direct programmatic complement to the v0.18.4 reconstruct_cluster `min_sign_count` filter: where the filter drops short fragments inline at BFS time, this tool exposes the same marginal-signal surface as a queryable view. Motivated by the 2026-05-22 BM.77056 cluster survey's NZK.set.* finding (3 cluster members at 5-8 signs each — too short for reliable fuzzy-Jaccard). Use this tool to (a) pre-audit a prefix before running cluster reconstruction, (b) generate exclusion lists for batch workflows, (c) discover under-cataloged sub-corpora corpus-wide.",
+    inputSchema: {
+      max_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .describe("Surface tablets with sign_count AT OR BELOW this threshold. E.g. 10 = micro-fragments only; 50 = quality-filter floor recommended for cluster reconstruction; 100 = anomaly-tool default (per methods paper §2.4)."),
+      prefix_filter: z
+        .array(z.string().min(1))
+        .optional()
+        .describe("Optional whitelist of museum-collection prefixes to scope the query. E.g. ['NZK'] to inspect the NZK.set.* tablets only; ['BM', 'K'] for the two major British Museum prefixes. Omit to scan the entire corpus."),
+      sort_order: z
+        .enum(["asc", "desc"])
+        .optional()
+        .describe("`asc` (default) lists shortest first (the most marginal); `desc` lists longest-under-threshold first (the candidates closest to the threshold)."),
+      top_n: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on returned fragments. Default 50. Capped at 500."),
+    },
+  },
+  async ({ max_sign_count, prefix_filter, sort_order, top_n }) => {
+    const SCHEMA = schemaId("find_short_fragments");
+    try {
+      const result = findShortFragments({
+        maxSignCount: max_sign_count,
+        prefixFilter: prefix_filter,
+        sortOrder: sort_order,
+        topN: top_n,
+      });
+
+      const lines: string[] = [
+        `Threshold: sign_count ≤ ${result.query.max_sign_count}${result.query.prefix_filter ? ` · prefixes: [${result.query.prefix_filter.join(", ")}]` : ` · all prefixes`}`,
+        `Corpus: ${result.totals.total_tablets_in_index.toLocaleString()} tablets in index · ${result.totals.total_below_threshold.toLocaleString()} below threshold corpus-wide${result.query.prefix_filter ? ` · ${result.totals.total_matching_prefix_filter.toLocaleString()} after prefix filter` : ""}`,
+        `Returning: ${result.totals.fragments_returned} fragments (sort: ${result.query.sort_order})`,
+        ``,
+      ];
+      const prefixDist = Object.entries(result.totals.prefix_distribution_below_threshold).sort((a, b) => b[1] - a[1]).slice(0, 15);
+      if (prefixDist.length > 0) {
+        lines.push(`Prefix distribution (below threshold): ${prefixDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+        lines.push(``);
+      }
+      lines.push(`Fragment                 signs   lex   them`);
+      lines.push(`──────────────────────  ──────  ────  ────`);
+      for (const f of result.fragments) {
+        lines.push(
+          `${f.id.padEnd(22).slice(0, 22)}  ${String(f.sign_count).padStart(6)}  ${f.in_lex_graph ? "  ✓ " : "  - "}  ${f.in_them_index ? "  ✓ " : "  - "}`,
+        );
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:short-fragments", VERSION, {
+          citation:
+            "Quality-audit surface for marginal-signal tablets. v0.18.6. Programmatic complement to reconstruct_cluster's min_sign_count filter (v0.18.4).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_short_fragments error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { max_sign_count: max_sign_count ?? 0, prefix_filter: prefix_filter ?? null, sort_order: sort_order ?? "asc", top_n: top_n ?? 50 },
+          fragments: [] as never[],
+          totals: { total_tablets_in_index: 0, total_below_threshold: 0, total_matching_prefix_filter: 0, fragments_returned: 0, prefix_distribution_below_threshold: {} },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:short-fragments", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.5 — Discovery: list all museum-collection prefixes ──────────────
 
 server.registerTool(
@@ -4098,7 +4185,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 32 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes corpus-discovery tool)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 33 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments quality-audit)\n`,
     );
     process.exit(0);
   }

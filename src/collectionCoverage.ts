@@ -154,6 +154,99 @@ export function listCollectionPrefixes(opts: ListPrefixesOptions = {}): ListPref
   };
 }
 
+// ─── v0.18.6 — find_short_fragments (quality-audit primitive) ──────────────
+
+export type ShortFragment = {
+  id: string;
+  prefix: string;
+  sign_count: number;
+  in_lex_graph: boolean;
+  in_them_index: boolean;
+};
+
+export type FindShortFragmentsResult = {
+  query: {
+    max_sign_count: number;
+    prefix_filter: string[] | null; // null = all prefixes
+    sort_order: "asc" | "desc";
+    top_n: number;
+  };
+  fragments: ShortFragment[];
+  totals: {
+    total_tablets_in_index: number;
+    total_below_threshold: number;
+    total_matching_prefix_filter: number;
+    fragments_returned: number;
+    prefix_distribution_below_threshold: Record<string, number>;
+  };
+  warnings: string[];
+};
+
+export type FindShortFragmentsOptions = {
+  maxSignCount: number; // required — fragments at OR below this count are surfaced
+  prefixFilter?: string[]; // optional whitelist of prefixes
+  sortOrder?: "asc" | "desc"; // asc = shortest first (default); desc = longest-under-threshold first
+  topN?: number; // default 50
+};
+
+export function findShortFragments(opts: FindShortFragmentsOptions): FindShortFragmentsResult {
+  const maxSign = Math.max(0, opts.maxSignCount);
+  const prefixFilter = opts.prefixFilter && opts.prefixFilter.length > 0 ? opts.prefixFilter : null;
+  const sortOrder = opts.sortOrder ?? "asc";
+  const topN = Math.max(1, Math.min(500, opts.topN ?? 50));
+  const warnings: string[] = [];
+
+  const tablets = getAllTabletRecords();
+  if (!tablets) {
+    return {
+      query: { max_sign_count: maxSign, prefix_filter: prefixFilter, sort_order: sortOrder, top_n: topN },
+      fragments: [],
+      totals: { total_tablets_in_index: 0, total_below_threshold: 0, total_matching_prefix_filter: 0, fragments_returned: 0, prefix_distribution_below_threshold: {} },
+      warnings: ["Anomaly index not loaded — run `node scripts/build-anomaly-index.mjs` to populate the cache before querying."],
+    };
+  }
+
+  const below: ShortFragment[] = [];
+  const prefixDist: Record<string, number> = {};
+  let matchedPrefix = 0;
+  for (const t of tablets) {
+    if (t.sign_count > maxSign) continue;
+    const prefix = _prefixOf(t.id);
+    if (prefixFilter && !prefixFilter.includes(prefix)) continue;
+    matchedPrefix++;
+    below.push({
+      id: t.id,
+      prefix,
+      sign_count: t.sign_count,
+      in_lex_graph: t.in_lex_graph,
+      in_them_index: t.in_them_index,
+    });
+    prefixDist[prefix] = (prefixDist[prefix] ?? 0) + 1;
+  }
+
+  below.sort((a, b) => (sortOrder === "asc" ? a.sign_count - b.sign_count : b.sign_count - a.sign_count));
+  const truncated = below.slice(0, topN);
+
+  // Also compute the unfiltered total-below-threshold (across all prefixes)
+  let totalBelow = 0;
+  for (const t of tablets) {
+    if (t.sign_count <= maxSign) totalBelow++;
+  }
+
+  return {
+    query: { max_sign_count: maxSign, prefix_filter: prefixFilter, sort_order: sortOrder, top_n: topN },
+    fragments: truncated,
+    totals: {
+      total_tablets_in_index: tablets.length,
+      total_below_threshold: totalBelow,
+      total_matching_prefix_filter: matchedPrefix,
+      fragments_returned: truncated.length,
+      prefix_distribution_below_threshold: prefixDist,
+    },
+    warnings,
+  };
+}
+
 // ─── Public types ──────────────────────────────────────────────────────────
 
 export type CoverageStatsForPrefix = {
