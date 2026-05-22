@@ -20,6 +20,7 @@
 // `getAllTabletRecords()` accessor.
 
 import { getAllTabletRecords, type AnomalyTabletRecord } from "./anomalySurface.js";
+import { getFragmentMetadata, getPeriod, getCity, getPrimaryGenre } from "./fragmentMetadata.js";
 
 // ─── v0.18.5 — list_collection_prefixes ────────────────────────────────────
 
@@ -383,16 +384,30 @@ export function collectionCoverage(opts: CoverageStatsOptions): CoverageStatsRes
     const inThem = bucket.filter((t) => t.in_them_index).length;
     const inBoth = bucket.filter((t) => t.in_lex_graph && t.in_them_index).length;
 
+    // v0.18.13 — Enrich period/genre/city distributions via fragment-metadata cache.
+    // Falls back to the anomaly-index fields (which are NULL for all tablets as of
+    // 2026-05-22) when no enriched metadata is available; final fallback is
+    // "(unknown — not enriched)" so the gap is explicit. Run enrich_prefix_metadata
+    // to populate the cache for this prefix before querying for real distributions.
     const periodDist: Record<string, number> = {};
     const genreDist: Record<string, number> = {};
     const cityDist: Record<string, number> = {};
+    let enrichedCount = 0;
     for (const t of bucket) {
-      const period = t.period ?? "(unknown)";
-      const genre = t.genre ?? "(unknown)";
-      const city = t.city ?? "(unknown)";
+      const md = getFragmentMetadata(t.id);
+      if (md) enrichedCount++;
+      const period = getPeriod(md) ?? t.period ?? "(unknown — not enriched)";
+      const genre = getPrimaryGenre(md) ?? t.genre ?? "(unknown — not enriched)";
+      const city = getCity(md) ?? t.city ?? "(unknown — not enriched)";
       periodDist[period] = (periodDist[period] ?? 0) + 1;
       genreDist[genre] = (genreDist[genre] ?? 0) + 1;
       cityDist[city] = (cityDist[city] ?? 0) + 1;
+    }
+    const enrichedPct = bucket.length > 0 ? Math.round((enrichedCount / bucket.length) * 1000) / 10 : 0;
+    if (enrichedPct < 5 && bucket.length >= 50) {
+      warnings.push(
+        `Prefix ${prefix}: only ${enrichedCount}/${bucket.length} tablets (${enrichedPct}%) have enriched metadata. Run enrich_prefix_metadata(prefix_filter="${prefix}") to backfill from the eBL API.`,
+      );
     }
 
     const topTablets = [...bucket]

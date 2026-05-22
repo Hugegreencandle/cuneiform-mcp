@@ -83,6 +83,11 @@ import {
   findThematicClusterInPrefix,
 } from "./thematicCluster.js";
 import {
+  enrichFragmentMetadata,
+  metadataCoverage,
+} from "./fragmentMetadata.js";
+import { getAllTabletRecords as _getAllTabletRecordsForEnrich } from "./anomalySurface.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -204,7 +209,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.12";
+const VERSION = "0.18.13";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3759,6 +3764,192 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.13 — Fragment-metadata enrichment (backfill the anomaly-index gap) ─
+
+server.registerTool(
+  "enrich_prefix_metadata",
+  {
+    description:
+      "Backfill the fragment-metadata cache for a museum-collection prefix by batched eBL API calls. Closes the v0.18.4-v0.18.12 'distributions surface (unknown)' gap: the anomaly-index has period/genre/city/designation fields NULL for ALL 36,476 tablets, so coverage_stats_for_collection couldn't actually surface real distributions. This tool pulls the rich metadata from eBL /fragments/{museum_number} for tablets in the requested prefix, persists to ~/.cache/cuneiform-mcp/fragment-metadata.json, and subsequent coverage queries automatically pick it up. Rate-limited (default concurrency=5, polite to eBL); chunked (default max_to_fetch=50 per call, so a 2,500-tablet prefix like K needs ~50 invocations to fully enrich). Skips already-cached entries (positive OR negative — 404s don't retry). Returns: per-invocation counts (newly fetched / failed / already cached) + how many tablets in the prefix still need enrichment after this batch.",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .describe("Museum-collection prefix to enrich (e.g. 'K', 'BM', 'Sm', 'CBS', 'VAT'). Required — corpus-wide enrichment via this tool is impractical; use the scripts/enrich-*.mjs CLI for that."),
+      max_to_fetch: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on new eBL API calls in this invocation. Default 50 (≈10s at concurrency=5). Max 500. Use 50-100 for interactive sessions, 200-500 for batch enrichment workflows where you can wait."),
+      concurrency: z
+        .number()
+        .int()
+        .min(1)
+        .max(10)
+        .optional()
+        .describe("Concurrent eBL API calls. Default 5 (matches the polite-neighbour default in scripts/enrich-primary-source-metadata.mjs). Max 10."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Only enrich tablets with sign_count >= this threshold (skip empty/placeholder records). Default 0 (enrich all)."),
+    },
+  },
+  async ({ prefix_filter, max_to_fetch, concurrency, min_sign_count }) => {
+    const SCHEMA = schemaId("enrich_prefix_metadata");
+    try {
+      const tablets = _getAllTabletRecordsForEnrich();
+      if (!tablets) {
+        return structuredResult(
+          `enrich_prefix_metadata error: anomaly index not loaded (run scripts/build-anomaly-index.mjs).`,
+          {
+            schema: SCHEMA,
+            data: {
+              query: { prefix_filter, max_to_fetch: max_to_fetch ?? 50, concurrency: concurrency ?? 5, min_sign_count: min_sign_count ?? 0 },
+              result: null,
+              coverage_after: metadataCoverage(),
+              warnings: ["anomaly index not loaded"],
+            },
+            provenance: provenance("local", "local:enrich-prefix-metadata", VERSION),
+            warnings: ["anomaly index not loaded"],
+          },
+        );
+      }
+
+      const minSigns = min_sign_count ?? 0;
+      const prefixOf = (id: string): string => {
+        const m = /^([^.,]+)/.exec(id);
+        return m ? m[1] : id;
+      };
+      const ids = tablets
+        .filter((t) => prefixOf(t.id) === prefix_filter && t.sign_count >= minSigns)
+        .map((t) => t.id);
+
+      const result = await enrichFragmentMetadata({
+        ids,
+        concurrency: concurrency ?? 5,
+        maxToFetch: max_to_fetch ?? 50,
+        prefixLabel: prefix_filter,
+      });
+
+      const coverage = metadataCoverage();
+
+      const lines: string[] = [
+        `Enrichment: prefix=${prefix_filter} · max_to_fetch=${max_to_fetch ?? 50} · concurrency=${concurrency ?? 5} · min_sign_count=${minSigns}`,
+        `Prefix scope: ${ids.length} tablets in '${prefix_filter}' above sign_count=${minSigns}`,
+        ``,
+        `This invocation:`,
+        `  already cached (with data):    ${result.already_cached_with_data}`,
+        `  already cached (null / 404):   ${result.already_cached_null}`,
+        `  newly fetched (success):       ${result.newly_fetched}`,
+        `  newly fetched (404 → null):    ${result.newly_null_404}`,
+        `  newly failed (will retry):     ${result.newly_failed}`,
+        `  elapsed:                       ${result.elapsed_seconds}s`,
+        `  remaining without metadata:    ${result.remaining_in_prefix_without_metadata}`,
+        ``,
+        `Cache after this run: ${coverage.total_with_metadata} entries with metadata + ${coverage.total_null} cached-null, ${coverage.total_entries_in_cache} total`,
+      ];
+      if (result.remaining_in_prefix_without_metadata > 0) {
+        const nextBatches = Math.ceil(result.remaining_in_prefix_without_metadata / (max_to_fetch ?? 50));
+        lines.push(``);
+        lines.push(`To finish enriching '${prefix_filter}', invoke this tool ${nextBatches} more times with the same parameters.`);
+      } else if (result.newly_fetched > 0 || result.newly_null_404 > 0) {
+        lines.push(``);
+        lines.push(`✓ '${prefix_filter}' is now fully enriched. Re-run coverage_stats_for_collection(prefixes=["${prefix_filter}"]) for real period/genre/city distributions.`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter, max_to_fetch: max_to_fetch ?? 50, concurrency: concurrency ?? 5, min_sign_count: minSigns },
+          result,
+          coverage_after: coverage,
+          warnings: result.warnings,
+        },
+        provenance: provenance("local", "local:enrich-prefix-metadata", VERSION, {
+          citation:
+            "Per-prefix batched eBL /fragments/{id} backfill into fragment-metadata.json. v0.18.13. Closes the anomaly-index period/genre/city/designation NULL-gap so coverage_stats_for_collection surfaces real distributions.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`enrich_prefix_metadata error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter: prefix_filter ?? "", max_to_fetch: max_to_fetch ?? 50, concurrency: concurrency ?? 5, min_sign_count: min_sign_count ?? 0 },
+          result: null,
+          coverage_after: metadataCoverage(),
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:enrich-prefix-metadata", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.13 — Quick read-only coverage probe ────────────────────────────
+
+server.registerTool(
+  "fragment_metadata_coverage",
+  {
+    description:
+      "Read-only diagnostic: how many tablets currently have enriched fragment-metadata cached vs not. Returns the total cache entries, count with real metadata, count cached as null (404s), and the cache file path. Use to decide whether to invoke enrich_prefix_metadata before running coverage_stats_for_collection / find_thematic_cluster / similar tools that benefit from rich metadata. Read-only — does NOT trigger any network calls.",
+    inputSchema: {},
+  },
+  async () => {
+    const SCHEMA = schemaId("fragment_metadata_coverage");
+    try {
+      const coverage = metadataCoverage();
+      const tablets = _getAllTabletRecordsForEnrich();
+      const corpusSize = tablets?.length ?? null;
+      const coverageRatio = corpusSize ? +((coverage.total_with_metadata / corpusSize) * 100).toFixed(2) : null;
+
+      const lines: string[] = [
+        `Fragment-metadata cache: ${coverage.cache_path}`,
+        ``,
+        `Cache state:`,
+        `  total entries:       ${coverage.total_entries_in_cache.toLocaleString()}`,
+        `  with metadata:       ${coverage.total_with_metadata.toLocaleString()}`,
+        `  cached as null/404:  ${coverage.total_null.toLocaleString()}`,
+        ``,
+      ];
+      if (corpusSize !== null) {
+        lines.push(`Anomaly-index corpus size: ${corpusSize.toLocaleString()} tablets`);
+        lines.push(`Corpus-wide coverage: ${coverage.total_with_metadata.toLocaleString()} / ${corpusSize.toLocaleString()} = ${coverageRatio}%`);
+        lines.push(``);
+        if (coverageRatio !== null && coverageRatio < 1) {
+          lines.push(`⚠ Coverage is <1% — most coverage_stats / find_thematic_cluster results will surface "(unknown — not enriched)" for period/genre/city distributions.`);
+          lines.push(`  → Run enrich_prefix_metadata(prefix_filter="X") to backfill specific prefixes.`);
+        }
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: {
+          coverage,
+          corpus_size: corpusSize,
+          coverage_pct: coverageRatio,
+        },
+        provenance: provenance("local", "local:fragment-metadata-coverage", VERSION, {
+          citation: "Read-only probe of the fragment-metadata.json cache. v0.18.13.",
+        }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`fragment_metadata_coverage error: ${msg}`, {
+        schema: SCHEMA,
+        data: { coverage: metadataCoverage(), corpus_size: null, coverage_pct: null },
+        provenance: provenance("local", "local:fragment-metadata-coverage", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.12 — Tablet-level composite neighborhood tool ───────────────────
 
 server.registerTool(
@@ -5710,7 +5901,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 45 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 47 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage)\n`,
     );
     process.exit(0);
   }
