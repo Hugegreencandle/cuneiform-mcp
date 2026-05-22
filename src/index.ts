@@ -50,6 +50,9 @@ import {
   clusterPairSimilarityMatrix,
 } from "./clusterMatrix.js";
 import {
+  compareTabletPair,
+} from "./comparePair.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -171,7 +174,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.7";
+const VERSION = "0.18.8";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3726,6 +3729,89 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.8 — Cross-axis pair-comparison tool ─────────────────────────────
+
+server.registerTool(
+  "compare_tablet_pair",
+  {
+    description:
+      "Given two museum numbers, return the full cross-axis similarity (lexical exact-J, fuzzy-J + run-bonus, thematic cosine, scribal-signature cosine + Jaccard) PLUS an identification verdict (same_composition_same_scribe / same_composition_different_scribe / same_scribe_different_composition / physical_join_candidate / thematic_only / weak_relationship / unrelated). Single-call cross-axis pair diagnostic — completes the per-pair zoom layer that reconstruct_cluster + cluster_pair_similarity_matrix handle at corpus/cluster scale. The verdict decision-tree mirrors the methods paper §3.4 + §3.4.1 framing: each axis answers a distinct Assyriological question and the combined pattern is more informative than any single metric.",
+    inputSchema: {
+      tablet_a: z.string().min(1).describe("First museum number (e.g., 'BM.34970')."),
+      tablet_b: z.string().min(1).describe("Second museum number (e.g., '1881,0204.471')."),
+    },
+  },
+  async ({ tablet_a, tablet_b }) => {
+    const SCHEMA = schemaId("compare_tablet_pair");
+    try {
+      const result = compareTabletPair({ tabletA: tablet_a, tabletB: tablet_b });
+
+      const lines: string[] = [
+        `Pair: ${result.tablet_a} ↔ ${result.tablet_b}`,
+        ``,
+        `─── VERDICT ───`,
+        `Primary relationship: ${result.verdict.primary_relationship}`,
+        `Confidence: ${result.verdict.confidence}`,
+      ];
+      for (const ev of result.verdict.evidence) lines.push(`  • ${ev}`);
+      lines.push(``);
+
+      lines.push(`─── PER-AXIS DETAIL ───`);
+      const axes = [
+        { name: "Lexical (exact-J)", axis: result.axes.lexical },
+        { name: "Fuzzy (1-sub + run-bonus)", axis: result.axes.fuzzy },
+        { name: "Thematic (RI embedding cosine)", axis: result.axes.thematic },
+        { name: "Scribal (LLR signature)", axis: result.axes.scribal },
+      ];
+      for (const { name, axis } of axes) {
+        lines.push(`${name}:`);
+        if (axis.status === "found") {
+          lines.push(`  status: found · direction: ${axis.direction}`);
+          for (const [k, v] of Object.entries(axis.values)) {
+            lines.push(`  ${k}: ${typeof v === "number" ? v : v}`);
+          }
+        } else if (axis.status === "below_threshold") {
+          lines.push(`  status: below_threshold · direction attempted: ${axis.direction_attempted}`);
+          lines.push(`  note: ${axis.threshold_note}`);
+        } else {
+          lines.push(`  status: tablet_not_in_index · missing: ${axis.missing_tablets.join(", ")}`);
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:compare-pair", VERSION, {
+          citation:
+            "Cross-axis pair comparison. v0.18.8. Combines findFuzzyParallels + findThematicParallel + findSameScribeCandidates with a methods-paper-aligned verdict classifier.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_tablet_pair error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_a: tablet_a ?? "",
+          tablet_b: tablet_b ?? "",
+          axes: {
+            lexical: { status: "tablet_not_in_index" as const, missing_tablets: [] as never[] },
+            fuzzy: { status: "tablet_not_in_index" as const, missing_tablets: [] as never[] },
+            thematic: { status: "tablet_not_in_index" as const, missing_tablets: [] as never[] },
+            scribal: { status: "tablet_not_in_index" as const, missing_tablets: [] as never[] },
+          },
+          verdict: { primary_relationship: "unrelated" as const, confidence: "low" as const, evidence: [msg] },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:compare-pair", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.7 — Cluster topology: full pairwise similarity matrix ──────────
 
 server.registerTool(
@@ -4291,7 +4377,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 34 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 35 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair cross-axis diagnostic)\n`,
     );
     process.exit(0);
   }
