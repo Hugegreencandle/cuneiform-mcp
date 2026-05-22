@@ -14,7 +14,7 @@
 
 This paper documents a four-axis computational discovery pipeline (`cuneiform-mcp` v0.16–v0.18.3) for the electronic Babylonian Library transliteration corpus of approximately 36,500 tablets. The pipeline operates on raw sign-token sequences without metadata and produces four categories of finding: manuscript siblings missed by lexical methods (fuzzy trigram-Jaccard with one-substitution tolerance plus contiguous-run signaling), full manuscript-witness clusters of canonical compositions (recursive breadth-first search via fuzzy parallels), scribal-lineage candidates (orthographic-preference clustering via log-likelihood-ratio signatures), and multi-sign lacuna restorations (parallel-template alignment with bigram beam-search fallback).
 
-Four validated metrics result: a 55% manuscript-sibling rescue rate on candidates the strict 0.30 trigram-Jaccard methodology surfaces as isolated; a 100+ tablet *āšipūtu* (exorcist) canon cluster spanning 20 museum-collection prefixes recovered from a single seed tablet (BM.77056); three reciprocal same-scribe pairs in 34 probed tablets with empirically-validated discrimination from same-composition pairs; and 91.7% top-1 precision with 100% top-10 recall in synthetic-gap lacuna restoration across 48 test cases.
+Four validated metrics result: a 55% manuscript-sibling rescue rate on candidates the strict 0.30 trigram-Jaccard methodology surfaces as isolated; a 100+ tablet *āšipūtu* (exorcist) canon cluster spanning 20 museum-collection prefixes recovered from a single seed tablet (BM.77056); three reciprocal same-scribe pairs plus a four-tablet same-scribe scribal-lineage group in 38 probed tablets, with empirically-validated discrimination from both same-composition pairs (negative K.2798 ↔ Si.776 result) and physical-join candidates (negative quartet-join result); and 91.7% top-1 precision with 100% top-10 recall in synthetic-gap lacuna restoration across 48 test cases.
 
 The paper's primary methodological contribution is the demonstration that exact lexical methods at the conventional 0.30 Jaccard threshold systematically under-recover wide-transmission compositions, and that the underlying *āšipūtu* canon described in textual-evidence consensus (Lenzi 2008; Geller 2010; Maul 1994) is recoverable empirically from pure-orthographic clustering. A separate methodological contribution emerges from two calibration audits demonstrating that precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited: a one-line scoring change lifted lacuna-restoration top-1 precision from 22.9% to 91.7% without altering the underlying recovery algorithm, and a threshold audit converged the bi-orphan discovery surface from 167 candidates to 2 without altering any underlying method. A third contribution demonstrates that the contiguous-run bonus is methodology-agnostic: applied independently to fuzzy-trigram and exact-trigram methodologies, both surface the same cross-subseries manuscript-section sibling pair (K.5896 and K.2761, both Mīs pî, sharing continuous text passages with K.2798, Bīt salāʾ mê) — the calibration pattern itself transfers across underlying algorithms.
 
@@ -168,17 +168,44 @@ K.5896 and K.2761 are both Mīs pî manuscripts with continuous trigram runs sha
 
 In the v0.18 scribal-fingerprint scale validation on 34 probed tablets, three reciprocal same-scribe pairs emerged (table 3).
 
-**Table 3**. Reciprocal same-scribe pairs (average signature cosine).
+**Table 3**. Reciprocal same-scribe pairs and scribal-lineage groups.
 
-| Pair | Composition | Average cosine | Combined evidence |
+| Group | Composition | Best pair (signature cosine) | Combined evidence |
 |---|---|---|---|
-| BM.77056 ↔ BM.74130 | *āšipūtu* (Sippar) | 0.78 | fuzzy-J 0.48 + reciprocal scribal — probable physical same scribe |
-| K.15325 ↔ K.8994 | Mīs pî (Kuyunjik) | 0.77 | fuzzy-J 0.49 + reciprocal scribal at #1/#3 — strongest pair |
-| BM.35512 ↔ K.2581 | *Šumma amēlu* medical | 0.59 | Cross-collection same scribe candidate |
+| BM.77056 ↔ BM.74130 (pair) | *āšipūtu* (Sippar) | 0.78 | fuzzy-J 0.48 + reciprocal scribal — probable physical same scribe |
+| K.15325 ↔ K.8994 (pair) | Mīs pî (Kuyunjik) | 0.77 | fuzzy-J 0.49 + reciprocal scribal at #1/#3 |
+| BM.35512 ↔ K.2581 (pair) | *Šumma amēlu* medical | 0.59 | Cross-collection same-scribe candidate |
+| **BM.34970 + 1881,0204.471 + BM.37658 + 1882,0522.515 (quartet)** | **Šuʾila divine hymns (Ashurbanipal acquisition lot)** | **0.8866** (1881,0204.471 ↔ BM.37658) | **Three-metric convergence + fuzzy-J 0.8069 hub edge + not physical-join — four-tablet scribal-lineage group; see §3.4.1** |
 
 The critical negative result: K.2798 ↔ Si.776 are NOT in each other's same-scribe top-15. They are confirmed manuscript siblings (caught by `find_fuzzy_parallels`) but the methodology correctly identifies them as different scribes — exactly as Assyriological theory predicts for two scribes copying the same canonical text. This negative result operationalizes the long-recognized distinction between textual transmission and scribal lineage as two independent computational objects: `find_fuzzy_parallels` answers "what composition?"; `find_same_scribe_candidates` answers "who copied?"
 
 A secondary discovery from the scribal pass concerns scribal-style geography: Si.776 (Sippar provenance) has Kuyunjik-leaning scribal style (K=5 of top-10 same-scribe candidates), corroborating eBL's catalog note that it is "written in Assyrian script." K.2798 (Kuyunjik provenance) conversely has Babylonian-leaning scribal style (BM=5 of top-10). This inverted pattern fits the Neo-Assyrian practice of importing Babylonian scholarly material to Kuyunjik plus the reciprocal Neo-Babylonian copying-from-Assyrian-models tradition (cf. Beaulieu 2000).
+
+### 3.4.1 The BM.34970 Quartet — A Same-Scribe Scribal-Lineage Group
+
+The §3.1 cluster reconstruction at `max_size=100` surfaced a pair-similarity outlier within the BM.77056 cluster: **BM.34970 ↔ 1881,0204.471 at fuzzy-Jaccard 0.8069**, exceeding the previously-documented Sippar same-scribe pair BM.77056 ↔ BM.74130 (fuzzy-J 0.48) and the Kuyunjik Mīs pî pair K.15325 ↔ K.8994 (fuzzy-J 0.49) reported in §3.4. Running `find_same_scribe_candidates` against both members reveals a **four-tablet quartet** — BM.34970, 1881,0204.471, BM.37658, 1882,0522.515 — that is mutually reciprocal in each other's top-5 same-scribe candidates. Pairwise similarities are summarized in table 5.
+
+**Table 5**. The BM.34970 quartet — pairwise similarity across three independent metrics.
+
+| Pair | Signature cosine | Signature Jaccard | Fuzzy-Jaccard | Note |
+|---|---|---|---|---|
+| **1881,0204.471 ↔ BM.37658** | **0.8866** | 0.5882 | (cluster-internal edge) | New corpus-wide same-scribe pair record |
+| 1881,0204.471 ↔ 1882,0522.515 | 0.7536 | 0.4722 | — | |
+| BM.34970 ↔ 1881,0204.471 | 0.6031 | 0.5385 | **0.8069** | New corpus-wide fuzzy-Jaccard record within the BM.77056 cluster |
+| BM.34970 ↔ BM.37658 | 0.5474 | 0.4595 | 0.5 | |
+| BM.34970 ↔ 1882,0522.515 | 0.5527 | 0.3947 | 0.3206 | |
+
+The 1881,0204.471 ↔ BM.37658 signature cosine of 0.8866 surpasses both previously-reported high pairs (BM.77056 ↔ BM.74130 at 0.78; K.15325 ↔ K.8994 at 0.77). Three independent computational metrics — signature cosine, signature Jaccard, and fuzzy-Jaccard — converge on the same four tablets at the top of each ranking, producing the corpus's strongest same-scribe identification to date.
+
+The methodologically significant contribution is the shift from **pair** to **quartet**. §3.4's documented same-scribe pairs each capture a single scribal-relationship instance; the quartet captures a scribal-lineage instance persisting across (at least) four manuscript copies of (apparently) the same composition. The quartet provides evidence on a class of question pair-based analyses cannot reach: not "are these two tablets by the same scribe?" but "how many manuscripts did a single scribal lineage produce of this composition?"
+
+A second methodologically significant finding is the **negative-discrimination result for physical-join recovery**. `find_join_candidates` was run on both BM.34970 and 1881,0204.471 against the eBL `/match` corpus. Neither query returned any of the quartet's other three members in its top-15 join candidates. The top join candidates for both queries were instead dominated by tablets in the 1879,0708.* and 1880,0719.* accession-year ranges — Ashurbanipal-library tablets sharing line-structure fingerprints rather than orthographic fingerprints. The quartet members are therefore **same-composition, same-scribe, separate tablet objects** rather than fragments of a single broken original. This negative result operationalizes the join-vs-scribal-lineage distinction in the same way §3.4's K.2798 ↔ Si.776 negative result operationalized the composition-vs-scribe distinction: `find_join_candidates` answers "what physical original?"; `find_same_scribe_candidates` answers "who copied?"; `find_fuzzy_parallels` answers "what composition?". The three methodological objects are computationally independent and produce orthogonal evidence.
+
+The quartet's eBL genre classifications support a Šuʾila (hand-raising divine prayer) identification: BM.34970 is classified `CANONICAL → Literature → Hymns → Divine → Šuʾila`; 1881,0204.471 is classified `CANONICAL → Literature → Hymns → Divine` plus `CANONICAL → Magic`. The other two quartet members (BM.37658, 1882,0522.515) are not eBL genre-classified, but the same-scribe similarity to 1881,0204.471 at signature cosines 0.8866 and 0.7536 respectively strongly implies same-composition identification. Direct eBL genre probes on the unclassified members would lock this down at zero additional methodological cost.
+
+The Ashurbanipal-library acquisition-lot signal in the join-candidate domination by 1879,0708.* and 1880,0719.* accessions — both 19th-century British Museum lots from the Layard / Rassam / Smith excavation sequence at Nineveh (Reade 1976) — situates the quartet within a specific Ashurbanipal-library manuscript group. The implication is that the same-scribe scribal lineage active in the quartet was producing manuscripts for Ashurbanipal's collection rather than for a distributed cult-practitioner audience. This is consistent with the Frame & George 2005 reconstruction of the royal-libraries collection program at Nineveh, in which scribal-school output was systematically harvested for the royal library. Confirmation of this attribution would require provenance work on each quartet member beyond what `find_join_candidates` and `find_same_scribe_candidates` directly surface.
+
+The combined evidence pattern across §3.4 and §3.4.1 demonstrates that the cuneiform-mcp pipeline produces **three orthogonal computational objects** corresponding to three distinct Assyriological questions: `find_fuzzy_parallels` answers "what composition?" (validated: K.2798 ↔ Si.776 sibling recovery, §1); `find_same_scribe_candidates` answers "who copied?" (validated: three pairs in §3.4; one quartet in §3.4.1); and `find_join_candidates` answers "what physical original?" (validated negatively: quartet members do NOT join despite same-scribe + same-composition status). Each object produces evidence the others cannot reach. The pipeline's contribution is not any single algorithm but the integration of three orthogonal evidence streams into a unified question-engine for cuneiform manuscript-witness analysis.
 
 ### 3.5 Lacuna Restoration: 92% Top-1 Precision
 

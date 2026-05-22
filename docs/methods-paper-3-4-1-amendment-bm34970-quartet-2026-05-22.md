@@ -2,16 +2,18 @@
 
 *Supplementary finding for CDLJ submission. Drafted 2026-05-22 PM following the v2 reconstruction of the BM.77056 cluster (§3.1) at the methods paper's stated `max_size=100` configuration.*
 
+**Status: ✅ INLINED via Path A on 2026-05-22 (commit follows).** §3.4.1 now lives in `methods-paper-cdlj-submission.md` between §3.4 and §3.5; Table 3 updated to include the quartet row; Abstract amended to include the four-tablet scribal-lineage group + negative-discrimination claim. This standalone doc is preserved as the integration-history record.
+
 ---
 
-## Integration instructions
+## Integration instructions (historical — superseded by inline integration)
 
-This amendment is a standalone supplementary-finding sub-section intended for insertion as **§3.4.1** in `methods-paper-cdlj-submission.md`. Two integration paths:
+This amendment was drafted as a standalone supplementary-finding sub-section. Two integration paths were considered at drafting time:
 
-- **Path A (preferred):** Insert §3.4.1 between the existing §3.4 (line 181, after the Beaulieu 2000 paragraph) and §3.5 (line 183, "Lacuna Restoration"). Update Table 3 with the new quartet entries per §3.4.1 Table 5 below. Update the Abstract's same-scribe count from "three reciprocal same-scribe pairs" to "three reciprocal same-scribe pairs plus a four-tablet same-scribe quartet" if including in the abstract.
-- **Path B:** Submit §3.4.1 as a separate supplementary-finding addendum alongside the camera-ready paper without modifying §3.4 itself. Preserves the originally-submitted §3.4 narrative as-is.
+- **Path A (chosen, 2026-05-22):** Insert §3.4.1 between the existing §3.4 (line 181, after the Beaulieu 2000 paragraph) and §3.5 (line 183, "Lacuna Restoration"). Update Table 3 with the new quartet entries per §3.4.1 Table 5 below. Update the Abstract's same-scribe count from "three reciprocal same-scribe pairs" to "three reciprocal same-scribe pairs plus a four-tablet same-scribe quartet."
+- **Path B (rejected):** Submit §3.4.1 as a separate supplementary-finding addendum alongside the camera-ready paper without modifying §3.4 itself. Would have preserved the originally-submitted §3.4 narrative as-is.
 
-Either path is consistent with the v2 reconstruction running cleanly on v0.18.3 — no MCP version-bump required.
+Path A was chosen because the methods paper had not yet been submitted to CDLJ at the time of the finding — inline integration was the lower-friction path. The v2 reconstruction runs cleanly on v0.18.3 — no MCP version-bump required.
 
 ---
 
