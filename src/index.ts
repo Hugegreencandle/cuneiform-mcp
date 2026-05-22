@@ -74,6 +74,15 @@ import {
   corpusHealthReport,
 } from "./corpusHealth.js";
 import {
+  findTabletNeighborhood,
+} from "./tabletNeighborhood.js";
+import {
+  findLacunaRestorationCandidates,
+} from "./lacunaCandidates.js";
+import {
+  findThematicClusterInPrefix,
+} from "./thematicCluster.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -195,7 +204,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.11";
+const VERSION = "0.18.12";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3750,6 +3759,361 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.12 — Tablet-level composite neighborhood tool ───────────────────
+
+server.registerTool(
+  "find_tablet_neighborhood",
+  {
+    description:
+      "Given ONE tablet, return its full 4-axis discovery neighborhood in a single call: fuzzy parallels (composition siblings, 1-sub trigram-J) + thematic neighbors (RI embedding cosine) + scribal candidates (LLR-signature cosine, same-scribe lineage) + join candidates (deferred to find_join_candidates — see warnings). Plus a cross-axis summary that surfaces tablets appearing on MULTIPLE axes (higher-confidence relatives) and generated recommendations that map the per-axis count pattern to a short Assyriological narrative (e.g. 'N strong fuzzy parallels but no same-scribe matches — likely same composition different scribes'). Tablet-level composite of the per-pair compare_tablet_pair (v0.18.8): that tool zooms on TWO tablets and emits a verdict; this tool gives the full neighborhood graph around ONE tablet. Replaces the manual workflow of running findFuzzyParallels + findThematicParallel + findSameScribeCandidates sequentially.",
+    inputSchema: {
+      tablet_id: z.string().min(1).describe("Museum number (e.g., 'K.2798', 'BM.34970')."),
+      top_k_per_axis: z
+        .number()
+        .int()
+        .positive()
+        .max(30)
+        .optional()
+        .describe("Top-K candidates per axis. Default 10, max 30."),
+      min_fuzzy_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum fuzzy_jaccard for the fuzzy axis. Default 0.20."),
+      min_thematic_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum thematic cosine for the thematic axis. Default 0.50."),
+      min_scribal_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum signature_cosine for the scribal axis. Default 0.40."),
+    },
+  },
+  async ({ tablet_id, top_k_per_axis, min_fuzzy_jaccard, min_thematic_cosine, min_scribal_cosine }) => {
+    const SCHEMA = schemaId("find_tablet_neighborhood");
+    try {
+      const result = findTabletNeighborhood({
+        tabletId: tablet_id,
+        topKPerAxis: top_k_per_axis,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minThematicCosine: min_thematic_cosine,
+        minScribalCosine: min_scribal_cosine,
+      });
+
+      const lines: string[] = [
+        `Tablet neighborhood: ${result.tablet.tablet_id}`,
+        `sign_count=${result.tablet.sign_count ?? "?"} · in_lex_graph=${result.tablet.in_lex_graph} · in_them_index=${result.tablet.in_them_index} · anomaly_flag=${result.tablet.anomaly_flag}`,
+        ``,
+        `─── AXES (top-${result.query.top_k_per_axis}) ───`,
+        `Fuzzy parallels (J≥${result.query.min_fuzzy_jaccard}): ${result.axes.fuzzy_parallels.length}`,
+      ];
+      for (const p of result.axes.fuzzy_parallels) {
+        lines.push(`  ${p.tablet_id}  fuzzy_J=${p.fuzzy_jaccard}  exact_J=${p.exact_jaccard}  run=${p.longest_contiguous_run}  final=${p.final_score}`);
+      }
+      lines.push(`Thematic neighbors (cos≥${result.query.min_thematic_cosine}): ${result.axes.thematic_neighbors.length}`);
+      for (const n of result.axes.thematic_neighbors) {
+        lines.push(`  ${n.tablet_id}  cos=${n.thematic_cosine}`);
+      }
+      lines.push(`Scribal candidates (cos≥${result.query.min_scribal_cosine}): ${result.axes.scribal_candidates.length}`);
+      for (const c of result.axes.scribal_candidates) {
+        lines.push(`  ${c.tablet_id}  sig_cos=${c.signature_cosine}  sig_J=${c.signature_jaccard}  overlap=${c.signature_overlap_count}`);
+      }
+      lines.push(`Join candidates: ${result.axes.join_candidates.length} (see warnings — axis deferred in v0.18.12)`);
+      lines.push(``);
+
+      lines.push(`─── CROSS-AXIS SUMMARY ───`);
+      const mult = result.cross_axis_summary.counts_by_axis_multiplicity;
+      lines.push(`Multiplicity counts: 1-axis=${mult["1"] ?? 0} · 2-axis=${mult["2"] ?? 0} · 3-axis=${mult["3"] ?? 0} · 4-axis=${mult["4"] ?? 0}`);
+      for (const h of result.cross_axis_summary.multi_axis_hits) {
+        lines.push(`  ${h.tablet_id}  axes=[${h.axes.join(", ")}] (${h.axis_count})  scores=${JSON.stringify(h.per_axis_scores)}`);
+      }
+      lines.push(``);
+
+      lines.push(`─── RECOMMENDATIONS ───`);
+      for (const r of result.recommendations) lines.push(`  • ${r}`);
+      if (result.warnings.length > 0) {
+        lines.push(``);
+        lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:tablet-neighborhood", VERSION, {
+          citation:
+            "Tablet-level composite 4-axis discovery. v0.18.12. Combines findFuzzyParallels + findThematicParallel + findSameScribeCandidates + describeAnomaly with cross-axis multiplicity scoring and generated recommendations. Join-candidates axis deferred (see warnings); same pragmatic skip as compare_tablet_pair (v0.18.8).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_tablet_neighborhood error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            tablet_id: tablet_id ?? "",
+            top_k_per_axis: top_k_per_axis ?? 10,
+            min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.20,
+            min_thematic_cosine: min_thematic_cosine ?? 0.50,
+            min_scribal_cosine: min_scribal_cosine ?? 0.40,
+          },
+          tablet: {
+            tablet_id: tablet_id ?? "",
+            sign_count: null,
+            in_lex_graph: false,
+            in_them_index: false,
+            anomaly_flag: false,
+          },
+          axes: {
+            fuzzy_parallels: [],
+            thematic_neighbors: [],
+            scribal_candidates: [],
+            join_candidates: [],
+          },
+          cross_axis_summary: { multi_axis_hits: [], counts_by_axis_multiplicity: {} },
+          recommendations: [],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:tablet-neighborhood", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.12 — Lacuna-restoration backlog discovery ──────────────────────
+
+server.registerTool(
+  "find_lacuna_restoration_candidates",
+  {
+    description:
+      "Surface the highest-value backlog for the v0.18.0 restore_lacuna_passage tool: tablets where restoration is BOTH needed (high X-token damage ratio, indicating missing/broken signs) AND possible (strong fuzzy parallels exist, so the restorer has templates from which to predict the missing signs). The intersection is the high-value restoration queue. Returns top-N candidates ranked by restoration_priority_score = damage_ratio × strongest_parallel_fuzzy_j (equal-weight reward — a 30%-damaged tablet with a 0.7 parallel beats a 10%-damaged tablet with a 0.9 parallel). Filters out essentially-complete tablets (x_ratio < min_damage_ratio, default 0.10 — no restoration needed) and practically-destroyed tablets (x_ratio > max_damage_ratio, default 0.50 — too little surviving context to drive the restorer's n-gram conditioning). Per-candidate output includes damage stats + strongest-parallel info to prime restore_lacuna_passage calls. Pairs with restore_lacuna_passage (per-tablet zoom on a chosen candidate), find_fuzzy_parallels (broader parallel survey), and find_anomalous_tablets (heavily-damaged surface). Cost-bounded by max_tablets_to_scan (default 500); raise prefix_filter coverage by repeating per prefix.",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .optional()
+        .describe("Optional museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS'). Omit to scan the entire corpus. Use list_collection_prefixes to enumerate options."),
+      min_damage_ratio: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Lower bound on x_ratio (proportion of X-tokens / damaged signs) for inclusion. Default 0.10 — tablets below 10% damage don't need restoration. Set to 0.05 for marginal cases or 0.20 for clearly damaged-only surfaces."),
+      max_damage_ratio: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Upper bound on x_ratio. Default 0.50 — tablets above 50% damage typically have too little surviving context for the restorer's n-gram conditioning to converge. Raise to 0.70 to chase heroic cases like Mīs pî K.5896 / K.2761."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (need enough surviving signs to drive restoration). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on tablets to probe in the damage window (cost control — each candidate triggers a findFuzzyParallels call). Default 500. Scoping by prefix_filter is usually cheaper than raising this."),
+      top_n_candidates: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("How many top-ranked restoration candidates to return. Default 30."),
+    },
+  },
+  async ({ prefix_filter, min_damage_ratio, max_damage_ratio, min_sign_count, max_tablets_to_scan, top_n_candidates }) => {
+    const SCHEMA = schemaId("find_lacuna_restoration_candidates");
+    try {
+      const result = findLacunaRestorationCandidates({
+        prefixFilter: prefix_filter,
+        minDamageRatio: min_damage_ratio,
+        maxDamageRatio: max_damage_ratio,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topNCandidates: top_n_candidates,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter ?? "(all)"} · damage=[${result.query.min_damage_ratio}, ${result.query.max_damage_ratio}] · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan}`,
+        `Results: ${result.summary.total_tablets_scanned} scanned · ${result.summary.total_candidates_with_damage} in damage window · ${result.summary.total_candidates_surfaced} with usable parallels · top ${result.candidates.length} returned`,
+        `Means (returned): damage_ratio=${result.summary.mean_damage_ratio} · priority_score=${result.summary.mean_priority_score}`,
+        ``,
+      ];
+      const topShown = result.candidates.slice(0, 25);
+      if (topShown.length === 0) {
+        lines.push(`No restoration candidates surfaced. Try widening the damage window, lowering min_sign_count, or dropping prefix_filter.`);
+      } else {
+        lines.push(`── Top ${topShown.length} restoration candidates by priority ──`);
+        for (const c of topShown) {
+          lines.push(`   ${c.tablet_id.padEnd(20).slice(0, 20)}  signs=${String(c.sign_count).padStart(5)}  x=${c.x_ratio}  parallel=${(c.strongest_parallel_id ?? "—").padEnd(18).slice(0, 18)}  fuzzy_j=${c.strongest_parallel_fuzzy_j}  run=${c.strongest_parallel_run}  priority=${c.restoration_priority_score}`);
+        }
+        if (result.candidates.length > 25) lines.push(`(${result.candidates.length - 25} more candidates not shown)`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:lacuna-candidates", VERSION, {
+          citation:
+            "Lacuna-restoration backlog discovery via X-ratio × fuzzy-parallel intersection. v0.18.12. Surfaces high-value candidates for the v0.18.0 restore_lacuna_passage tool — tablets where restoration is both needed (damaged) and possible (templates exist).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_lacuna_restoration_candidates error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter ?? null,
+            min_damage_ratio: min_damage_ratio ?? 0.10,
+            max_damage_ratio: max_damage_ratio ?? 0.50,
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_n_candidates: top_n_candidates ?? 30,
+          },
+          candidates: [] as never[],
+          summary: {
+            total_tablets_scanned: 0,
+            total_candidates_with_damage: 0,
+            total_candidates_surfaced: 0,
+            mean_damage_ratio: 0,
+            mean_priority_score: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lacuna-candidates", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.12 — Within-prefix thematic-neighborhood cluster discovery ─────
+
+server.registerTool(
+  "find_thematic_cluster_in_prefix",
+  {
+    description:
+      "Within a museum-collection prefix bucket (e.g. K, BM, Sm, CBS, VAT), surface thematic neighborhoods — groups of tablets that are semantically similar via embedding cosine, even when lexical similarity is low. The thematic-axis analogue of find_scribal_groups (v0.18.9, same-scribe groups) and find_strongest_fuzzy_pairs_in_prefix (v0.18.11, lexical pairs). Asks 'within prefix X, what topical groupings exist?' instead of 'what's most topically similar to THIS tablet?' (the per-tablet find_thematic_parallel question). Surfaces groups that lexical methods miss — paraphrases, bilingual pairs (a Sumerian original + its Akkadian translation diverge lexically but converge thematically), alt-spellings, and same-genre compositions copied by different traditions. Algorithm: iterate tablets in prefix (sorted by sign_count desc, capped by max_tablets_to_scan), fetch top-K thematic parallels per tablet, keep mutually-reciprocal edges at cosine ≥ threshold (default 0.65), apply union-find, return groups of size ≥ min_group_size with per-group cohesion stats + per-member intra-group degree. Cost-bounded by max_tablets_to_scan (default 500); raise to 2000-3000 for full coverage of major prefixes like K or BM.",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .describe("Museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS', 'VAT'). Required — unlike find_scribal_groups this tool is always prefix-scoped."),
+      min_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum thematic-embedding cosine for a reciprocal edge. Default 0.65 ('topically related'). Note: thematic-cosine has a different scale than scribal-signature-cosine — random-indexing thematic neighbor lists trend lower than LLR-weighted scribal signatures, so this default is looser than the 0.6 scribal default but calibrated to the same intent. Tighten to 0.75-0.8 for 'topically near-identical'; loosen to 0.55 for broader same-genre neighborhoods."),
+      min_group_size: z
+        .number()
+        .int()
+        .min(2)
+        .optional()
+        .describe("Minimum group size to return. Default 3 (triplet-class and up). Set 2 to also surface all thematic pairs."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (embedding less reliable). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on tablets to query (cost control). Default 500. Increase to ~2500 for full coverage of a major prefix like K or BM."),
+      top_k_per_tablet: z
+        .number()
+        .int()
+        .min(2)
+        .max(30)
+        .optional()
+        .describe("How many thematic neighbors to fetch per tablet. Default 15. Lower = faster but may miss reciprocal pairs; higher = more thorough."),
+    },
+  },
+  async ({ prefix_filter, min_cosine, min_group_size, min_sign_count, max_tablets_to_scan, top_k_per_tablet }) => {
+    const SCHEMA = schemaId("find_thematic_cluster_in_prefix");
+    try {
+      const result = findThematicClusterInPrefix({
+        prefixFilter: prefix_filter,
+        minCosine: min_cosine,
+        minGroupSize: min_group_size,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topKPerTablet: top_k_per_tablet,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter} · min_cos=${result.query.min_cosine} · min_group=${result.query.min_group_size} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan}`,
+        `Results: ${result.totals.tablets_scanned} tablets scanned · ${result.totals.reciprocal_edges_found} reciprocal edges · ${result.totals.groups_returned} groups (largest size=${result.totals.largest_group_size})`,
+        ``,
+      ];
+      const topGroups = result.groups.slice(0, 25);
+      if (topGroups.length === 0) {
+        lines.push(`No thematic clusters found above thresholds. Try lowering min_cosine or min_group_size, or raising max_tablets_to_scan.`);
+      } else {
+        for (const g of topGroups) {
+          lines.push(`── Group ${g.group_id} · size=${g.size} · cohesion: mean=${g.cohesion.mean_pairwise_cosine} min=${g.cohesion.min_pairwise_cosine} max=${g.cohesion.max_pairwise_cosine} · density=${(g.edge_density * 100).toFixed(0)}% (${g.edge_count} edges)`);
+          for (const m of g.members.slice(0, 8)) {
+            lines.push(`   ${m.tablet_id.padEnd(22).slice(0, 22)}  degree=${m.intra_group_degree}`);
+          }
+          if (g.members.length > 8) lines.push(`   … and ${g.members.length - 8} more members`);
+          lines.push(``);
+        }
+        if (result.groups.length > 25) lines.push(`(${result.groups.length - 25} more groups not shown)`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:thematic-cluster", VERSION, {
+          citation:
+            "Corpus-wide thematic-neighborhood discovery via mutual-reciprocal embedding-cosine graph + union-find. Generalizes find_thematic_parallel (v0.15.0) from per-tablet to systematic; thematic-axis analogue of find_scribal_groups (v0.18.9) and find_strongest_fuzzy_pairs_in_prefix (v0.18.11).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_thematic_cluster_in_prefix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter,
+            min_cosine: min_cosine ?? 0.65,
+            min_group_size: min_group_size ?? 3,
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_k_per_tablet: top_k_per_tablet ?? 15,
+          },
+          groups: [] as never[],
+          totals: { tablets_scanned: 0, reciprocal_edges_found: 0, groups_returned: 0, largest_group_size: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:thematic-cluster", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.11 — Two-cluster comparison (overlap + relationship classifier) ─
 
 server.registerTool(
@@ -5346,7 +5710,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 42 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 45 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix)\n`,
     );
     process.exit(0);
   }
