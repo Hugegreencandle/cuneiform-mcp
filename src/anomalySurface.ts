@@ -643,6 +643,33 @@ function emptyDescribe(tabletId: string, warnings: string[]): DescribeAnomalyRes
   };
 }
 
+// v0.18.4 — Lightweight sign-count lookup for cross-tool quality filtering
+// (e.g. reconstructCluster.minSignCount filter to drop marginal-signal
+// fragments like the NZK.set.* sub-cluster surfaced 2026-05-22). Returns
+// null if the tablet is not in the anomaly index (most often: tablet has
+// no signs at all in the eBL cache, or anomaly-index was not built).
+export function getTabletSignCount(tabletId: string): number | null {
+  const idx = loadIndex();
+  if (!idx) return null;
+  const t = idx.byId.get(tabletId);
+  if (!t) return null;
+  return t.sign_count;
+}
+
+// v0.18.4 — Public read-only accessor for cross-tool corpus queries
+// (e.g. collectionCoverage tool). Returns the full tablet array if
+// the anomaly index is loaded, or null otherwise. Callers must treat
+// the array as read-only.
+export function getAllTabletRecords(): readonly TabletRecord[] | null {
+  const idx = loadIndex();
+  if (!idx) return null;
+  return idx.tablets;
+}
+
+// v0.18.4 — re-export the TabletRecord type so cross-module consumers
+// can type their data flows. Kept module-internal in v0.18.3 and prior.
+export type AnomalyTabletRecord = TabletRecord;
+
 export function surfaceStats(): SurfaceStats {
   const idx = loadIndex();
   if (!idx) {

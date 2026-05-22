@@ -21,8 +21,18 @@
 // inspectable.
 //
 // Pure stdlib + reuse of fuzzyParallels.ts.
+//
+// v0.18.4 — Added optional `minSignCount` filter to drop marginal-signal
+// fragments from cluster membership. Motivation: 2026-05-22 investigation
+// of the BM.77056 cluster surfaced 3 NZK.set.* members (NZK.set.{11,12,13})
+// with only 5-8 signs each — short enough that fuzzy-Jaccard is false-
+// positive-prone. Setting `minSignCount` to e.g. 50 or 100 (mirroring
+// `find_anomalous_tablets`'s default-100 quality filter) drops these
+// marginal members. Default is undefined (no filter) to preserve
+// backward-compatibility with v0.17.1-v0.18.3 reconstructions.
 
 import { findFuzzyParallels } from "./fuzzyParallels.js";
+import { getTabletSignCount } from "./anomalySurface.js";
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -53,11 +63,14 @@ export type ClusterResult = {
     max_cluster_size: number;
     max_depth: number;
     top_k_per_node: number;
+    min_sign_count: number; // v0.18.4 — 0 disables filter (default)
   };
   termination_reason: "frontier_exhausted" | "max_depth_reached" | "max_size_reached";
   index_stats: {
     total_fuzzy_calls: number;
     expanded_tablets: number;
+    filtered_below_sign_count: number; // v0.18.4 — count dropped by min_sign_count filter
+    filtered_no_sign_count_data: number; // v0.18.4 — count dropped because anomaly index has no record
   };
   warnings: string[];
 };
@@ -71,6 +84,7 @@ export type ReconstructClusterOptions = {
   maxClusterSize?: number; // default 30
   maxDepth?: number; // default 3
   topKPerNode?: number; // default 12
+  minSignCount?: number; // v0.18.4 — default 0 (no filter). Recommended 50-100 to drop short fragments.
 };
 
 function prefixOf(id: string): string {
@@ -84,7 +98,42 @@ export function reconstructCluster(opts: ReconstructClusterOptions): ClusterResu
   const maxSize = Math.max(2, Math.min(100, opts.maxClusterSize ?? 30));
   const maxDepth = Math.max(1, Math.min(6, opts.maxDepth ?? 3));
   const topK = Math.max(1, Math.min(30, opts.topKPerNode ?? 12));
+  const minSignCount = Math.max(0, opts.minSignCount ?? 0);
   const warnings: string[] = [];
+
+  // v0.18.4 quality-filter: should this candidate be included?
+  // Returns { include: boolean, reason?: "below_sign_count" | "no_data" }.
+  // When minSignCount = 0, every candidate passes (backward-compat default).
+  // Seed is exempt — if the user asked for a specific seed, respect it even
+  // if it's below the threshold (drop a warning instead of silently empty).
+  let filteredBelow = 0;
+  let filteredNoData = 0;
+  function shouldInclude(tabletId: string, isSeed: boolean): boolean {
+    if (minSignCount <= 0) return true;
+    if (isSeed) return true;
+    const sc = getTabletSignCount(tabletId);
+    if (sc == null) {
+      filteredNoData++;
+      return false;
+    }
+    if (sc < minSignCount) {
+      filteredBelow++;
+      return false;
+    }
+    return true;
+  }
+  if (minSignCount > 0) {
+    const seedSc = getTabletSignCount(opts.seedTabletId);
+    if (seedSc == null) {
+      warnings.push(
+        `Seed ${opts.seedTabletId} has no sign_count in anomaly index — seed is included regardless, but min_sign_count filter cannot evaluate it.`,
+      );
+    } else if (seedSc < minSignCount) {
+      warnings.push(
+        `Seed ${opts.seedTabletId} sign_count (${seedSc}) is below min_sign_count (${minSignCount}) — seed included regardless; quality-filter applied only to subsequent candidates.`,
+      );
+    }
+  }
 
   // Probe the seed first to surface load errors / missing-tablet immediately
   const seedProbe = findFuzzyParallels({
@@ -102,9 +151,9 @@ export function reconstructCluster(opts: ReconstructClusterOptions): ClusterResu
       depth_distribution: {},
       prefix_distribution: {},
       cross_prefix_count: 0,
-      config: { min_fuzzy_jaccard: minJ, min_fuzzy_intersect: minI, max_cluster_size: maxSize, max_depth: maxDepth, top_k_per_node: topK },
+      config: { min_fuzzy_jaccard: minJ, min_fuzzy_intersect: minI, max_cluster_size: maxSize, max_depth: maxDepth, top_k_per_node: topK, min_sign_count: minSignCount },
       termination_reason: "frontier_exhausted",
-      index_stats: { total_fuzzy_calls: 1, expanded_tablets: 0 },
+      index_stats: { total_fuzzy_calls: 1, expanded_tablets: 0, filtered_below_sign_count: 0, filtered_no_sign_count_data: 0 },
       warnings: seedProbe.warnings,
     };
   }
@@ -123,6 +172,7 @@ export function reconstructCluster(opts: ReconstructClusterOptions): ClusterResu
   for (const p of seedProbe.parallels) {
     if (inCluster.size >= maxSize) break;
     if (inCluster.has(p.tablet_id)) continue;
+    if (!shouldInclude(p.tablet_id, false)) continue; // v0.18.4 quality filter
     inCluster.set(p.tablet_id, {
       tablet_id: p.tablet_id,
       depth: 1,
@@ -157,6 +207,7 @@ export function reconstructCluster(opts: ReconstructClusterOptions): ClusterResu
           edges.push({ source: parent, target: p.tablet_id, fuzzy_jaccard: p.fuzzy_jaccard });
           continue;
         }
+        if (!shouldInclude(p.tablet_id, false)) continue; // v0.18.4 quality filter
         inCluster.set(p.tablet_id, {
           tablet_id: p.tablet_id,
           depth,
@@ -216,9 +267,15 @@ export function reconstructCluster(opts: ReconstructClusterOptions): ClusterResu
       max_cluster_size: maxSize,
       max_depth: maxDepth,
       top_k_per_node: topK,
+      min_sign_count: minSignCount,
     },
     termination_reason: termination,
-    index_stats: { total_fuzzy_calls: fuzzyCalls, expanded_tablets: expandedTablets },
+    index_stats: {
+      total_fuzzy_calls: fuzzyCalls,
+      expanded_tablets: expandedTablets,
+      filtered_below_sign_count: filteredBelow,
+      filtered_no_sign_count_data: filteredNoData,
+    },
     warnings,
   };
 }

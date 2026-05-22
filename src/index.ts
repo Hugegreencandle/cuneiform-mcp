@@ -42,6 +42,9 @@ import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
+  collectionCoverage,
+} from "./collectionCoverage.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -163,7 +166,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.3";
+const VERSION = "0.18.4";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3640,9 +3643,15 @@ server.registerTool(
         .max(30)
         .optional()
         .describe("How many fuzzy parallels to expand per node. Default 12. Lower = tighter cluster, higher = more exploration."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("v0.18.4 quality filter — drop cluster candidates whose anomaly-index sign_count is below this threshold. Default 0 (no filter, backward-compatible with v0.17.1-v0.18.3). Recommended 50-100 to drop marginal-signal fragments (e.g. NZK.set.* sub-cluster surfaced in the BM.77056 validation 2026-05-22 had only 5-8 signs each). Seed is always included regardless of its own sign_count; a warning is emitted if the seed is below threshold."),
     },
   },
-  async ({ seed_tablet_id, min_fuzzy_jaccard, min_fuzzy_intersect, max_cluster_size, max_depth, top_k_per_node }) => {
+  async ({ seed_tablet_id, min_fuzzy_jaccard, min_fuzzy_intersect, max_cluster_size, max_depth, top_k_per_node, min_sign_count }) => {
     const SCHEMA = schemaId("reconstruct_cluster");
     try {
       const result = reconstructCluster({
@@ -3652,13 +3661,17 @@ server.registerTool(
         maxClusterSize: max_cluster_size,
         maxDepth: max_depth,
         topKPerNode: top_k_per_node,
+        minSignCount: min_sign_count,
       });
 
       const lines: string[] = [
         `Seed: ${seed_tablet_id}`,
         `Cluster size: ${result.cluster_size} · Termination: ${result.termination_reason}`,
         `BFS fuzzy calls: ${result.index_stats.total_fuzzy_calls} · Expanded tablets: ${result.index_stats.expanded_tablets}`,
-        `Config: min_J=${result.config.min_fuzzy_jaccard}, min_I=${result.config.min_fuzzy_intersect}, max_size=${result.config.max_cluster_size}, max_depth=${result.config.max_depth}, top_k=${result.config.top_k_per_node}`,
+        `Config: min_J=${result.config.min_fuzzy_jaccard}, min_I=${result.config.min_fuzzy_intersect}, max_size=${result.config.max_cluster_size}, max_depth=${result.config.max_depth}, top_k=${result.config.top_k_per_node}, min_sign_count=${result.config.min_sign_count}`,
+        result.config.min_sign_count > 0
+          ? `Quality filter: dropped ${result.index_stats.filtered_below_sign_count} candidates below sign_count threshold + ${result.index_stats.filtered_no_sign_count_data} with no anomaly-index data`
+          : `Quality filter: disabled (min_sign_count=0)`,
         ``,
         `Depth distribution: ${Object.entries(result.depth_distribution).map(([d, c]) => `d${d}=${c}`).join(", ")}`,
         `Prefix distribution: ${Object.entries(result.prefix_distribution).sort((a, b) => b[1] - a[1]).map(([p, c]) => `${p}=${c}`).join(", ")}`,
@@ -3696,12 +3709,111 @@ server.registerTool(
           depth_distribution: {},
           prefix_distribution: {},
           cross_prefix_count: 0,
-          config: { min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.2, min_fuzzy_intersect: min_fuzzy_intersect ?? 5, max_cluster_size: max_cluster_size ?? 30, max_depth: max_depth ?? 3, top_k_per_node: top_k_per_node ?? 12 },
+          config: { min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.2, min_fuzzy_intersect: min_fuzzy_intersect ?? 5, max_cluster_size: max_cluster_size ?? 30, max_depth: max_depth ?? 3, top_k_per_node: top_k_per_node ?? 12, min_sign_count: min_sign_count ?? 0 },
           termination_reason: "frontier_exhausted",
-          index_stats: { total_fuzzy_calls: 0, expanded_tablets: 0 },
+          index_stats: { total_fuzzy_calls: 0, expanded_tablets: 0, filtered_below_sign_count: 0, filtered_no_sign_count_data: 0 },
           warnings: [msg],
         },
         provenance: provenance("local", "local:reconstruct-cluster", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.4 — Coverage statistics for museum-collection prefix ────────────
+
+server.registerTool(
+  "coverage_stats_for_collection",
+  {
+    description:
+      "Corpus-level baseline: for a given museum-collection prefix (or list of prefixes) like 'BM', 'K', 'Sm', 'CBS', 'VAT', 'NZK', etc., return total tablet count + transliteration coverage + sign-count distribution + top-N largest tablets + period/genre/city breakdowns. Useful as the entry-point query for any per-collection deep-dive: identify under-cataloged sub-corpora, the largest tablets worth a per-tablet brief, and the historical character of a collection. Companion to find_anomalous_tablets (per-tablet anomaly detail) and reconstruct_cluster (per-seed manuscript reconstruction). The 2026-05-22 BM.77056 *āšipūtu* cluster survey motivated this tool — the cluster spanned 20 museum prefixes but no existing tool surfaced 'how many total tablets in prefix X, what's their sign-count distribution?'",
+    inputSchema: {
+      prefixes: z
+        .array(z.string().min(1))
+        .min(1)
+        .describe(
+          "List of museum-collection prefixes to aggregate. Examples: ['BM'] · ['K', 'Sm'] · ['NZK'] · ['MLC', 'YBC']. Prefix matching is case-sensitive and uses the eBL convention (the substring before the first '.' or ',' in the museum number).",
+        ),
+      top_n: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("Top-N largest tablets per prefix to surface (by sign_count). Default 10. Capped at 50."),
+    },
+  },
+  async ({ prefixes, top_n }) => {
+    const SCHEMA = schemaId("coverage_stats_for_collection");
+    try {
+      const result = collectionCoverage({ prefixes, topN: top_n });
+
+      const lines: string[] = [
+        `Coverage query: [${result.query.prefixes.join(", ")}] · top_n=${result.query.top_n}`,
+        `Corpus totals: ${result.corpus_totals.total_tablets_in_index.toLocaleString()} tablets in index across ${result.corpus_totals.distinct_prefixes_in_corpus} prefixes`,
+        `Query match: ${result.corpus_totals.total_tablets_matching_query.toLocaleString()} tablets across ${result.corpus_totals.prefixes_matched}/${result.query.prefixes.length} requested prefixes`,
+        ``,
+      ];
+      for (const pp of result.per_prefix) {
+        if (pp.total_tablets === 0) {
+          lines.push(`Prefix ${pp.prefix}: no matching tablets in the anomaly index.`);
+          lines.push(``);
+          continue;
+        }
+        const lexPct = ((pp.in_lex_graph / pp.total_tablets) * 100).toFixed(1);
+        const themPct = ((pp.in_them_index / pp.total_tablets) * 100).toFixed(1);
+        const bothPct = ((pp.in_both / pp.total_tablets) * 100).toFixed(1);
+        lines.push(
+          `─── ${pp.prefix} (${pp.total_tablets} tablets) ───`,
+          `  Coverage: ${pp.in_lex_graph} in lex graph (${lexPct}%) · ${pp.in_them_index} in thematic index (${themPct}%) · ${pp.in_both} in both (${bothPct}%)`,
+          `  Sign counts (excluding ${pp.sign_count.zero_sign_count} zero-sign records): min=${pp.sign_count.min} median=${pp.sign_count.median} mean=${pp.sign_count.mean} p90=${pp.sign_count.p90} max=${pp.sign_count.max} total=${pp.sign_count.total.toLocaleString()}`,
+        );
+        const periods = Object.entries(pp.period_distribution).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (periods.length > 0) {
+          lines.push(`  Top periods: ${periods.map(([k, v]) => `${k}=${v}`).join(", ")}`);
+        }
+        const genres = Object.entries(pp.genre_distribution).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (genres.length > 0) {
+          lines.push(`  Top genres: ${genres.map(([k, v]) => `${k}=${v}`).join(", ")}`);
+        }
+        const cities = Object.entries(pp.city_distribution).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (cities.length > 0) {
+          lines.push(`  Top cities: ${cities.map(([k, v]) => `${k}=${v}`).join(", ")}`);
+        }
+        lines.push(`  Top ${pp.top_by_sign_count.length} by sign count:`);
+        for (const t of pp.top_by_sign_count) {
+          lines.push(`    ${t.id.padEnd(22)} ${String(t.sign_count).padStart(6)} signs${t.designation ? `  · ${t.designation}` : ""}`);
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:collection-coverage", VERSION, {
+          citation:
+            "Per-prefix corpus statistics over the anomaly-index. v0.18.4. Companion to find_anomalous_tablets + reconstruct_cluster.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`coverage_stats_for_collection error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefixes: prefixes ?? [], top_n: top_n ?? 10 },
+          per_prefix: [] as never[],
+          corpus_totals: {
+            total_tablets_in_index: 0,
+            total_tablets_matching_query: 0,
+            prefixes_matched: 0,
+            distinct_prefixes_in_corpus: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:collection-coverage", VERSION),
         warnings: [msg],
       });
     }
@@ -3899,7 +4011,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 30 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 31 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter)\n`,
     );
     process.exit(0);
   }
