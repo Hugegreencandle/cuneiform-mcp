@@ -97,6 +97,15 @@ import {
   findTabletsByGenre,
 } from "./findByGenre.js";
 import {
+  comparePrefixPair,
+} from "./comparePrefixes.js";
+import {
+  findGenreAnchorTablets,
+} from "./genreAnchors.js";
+import {
+  findTabletsByProvenance,
+} from "./findByProvenance.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -218,7 +227,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.14";
+const VERSION = "0.18.15";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3773,6 +3782,221 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.15 — Prefix-pair structural comparator ─────────────────────────
+
+server.registerTool(
+  "compare_prefix_pair",
+  {
+    description:
+      "Compare two museum-collection prefixes (e.g. 'K' vs 'Sm', 'BM' vs 'IM') and surface their structural relationship — corpus coverage, period / genre / city overlap, and the top same-scribe edges crossing the pair. Returns: cohort_a + cohort_b (tablet_count, total_sign_count, in_lex_graph, in_them_index, top-5 period / genre / city distributions); comparison (shared periods/genres/cities + per-side counts + period_jaccard + genre_jaccard + city_jaccard); cross_scribal_edges[] (top-N cross-prefix same-scribe edges sorted by signature_cosine desc); a relationship_classification (same_excavation_site / complementary_collections / shared_scholarly_tradition / minimal_overlap); and narrative recommendations. Use case: 'How are the K and Sm prefixes related?' — answer: both Kuyunjik, ~95% period overlap + N same-scribe edges, treat as one Nineveh corpus. Distinguishes MODERN museum-cataloging artifacts (K/Sm split) from ANCIENT scholarly-tradition differences (BM/IM split). Period/genre/city analysis requires enriched fragment-metadata — run enrich_prefix_metadata first per prefix; cross-prefix scribal edges work without metadata.",
+    inputSchema: {
+      prefix_a: z.string().min(1).describe("First museum-collection prefix (e.g. 'K', 'BM', 'Sm')."),
+      prefix_b: z.string().min(1).describe("Second museum-collection prefix (e.g. 'Sm', 'IM', 'CBS')."),
+      min_sign_count: z.number().int().min(0).optional().describe("Minimum sign_count for cohort inclusion. Default 50."),
+      max_tablets_per_prefix: z.number().int().min(10).max(5000).optional().describe("Cost cap for cross-prefix scribal scan. Default 500."),
+      cross_scribal_min_cosine: z.number().min(0).max(1).optional().describe("Minimum signature_cosine for cross-prefix edge. Default 0.6."),
+      top_k_per_tablet: z.number().int().min(2).max(30).optional().describe("topK for findSameScribeCandidates. Default 10."),
+    },
+  },
+  async ({ prefix_a, prefix_b, min_sign_count, max_tablets_per_prefix, cross_scribal_min_cosine, top_k_per_tablet }) => {
+    const SCHEMA = schemaId("compare_prefix_pair");
+    try {
+      const result = comparePrefixPair({
+        prefixA: prefix_a,
+        prefixB: prefix_b,
+        minSignCount: min_sign_count,
+        maxTabletsPerPrefix: max_tablets_per_prefix,
+        crossScribalMinCosine: cross_scribal_min_cosine,
+        topKPerTablet: top_k_per_tablet,
+      });
+      const a = result.cohort_a;
+      const b = result.cohort_b;
+      const cmp = result.comparison;
+      const lines: string[] = [
+        `Prefix A: ${a.prefix}  ·  ${a.tablet_count} tablets  ·  ${a.total_sign_count} signs  ·  enriched=${a.enriched_count}/${a.tablet_count} (${a.enriched_pct}%)`,
+        `Prefix B: ${b.prefix}  ·  ${b.tablet_count} tablets  ·  ${b.total_sign_count} signs  ·  enriched=${b.enriched_count}/${b.tablet_count} (${b.enriched_pct}%)`,
+        ``,
+        `Jaccard overlap — period: ${cmp.period_jaccard.toFixed(4)} · genre: ${cmp.genre_jaccard.toFixed(4)} · city: ${cmp.city_jaccard.toFixed(4)}`,
+        `Cross-prefix same-scribe edges: ${result.cross_scribal_edge_count} (at cos ≥ ${result.query.cross_scribal_min_cosine})`,
+        `Relationship: ${result.relationship_classification}`,
+      ];
+      if (cmp.period_overlap.length > 0) {
+        lines.push(``, `Top shared periods:`);
+        for (const p of cmp.period_overlap.slice(0, 5)) lines.push(`  ${p.value}  —  A=${p.a_count}  B=${p.b_count}`);
+      }
+      if (cmp.genre_overlap.length > 0) {
+        lines.push(``, `Top shared genres:`);
+        for (const g of cmp.genre_overlap.slice(0, 5)) lines.push(`  ${g.value}  —  A=${g.a_count}  B=${g.b_count}`);
+      }
+      if (result.cross_scribal_edges.length > 0) {
+        lines.push(``, `Top cross-prefix scribal edges:`);
+        for (const e of result.cross_scribal_edges.slice(0, 10)) lines.push(`  ${e.tablet_a}  ↔  ${e.tablet_b}   cos=${e.signature_cosine.toFixed(4)}`);
+      }
+      if (result.recommendations.length > 0) {
+        lines.push(``, `Recommendations:`);
+        for (const r of result.recommendations) lines.push(`  • ${r}`);
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:compare-prefix-pair", VERSION, {
+          citation: "Prefix-pair structural comparator. v0.18.15.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_prefix_pair error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_a: prefix_a ?? "", prefix_b: prefix_b ?? "", min_sign_count: min_sign_count ?? 50, max_tablets_per_prefix: max_tablets_per_prefix ?? 500, cross_scribal_min_cosine: cross_scribal_min_cosine ?? 0.6, top_k_per_tablet: top_k_per_tablet ?? 10 },
+          cohort_a: { prefix: prefix_a ?? "", tablet_count: 0, total_sign_count: 0, in_lex_graph: 0, in_them_index: 0, enriched_count: 0, enriched_pct: 0, period_distribution: [] as never[], genre_distribution: [] as never[], city_distribution: [] as never[] },
+          cohort_b: { prefix: prefix_b ?? "", tablet_count: 0, total_sign_count: 0, in_lex_graph: 0, in_them_index: 0, enriched_count: 0, enriched_pct: 0, period_distribution: [] as never[], genre_distribution: [] as never[], city_distribution: [] as never[] },
+          comparison: { period_overlap: [] as never[], genre_overlap: [] as never[], city_overlap: [] as never[], period_jaccard: 0, genre_jaccard: 0, city_jaccard: 0 },
+          cross_scribal_edges: [] as never[],
+          cross_scribal_edge_count: 0,
+          relationship_classification: "minimal_overlap",
+          recommendations: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:compare-prefix-pair", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_genre_anchor_tablets_in_prefix",
+  {
+    description:
+      "Within a (prefix, genre) cohort, surface the 'anchor tablets' — the largest, most-connected witnesses that other fragments in the cohort point to via fuzzy parallels. These are the canonical-template candidates: surviving witnesses other tablets are likely copies of, derived from, or paraphrases against. Algorithm: filter to prefix + genre + min_sign_count, then for each candidate fetch top-15 fuzzy parallels (minJ=0.20) and count how many fall back inside the cohort = intra_cohort_degree. anchor_score = sqrt(sign_count) × intra_cohort_degree. Use case: 'within prefix K, find the Mīs pî anchor tablets' — surfaces canonical-template candidates like K.15325 (the Mīs pî hub of the methods paper's BM.77056 cluster). Depends on enriched fragment-metadata cache for the genre filter; run enrich_prefix_metadata first.",
+    inputSchema: {
+      prefix_filter: z.string().min(1).describe("Museum-collection prefix to scope the search."),
+      genre_pattern: z.string().min(1).describe("Genre / category substring match (e.g. 'Mīs pî', 'Šuʾila')."),
+      min_sign_count: z.number().int().min(0).optional().describe("Minimum sign_count for cohort membership. Default 100."),
+      max_tablets_to_scan: z.number().int().min(10).max(1000).optional().describe("Cost cap on per-candidate fuzzy probe. Default 200."),
+      top_n_anchors: z.number().int().min(1).optional().describe("Cap on returned anchor rows. Default 10."),
+    },
+  },
+  async ({ prefix_filter, genre_pattern, min_sign_count, max_tablets_to_scan, top_n_anchors }) => {
+    const SCHEMA = schemaId("find_genre_anchor_tablets_in_prefix");
+    try {
+      const result = findGenreAnchorTablets({
+        prefixFilter: prefix_filter,
+        genrePattern: genre_pattern,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topNAnchors: top_n_anchors,
+      });
+      const lines: string[] = [
+        `Anchor query: prefix=${result.query.prefix_filter} · genre="${result.query.genre_pattern}" · min_sign_count=${result.query.min_sign_count} · max_scan=${result.query.max_tablets_to_scan}`,
+        `Cohort size: ${result.cohort_size} tablets · returning top ${result.summary.total_anchors_returned} anchors (mean score ${result.summary.mean_anchor_score})`,
+        ``,
+      ];
+      if (result.anchors.length > 0) {
+        lines.push(`Tablet                   signs   degree   score    strongest_parallel       fuzzyJ`);
+        lines.push(`──────────────────────  ──────  ───────  ───────  ──────────────────────  ──────`);
+        for (const a of result.anchors) {
+          lines.push(`${a.tablet_id.padEnd(22).slice(0, 22)}  ${String(a.sign_count).padStart(6)}  ${String(a.intra_cohort_degree).padStart(7)}  ${String(a.anchor_score).padStart(7)}  ${(a.strongest_parallel_id ?? "-").padEnd(22).slice(0, 22)}  ${String(a.strongest_parallel_fuzzy_j).padStart(6)}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:genre-anchors", VERSION, {
+          citation: "Genre-cohort anchor-tablet discovery via sqrt(sign_count) × intra_cohort_degree. v0.18.15.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_genre_anchor_tablets_in_prefix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter: prefix_filter ?? "", genre_pattern: genre_pattern ?? "", min_sign_count: min_sign_count ?? 100, max_tablets_to_scan: max_tablets_to_scan ?? 200, top_n_anchors: top_n_anchors ?? 10 },
+          cohort_size: 0,
+          anchors: [] as never[],
+          summary: { total_anchors_returned: 0, cohort_size: 0, mean_anchor_score: 0, top_designation_pattern: null },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:genre-anchors", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_tablets_by_provenance",
+  {
+    description:
+      "Provenance-based corpus discovery — return all tablets from a given historical site (e.g. 'Sippar', 'Nineveh', 'Nippur', 'Babylon', 'Uruk', 'Susa', 'Mari', 'Lagash', 'Ur'), optionally narrowed by period and/or museum prefix. Matches via case-insensitive substring with whitespace/punctuation normalization against provenance.site in the enriched fragment-metadata cache. Direct city-axis mirror of find_tablets_by_genre. Results sorted by sign_count desc. Requires enriched fragment-metadata; run enrich_prefix_metadata(prefix_filter='X') for low-coverage prefixes.",
+    inputSchema: {
+      city: z.string().min(1).describe("Historical site (e.g. 'Sippar', 'Nineveh', 'Nippur')."),
+      period: z.string().min(1).optional().describe("Optional period filter (e.g. 'Old Babylonian')."),
+      prefix_filter: z.string().min(1).optional().describe("Optional museum-collection prefix."),
+      min_sign_count: z.number().int().min(0).optional().describe("Minimum sign_count. Default 0."),
+      top_n: z.number().int().min(1).max(500).optional().describe("Cap on returned matches. Default 50."),
+    },
+  },
+  async ({ city, period, prefix_filter, min_sign_count, top_n }) => {
+    const SCHEMA = schemaId("find_tablets_by_provenance");
+    try {
+      const result = findTabletsByProvenance({
+        city,
+        period,
+        prefixFilter: prefix_filter,
+        minSignCount: min_sign_count,
+        topN: top_n,
+      });
+      const lines: string[] = [
+        `Provenance query: "${result.query.city}"${result.query.period ? ` · period≈${result.query.period}` : ""}${result.query.prefix_filter ? ` · prefix=${result.query.prefix_filter}` : " · all prefixes"} · min_sign_count=${result.query.min_sign_count}`,
+        `Scanned: ${result.summary.total_scanned.toLocaleString()} tablets · ${result.summary.metadata_coverage_pct}% with metadata`,
+        `Matches: ${result.summary.total_matches} total · returning top ${result.summary.total_returned}`,
+        ``,
+      ];
+      const prefixDist = Object.entries(result.summary.prefix_distribution).sort((a, b) => b[1] - a[1]);
+      if (prefixDist.length > 0) lines.push(`Prefix distribution: ${prefixDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+      const periodDist = Object.entries(result.summary.period_distribution).sort((a, b) => b[1] - a[1]);
+      if (periodDist.length > 0) lines.push(`Period distribution: ${periodDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+      const genreDist = Object.entries(result.summary.genre_distribution).sort((a, b) => b[1] - a[1]);
+      if (genreDist.length > 0) lines.push(`Genre distribution: ${genreDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+      if (result.matches.length > 0) {
+        lines.push(``);
+        for (const m of result.matches) {
+          const tail = m.primary_genre ?? m.designation ?? "-";
+          lines.push(`${m.tablet_id.padEnd(22).slice(0, 22)}  signs=${String(m.sign_count).padStart(5)}  ${(m.period ?? "-").padEnd(16).slice(0, 16)}  ${(m.city ?? "-").padEnd(20).slice(0, 20)}  ${m.in_lex_graph ? "✓" : "-"}  ${tail}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:find-by-provenance", VERSION, {
+          citation: "Provenance-based discovery over the enriched fragment-metadata cache. v0.18.15.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_tablets_by_provenance error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { city: city ?? "", period: period ?? null, prefix_filter: prefix_filter ?? null, min_sign_count: min_sign_count ?? 0, top_n: top_n ?? 50 },
+          matches: [] as never[],
+          summary: { total_matches: 0, total_returned: 0, total_with_metadata_in_corpus: 0, total_scanned: 0, metadata_coverage_pct: 0, prefix_distribution: {}, period_distribution: {}, genre_distribution: {} },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:find-by-provenance", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.14 — Metadata-powered discovery tools (require enriched cache) ──
 
 server.registerTool(
@@ -6246,7 +6470,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 50 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 53 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance)\n`,
     );
     process.exit(0);
   }
