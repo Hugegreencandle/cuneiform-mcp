@@ -47,6 +47,9 @@ import {
   findShortFragments,
 } from "./collectionCoverage.js";
 import {
+  clusterPairSimilarityMatrix,
+} from "./clusterMatrix.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -168,7 +171,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.6";
+const VERSION = "0.18.7";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3723,6 +3726,109 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.7 — Cluster topology: full pairwise similarity matrix ──────────
+
+server.registerTool(
+  "cluster_pair_similarity_matrix",
+  {
+    description:
+      "Given an arbitrary list of museum numbers (typically the cluster_members from a prior reconstruct_cluster call), compute the FULL upper-triangular pairwise fuzzy-Jaccard matrix. Returns: sparse edge list (pairs with J ≥ min_jaccard), per-tablet degree at multiple thresholds, edge-weight summary stats, connected-component analysis at 5 thresholds (0.10, 0.20, 0.30, 0.40, 0.50). Fills the gap where reconstruct_cluster's BFS-tree edge set captures parent-child relationships but misses many sibling-to-sibling edges below the top-K cutoff. Use cases: cluster visualization, topology analysis, edge-density baseline before publishing a cluster claim, hub/leaf identification.",
+    inputSchema: {
+      tablet_ids: z
+        .array(z.string().min(1))
+        .min(2)
+        .describe("List of museum numbers to compute the pairwise matrix over. Minimum 2 tablets. Typically populated from a reconstruct_cluster result's cluster_members array (e.g. the 100-member BM.77056 cluster) or any other tablet set the user wants to inspect."),
+      min_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum fuzzy-Jaccard for an edge to be included. Default 0.10. Tighter (e.g. 0.20) yields the cluster's strong-similarity backbone; looser (e.g. 0.05) yields the full neighborhood."),
+      top_k_per_node: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("How many fuzzy parallels to fetch per tablet (drives sibling-pair coverage). Default 50 (maximizes coverage). Lower if the tablet set is small (≤10) and you want speed."),
+    },
+  },
+  async ({ tablet_ids, min_jaccard, top_k_per_node }) => {
+    const SCHEMA = schemaId("cluster_pair_similarity_matrix");
+    try {
+      const result = clusterPairSimilarityMatrix({
+        tabletIds: tablet_ids,
+        minJaccard: min_jaccard,
+        topKPerNode: top_k_per_node,
+      });
+
+      const lines: string[] = [
+        `Matrix: ${result.query.tablet_count} tablets · min_J=${result.query.min_jaccard} · top_k=${result.query.top_k_per_node}`,
+        `Edges: ${result.edge_stats.edges_above_threshold} of ${result.edge_stats.total_pairs_possible} possible pairs (density=${(result.edge_stats.density * 100).toFixed(1)}%)`,
+        `Weights: min=${result.edge_stats.weight_min} median=${result.edge_stats.weight_median} mean=${result.edge_stats.weight_mean} max=${result.edge_stats.weight_max}`,
+        ``,
+        `Connected components by threshold:`,
+        `  threshold   components   largest   isolated`,
+      ];
+      for (const cc of result.connected_components) {
+        lines.push(
+          `  J ≥ ${cc.threshold.toFixed(2)}     ${String(cc.component_count).padStart(8)}   ${String(cc.largest_component_size).padStart(6)}   ${String(cc.isolated_tablets).padStart(6)}`,
+        );
+      }
+      lines.push(``);
+
+      const topDegrees = result.per_tablet_degree.slice(0, 10);
+      if (topDegrees.length > 0) {
+        lines.push(`Top ${topDegrees.length} tablets by degree at J ≥ 0.20:`);
+        lines.push(`  tablet                  d(.10)  d(.20)  d(.30)  max_edge`);
+        for (const d of topDegrees) {
+          lines.push(
+            `  ${d.tablet_id.padEnd(22).slice(0, 22)}  ${String(d.degree_at_0_10).padStart(6)}  ${String(d.degree_at_0_20).padStart(6)}  ${String(d.degree_at_0_30).padStart(6)}  ${String(d.max_edge_weight).padStart(8)}`,
+          );
+        }
+        lines.push(``);
+      }
+
+      const topEdges = result.edges.slice(0, 15);
+      if (topEdges.length > 0) {
+        lines.push(`Top ${topEdges.length} edges by fuzzy_jaccard:`);
+        for (const e of topEdges) {
+          lines.push(`  ${e.source.padEnd(20).slice(0, 20)} ↔ ${e.target.padEnd(20).slice(0, 20)}  J=${e.fuzzy_jaccard.toFixed(4)}`);
+        }
+        lines.push(``);
+      }
+
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:cluster-matrix", VERSION, {
+          citation:
+            "Pairwise fuzzy-Jaccard matrix for an arbitrary tablet set. v0.18.7. Companion to reconstruct_cluster — fills the BFS-tree edge-set gap with full pairwise coverage.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`cluster_pair_similarity_matrix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { tablet_count: tablet_ids?.length ?? 0, min_jaccard: min_jaccard ?? 0.1, top_k_per_node: top_k_per_node ?? 50 },
+          edges: [] as never[],
+          edge_stats: { total_pairs_possible: 0, edges_above_threshold: 0, density: 0, weight_min: 0, weight_median: 0, weight_max: 0, weight_mean: 0 },
+          per_tablet_degree: [] as never[],
+          connected_components: [] as never[],
+          not_in_corpus: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:cluster-matrix", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.6 — Quality-audit: surface short fragments below threshold ──────
 
 server.registerTool(
@@ -4185,7 +4291,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 33 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments quality-audit)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 34 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix)\n`,
     );
     process.exit(0);
   }
