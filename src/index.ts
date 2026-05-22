@@ -106,6 +106,15 @@ import {
   findTabletsByProvenance,
 } from "./findByProvenance.js";
 import {
+  findJoinCandidatesInPrefix,
+} from "./joinCandidatesInPrefix.js";
+import {
+  findLineageChain,
+} from "./lineageChain.js";
+import {
+  findHighJoinCountTablets,
+} from "./highJoinCountTablets.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -227,7 +236,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.15";
+const VERSION = "0.18.16";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3782,6 +3791,216 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.16 — Three new tools: join-discovery + multi-axis chain + champion-fragments ──
+
+server.registerTool(
+  "find_join_candidates_in_prefix",
+  {
+    description:
+      "Within a museum-collection prefix bucket (e.g. K, BM, Sm, IM, CBS), systematically surface physical-JOIN candidate pairs — tablets that may be fragments of one originally-whole tablet broken into multiple pieces and re-cataloged separately. The join-axis mirror of find_strongest_fuzzy_pairs_in_prefix (v0.18.11, lexical-axis sibling-manuscript discovery) and find_scribal_groups (v0.18.9, scribal-axis grouping). Algorithm: scan prefix tablets sorted by sign_count desc (capped at max_tablets_to_scan), call findFuzzyParallels per seed at a VERY HIGH min_fuzzy_jaccard (default 0.50 — joins require near-identical wording on the broken edge), keep only intra-prefix edges, canonical-key dedupe (max across both directions), score by fuzzy_jaccard × sqrt(min(sign_count_a, sign_count_b)) so both endpoints must carry substantial text, and surface joins_count flags from FragmentMetadata so callers can prioritize candidates where NEITHER endpoint has known joins (highest-value uncataloged discoveries).",
+    inputSchema: {
+      prefix_filter: z.string().min(1).describe("Museum-collection prefix to scope the scan (REQUIRED — joins are intra-collection)."),
+      min_fuzzy_jaccard: z.number().min(0).max(1).optional().describe("Minimum fuzzy Jaccard for join-grade similarity. Default 0.50."),
+      min_sign_count: z.number().int().min(0).optional().describe("Skip tablets below this sign_count (joins need text on each side). Default 50."),
+      max_tablets_to_scan: z.number().int().min(10).max(5000).optional().describe("Cost cap. Default 500."),
+      top_n_candidates: z.number().int().min(1).max(200).optional().describe("Top-N candidates to return. Default 30."),
+    },
+  },
+  async ({ prefix_filter, min_fuzzy_jaccard, min_sign_count, max_tablets_to_scan, top_n_candidates }) => {
+    const SCHEMA = schemaId("find_join_candidates_in_prefix");
+    try {
+      const result = findJoinCandidatesInPrefix({
+        prefixFilter: prefix_filter,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topNCandidates: top_n_candidates,
+      });
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter} · min_fuzzy_j=${result.query.min_fuzzy_jaccard} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan}`,
+        `Results: ${result.summary.total_tablets_scanned} scanned · ${result.summary.total_candidates_collected} collected · top ${result.summary.total_candidates_surfaced} returned (${result.summary.reciprocal_pair_count} reciprocal)`,
+        `Known-joins split: ${result.summary.total_with_no_known_joins_either_side} uncataloged · ${result.summary.total_with_known_joins_either_side} touch a known-joins cluster`,
+        ``,
+      ];
+      const top = result.candidates.slice(0, 25);
+      if (top.length === 0) {
+        lines.push(`No within-prefix join candidates found above thresholds.`);
+      } else {
+        lines.push(`── Top ${top.length} join candidates (* = endpoint has known joins) ──`);
+        for (const c of top) {
+          const aMark = c.a_has_known_joins ? "*" : " ";
+          const bMark = c.b_has_known_joins ? "*" : " ";
+          const recip = c.is_reciprocal ? "↔" : "→";
+          lines.push(`   ${aMark}${c.tablet_a.padEnd(18).slice(0, 18)} ${recip} ${bMark}${c.tablet_b.padEnd(18).slice(0, 18)}  fuzzy_j=${c.fuzzy_jaccard}  run=${c.longest_contiguous_run}  signs=${c.sign_count_a}/${c.sign_count_b}  score=${c.join_score}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:join-candidates-in-prefix", VERSION, {
+          citation: "Per-prefix physical-join candidate discovery. v0.18.16.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_join_candidates_in_prefix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter: prefix_filter ?? "", min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.5, min_sign_count: min_sign_count ?? 50, max_tablets_to_scan: max_tablets_to_scan ?? 500, top_n_candidates: top_n_candidates ?? 30 },
+          candidates: [] as never[],
+          summary: { total_tablets_scanned: 0, total_candidates_surfaced: 0, total_candidates_collected: 0, mean_fuzzy_jaccard: 0, total_with_known_joins_either_side: 0, total_with_no_known_joins_either_side: 0, reciprocal_pair_count: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:join-candidates-in-prefix", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_lineage_chain",
+  {
+    description:
+      "Given a seed tablet, walk an ALTERNATING multi-axis BFS chain (e.g. fuzzy → scribal → fuzzy → scribal → ...) up to N hops, surfacing transitive scholarly-lineage paths. Differs from `reconstruct_cluster` (which expands the seed's neighborhood via ONE axis — fuzzy trigram-Jaccard) by SWITCHING the expansion axis on every hop. Valid axes: 'fuzzy' (trigram-Jaccard parallel), 'scribal' (LLR signature-cosine), 'thematic' (Random-Indexing embedding cosine). Dedupe: a tablet appearing at multiple depths keeps the SHORTEST depth as its canonical depth, but records ALL {axis, parent, score} arrivals in `axes_arrived_via` — and the `cross_axis_members[]` block highlights tablets that arrived via ≥2 distinct axes (higher-confidence chain members). One call maps the multi-relationship transitive ego-network across all axes simultaneously.",
+    inputSchema: {
+      seed_tablet_id: z.string().describe("Museum number of the seed tablet."),
+      axis_sequence: z.array(z.enum(["fuzzy", "scribal", "thematic"])).optional().describe("Alternating axis order. Default ['fuzzy','scribal','fuzzy','scribal']."),
+      max_depth: z.number().int().min(1).max(6).optional().describe("BFS depth cap. Default 4, max 6."),
+      top_k_per_hop: z.number().int().min(1).max(15).optional().describe("Per-parent topK. Default 5, max 15."),
+      min_fuzzy_jaccard: z.number().min(0).max(1).optional().describe("Default 0.20."),
+      min_scribal_cosine: z.number().min(0).max(1).optional().describe("Default 0.50."),
+      min_thematic_cosine: z.number().min(0).max(1).optional().describe("Default 0.60."),
+      max_chain_size: z.number().int().min(2).max(100).optional().describe("Cap on chain size. Default 30, max 100."),
+    },
+  },
+  async ({ seed_tablet_id, axis_sequence, max_depth, top_k_per_hop, min_fuzzy_jaccard, min_scribal_cosine, min_thematic_cosine, max_chain_size }) => {
+    const SCHEMA = schemaId("find_lineage_chain");
+    try {
+      const result = findLineageChain({
+        seedTabletId: seed_tablet_id,
+        axisSequence: axis_sequence,
+        maxDepth: max_depth,
+        topKPerHop: top_k_per_hop,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minScribalCosine: min_scribal_cosine,
+        minThematicCosine: min_thematic_cosine,
+        maxChainSize: max_chain_size,
+      });
+      const lines: string[] = [
+        `Seed: ${seed_tablet_id}`,
+        `Chain size: ${result.summary.total_chain_size} · Termination: ${result.summary.termination_reason}`,
+        `Axis sequence: ${result.summary.axis_sequence_used.join(" → ")}`,
+        `Axis-path summary: fuzzy=${result.axis_path_summary.fuzzy}, scribal=${result.axis_path_summary.scribal}, thematic=${result.axis_path_summary.thematic}`,
+        ``,
+        `Chain members:`,
+      ];
+      for (const m of result.chain) {
+        if (m.depth === 0) {
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=0 (seed)`);
+        } else {
+          const best = m.axes_arrived_via.reduce((acc, a) => (a.score > acc.score ? a : acc), m.axes_arrived_via[0]);
+          const axesTag = [...new Set(m.axes_arrived_via.map((a) => a.axis))].join("+");
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=${m.depth}  ← ${best.parent}  (${best.axis}=${best.score.toFixed(4)}) [${axesTag}]`);
+        }
+      }
+      if (result.cross_axis_members.length > 0) {
+        lines.push(``, `Cross-axis members (≥2 axes):`);
+        for (const m of result.cross_axis_members) {
+          const axesTag = [...new Set(m.axes_arrived_via.map((a) => a.axis))].join("+");
+          lines.push(`  ${m.tablet_id.padEnd(22)} axes=[${axesTag}]`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:lineage-chain", VERSION, {
+          citation: "Multi-axis alternating BFS chain. v0.18.16.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_lineage_chain error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { seed_tablet_id, axis_sequence: axis_sequence ?? ["fuzzy", "scribal", "fuzzy", "scribal"], max_depth: max_depth ?? 4, top_k_per_hop: top_k_per_hop ?? 5, min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.2, min_scribal_cosine: min_scribal_cosine ?? 0.5, min_thematic_cosine: min_thematic_cosine ?? 0.6, max_chain_size: max_chain_size ?? 30 },
+          chain: [] as never[],
+          axis_path_summary: { fuzzy: 0, scribal: 0, thematic: 0 },
+          prefix_distribution: {},
+          cross_axis_members: [] as never[],
+          summary: { total_chain_size: 0, axis_sequence_used: axis_sequence ?? ["fuzzy", "scribal", "fuzzy", "scribal"], termination_reason: "frontier_exhausted" as const, depth_distribution: {}, expansion_calls: { fuzzy: 0, scribal: 0, thematic: 0 } },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lineage-chain", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_high_join_count_tablets",
+  {
+    description:
+      "High-join-count tablet discovery — surface tablets in the corpus with the most known physical joins (per eBL fragment-metadata `joins_count`). These are the 'champion fragments' / substantially reconstructed original tablets (e.g. K.5896's 13-tablet join group from the BM.77056 *āšipūtu* cluster). Useful for picking the canonical anchor witness for a composition before running parallel-search, lacuna-restoration, or scribal-fingerprint work. Companion to find_join_candidates (which proposes NEW joins) — this surfaces ALREADY-RECOVERED joins. Sorted by joins_count desc, tie-broken by sign_count desc. Requires enriched fragment-metadata.",
+    inputSchema: {
+      prefix_filter: z.string().min(1).optional().describe("Optional museum-collection prefix scope. Omit for full corpus."),
+      min_joins_count: z.number().int().min(0).optional().describe("Minimum joins_count threshold. Default 1."),
+      top_n: z.number().int().min(1).max(500).optional().describe("Cap on returned tablets. Default 50."),
+      include_zero_joins: z.boolean().optional().describe("If true, include tablets with metadata but joins_count=0. Default false."),
+    },
+  },
+  async ({ prefix_filter, min_joins_count, top_n, include_zero_joins }) => {
+    const SCHEMA = schemaId("find_high_join_count_tablets");
+    try {
+      const result = findHighJoinCountTablets({
+        prefixFilter: prefix_filter,
+        minJoinsCount: min_joins_count,
+        topN: top_n,
+        includeZeroJoins: include_zero_joins,
+      });
+      const lines: string[] = [
+        `High-join-count query: ${result.query.prefix_filter ? `prefix=${result.query.prefix_filter}` : "all prefixes"} · min_joins_count=${result.query.min_joins_count}${result.query.include_zero_joins ? " · include_zero_joins=true" : ""}`,
+        `Scanned: ${result.summary.total_scanned.toLocaleString()} tablets · ${result.summary.metadata_coverage_pct}% with metadata`,
+        `Matching: ${result.summary.total_matching} total · returning top ${result.summary.total_returned} · max joins_count=${result.summary.max_joins_count_seen} · mean=${result.summary.mean_joins_count}`,
+        ``,
+      ];
+      if (result.tablets.length > 0) {
+        for (const m of result.tablets) {
+          const tail = m.genre ?? m.designation ?? "-";
+          lines.push(`${m.tablet_id.padEnd(22).slice(0, 22)}  joins=${String(m.joins_count).padStart(3)}  signs=${String(m.sign_count).padStart(5)}  ${(m.period ?? "-").padEnd(16).slice(0, 16)}  ${tail}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:high-join-count", VERSION, {
+          citation: "High-join-count tablet discovery. v0.18.16.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_high_join_count_tablets error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter: prefix_filter ?? null, min_joins_count: min_joins_count ?? 1, top_n: top_n ?? 50, include_zero_joins: include_zero_joins ?? false },
+          tablets: [] as never[],
+          summary: { total_matching: 0, total_returned: 0, total_with_metadata_in_corpus: 0, total_scanned: 0, metadata_coverage_pct: 0, max_joins_count_seen: 0, mean_joins_count: 0, prefix_distribution: {}, period_distribution: {} },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:high-join-count", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.15 — Prefix-pair structural comparator ─────────────────────────
 
 server.registerTool(
@@ -6470,7 +6689,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 53 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 56 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets)\n`,
     );
     process.exit(0);
   }
