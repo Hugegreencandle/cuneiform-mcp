@@ -65,6 +65,15 @@ import {
   findCrossPrefixScribalLinks,
 } from "./crossPrefixScribal.js";
 import {
+  compareClusters,
+} from "./compareClusters.js";
+import {
+  findStrongestFuzzyPairs,
+} from "./strongestFuzzyPairs.js";
+import {
+  corpusHealthReport,
+} from "./corpusHealth.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -186,7 +195,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.10";
+const VERSION = "0.18.11";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3741,6 +3750,427 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.11 — Two-cluster comparison (overlap + relationship classifier) ─
+
+server.registerTool(
+  "compare_clusters",
+  {
+    description:
+      "Compare two clusters (each defined EITHER by a seed_tablet_id OR an explicit cluster_members list) and surface whether they're the same composition, distinct compositions, or topology-adjacent neighbors. Computes: shared / A-unique / B-unique membership sets, Jaccard similarity, per-prefix distribution comparison (counts in A, B, and shared), and a relationship classification (identical / subset_a_in_b / subset_b_in_a / overlap / disjoint). For unions ≤ 50 tablets it also runs an internal cluster_pair_similarity_matrix across the union to break edges into intra-A / intra-B / cross-cluster buckets — surfacing whether two disjoint clusters are NEIGHBORS in fuzzy-Jaccard space (related compositions separated by a topology shatter) or genuine strangers. Use case: 'Is the BM.77056 cluster the same as the K.15325 cluster, or distinct?' One call replaces the manual reconstruct_cluster ×2 + set arithmetic + prefix rollup workflow. Recommendations block interprets the comparison in narrative form.",
+    inputSchema: {
+      cluster_a_seed: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Seed museum number for Cluster A (e.g. 'BM.77056'). Triggers an internal reconstruct_cluster call with the supplied min_fuzzy_jaccard / max_cluster_size / max_depth (or defaults 0.20 / 100 / 4). Either this OR cluster_a_members is required."),
+      cluster_a_members: z
+        .array(z.string().min(1))
+        .min(1)
+        .optional()
+        .describe("Explicit list of museum numbers for Cluster A (skips reconstruct_cluster). Use when iterating on a filtered / hand-curated cluster. If both this and cluster_a_seed are supplied, the explicit list wins."),
+      cluster_b_seed: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Seed museum number for Cluster B (e.g. 'K.15325'). Triggers an internal reconstruct_cluster call with the supplied parameters. Either this OR cluster_b_members is required."),
+      cluster_b_members: z
+        .array(z.string().min(1))
+        .min(1)
+        .optional()
+        .describe("Explicit list of museum numbers for Cluster B (skips reconstruct_cluster). If both this and cluster_b_seed are supplied, the explicit list wins."),
+      min_fuzzy_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Fuzzy-Jaccard threshold for the reconstruct_cluster calls (only used when a seed is supplied). Default 0.20 — matches the v0.17.1 cluster-reconstruction baseline."),
+      max_cluster_size: z
+        .number()
+        .int()
+        .min(2)
+        .max(100)
+        .optional()
+        .describe("Max members per reconstructed cluster (only used when a seed is supplied). Default 100."),
+      max_depth: z
+        .number()
+        .int()
+        .min(1)
+        .max(6)
+        .optional()
+        .describe("BFS depth cap for cluster reconstruction (only used when a seed is supplied). Default 4."),
+    },
+  },
+  async ({ cluster_a_seed, cluster_a_members, cluster_b_seed, cluster_b_members, min_fuzzy_jaccard, max_cluster_size, max_depth }) => {
+    const SCHEMA = schemaId("compare_clusters");
+    try {
+      const result = compareClusters({
+        clusterASeed: cluster_a_seed,
+        clusterAMembers: cluster_a_members,
+        clusterBSeed: cluster_b_seed,
+        clusterBMembers: cluster_b_members,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        maxClusterSize: max_cluster_size,
+        maxDepth: max_depth,
+      });
+
+      const a = result.cluster_a;
+      const b = result.cluster_b;
+      const cmp = result.comparison;
+      const lines: string[] = [
+        `Cluster A: ${a.source}${a.source === "seed" ? ` (seed=${a.source_id})` : ""} · ${a.member_count} members`,
+        `Cluster B: ${b.source}${b.source === "seed" ? ` (seed=${b.source_id})` : ""} · ${b.member_count} members`,
+        ``,
+        `Comparison:`,
+        `  shared: ${cmp.shared_count}  ·  A-only: ${cmp.a_unique_count}  ·  B-only: ${cmp.b_unique_count}`,
+        `  Jaccard: ${cmp.jaccard.toFixed(4)}  ·  relationship: ${cmp.relationship}`,
+      ];
+      if (cmp.shared_members.length > 0) {
+        lines.push(
+          `  shared members: ${cmp.shared_members.slice(0, 8).join(", ")}${cmp.shared_members.length > 8 ? `… (+${cmp.shared_members.length - 8})` : ""}`,
+        );
+      }
+
+      if (result.prefix_comparison.length > 0) {
+        lines.push(``, `Prefix comparison (top 8):`);
+        lines.push(`  prefix       A    B   shared`);
+        for (const p of result.prefix_comparison.slice(0, 8)) {
+          lines.push(
+            `  ${p.prefix.padEnd(10)} ${String(p.a).padStart(3)}  ${String(p.b).padStart(3)}   ${String(p.shared).padStart(4)}`,
+          );
+        }
+      }
+
+      if (result.union_analysis) {
+        const u = result.union_analysis;
+        lines.push(``, `Union analysis:`);
+        if (u.skipped) {
+          lines.push(`  SKIPPED — ${u.skip_reason}`);
+        } else {
+          lines.push(
+            `  union size: ${u.union_size}  ·  edges: ${u.total_edges}  ·  density: ${(u.edge_density * 100).toFixed(1)}%`,
+            `  intra-A: ${u.intra_a_edges}  ·  intra-B: ${u.intra_b_edges}  ·  cross-cluster: ${u.cross_cluster_edges}`,
+          );
+        }
+      }
+
+      if (result.recommendations.length > 0) {
+        lines.push(``, `Recommendations:`);
+        for (const r of result.recommendations) lines.push(`  • ${r}`);
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:compare-clusters", VERSION, {
+          citation:
+            "Pairwise cluster-vs-cluster comparator — orchestrates reconstruct_cluster ×2 + set arithmetic + per-prefix rollup + union-edge analysis into a single is-this-the-same-cluster envelope.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_clusters error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            cluster_a: {
+              mode: cluster_a_members && cluster_a_members.length > 0 ? "explicit" : "seed",
+              seed: cluster_a_seed ?? null,
+              explicit_count: cluster_a_members?.length ?? 0,
+            },
+            cluster_b: {
+              mode: cluster_b_members && cluster_b_members.length > 0 ? "explicit" : "seed",
+              seed: cluster_b_seed ?? null,
+              explicit_count: cluster_b_members?.length ?? 0,
+            },
+            min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.2,
+            max_cluster_size: max_cluster_size ?? 100,
+            max_depth: max_depth ?? 4,
+            union_edge_cap: 50,
+          },
+          cluster_a: { source: "seed", source_id: cluster_a_seed ?? null, member_count: 0, member_ids: [] as never[], prefix_distribution: [] as never[], reconstruction: null },
+          cluster_b: { source: "seed", source_id: cluster_b_seed ?? null, member_count: 0, member_ids: [] as never[], prefix_distribution: [] as never[], reconstruction: null },
+          comparison: { shared_members: [] as never[], a_unique: [] as never[], b_unique: [] as never[], a_unique_count: 0, b_unique_count: 0, shared_count: 0, jaccard: 0, relationship: "disjoint" },
+          prefix_comparison: [] as never[],
+          union_analysis: null,
+          recommendations: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:compare-clusters", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.11 — Per-prefix top-N strongest fuzzy-Jaccard pair discovery ────
+
+server.registerTool(
+  "find_strongest_fuzzy_pairs_in_prefix",
+  {
+    description:
+      "Within a museum-collection prefix bucket (e.g. K, BM, Sm, CBS, VAT), surface the top-N strongest fuzzy-Jaccard edges between any pair of tablets in that bucket. The per-collection generalization of find_fuzzy_parallels (v0.17.0) — instead of asking 'what's most similar to THIS tablet?', asks 'within prefix X, what are the strongest sibling-manuscript candidate pairs ANYWHERE?'. Returns pairs sorted by fuzzy_jaccard desc (with final_score tie-break) + per-tablet involvement counts (cluster-hub candidates) + edge-weight summary stats. Motivated by the v0.17 calibration audit recovery of the K.2798 ↔ Si.776 pair (a methods-paper-grade missed sibling, surfaced only because Dane probed K.2798 by hand): this tool answers systematically 'what OTHER such pairs exist within a collection that nobody has probed?'. Pairs with find_fuzzy_parallels for per-tablet zoom and find_scribal_groups (v0.18.9) for the same systematic-discovery pattern on the scribal-signature axis. Cost-bounded by max_tablets_to_scan (default 500 ≈ 30s); raise to 2500-3000 for full coverage of major prefixes like K or BM (a few minutes).",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .describe("Museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS', 'VAT'). REQUIRED — this tool is per-prefix by design. Use list_collection_prefixes to enumerate options."),
+      min_fuzzy_jaccard: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum fuzzy Jaccard for an edge to be collected. Default 0.20 (the v0.17 sibling-manuscript discovery threshold). Tighter (e.g. 0.35) yields only near-duplicate pairs; looser (e.g. 0.10) yields broader composition-overlap candidates."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (fuzzy-J unreliable on short fragments). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on tablets to query in this prefix (cost control). Default 500 ≈ 30s on warm fuzzy index. Increase to ~2500-3000 for full coverage of a major prefix like K or BM (a few minutes)."),
+      top_k_per_tablet: z
+        .number()
+        .int()
+        .min(2)
+        .max(50)
+        .optional()
+        .describe("How many fuzzy parallels to fetch per scanned tablet. Default 15. Lower = faster but may miss weaker edges; higher = more thorough collection but more cost per tablet."),
+      top_n_pairs: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("How many top-ranked pairs to return. Default 50. Max 500."),
+    },
+  },
+  async ({ prefix_filter, min_fuzzy_jaccard, min_sign_count, max_tablets_to_scan, top_k_per_tablet, top_n_pairs }) => {
+    const SCHEMA = schemaId("find_strongest_fuzzy_pairs_in_prefix");
+    try {
+      const result = findStrongestFuzzyPairs({
+        prefixFilter: prefix_filter,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topKPerTablet: top_k_per_tablet,
+        topNPairs: top_n_pairs,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter} · min_fuzzy_j=${result.query.min_fuzzy_jaccard} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan} · top_k_per_tablet=${result.query.top_k_per_tablet}`,
+        `Results: ${result.summary.tablets_scanned} tablets scanned · ${result.summary.total_pairs_collected} pairs collected · top ${result.summary.total_pairs_returned} returned (${result.summary.reciprocal_pair_count} reciprocal)`,
+        `Edge weight (returned): min=${result.summary.edge_weight.min_fuzzy_jaccard} · median=${result.summary.edge_weight.median_fuzzy_jaccard} · max=${result.summary.edge_weight.max_fuzzy_jaccard}`,
+        ``,
+      ];
+      const topPairs = result.pairs.slice(0, 25);
+      if (topPairs.length === 0) {
+        lines.push(`No within-prefix pairs found above thresholds. Try lowering min_fuzzy_jaccard or raising max_tablets_to_scan.`);
+      } else {
+        lines.push(`── Top ${topPairs.length} pairs by fuzzy_jaccard ──`);
+        for (const p of topPairs) {
+          const recip = p.is_reciprocal ? "↔" : "→";
+          lines.push(`   ${p.tablet_a.padEnd(20).slice(0, 20)} ${recip} ${p.tablet_b.padEnd(20).slice(0, 20)}  fuzzy_j=${p.fuzzy_jaccard}  exact_j=${p.exact_jaccard}  run=${p.longest_contiguous_run}  final=${p.final_score}`);
+        }
+        if (result.pairs.length > 25) lines.push(`(${result.pairs.length - 25} more returned pairs not shown)`);
+        lines.push(``);
+      }
+      if (result.top_involved_tablets.length > 0) {
+        lines.push(`── Cluster-hub candidates (most pair appearances) ──`);
+        for (const t of result.top_involved_tablets) {
+          lines.push(`   ${t.tablet_id.padEnd(22).slice(0, 22)}  pairs=${t.pair_count}  max_fuzzy_j=${t.max_fuzzy_jaccard}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:strongest-fuzzy-pairs", VERSION, {
+          citation:
+            "Per-prefix top-N strongest fuzzy-Jaccard pair discovery via tablet iteration + canonical-key edge dedupe. v0.18.11. Generalizes find_fuzzy_parallels (v0.17.0) from per-tablet to systematic per-collection — the fuzzy-axis analogue of find_scribal_groups (v0.18.9).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_strongest_fuzzy_pairs_in_prefix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter ?? "",
+            min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.20,
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_k_per_tablet: top_k_per_tablet ?? 15,
+            top_n_pairs: top_n_pairs ?? 50,
+          },
+          pairs: [] as never[],
+          top_involved_tablets: [] as never[],
+          summary: {
+            total_pairs_returned: 0,
+            total_pairs_collected: 0,
+            tablets_scanned: 0,
+            tablets_with_any_pair: 0,
+            edge_weight: { min_fuzzy_jaccard: 0, median_fuzzy_jaccard: 0, max_fuzzy_jaccard: 0 },
+            reciprocal_pair_count: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:strongest-fuzzy-pairs", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.11 — corpus_health_report (corpus-level meta-diagnostic) ────────
+
+server.registerTool(
+  "corpus_health_report",
+  {
+    description:
+      "One-call corpus-level meta-diagnostic. Returns the 'system health' snapshot for the cuneiform-mcp pipeline: total tablet count, lex-graph / thematic-index coverage, distinct prefix count + top-10 by tablet count + top-5 by total sign count, corpus-wide sign-count distribution (mean/median/total), short-fragment count at a caller-configurable threshold, an approximate bi-orphan count at caller-configurable lex/thematic thresholds, mean per-prefix coverage percentages, and a generated list of recommended next queries. Use as the FIRST query in any corpus-exploration session, and before running expensive corpus-wide tools like find_scribal_groups or find_cross_prefix_scribal_links. Also useful as a release-artifact snapshot when documenting corpus state for the methods paper.",
+    inputSchema: {
+      short_fragment_threshold: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe(
+          "Tablets with sign_count strictly below this threshold are counted as short fragments. Default 50 (matches the methods-paper §2.4 short-fragment cutoff).",
+        ),
+      bi_orphan_thresholds: z
+        .object({
+          lex_jaccard: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Lexical Jaccard threshold below which a tablet is considered lex-isolated. Default 0.30."),
+          thematic_cosine: z
+            .number()
+            .min(0)
+            .max(1)
+            .describe("Thematic-embedding cosine threshold below which a tablet is considered thematically-isolated. Default 0.50."),
+        })
+        .optional()
+        .describe(
+          "Thresholds used to estimate the bi-orphan count. When both equal the methods-paper defaults (0.30 / 0.50), the pre-aggregated anomaly-index total is surfaced; otherwise the count is recomputed live by scanning the index.",
+        ),
+    },
+  },
+  async ({ short_fragment_threshold, bi_orphan_thresholds }) => {
+    const SCHEMA = schemaId("corpus_health_report");
+    try {
+      const result = corpusHealthReport({
+        shortFragmentThreshold: short_fragment_threshold,
+        biOrphanThresholds: bi_orphan_thresholds
+          ? {
+              lexJaccard: bi_orphan_thresholds.lex_jaccard,
+              thematicCosine: bi_orphan_thresholds.thematic_cosine,
+            }
+          : undefined,
+      });
+
+      const ct = result.corpus_totals;
+      const ps = result.prefix_summary;
+      const sf = result.short_fragments;
+      const bo = result.bi_orphans_estimate;
+      const qi = result.quality_indicators;
+      const lines: string[] = [
+        `Corpus health report — query: short_fragment_threshold=${result.query.short_fragment_threshold}, bi_orphan_thresholds=(lex_jaccard<${result.query.bi_orphan_thresholds.lex_jaccard}, thematic_cosine<${result.query.bi_orphan_thresholds.thematic_cosine})`,
+        ``,
+        `Corpus totals:`,
+        `  ${ct.total_tablets_in_index.toLocaleString()} tablets indexed`,
+        `  ${ct.in_lex_graph.toLocaleString()} in lex graph · ${ct.in_them_index.toLocaleString()} in thematic index · ${ct.in_both.toLocaleString()} in both`,
+        `  ${ct.zero_sign_count.toLocaleString()} zero-sign records · ${ct.total_signs_corpus_wide.toLocaleString()} total signs · mean=${ct.mean_sign_count} median=${ct.median_sign_count}`,
+        ``,
+        `Prefixes: ${ps.distinct_prefix_count} distinct${ps.largest_prefix_name ? ` · largest=${ps.largest_prefix_name}` : ""}${ps.smallest_prefix_name ? ` · smallest=${ps.smallest_prefix_name}` : ""}`,
+        `  Top 10 by tablet count: ${ps.top_10_by_tablet_count.map((p) => `${p.prefix}(${p.tablet_count})`).join(", ")}`,
+        `  Top 5 by total signs:   ${ps.top_5_by_total_sign_count.map((p) => `${p.prefix}(${p.total_sign_count.toLocaleString()})`).join(", ")}`,
+        ``,
+        `Short fragments (<${sf.threshold} signs): ${sf.count.toLocaleString()} (${sf.percent_of_corpus}% of corpus)`,
+        `Bi-orphan estimate: ${bo.approximate_count != null ? `~${bo.approximate_count}` : "unavailable"} [source=${bo.source}]`,
+        `  ${bo.note}`,
+        ``,
+        `Quality indicators:`,
+        `  Mean per-prefix lex coverage: ${qi.mean_lex_coverage_pct}% · thematic coverage: ${qi.mean_them_coverage_pct}%`,
+        `  Prefixes with >10% zero-sign records: ${qi.prefixes_with_high_zero_sign_count.length}${qi.prefixes_with_high_zero_sign_count.length > 0 ? ` (${qi.prefixes_with_high_zero_sign_count.slice(0, 5).map((p) => `${p.prefix}=${p.zero_sign_pct}%`).join(", ")})` : ""}`,
+        ``,
+        `Recommendations:`,
+        ...result.recommendations.map((r, i) => `  ${i + 1}. ${r}`),
+      ];
+      if (result.warnings.length > 0) {
+        lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:corpus-health", VERSION, {
+          citation:
+            "Corpus-level meta-diagnostic over the anomaly-index. v0.18.11. Companion to list_collection_prefixes + coverage_stats_for_collection + find_short_fragments.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`corpus_health_report error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            short_fragment_threshold: short_fragment_threshold ?? 50,
+            bi_orphan_thresholds: bi_orphan_thresholds ?? { lex_jaccard: 0.3, thematic_cosine: 0.5 },
+          },
+          corpus_totals: {
+            total_tablets_in_index: 0,
+            in_lex_graph: 0,
+            in_them_index: 0,
+            in_both: 0,
+            zero_sign_count: 0,
+            mean_sign_count: 0,
+            median_sign_count: 0,
+            total_signs_corpus_wide: 0,
+          },
+          prefix_summary: {
+            distinct_prefix_count: 0,
+            top_10_by_tablet_count: [] as never[],
+            top_5_by_total_sign_count: [] as never[],
+            largest_prefix_name: null,
+            smallest_prefix_name: null,
+          },
+          short_fragments: {
+            threshold: short_fragment_threshold ?? 50,
+            count: 0,
+            percent_of_corpus: 0,
+          },
+          bi_orphans_estimate: {
+            approximate_count: null,
+            thresholds_used: bi_orphan_thresholds ?? { lex_jaccard: 0.3, thematic_cosine: 0.5 },
+            source: "unavailable" as const,
+            note: msg,
+          },
+          quality_indicators: {
+            mean_lex_coverage_pct: 0,
+            mean_them_coverage_pct: 0,
+            prefixes_with_high_zero_sign_count: [] as never[],
+          },
+          recommendations: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:corpus-health", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.10 — Composite cluster audit (one-call diagnostic) ─────────────
 
 server.registerTool(
@@ -4916,7 +5346,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 39 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 42 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report)\n`,
     );
     process.exit(0);
   }
