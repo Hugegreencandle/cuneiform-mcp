@@ -115,6 +115,15 @@ import {
   findHighJoinCountTablets,
 } from "./highJoinCountTablets.js";
 import {
+  findIsolateCompositions,
+} from "./isolateCompositions.js";
+import {
+  findSignatureEvolutionInLineage,
+} from "./signatureEvolution.js";
+import {
+  extendDatasetToMotif,
+} from "./motifDatasetBuilder.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -236,7 +245,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.16";
+const VERSION = "0.18.17";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3791,6 +3800,211 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.17 — Three new tools: isolate compositions + signature evolution + motif-dataset builder ──
+
+server.registerTool(
+  "find_isolate_compositions",
+  {
+    description:
+      "Surface SUBSTANTIAL tablets (high sign_count) that have FEW fuzzy parallels in the corpus — compositions NOT well-represented by multiple witnesses. Candidates for: (a) unique surviving compositions of historical significance, (b) compositions scholars have studied as singletons, (c) the 'we have only one witness — handle with care' sub-cohort for methods-paper + pitch material. Distinct from find_anomalous_tablets (bi-orphan at any sign_count); this tool is the 'lexically-isolated AND substantial' intersection. Ranks by isolation_score = sign_count / (parallel_count + 1).",
+    inputSchema: {
+      prefix_filter: z.string().optional().describe("Optional museum-collection prefix scope."),
+      min_sign_count: z.number().int().min(0).optional().describe("Minimum sign_count. Default 200."),
+      max_parallel_count: z.number().int().min(0).optional().describe("Max fuzzy parallels to qualify as isolated. Default 2."),
+      min_fuzzy_jaccard: z.number().min(0).max(1).optional().describe("Parallel threshold. Default 0.20."),
+      max_tablets_to_scan: z.number().int().min(10).max(5000).optional().describe("Cost cap. Default 500."),
+      top_n: z.number().int().min(1).max(500).optional().describe("Top-N. Default 30."),
+    },
+  },
+  async ({ prefix_filter, min_sign_count, max_parallel_count, min_fuzzy_jaccard, max_tablets_to_scan, top_n }) => {
+    const SCHEMA = schemaId("find_isolate_compositions");
+    try {
+      const result = findIsolateCompositions({
+        prefixFilter: prefix_filter,
+        minSignCount: min_sign_count,
+        maxParallelCount: max_parallel_count,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        maxTabletsToScan: max_tablets_to_scan,
+        topN: top_n,
+      });
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter ?? "(all)"} · min_signs=${result.query.min_sign_count} · max_parallels=${result.query.max_parallel_count}`,
+        `Results: ${result.summary.total_tablets_scanned} scanned · ${result.summary.total_isolates_surfaced} isolates · mean iso=${result.summary.mean_isolation_score}`,
+        ``,
+      ];
+      for (const c of result.isolates.slice(0, 25)) {
+        lines.push(`   ${c.tablet_id.padEnd(20).slice(0, 20)}  signs=${String(c.sign_count).padStart(5)}  parallels=${c.parallel_count}  iso=${c.isolation_score}  top=${(c.top_parallel_id ?? "—").padEnd(18).slice(0, 18)}  top_j=${c.top_parallel_fuzzy_j}`);
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:isolate-compositions", VERSION, { citation: "Isolate-composition discovery. v0.18.17." }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_isolate_compositions error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { prefix_filter: prefix_filter ?? null, min_sign_count: min_sign_count ?? 200, max_parallel_count: max_parallel_count ?? 2, min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.20, max_tablets_to_scan: max_tablets_to_scan ?? 500, top_n: top_n ?? 30 },
+          isolates: [] as never[],
+          summary: { total_tablets_scanned: 0, total_isolates_surfaced: 0, mean_isolation_score: 0, prefix_distribution: {} as Record<string, number> },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:isolate-compositions", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_signature_evolution_in_lineage",
+  {
+    description:
+      "Walk a multi-axis lineage chain (using the v0.18.16 find_lineage_chain primitive) and overlay per-hop scribal-signature drift on every parent→child edge. For every member: sig_cosine_to_seed + sig_cosine_to_parent. Surfaces signature_jumps[] — parent→child hops where cosine drops below jump_threshold (default 0.40 = candidate scribal-school boundary) — plus a chain-wide coherence classification: stable / drifting / fragmented. Tests whether a transitive lineage chain represents one scribal tradition or copies that crossed multiple traditions.",
+    inputSchema: {
+      seed_tablet_id: z.string().describe("Museum number of the seed tablet."),
+      axis_sequence: z.array(z.enum(["fuzzy", "scribal", "thematic"])).optional().describe("Default ['fuzzy','scribal','fuzzy']."),
+      max_depth: z.number().int().min(1).max(6).optional().describe("Default 3."),
+      top_k_per_hop: z.number().int().min(1).max(15).optional().describe("Default 3."),
+      max_chain_size: z.number().int().min(2).max(100).optional().describe("Default 15."),
+      jump_threshold: z.number().min(0).max(1).optional().describe("Default 0.40."),
+    },
+  },
+  async ({ seed_tablet_id, axis_sequence, max_depth, top_k_per_hop, max_chain_size, jump_threshold }) => {
+    const SCHEMA = schemaId("find_signature_evolution_in_lineage");
+    try {
+      const result = findSignatureEvolutionInLineage({
+        seedTabletId: seed_tablet_id,
+        axisSequence: axis_sequence,
+        maxDepth: max_depth,
+        topKPerHop: top_k_per_hop,
+        maxChainSize: max_chain_size,
+        jumpThreshold: jump_threshold,
+      });
+      const lines: string[] = [
+        `Seed: ${seed_tablet_id}`,
+        `Chain size: ${result.summary.total_members} · Jumps: ${result.summary.total_jumps} · Coherence: ${result.summary.scribal_coherence_classification}`,
+        `Mean sig-cosine-to-seed: ${result.summary.mean_sig_cosine_to_seed_across_chain.toFixed(4)}`,
+        ``,
+      ];
+      for (const m of result.chain_with_signatures) {
+        if (m.depth === 0) {
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=0 (seed)  sig=${m.sig_cosine_to_seed.toFixed(4)}`);
+        } else {
+          const parentCos = m.sig_cosine_to_parent === null ? "n/a" : m.sig_cosine_to_parent.toFixed(4);
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=${m.depth}  ← ${m.parent ?? "?"}  (${m.axis_arrived_via ?? "?"})  seed=${m.sig_cosine_to_seed.toFixed(4)} parent=${parentCos}`);
+        }
+      }
+      if (result.signature_jumps.length > 0) {
+        lines.push(``, `Signature jumps (cos < ${result.query.jump_threshold}):`);
+        for (const j of result.signature_jumps) {
+          lines.push(`  ${j.parent} → ${j.child}  (${j.axis})  cos=${j.sig_cosine_to_parent.toFixed(4)}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:signature-evolution", VERSION, { citation: "Per-hop scribal-signature drift along a multi-axis lineage chain. v0.18.17." }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_signature_evolution_in_lineage error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { seed_tablet_id, axis_sequence: axis_sequence ?? ["fuzzy", "scribal", "fuzzy"], max_depth: max_depth ?? 3, top_k_per_hop: top_k_per_hop ?? 3, max_chain_size: max_chain_size ?? 15, jump_threshold: jump_threshold ?? 0.4 },
+          chain_with_signatures: [] as never[],
+          depth_aggregates: [] as never[],
+          signature_jumps: [] as never[],
+          summary: { total_members: 0, total_jumps: 0, mean_sig_cosine_to_seed_across_chain: 0, scribal_coherence_classification: "fragmented" as const, underlying_chain_termination: "frontier_exhausted" as const },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:signature-evolution", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "extend_dataset_to_motif",
+  {
+    description:
+      "Generalize per-tablet motif discovery to ARBITRARY caller-specified motifs. Given a motif name + 1-20 seed tablet IDs, expand transitively via BOTH discovery axes (fuzzy trigram-Jaccard + Random-Indexing thematic cosine) and build a structured corpus dataset attesting that motif. Cross-axis-confirmed candidates get source='cross_axis' (higher confidence); single-axis hits at threshold or strong-lexical-alone (fuzzy_J ≥ 0.4) also pass unless require_cross_axis=true. Optional BFS depth-2 expansion. Persisted to data/motif-datasets/{slug}.json as a static snapshot. Generalizes the apkallu_attestations pattern to any user-defined research target.",
+    inputSchema: {
+      motif_name: z.string().min(1).describe("Human-readable motif name (e.g., 'mīs pî', 'apkallū invocation'). Slugified for filename."),
+      seed_tablet_ids: z.array(z.string()).min(1).max(20).describe("Seed museum numbers (1-20). E.g., ['K.15325', 'K.8994']."),
+      max_dataset_size: z.number().int().min(1).max(500).optional().describe("Cap on dataset size. Default 100."),
+      expand_depth: z.number().int().min(0).max(2).optional().describe("BFS depth. Default 1."),
+      min_fuzzy_jaccard: z.number().min(0).max(1).optional().describe("Default 0.30."),
+      min_thematic_cosine: z.number().min(0).max(1).optional().describe("Default 0.65."),
+      require_cross_axis: z.boolean().optional().describe("If true, only cross-axis admits. Default false."),
+      persist: z.boolean().optional().describe("Write to disk. Default true."),
+    },
+  },
+  async ({ motif_name, seed_tablet_ids, max_dataset_size, expand_depth, min_fuzzy_jaccard, min_thematic_cosine, require_cross_axis, persist }) => {
+    const SCHEMA = schemaId("extend_dataset_to_motif");
+    try {
+      const result = extendDatasetToMotif({
+        motifName: motif_name,
+        seedTabletIds: seed_tablet_ids,
+        maxDatasetSize: max_dataset_size,
+        expandDepth: expand_depth,
+        minFuzzyJaccard: min_fuzzy_jaccard,
+        minThematicCosine: min_thematic_cosine,
+        requireCrossAxis: require_cross_axis,
+        persist,
+      });
+      const s = result.dataset_summary;
+      const lines: string[] = [
+        `Motif: ${s.motif_name}  (slug: ${s.slug})`,
+        `Seeds: ${result.query.seed_tablet_ids.join(", ")}`,
+        `Total members: ${s.total_members} · Termination: ${result.termination_reason}`,
+        `Composition: seed=${s.members_via_seed}, fuzzy_only=${s.members_via_fuzzy_only}, thematic_only=${s.members_via_thematic_only}, cross_axis=${s.members_via_both}`,
+        result.file_path ? `Persisted: ${result.file_path}` : `Persisted: (skipped)`,
+        ``,
+      ];
+      for (const m of result.members) {
+        if (m.source === "seed") {
+          lines.push(`  ${m.tablet_id.padEnd(22)} [seed]`);
+        } else {
+          const fj = m.fuzzy_j !== undefined ? `fuzzy_J=${m.fuzzy_j.toFixed(3)}` : "";
+          const tc = m.thematic_cos !== undefined ? `them_cos=${m.thematic_cos.toFixed(3)}` : "";
+          lines.push(`  ${m.tablet_id.padEnd(22)} d=${m.depth} src=${m.source} ← ${m.source_seed ?? "?"}  ${[fj, tc].filter((x) => x.length > 0).join(", ")}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:motif-dataset-builder", VERSION, { citation: "Multi-axis BFS motif-dataset construction. v0.18.17. Generalizes apkallu_attestations." }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`extend_dataset_to_motif error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { motif_name, seed_tablet_ids, max_dataset_size: max_dataset_size ?? 100, expand_depth: expand_depth ?? 1, min_fuzzy_jaccard: min_fuzzy_jaccard ?? 0.3, min_thematic_cosine: min_thematic_cosine ?? 0.65, require_cross_axis: require_cross_axis ?? false, persist: persist ?? true },
+          dataset_summary: { motif_name, slug: "", total_members: 0, members_via_seed: 0, members_via_fuzzy_only: 0, members_via_thematic_only: 0, members_via_both: 0, prefix_distribution: {}, mean_sign_count: 0, depth_distribution: {} },
+          members: [] as never[],
+          all_member_ids: [] as never[],
+          file_path: null,
+          termination_reason: "frontier_exhausted",
+          index_stats: { total_fuzzy_calls: 0, total_thematic_calls: 0, expanded_tablets: 0, candidates_rejected_below_threshold: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:motif-dataset-builder", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.16 — Three new tools: join-discovery + multi-axis chain + champion-fragments ──
 
 server.registerTool(
@@ -6689,7 +6903,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 56 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 59 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif)\n`,
     );
     process.exit(0);
   }
