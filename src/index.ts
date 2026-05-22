@@ -53,6 +53,9 @@ import {
   compareTabletPair,
 } from "./comparePair.js";
 import {
+  findScribalGroups,
+} from "./scribalGroups.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -174,7 +177,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.8";
+const VERSION = "0.18.9";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3729,6 +3732,121 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.9 — Corpus-wide same-scribe group discovery ────────────────────
+
+server.registerTool(
+  "find_scribal_groups",
+  {
+    description:
+      "Corpus-wide same-scribe scribal-lineage group discovery — generalizes the per-tablet find_same_scribe_candidates (v0.18.0) to systematic group surfacing. Asks 'what scribal-lineage groups exist within prefix X?' instead of 'who copied this specific tablet?'. Returns all mutually-reciprocal same-scribe groups at a configurable cosine threshold (default 0.6), with per-group cohesion statistics + per-member intra-group degree. Motivated by the 2026-05-22 methods paper §3.4.1 BM.34970 quartet finding (4-tablet same-scribe group at signature cosine 0.8866) — which was surfaced opportunistically. This tool answers systematically: 'what OTHER quartet-class groups exist that have not been surfaced by happenstance?' Cost-bounded by max_tablets_to_scan parameter (default 500); for major prefixes (K=2,500+) raise to 2000-3000 for full coverage.",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS', 'VAT'). Omit for full corpus scan (slower)."),
+      min_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum signature cosine for a reciprocal edge. Default 0.6 (the 2026-05-22 corpus-wide threshold for 'probable same scribe'). Tighter (e.g. 0.75) yields the quartet-class only; looser (e.g. 0.5) yields broader same-scribal-school groups."),
+      min_group_size: z
+        .number()
+        .int()
+        .min(2)
+        .optional()
+        .describe("Minimum group size to return. Default 3 (quartet-class and up — i.e. 3-tablet triplets + 4-tablet quartets + larger). Set 2 to also surface all same-scribe pairs."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (signature unreliable). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on tablets to query (cost control). Default 500. Increase to ~2500 for full coverage of a major prefix like K or BM."),
+      top_k_per_tablet: z
+        .number()
+        .int()
+        .min(2)
+        .max(30)
+        .optional()
+        .describe("How many same-scribe candidates to fetch per tablet. Default 15. Lower = faster but may miss reciprocal pairs; higher = more thorough."),
+    },
+  },
+  async ({ prefix_filter, min_cosine, min_group_size, min_sign_count, max_tablets_to_scan, top_k_per_tablet }) => {
+    const SCHEMA = schemaId("find_scribal_groups");
+    try {
+      const result = findScribalGroups({
+        prefixFilter: prefix_filter,
+        minCosine: min_cosine,
+        minGroupSize: min_group_size,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topKPerTablet: top_k_per_tablet,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter ?? "<all>"} · min_cos=${result.query.min_cosine} · min_group=${result.query.min_group_size} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan}`,
+        `Results: ${result.totals.tablets_scanned} tablets scanned · ${result.totals.reciprocal_edges_found} reciprocal edges · ${result.totals.groups_returned} groups (largest size=${result.totals.largest_group_size})`,
+        ``,
+      ];
+      const topGroups = result.groups.slice(0, 25);
+      if (topGroups.length === 0) {
+        lines.push(`No groups found above thresholds. Try lowering min_cosine or min_group_size, or raising max_tablets_to_scan.`);
+      } else {
+        for (const g of topGroups) {
+          lines.push(`── Group ${g.group_id} · size=${g.size} · cohesion: mean=${g.cohesion.mean_pairwise_cosine} min=${g.cohesion.min_pairwise_cosine} max=${g.cohesion.max_pairwise_cosine} · density=${(g.cohesion.edge_density * 100).toFixed(0)}% (${g.cohesion.edge_count} edges)`);
+          const prefDist = Object.entries(g.prefix_distribution).sort((a, b) => b[1] - a[1]).map(([p, c]) => `${p}=${c}`).join(", ");
+          lines.push(`   Prefixes: ${prefDist}`);
+          for (const m of g.members.slice(0, 8)) {
+            lines.push(`   ${m.tablet_id.padEnd(22).slice(0, 22)}  degree=${m.intra_group_degree}`);
+          }
+          if (g.members.length > 8) lines.push(`   … and ${g.members.length - 8} more members`);
+          lines.push(``);
+        }
+        if (result.groups.length > 25) lines.push(`(${result.groups.length - 25} more groups not shown)`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:scribal-groups", VERSION, {
+          citation:
+            "Corpus-wide scribal-lineage group discovery via mutual-reciprocal same-scribe graph + union-find. v0.18.9. Generalizes find_same_scribe_candidates from per-tablet to systematic.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_scribal_groups error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter ?? null,
+            min_cosine: min_cosine ?? 0.6,
+            min_group_size: min_group_size ?? 3,
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_k_per_tablet: top_k_per_tablet ?? 15,
+          },
+          groups: [] as never[],
+          totals: { tablets_scanned: 0, reciprocal_edges_found: 0, groups_returned: 0, largest_group_size: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:scribal-groups", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.8 — Cross-axis pair-comparison tool ─────────────────────────────
 
 server.registerTool(
@@ -4377,7 +4495,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 35 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair cross-axis diagnostic)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 36 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups corpus-wide discovery)\n`,
     );
     process.exit(0);
   }
