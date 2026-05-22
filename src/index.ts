@@ -43,6 +43,7 @@ import {
 } from "./reconstructCluster.js";
 import {
   collectionCoverage,
+  listCollectionPrefixes,
 } from "./collectionCoverage.js";
 import {
   restoreLacunaPassage,
@@ -166,7 +167,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.4";
+const VERSION = "0.18.5";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3721,6 +3722,92 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.5 — Discovery: list all museum-collection prefixes ──────────────
+
+server.registerTool(
+  "list_collection_prefixes",
+  {
+    description:
+      "Discovery tool — returns the full list of distinct museum-collection prefixes in the corpus, ranked by tablet count (or alternative metric), with per-prefix tablet count + total sign count + transliteration coverage. The companion query to coverage_stats_for_collection: this tool answers 'what prefixes exist?' so the user knows what to query coverage_stats with. Useful as the FIRST query in any corpus-exploration session — surfaces the long tail of small collections (NZK, Ashm-1923, etc.) alongside the major prefixes (BM, K, Sm). Default sort is descending by tablet_count.",
+    inputSchema: {
+      min_tablet_count: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Drop prefixes with fewer than this many tablets. Default 1 (no filter). Use higher values (e.g. 10, 100) to focus on the major collections only."),
+      sort_by: z
+        .enum(["tablet_count", "total_sign_count", "mean_sign_count", "prefix"])
+        .optional()
+        .describe("Sort key. Default 'tablet_count'. 'mean_sign_count' surfaces prefixes with the largest average tablets; 'prefix' is alphabetical."),
+      sort_order: z
+        .enum(["desc", "asc"])
+        .optional()
+        .describe("Sort direction. Default 'desc' (largest first)."),
+      top_n: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Optional cap on returned prefixes. Omit to return all distinct prefixes (typically 30-50)."),
+    },
+  },
+  async ({ min_tablet_count, sort_by, sort_order, top_n }) => {
+    const SCHEMA = schemaId("list_collection_prefixes");
+    try {
+      const result = listCollectionPrefixes({
+        minTabletCount: min_tablet_count,
+        sortBy: sort_by,
+        sortOrder: sort_order,
+        topN: top_n ?? null,
+      });
+
+      const lines: string[] = [
+        `Corpus: ${result.totals.total_tablets.toLocaleString()} tablets across ${result.totals.distinct_prefixes} distinct prefixes (${result.totals.total_signs.toLocaleString()} total signs)`,
+        `Query: sort_by=${result.query.sort_by} ${result.query.sort_order}, min_tablet_count=${result.query.min_tablet_count}${result.query.top_n ? `, top_n=${result.query.top_n}` : ""}`,
+        `Returned: ${result.totals.prefixes_returned} prefixes${result.totals.prefixes_filtered_out_by_min_count > 0 ? ` (${result.totals.prefixes_filtered_out_by_min_count} filtered out by min_tablet_count)` : ""}`,
+        ``,
+        `Prefix           Tablets    Total signs  Mean signs  In-lex (%)`,
+        `──────────────  ────────  ────────────  ──────────  ──────────`,
+      ];
+      for (const p of result.prefixes) {
+        lines.push(
+          `${p.prefix.padEnd(14).slice(0, 14)}  ${String(p.tablet_count).padStart(8)}  ${p.total_sign_count.toLocaleString().padStart(12)}  ${String(p.mean_sign_count).padStart(10)}  ${String(p.in_lex_graph).padStart(6)} (${String(p.lex_coverage_pct).padStart(5)}%)`,
+        );
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:list-prefixes", VERSION, {
+          citation:
+            "Corpus-prefix discovery over the anomaly-index. v0.18.5. Companion to coverage_stats_for_collection.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`list_collection_prefixes error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            min_tablet_count: min_tablet_count ?? 1,
+            sort_by: sort_by ?? "tablet_count",
+            sort_order: sort_order ?? "desc",
+            top_n: top_n ?? null,
+          },
+          prefixes: [] as never[],
+          totals: { distinct_prefixes: 0, prefixes_returned: 0, total_tablets: 0, total_signs: 0, prefixes_filtered_out_by_min_count: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:list-prefixes", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.4 — Coverage statistics for museum-collection prefix ────────────
 
 server.registerTool(
@@ -4011,7 +4098,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 31 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 32 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes corpus-discovery tool)\n`,
     );
     process.exit(0);
   }

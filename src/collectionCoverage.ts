@@ -21,6 +21,139 @@
 
 import { getAllTabletRecords, type AnomalyTabletRecord } from "./anomalySurface.js";
 
+// ─── v0.18.5 — list_collection_prefixes ────────────────────────────────────
+
+export type PrefixSummary = {
+  prefix: string;
+  tablet_count: number;
+  total_sign_count: number;
+  mean_sign_count: number;
+  in_lex_graph: number;
+  in_them_index: number;
+  lex_coverage_pct: number; // rounded to 1 decimal
+};
+
+export type ListPrefixesResult = {
+  query: {
+    min_tablet_count: number;
+    sort_by: "tablet_count" | "total_sign_count" | "mean_sign_count" | "prefix";
+    sort_order: "desc" | "asc";
+    top_n: number | null;
+  };
+  prefixes: PrefixSummary[];
+  totals: {
+    distinct_prefixes: number;
+    prefixes_returned: number;
+    total_tablets: number;
+    total_signs: number;
+    prefixes_filtered_out_by_min_count: number;
+  };
+  warnings: string[];
+};
+
+export type ListPrefixesOptions = {
+  minTabletCount?: number; // default 1 (no filter)
+  sortBy?: "tablet_count" | "total_sign_count" | "mean_sign_count" | "prefix";
+  sortOrder?: "desc" | "asc";
+  topN?: number | null; // null = return all
+};
+
+function _prefixOf(id: string): string {
+  const m = /^([^.,]+)/.exec(id);
+  return m ? m[1] : id;
+}
+
+export function listCollectionPrefixes(opts: ListPrefixesOptions = {}): ListPrefixesResult {
+  const minCount = Math.max(1, opts.minTabletCount ?? 1);
+  const sortBy = opts.sortBy ?? "tablet_count";
+  const sortOrder = opts.sortOrder ?? "desc";
+  const topN = opts.topN === undefined ? null : opts.topN;
+  const warnings: string[] = [];
+
+  const tablets = getAllTabletRecords();
+  if (!tablets) {
+    return {
+      query: { min_tablet_count: minCount, sort_by: sortBy, sort_order: sortOrder, top_n: topN },
+      prefixes: [],
+      totals: { distinct_prefixes: 0, prefixes_returned: 0, total_tablets: 0, total_signs: 0, prefixes_filtered_out_by_min_count: 0 },
+      warnings: ["Anomaly index not loaded — run `node scripts/build-anomaly-index.mjs` to populate the cache before querying."],
+    };
+  }
+
+  // Single-pass aggregation: bucket all tablets by prefix
+  const buckets = new Map<string, AnomalyTabletRecord[]>();
+  for (const t of tablets) {
+    const p = _prefixOf(t.id);
+    let bucket = buckets.get(p);
+    if (!bucket) {
+      bucket = [];
+      buckets.set(p, bucket);
+    }
+    bucket.push(t);
+  }
+
+  // Build summaries
+  let allTotalTablets = 0;
+  let allTotalSigns = 0;
+  let filteredOut = 0;
+  const summaries: PrefixSummary[] = [];
+  for (const [prefix, bucket] of buckets) {
+    const totalSign = bucket.reduce((s, t) => s + t.sign_count, 0);
+    const inLex = bucket.filter((t) => t.in_lex_graph).length;
+    const inThem = bucket.filter((t) => t.in_them_index).length;
+    allTotalTablets += bucket.length;
+    allTotalSigns += totalSign;
+    if (bucket.length < minCount) {
+      filteredOut++;
+      continue;
+    }
+    summaries.push({
+      prefix,
+      tablet_count: bucket.length,
+      total_sign_count: totalSign,
+      mean_sign_count: bucket.length > 0 ? Math.round((totalSign / bucket.length) * 10) / 10 : 0,
+      in_lex_graph: inLex,
+      in_them_index: inThem,
+      lex_coverage_pct: bucket.length > 0 ? Math.round((inLex / bucket.length) * 1000) / 10 : 0,
+    });
+  }
+
+  // Sort
+  const cmpAsc = (a: number, b: number) => a - b;
+  const cmpDesc = (a: number, b: number) => b - a;
+  const cmpStrAsc = (a: string, b: string) => a.localeCompare(b);
+  const cmpStrDesc = (a: string, b: string) => b.localeCompare(a);
+  summaries.sort((a, b) => {
+    switch (sortBy) {
+      case "tablet_count":
+        return sortOrder === "asc" ? cmpAsc(a.tablet_count, b.tablet_count) : cmpDesc(a.tablet_count, b.tablet_count);
+      case "total_sign_count":
+        return sortOrder === "asc" ? cmpAsc(a.total_sign_count, b.total_sign_count) : cmpDesc(a.total_sign_count, b.total_sign_count);
+      case "mean_sign_count":
+        return sortOrder === "asc" ? cmpAsc(a.mean_sign_count, b.mean_sign_count) : cmpDesc(a.mean_sign_count, b.mean_sign_count);
+      case "prefix":
+        return sortOrder === "asc" ? cmpStrAsc(a.prefix, b.prefix) : cmpStrDesc(a.prefix, b.prefix);
+      default:
+        return 0;
+    }
+  });
+
+  const truncated = topN !== null && topN > 0 ? summaries.slice(0, topN) : summaries;
+
+  return {
+    query: { min_tablet_count: minCount, sort_by: sortBy, sort_order: sortOrder, top_n: topN },
+    prefixes: truncated,
+    totals: {
+      distinct_prefixes: buckets.size,
+      prefixes_returned: truncated.length,
+      total_tablets: allTotalTablets,
+      total_signs: allTotalSigns,
+      prefixes_filtered_out_by_min_count: filteredOut,
+    },
+    warnings,
+  };
+}
+
 // ─── Public types ──────────────────────────────────────────────────────────
 
 export type CoverageStatsForPrefix = {
