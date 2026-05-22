@@ -56,6 +56,15 @@ import {
   findScribalGroups,
 } from "./scribalGroups.js";
 import {
+  auditCluster,
+} from "./auditCluster.js";
+import {
+  findOrthographicOutliers,
+} from "./orthographicOutliers.js";
+import {
+  findCrossPrefixScribalLinks,
+} from "./crossPrefixScribal.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -177,7 +186,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.9";
+const VERSION = "0.18.10";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3732,6 +3741,418 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.10 — Composite cluster audit (one-call diagnostic) ─────────────
+
+server.registerTool(
+  "audit_cluster",
+  {
+    description:
+      "Composite quality + topology + provenance audit for a cluster — one-call replacement for the manual reconstruct_cluster → find_short_fragments → cluster_pair_similarity_matrix → per-prefix-coverage workflow. Accepts EITHER a seed_tablet_id (triggers an internal reconstruct_cluster with defaults max_size=100, max_depth=4, min_fuzzy_jaccard=0.20) OR an explicit cluster_members list (skips reconstruction, audits the supplied set directly). Returns a unified envelope: quality (sign-count distribution + marginal-signal flagging + recommended-exclusion list), topology (prefix distribution + cross-prefix ratio + top-N hubs by degree at J ≥ 0.20 + connected-component counts and edge density at each topology_threshold + first-shatter threshold), provenance (distinct prefixes + per-prefix corpus coverage + missing-from-corpus list), and a generated recommendations list of suggested next actions. Designed for pre-publish cluster vetting (the BM.77056 *āšipūtu* canon validation pattern from 2026-05-22).",
+    inputSchema: {
+      seed_tablet_id: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Museum number of the seed tablet (e.g. 'BM.77056'). Triggers an internal reconstruct_cluster call with defaults (max_size=100, max_depth=4, min_fuzzy_jaccard=0.20). Mutually-exclusive-ish with cluster_members; if both are supplied, cluster_members wins."),
+      cluster_members: z
+        .array(z.string().min(1))
+        .min(2)
+        .optional()
+        .describe("Explicit list of museum numbers to audit (skips reconstruct_cluster). Use when iterating on a filtered or hand-curated cluster, e.g. after dropping marginal-signal members from a prior audit run. Minimum 2 entries."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Quality-filter threshold — members with sign_count at-or-below this are flagged as marginal-signal and added to recommended_exclusions. Default 50 (matches the reconstruct_cluster recommendation in v0.18.4+). Set 0 to disable marginal-signal flagging."),
+      topology_thresholds: z
+        .array(z.number().min(0).max(1))
+        .min(1)
+        .optional()
+        .describe("Fuzzy-Jaccard thresholds to roll up component counts + edge density at. Default [0.10, 0.20, 0.30, 0.40, 0.50]. The first threshold at which component_count > 1 is reported as shatter_threshold. NOTE: component counts come from clusterMatrix's built-in 5 thresholds (0.1/0.2/0.3/0.4/0.5); for non-default thresholds the nearest is used (edge density is always exact)."),
+    },
+  },
+  async ({ seed_tablet_id, cluster_members, min_sign_count, topology_thresholds }) => {
+    const SCHEMA = schemaId("audit_cluster");
+    try {
+      const result = auditCluster({
+        seedTabletId: seed_tablet_id,
+        clusterMembers: cluster_members,
+        minSignCount: min_sign_count,
+        topologyThresholds: topology_thresholds,
+      });
+
+      const q = result.query;
+      const lines: string[] = [
+        `Audit mode: ${q.mode}${q.mode === "seed" ? ` (seed=${q.seed_tablet_id})` : ` (${q.member_count} explicit members)`}`,
+        `Cluster size: ${result.cluster.member_count} · min_sign_count=${q.min_sign_count} · topology_thresholds=[${q.topology_thresholds.map((t) => t.toFixed(2)).join(", ")}]`,
+        ``,
+        `Quality:`,
+        `  sign_count: min=${result.quality.sign_count.min} median=${result.quality.sign_count.median} mean=${result.quality.sign_count.mean} max=${result.quality.sign_count.max} (n=${result.quality.sign_count.count})`,
+        `  marginal-signal members at-or-below ${q.min_sign_count}: ${result.quality.marginal_signal_count}`,
+        `  members without sign_count record: ${result.quality.members_without_sign_count.length}`,
+      ];
+      if (result.quality.recommended_exclusions.length > 0) {
+        lines.push(`  recommended exclusions: ${result.quality.recommended_exclusions.slice(0, 10).join(", ")}${result.quality.recommended_exclusions.length > 10 ? "…" : ""}`);
+      }
+      lines.push(
+        ``,
+        `Topology:`,
+        `  distinct prefixes: ${result.topology.distinct_prefix_count}  ·  cross-prefix members: ${result.topology.cross_prefix_count}/${result.cluster.member_count} (${(result.topology.cross_prefix_ratio * 100).toFixed(1)}%)`,
+        `  prefix distribution: ${result.topology.prefix_distribution.slice(0, 8).map((p) => `${p.prefix}=${p.count}`).join(", ")}${result.topology.prefix_distribution.length > 8 ? "…" : ""}`,
+        `  shatter threshold: ${result.topology.shatter_threshold === null ? "(cohesive throughout)" : `J ≥ ${result.topology.shatter_threshold.toFixed(2)}`}`,
+        `  components / edge-density by threshold:`,
+        `    threshold   components   largest   isolated   density`,
+      );
+      for (const cc of result.topology.components_by_threshold) {
+        lines.push(
+          `    J ≥ ${cc.threshold.toFixed(2)}     ${String(cc.component_count).padStart(8)}   ${String(cc.largest_component_size).padStart(6)}   ${String(cc.isolated_tablets).padStart(6)}   ${(cc.edge_density * 100).toFixed(1)}%`,
+        );
+      }
+      if (result.topology.top_hubs.length > 0) {
+        lines.push(``, `  top hubs by degree at J ≥ 0.20:`);
+        for (const h of result.topology.top_hubs.slice(0, 5)) {
+          lines.push(`    ${h.tablet_id.padEnd(22).slice(0, 22)} d(.20)=${h.degree_at_0_20}  max_edge=${h.max_edge_weight}`);
+        }
+      }
+      lines.push(
+        ``,
+        `Provenance:`,
+        `  prefixes: ${result.provenance.distinct_prefixes.slice(0, 12).join(", ")}${result.provenance.distinct_prefixes.length > 12 ? "…" : ""}`,
+      );
+      for (const pc of result.provenance.per_prefix_coverage.slice(0, 8)) {
+        lines.push(`    ${pc.prefix.padEnd(8)} ${pc.members_in_cluster} / ${pc.total_in_corpus} corpus tablets (${pc.coverage_pct}%)`);
+      }
+      if (result.provenance.missing_from_corpus.length > 0) {
+        lines.push(`  missing from corpus (${result.provenance.missing_from_corpus.length}): ${result.provenance.missing_from_corpus.slice(0, 5).join(", ")}${result.provenance.missing_from_corpus.length > 5 ? "…" : ""}`);
+      }
+      lines.push(``, `Recommendations:`);
+      for (const r of result.recommendations) lines.push(`  • ${r}`);
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:audit-cluster", VERSION, {
+          citation:
+            "Composite cluster audit — orchestrates reconstruct_cluster + cluster_pair_similarity_matrix + find_short_fragments + per-prefix coverage into a single pre-publish vetting envelope.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`audit_cluster error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            mode: cluster_members && cluster_members.length > 0 ? "explicit_members" : "seed",
+            seed_tablet_id: seed_tablet_id ?? null,
+            member_count: cluster_members?.length ?? 0,
+            min_sign_count: min_sign_count ?? 50,
+            topology_thresholds: topology_thresholds ?? [0.1, 0.2, 0.3, 0.4, 0.5],
+            reconstruct_defaults_used: !(cluster_members && cluster_members.length > 0) && !!seed_tablet_id,
+          },
+          cluster: {
+            member_count: 0,
+            member_ids: [] as never[],
+            reconstruction: null,
+            matrix: {
+              query: { tablet_count: 0, min_jaccard: 0.1, top_k_per_node: 50 },
+              edges: [] as never[],
+              edge_stats: { total_pairs_possible: 0, edges_above_threshold: 0, density: 0, weight_min: 0, weight_median: 0, weight_max: 0, weight_mean: 0 },
+              per_tablet_degree: [] as never[],
+              connected_components: [] as never[],
+              not_in_corpus: [] as never[],
+              warnings: [msg],
+            },
+          },
+          quality: {
+            sign_count: { min: 0, median: 0, mean: 0, max: 0, count: 0 },
+            members_without_sign_count: [] as never[],
+            marginal_signal: [] as never[],
+            marginal_signal_count: 0,
+            recommended_exclusions: [] as never[],
+          },
+          topology: {
+            prefix_distribution: [] as never[],
+            distinct_prefix_count: 0,
+            cross_prefix_count: 0,
+            cross_prefix_ratio: 0,
+            top_hubs: [] as never[],
+            components_by_threshold: [] as never[],
+            shatter_threshold: null,
+          },
+          provenance: {
+            distinct_prefixes: [] as never[],
+            per_prefix_coverage: [] as never[],
+            missing_from_corpus: [] as never[],
+          },
+          recommendations: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:audit-cluster", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.10 — Orthographic outlier discovery within a prefix cohort ─────
+
+server.registerTool(
+  "find_orthographic_outliers_in_prefix",
+  {
+    description:
+      "Within a museum-collection prefix bucket (e.g. K, BM, Sm, CBS, VAT), surface tablets whose scribal-signature LLR profile is FURTHEST from the cohort centroid. Complements find_scribal_groups (v0.18.9): that tool finds tight same-scribe clusters; this one finds the LONERS — tablets with anomalous scribal practice within their own cohort, candidates for imports / mislabeling / outlier scribal-school. Builds a per-prefix centroid by summing per-tablet LLR weights across the cohort, then ranks every tablet by sparse cosine to that centroid. Returns: outliers ranked by deviation (lowest cosine first) with their distinctive signs (signs in the tablet's signature but NOT in the centroid's top-30), the cohort centroid's top-15 signs as a baseline reference, and summary stats (mean/median/stdev cosine + top-3 most-typical tablets). Cost-bounded by max_tablets_to_scan (default 500); raise to 2000-3000 for full coverage of major prefixes.",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .describe("Museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS', 'VAT'). Required — outliers are only meaningful relative to a defined cohort."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (signature unreliable). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on cohort size (cost control). Default 500. Increase to ~2500 for full coverage of a major prefix like K or BM."),
+      top_n_outliers: z
+        .number()
+        .int()
+        .min(1)
+        .max(200)
+        .optional()
+        .describe("How many top-deviation tablets to return. Default 20."),
+    },
+  },
+  async ({ prefix_filter, min_sign_count, max_tablets_to_scan, top_n_outliers }) => {
+    const SCHEMA = schemaId("find_orthographic_outliers_in_prefix");
+    try {
+      const result = findOrthographicOutliers({
+        prefixFilter: prefix_filter,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topNOutliers: top_n_outliers,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan} · top_n=${result.query.top_n_outliers}`,
+        `Cohort: ${result.summary.cohort_size} tablets · mean cos=${result.summary.mean_cosine_to_centroid} · median=${result.summary.median_cosine_to_centroid} · stdev=${result.summary.stdev_cosine_to_centroid} · range=[${result.summary.min_cosine_to_centroid}, ${result.summary.max_cosine_to_centroid}]`,
+        ``,
+      ];
+
+      if (result.cohort_centroid.top_signs.length > 0) {
+        lines.push(`─── Cohort centroid top-15 signs (baseline) ───`);
+        for (const s of result.cohort_centroid.top_signs) {
+          lines.push(`   ${s.sign.padEnd(18).slice(0, 18)}  summed_llr=${s.summed_llr.toFixed(2).padStart(8)}  in ${s.tablet_count}/${result.cohort_centroid.cohort_size} tablets`);
+        }
+        lines.push(``);
+      }
+
+      if (result.summary.most_typical_tablets.length > 0) {
+        lines.push(`─── Most-typical tablets (highest cosine to centroid) ───`);
+        for (const t of result.summary.most_typical_tablets) {
+          lines.push(`   ${t.tablet_id.padEnd(22).slice(0, 22)}  cos=${t.signature_cosine_to_centroid}`);
+        }
+        lines.push(``);
+      }
+
+      if (result.outliers.length === 0) {
+        lines.push(`No outliers surfaced. Try lowering min_sign_count or raising max_tablets_to_scan.`);
+      } else {
+        lines.push(`─── Top ${result.outliers.length} outliers (lowest cosine = most deviant) ───`);
+        for (const o of result.outliers) {
+          lines.push(`── ${o.tablet_id}  cos=${o.signature_cosine_to_centroid}  deviation=${o.deviation_score}  signs=${o.sign_count}  sig_size=${o.signature_size}`);
+          if (o.distinctive_signs.length > 0) {
+            const dsLine = o.distinctive_signs.map((d) => `${d.sign}(${d.llr.toFixed(1)})`).join(", ");
+            lines.push(`   Distinctive (off-centroid): ${dsLine}`);
+          } else {
+            lines.push(`   No distinctive signs (all signature signs are in cohort centroid top-30)`);
+          }
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:orthographic-outliers", VERSION, {
+          citation:
+            "Per-prefix scribal-orthographic outlier discovery via cohort-centroid sparse-cosine ranking. v0.18.10. Complements find_scribal_groups (v0.18.9) — that finds tight same-scribe clusters, this finds the loners.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_orthographic_outliers_in_prefix error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter ?? "",
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_n_outliers: top_n_outliers ?? 20,
+          },
+          cohort_centroid: { cohort_size: 0, total_signature_signs_aggregated: 0, top_signs: [] as never[] },
+          outliers: [] as never[],
+          summary: {
+            cohort_size: 0,
+            mean_cosine_to_centroid: 0,
+            median_cosine_to_centroid: 0,
+            stdev_cosine_to_centroid: 0,
+            min_cosine_to_centroid: 0,
+            max_cosine_to_centroid: 0,
+            most_typical_tablets: [] as never[],
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:orthographic-outliers", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.10 — Cross-prefix same-scribe edge discovery ───────────────────
+
+server.registerTool(
+  "find_cross_prefix_scribal_links",
+  {
+    description:
+      "Surfaces same-scribe edges that CROSS museum-collection boundaries (e.g. BM↔K, BM↔Sm, K↔CBS) — complementary to v0.18.9 find_scribal_groups (which finds within-prefix groups via union-find). Research value: (a) scribal-school networks that transcend single excavation sites, (b) ancient manuscript-transmission patterns, (c) modern collection-history artifacts — 19th-century antiquities lots split across European museums. Algorithm: iterate tablets (capped by min_sign_count + max_tablets_to_scan, optionally scoped to one source prefix_filter); for each, fetch top-K same-scribe candidates; keep only edges where source.prefix ≠ candidate.prefix at signature_cosine ≥ threshold; optionally require mutual reciprocity. Returns edges sorted by cosine + per-prefix-pair aggregate counts + top-10 'bridge tablets' (tablets with the most cross-prefix edges — likely scribes whose work spans multiple modern collections). Cost-bounded by max_tablets_to_scan (default 500, max 5000).",
+    inputSchema: {
+      prefix_filter: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Source museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'CBS'). Omit for full corpus scan (slower but surfaces all cross-prefix edges, not just those originating from one collection)."),
+      min_cosine: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum signature cosine for a cross-prefix edge. Default 0.6 (the corpus-wide threshold for 'probable same scribe'). Raise to 0.75+ for quartet-class-quality cross-collection edges only."),
+      require_reciprocal: z
+        .boolean()
+        .optional()
+        .describe("If true (default), only return edges where BOTH tablets list the other in their top-K at ≥ min_cosine. Reciprocal-only is the higher-confidence default; set false to surface one-way candidate edges as leads."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (signature unreliable). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on tablets to query (cost control). Default 500. Increase to ~2500–5000 for full corpus coverage."),
+      top_k_per_tablet: z
+        .number()
+        .int()
+        .min(2)
+        .max(30)
+        .optional()
+        .describe("How many same-scribe candidates to fetch per tablet. Default 15. Lower = faster but may miss reciprocal pairs; higher = more thorough."),
+    },
+  },
+  async ({ prefix_filter, min_cosine, require_reciprocal, min_sign_count, max_tablets_to_scan, top_k_per_tablet }) => {
+    const SCHEMA = schemaId("find_cross_prefix_scribal_links");
+    try {
+      const result = findCrossPrefixScribalLinks({
+        prefixFilter: prefix_filter,
+        minCosine: min_cosine,
+        requireReciprocal: require_reciprocal,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topKPerTablet: top_k_per_tablet,
+      });
+
+      const lines: string[] = [
+        `Scan: prefix=${result.query.prefix_filter ?? "<all>"} · min_cos=${result.query.min_cosine} · reciprocal=${result.query.require_reciprocal} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan}`,
+        `Results: ${result.totals.tablets_scanned} tablets scanned · ${result.totals.total_edges_above_threshold} edges returned (${result.totals.total_reciprocal_edges} reciprocal observed) · ${result.totals.prefixes_involved} distinct prefixes involved`,
+        ``,
+      ];
+
+      if (result.prefix_pair_summary.length === 0) {
+        lines.push(`No cross-prefix pairs surfaced above thresholds.`);
+      } else {
+        lines.push(`── Top prefix-pairs (by edge count):`);
+        for (const p of result.prefix_pair_summary.slice(0, 15)) {
+          lines.push(`   ${p.pair.padEnd(18)}  edges=${p.edge_count}  reciprocal=${p.reciprocal_edge_count}  max_cos=${p.max_cosine}`);
+        }
+        if (result.prefix_pair_summary.length > 15) lines.push(`   … and ${result.prefix_pair_summary.length - 15} more pairs`);
+        lines.push(``);
+      }
+
+      if (result.bridge_tablets.length > 0) {
+        lines.push(`── Top bridge tablets (most distinct cross-prefix collections):`);
+        for (const b of result.bridge_tablets) {
+          lines.push(`   ${b.tablet_id.padEnd(22).slice(0, 22)}  edges=${b.cross_prefix_edge_count}  spans=${b.distinct_other_prefixes} other prefixes [${b.other_prefixes.join(", ")}]  max_cos=${b.max_cosine}`);
+        }
+        lines.push(``);
+      }
+
+      const topEdges = result.edges.slice(0, 20);
+      if (topEdges.length > 0) {
+        lines.push(`── Top edges (by cosine):`);
+        for (const e of topEdges) {
+          const recMark = e.is_reciprocal ? "↔" : "→";
+          lines.push(`   ${e.tablet_a.padEnd(20).slice(0, 20)} ${recMark} ${e.tablet_b.padEnd(20).slice(0, 20)}  [${e.prefix_a}↔${e.prefix_b}]  cos=${e.signature_cosine}  jac=${e.signature_jaccard}`);
+        }
+        if (result.edges.length > 20) lines.push(`(${result.edges.length - 20} more edges not shown)`);
+      }
+
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:cross-prefix-scribal", VERSION, {
+          citation:
+            "Cross-prefix same-scribe edge discovery via top-K candidate scan + canonical pair dedupe + optional mutual-reciprocity filter. v0.18.10. Complementary to v0.18.9 find_scribal_groups (within-prefix union-find).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_cross_prefix_scribal_links error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            prefix_filter: prefix_filter ?? null,
+            min_cosine: min_cosine ?? 0.6,
+            require_reciprocal: require_reciprocal ?? true,
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_k_per_tablet: top_k_per_tablet ?? 15,
+          },
+          edges: [] as never[],
+          prefix_pair_summary: [] as never[],
+          bridge_tablets: [] as never[],
+          totals: {
+            tablets_scanned: 0,
+            total_edges_above_threshold: 0,
+            total_reciprocal_edges: 0,
+            prefixes_involved: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:cross-prefix-scribal", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.9 — Corpus-wide same-scribe group discovery ────────────────────
 
 server.registerTool(
@@ -4495,7 +4916,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 36 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups corpus-wide discovery)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 39 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links)\n`,
     );
     process.exit(0);
   }
