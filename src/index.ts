@@ -88,6 +88,15 @@ import {
 } from "./fragmentMetadata.js";
 import { getAllTabletRecords as _getAllTabletRecordsForEnrich } from "./anomalySurface.js";
 import {
+  findUnpublishedInPublication,
+} from "./unpublishedInPublication.js";
+import {
+  compareDialects,
+} from "./compareDialects.js";
+import {
+  findTabletsByGenre,
+} from "./findByGenre.js";
+import {
   restoreLacunaPassage,
   lacunaIndexStats,
 } from "./lacunaRestore.js";
@@ -209,7 +218,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.13";
+const VERSION = "0.18.14";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3764,6 +3773,342 @@ server.registerTool(
   },
 );
 
+// ─── v0.18.14 — Metadata-powered discovery tools (require enriched cache) ──
+
+server.registerTool(
+  "find_unpublished_in_publication",
+  {
+    description:
+      "Surface tablets cataloged in a specific museum publication (e.g. CT, KAR, BAM, OECT, CTN, AOAT) that have NOT yet been entered into the eBL transliteration pipeline — i.e. the publication editorially knows the tablet (hand-copy / photograph exists in the volume) but its sign-content is absent from the lexical-graph / fuzzy / thematic indices. These are the highest-value targets for new transliteration work, because the upstream editorial step is already done. Algorithm: iterate the anomaly index, filter by FragmentMetadata.designation containing the publication_pattern (case-insensitive substring), then split by in_lex_graph (true=transliterated, false=untransliterated). Returns the untransliterated list (sorted by sign_count desc — largest tablets first) plus a small sample of transliterated matches for sanity-checking the pattern. CRITICAL CAVEAT: this tool only sees tablets whose fragment-metadata is already cached locally. Fragment-metadata coverage is sparse by default (<1% of corpus); the tool will emit a warning recommending enrich_prefix_metadata(prefix_filter='BM') (or the relevant prefix — K for Kuyunjik, BM for British Museum, IM for Iraq Museum, etc.) when coverage is below 5%. Without enrichment the result will look empty even for well-known publications. Pairs with enrich_prefix_metadata (run first), fragment_metadata_coverage (diagnostic), and coverage_stats_for_collection (broader collection survey). Read-only — no network calls.",
+    inputSchema: {
+      publication_pattern: z
+        .string()
+        .min(1)
+        .describe("Publication abbreviation to match against the tablet's designation field (case-insensitive substring). Examples: 'CT' (Cuneiform Texts from Babylonian Tablets in the British Museum), 'KAR' (Keilschrifttexte aus Assur religiösen Inhalts), 'BAM' (Die babylonisch-assyrische Medizin in Texten und Untersuchungen), 'OECT' (Oxford Editions of Cuneiform Texts), 'CTN' (Cuneiform Texts from Nimrud), 'AOAT' (Alter Orient und Altes Testament). Designations look like 'CT 23, pl. 4' / 'KAR 44' / 'BAM 248' so a plain substring of the abbreviation works."),
+      prefix_filter: z
+        .string()
+        .optional()
+        .describe("Optional museum-collection prefix to restrict the scan to a single collection (e.g. 'BM' for British Museum, 'K' for Kuyunjik, 'IM' for Iraq Museum). Most publications are tied to one museum (CT/K/Sm publications → BM; CTN → IM; OECT → Ashmolean), so scoping by prefix is usually correct and faster. Omit to scan the entire corpus."),
+      top_n: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("How many top untransliterated candidates to return (sorted by sign_count desc — largest tablets first, since they carry more lexical signal and yield more downstream parallel coverage when transliterated). Default 50, max 500."),
+    },
+  },
+  async ({ publication_pattern, prefix_filter, top_n }) => {
+    const SCHEMA = schemaId("find_unpublished_in_publication");
+    try {
+      const result = findUnpublishedInPublication({
+        publicationPattern: publication_pattern,
+        prefixFilter: prefix_filter,
+        topN: top_n,
+      });
+
+      const lines: string[] = [
+        `Scan: publication="${result.query.publication_pattern}" · prefix=${result.query.prefix_filter ?? "(all)"} · top_n=${result.query.top_n}`,
+        `Coverage: ${result.summary.total_with_metadata_in_corpus} tablets with fragment-metadata cached (${result.summary.metadata_coverage_pct}% of corpus)`,
+        `Matches: ${result.summary.total_matching_publication} total · ${result.summary.transliterated_count} transliterated (${result.summary.transliterated_pct}%) · ${result.summary.untransliterated_count} UNTRANSLITERATED`,
+        ``,
+      ];
+      const topShown = result.untransliterated.slice(0, 25);
+      if (topShown.length === 0) {
+        lines.push(`No untransliterated candidates surfaced. If coverage_pct is low, run enrich_prefix_metadata first.`);
+      } else {
+        lines.push(`── Top ${topShown.length} untransliterated candidates (largest first) ──`);
+        for (const c of topShown) {
+          lines.push(`   ${c.tablet_id.padEnd(20).slice(0, 20)}  signs=${String(c.sign_count).padStart(5)}  period=${(c.period ?? "—").padEnd(12).slice(0, 12)}  designation=${c.designation}`);
+        }
+        if (result.untransliterated.length > 25) lines.push(`(${result.untransliterated.length - 25} more candidates not shown)`);
+      }
+      if (result.transliterated_sample.length > 0) {
+        lines.push(``);
+        lines.push(`── Transliterated sample (sanity-check the pattern match) ──`);
+        for (const s of result.transliterated_sample) {
+          lines.push(`   ${s.tablet_id.padEnd(20).slice(0, 20)}  signs=${String(s.sign_count).padStart(5)}  designation=${s.designation}`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:unpublished-in-publication", VERSION, {
+          citation:
+            "Untransliterated-backlog discovery scoped to a museum publication. v0.18.14. Joins anomaly-index in_lex_graph with cached FragmentMetadata.designation.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_unpublished_in_publication error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            publication_pattern: publication_pattern ?? "",
+            prefix_filter: prefix_filter ?? null,
+            top_n: top_n ?? 50,
+          },
+          summary: {
+            total_matching_publication: 0,
+            transliterated_count: 0,
+            untransliterated_count: 0,
+            transliterated_pct: 0,
+            total_with_metadata_in_corpus: 0,
+            metadata_coverage_pct: 0,
+          },
+          untransliterated: [] as never[],
+          transliterated_sample: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:unpublished-in-publication", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "compare_dialects",
+  {
+    description:
+      "Within a city + period cohort (e.g. Sippar tablets from the Neo-Babylonian period), surface tablets whose scribal-signature LLR profile is FURTHEST from the cohort centroid. The historical-provenance analogue of v0.18.10 find_orthographic_outliers_in_prefix — that tool buckets tablets by museum-collection prefix (modern acquisition history); this tool buckets by city + period (a documented Mesopotamian dialect zone), so outliers surface candidates for ancient IMPORTS (a tablet excavated at Sippar but written in a Babylonian hand), MISLABELED provenance, or DIALECT outliers (regional sub-schools, archaizing copies, foreign-trained scribes). Builds a per-cohort centroid by summing per-tablet LLR weights, then ranks every tablet by sparse cosine to that centroid. Returns: outliers ranked by deviation (lowest cosine first) with their distinctive signs (signs in tablet sig NOT in centroid top-30), the cohort centroid's top-15 signs as a baseline, and summary stats (mean/median/stdev cosine + top-3 most-typical tablets). CRITICAL: cohort filtering requires enriched fragment metadata (city + period). If the fragment-metadata cache is thin (default state — ~0.6% coverage), the cohort will be small or empty; run enrich_prefix_metadata for the prefixes you care about first.",
+    inputSchema: {
+      city: z
+        .string()
+        .min(1)
+        .describe("Historical city of origin (e.g. 'Sippar', 'Nineveh', 'Nippur', 'Babylon', 'Uruk', 'Susa'). Matched case-insensitively against fragment-metadata provenance.site, with substring tolerance for variants like 'Sippar (Tell Abu Habba)'."),
+      period: z
+        .string()
+        .min(1)
+        .describe("Historical period (e.g. 'Old Babylonian', 'Neo-Assyrian', 'Late Babylonian', 'Neo-Babylonian', 'Ur III'). Matched case-insensitively against fragment-metadata script.period, with punctuation/whitespace normalization so 'Neo-Babylonian' and 'Neo Babylonian' both match."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Skip tablets with sign_count below this threshold (signature unreliable). Default 50."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(5000)
+        .optional()
+        .describe("Cap on cohort size (cost control). Default 500. Increase to 2000-3000 for full coverage of a major city+period bucket like Nineveh/Neo-Assyrian."),
+      top_n_outliers: z
+        .number()
+        .int()
+        .min(1)
+        .max(200)
+        .optional()
+        .describe("How many top-deviation tablets to return. Default 20."),
+    },
+  },
+  async ({ city, period, min_sign_count, max_tablets_to_scan, top_n_outliers }) => {
+    const SCHEMA = schemaId("compare_dialects");
+    try {
+      const result = compareDialects({
+        city,
+        period,
+        minSignCount: min_sign_count,
+        maxTabletsToScan: max_tablets_to_scan,
+        topNOutliers: top_n_outliers,
+      });
+
+      const lines: string[] = [
+        `Scan: city=${result.query.city} · period=${result.query.period} · min_signs=${result.query.min_sign_count} · cap=${result.query.max_tablets_to_scan} · top_n=${result.query.top_n_outliers}`,
+        `Cohort: ${result.summary.cohort_size} tablets · mean cos=${result.summary.mean_cosine_to_centroid} · median=${result.summary.median_cosine_to_centroid} · stdev=${result.summary.stdev_cosine_to_centroid} · range=[${result.summary.min_cosine_to_centroid}, ${result.summary.max_cosine_to_centroid}]`,
+        ``,
+      ];
+
+      if (result.cohort_centroid.top_signs.length > 0) {
+        lines.push(`─── Cohort centroid top-15 signs (baseline) ───`);
+        for (const s of result.cohort_centroid.top_signs) {
+          lines.push(`   ${s.sign.padEnd(18).slice(0, 18)}  summed_llr=${s.summed_llr.toFixed(2).padStart(8)}  in ${s.tablet_count}/${result.cohort_centroid.cohort_size} tablets`);
+        }
+        lines.push(``);
+      }
+
+      if (result.summary.most_typical_tablets.length > 0) {
+        lines.push(`─── Most-typical tablets (highest cosine to centroid) ───`);
+        for (const t of result.summary.most_typical_tablets) {
+          lines.push(`   ${t.tablet_id.padEnd(22).slice(0, 22)}  [${t.prefix}]  cos=${t.signature_cosine_to_centroid}`);
+        }
+        lines.push(``);
+      }
+
+      if (result.outliers.length === 0) {
+        lines.push(`No outliers surfaced. If the cohort is empty, run enrich_prefix_metadata for likely-relevant prefixes (e.g. BM for Sippar, K/Sm for Nineveh, CBS for Nippur) and retry.`);
+      } else {
+        lines.push(`─── Top ${result.outliers.length} dialect outliers (lowest cosine = most deviant) ───`);
+        for (const o of result.outliers) {
+          const desig = o.designation ? `  "${o.designation}"` : ``;
+          lines.push(`── ${o.tablet_id}  [${o.prefix}]${desig}  cos=${o.signature_cosine_to_centroid}  deviation=${o.deviation_score}  signs=${o.sign_count}  sig_size=${o.signature_size}`);
+          if (o.distinctive_signs.length > 0) {
+            const dsLine = o.distinctive_signs.map((d) => `${d.sign}(${d.llr.toFixed(1)})`).join(", ");
+            lines.push(`   Distinctive (off-centroid): ${dsLine}`);
+          } else {
+            lines.push(`   No distinctive signs (all signature signs are in cohort centroid top-30)`);
+          }
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:compare-dialects", VERSION, {
+          citation:
+            "Per-cohort (city + period) scribal-dialect outlier discovery via centroid sparse-cosine ranking. v0.18.14.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_dialects error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            city: city ?? "",
+            period: period ?? "",
+            min_sign_count: min_sign_count ?? 50,
+            max_tablets_to_scan: max_tablets_to_scan ?? 500,
+            top_n_outliers: top_n_outliers ?? 20,
+          },
+          cohort_centroid: { cohort_size: 0, total_signature_signs_aggregated: 0, top_signs: [] as never[] },
+          outliers: [] as never[],
+          summary: {
+            cohort_size: 0,
+            mean_cosine_to_centroid: 0,
+            median_cosine_to_centroid: 0,
+            stdev_cosine_to_centroid: 0,
+            min_cosine_to_centroid: 0,
+            max_cosine_to_centroid: 0,
+            most_typical_tablets: [] as never[],
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:compare-dialects", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "find_tablets_by_genre",
+  {
+    description:
+      "Genre-based corpus discovery — return all tablets matching a genre pattern (e.g. 'Mīs pî', 'Šuʾila', 'Bīt rimki', 'Maqlû', 'Šurpu', 'Udug-ḫul', 'Lamashtu', 'Namburbî'), optionally narrowed to a museum prefix. Matches via case-insensitive substring against both the full hierarchy strings (genres[]) and the per-category flat list (genres_flat[]) in the enriched fragment-metadata cache. Results sorted by sign_count desc so the largest/most-informative witnesses surface first — best for cohort-building, comparative work, and methods-paper-aligned per-genre witness lists. CRITICAL CAVEAT: matching runs against the enriched fragment-metadata cache, which covers only a small fraction of the corpus as of v0.18.13 (~0.6%). Tablets without metadata are silently skipped. The tool emits a coverage warning when fewer than ~10% of the scanned tablets have metadata. Run enrich_prefix_metadata(prefix_filter='X') to backfill specific prefixes before relying on this result for completeness.",
+    inputSchema: {
+      genre_pattern: z
+        .string()
+        .min(1)
+        .describe("Genre or category to match. Case-insensitive substring match against both the full hierarchy strings ('CANONICAL → Magic → Purification → Mīs pî') and the per-category flat list (['Magic', 'Purification', 'Mīs pî']). Examples: 'Mīs pî', 'Šuʾila', 'Maqlû', 'Šurpu', 'Bīt rimki', 'Udug-ḫul', 'Lamashtu', 'Namburbî'. Broader queries like 'Magic' or 'Ritual' hit any descendant when include_subgenres=true."),
+      prefix_filter: z
+        .string()
+        .min(1)
+        .optional()
+        .describe("Optional museum-collection prefix to scope the scan (e.g. 'K', 'BM', 'Sm', 'NZK'). Omit to scan the entire corpus. Use list_collection_prefixes to enumerate options."),
+      min_sign_count: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Minimum sign_count for a match to be returned. Default 0 — include ALL witnesses, even short fragments, since researchers often want every witness regardless of length. Raise to 50+ for fuzzy-Jaccard-grade witnesses only."),
+      top_n: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on returned matches. Default 50. Capped at 500. Per-prefix and per-period distributions are computed over ALL matches (not the truncated slice), so summary stats remain accurate even when top_n is restrictive."),
+      include_subgenres: z
+        .boolean()
+        .optional()
+        .describe("Default true. When true, 'Magic' matches any tablet whose hierarchy contains 'Magic' anywhere ('Magic/Purification/Mīs pî' all reachable). When false, only exact category-level hits in genres_flat[] are returned (still case-insensitive) — use for narrower, category-specific cohorts."),
+    },
+  },
+  async ({ genre_pattern, prefix_filter, min_sign_count, top_n, include_subgenres }) => {
+    const SCHEMA = schemaId("find_tablets_by_genre");
+    try {
+      const result = findTabletsByGenre({
+        genrePattern: genre_pattern,
+        prefixFilter: prefix_filter,
+        minSignCount: min_sign_count,
+        topN: top_n,
+        includeSubgenres: include_subgenres,
+      });
+
+      const lines: string[] = [
+        `Genre query: "${result.query.genre_pattern}"${result.query.prefix_filter ? ` · prefix=${result.query.prefix_filter}` : " · all prefixes"} · include_subgenres=${result.query.include_subgenres} · min_sign_count=${result.query.min_sign_count}`,
+        `Scanned: ${result.summary.total_scanned.toLocaleString()} tablets · ${result.summary.metadata_coverage_pct}% with metadata (${result.summary.total_with_metadata_in_corpus.toLocaleString()} enriched corpus-wide)`,
+        `Matches: ${result.summary.total_matches} total · returning top ${result.summary.total_returned} (sorted by sign_count desc)`,
+        ``,
+      ];
+      const prefixDist = Object.entries(result.summary.prefix_distribution).sort((a, b) => b[1] - a[1]).slice(0, 15);
+      if (prefixDist.length > 0) {
+        lines.push(`Prefix distribution: ${prefixDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+      }
+      const periodDist = Object.entries(result.summary.period_distribution).sort((a, b) => b[1] - a[1]);
+      if (periodDist.length > 0) {
+        lines.push(`Period distribution (top-5): ${periodDist.map(([p, c]) => `${p}=${c}`).join(", ")}`);
+      }
+      if (prefixDist.length > 0 || periodDist.length > 0) lines.push(``);
+
+      if (result.matches.length > 0) {
+        lines.push(`Tablet                   signs   period            city            lex   designation`);
+        lines.push(`──────────────────────  ──────  ────────────────  ──────────────  ────  ───────────`);
+        for (const m of result.matches) {
+          lines.push(
+            `${m.tablet_id.padEnd(22).slice(0, 22)}  ${String(m.sign_count).padStart(6)}  ${(m.period ?? "-").padEnd(16).slice(0, 16)}  ${(m.city ?? "-").padEnd(14).slice(0, 14)}  ${m.in_lex_graph ? "  ✓ " : "  - "}  ${m.designation ?? "-"}`,
+          );
+        }
+      }
+      if (result.warnings.length > 0) lines.push(``, `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:find-by-genre", VERSION, {
+          citation:
+            "Genre-based discovery over the enriched fragment-metadata cache. v0.18.14.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_tablets_by_genre error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            genre_pattern: genre_pattern ?? "",
+            prefix_filter: prefix_filter ?? null,
+            min_sign_count: min_sign_count ?? 0,
+            top_n: top_n ?? 50,
+            include_subgenres: include_subgenres ?? true,
+          },
+          matches: [] as never[],
+          summary: {
+            total_matches: 0,
+            total_returned: 0,
+            total_with_metadata_in_corpus: 0,
+            total_scanned: 0,
+            metadata_coverage_pct: 0,
+            prefix_distribution: {},
+            period_distribution: {},
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:find-by-genre", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.18.13 — Fragment-metadata enrichment (backfill the anomaly-index gap) ─
 
 server.registerTool(
@@ -5901,7 +6246,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 47 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 50 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre)\n`,
     );
     process.exit(0);
   }
