@@ -333,3 +333,167 @@ export function fuzzyIndexStats(): { loaded: boolean; total_tablets: number; loa
     load_error: _loadError,
   };
 }
+
+// ─── v0.18.19 — Embedded-fragment (asymmetric containment) probe ─────────────
+//
+// Calibration audit Round 3 / Lever 1. Motivated by the 2026-05-23 typology
+// finding that K.9508 (Mīs pî manuscript) returns ZERO fuzzy neighbors when
+// probed symmetrically at default min-J=0.30, but is recovered as a 102-sign
+// run when K.5896 (much larger) probes it. The symmetric Jaccard denominator
+// |A ∪ B| is dominated by the host's vocabulary, so an embedded-fragment-in-
+// host relationship is invisible from the small side. Asymmetric containment
+// `intersect / |query_trigrams|` measures "what fraction of the small fragment's
+// signal is reproduced in a larger host" — the right primitive for Archetype-5
+// (embedded fragment) discovery.
+//
+// Differs from findFuzzyParallels in three ways:
+//  1. Scoring: `containment = fuzzy_intersect / |query|` (NOT symmetric Jaccard)
+//  2. Host filter: targets are required to be ≥ host_size_multiplier × |query|
+//  3. Threshold: default min_containment 0.50 (half the guest must be in the host)
+
+export type EmbeddedFragmentMatch = {
+  host_tablet_id: string;
+  containment: number;                  // fuzzy_intersect / |query_trigrams|
+  exact_containment: number;            // exact_intersect / |query_trigrams|
+  fuzzy_intersect: number;
+  exact_intersect: number;
+  query_trigrams: number;
+  host_trigrams: number;
+  host_size_ratio: number;              // host_trigrams / query_trigrams
+  longest_contiguous_run: number;
+  shared_fuzzy_examples: Array<{ query: string; target: string }>;
+};
+
+export type EmbeddedFragmentsResult = {
+  guest_tablet_id: string;
+  matches: EmbeddedFragmentMatch[];
+  index_stats: {
+    total_tablets_indexed: number;
+    query_trigram_count: number;
+    candidates_examined: number;
+    candidates_passing_host_filter: number;
+    candidates_with_overlap: number;
+  };
+  warnings: string[];
+};
+
+export type EmbeddedFragmentOptions = {
+  guestTabletId: string;
+  topK?: number;                        // default 10
+  minContainment?: number;              // default 0.50
+  minRun?: number;                      // default 0 (off; raise to e.g. 10 to require a contiguous run)
+  hostSizeMultiplier?: number;          // default 5 (host must be ≥5× guest size)
+  maxGuestSize?: number;                // default 2000 — refuse to probe if guest is too big to be "embedded"
+};
+
+export function findEmbeddedFragments(opts: EmbeddedFragmentOptions): EmbeddedFragmentsResult {
+  const corpus = loadCorpus();
+  if (!corpus) {
+    return {
+      guest_tablet_id: opts.guestTabletId,
+      matches: [],
+      index_stats: {
+        total_tablets_indexed: 0, query_trigram_count: 0,
+        candidates_examined: 0, candidates_passing_host_filter: 0, candidates_with_overlap: 0,
+      },
+      warnings: [_loadError ?? "fuzzy index unavailable"],
+    };
+  }
+
+  const queryEntry = corpus.get(opts.guestTabletId);
+  if (!queryEntry) {
+    return {
+      guest_tablet_id: opts.guestTabletId,
+      matches: [],
+      index_stats: {
+        total_tablets_indexed: corpus.size, query_trigram_count: 0,
+        candidates_examined: 0, candidates_passing_host_filter: 0, candidates_with_overlap: 0,
+      },
+      warnings: [`tablet '${opts.guestTabletId}' not in corpus`],
+    };
+  }
+
+  const topK = Math.max(1, Math.min(50, opts.topK ?? 10));
+  const minContainment = opts.minContainment ?? 0.50;
+  // v0.18.19 calibration: 20-position contiguous run is the precision threshold
+  // that suppresses noise hosts on the methods-paper final-2 bi-orphans
+  // (IM.49220, K.3306) while preserving the K.9508 ↔ K.5896 positive case
+  // (run=142). At min_run=0 every lex-singleton fires; at min_run=20 the
+  // 20-tablet random sample drops from 20/20 to 8/20 (precision-tight).
+  const minRun = opts.minRun ?? 20;
+  const hostSizeMult = opts.hostSizeMultiplier ?? 5;
+  const maxGuestSize = opts.maxGuestSize ?? 2000;
+  const warnings: string[] = [];
+
+  const qSize = queryEntry.trigrams.size;
+  if (qSize > maxGuestSize) {
+    warnings.push(
+      `guest has ${qSize} trigrams (> max_guest_size=${maxGuestSize}); embedded-fragment relationships are defined for small guests in large hosts`,
+    );
+  }
+
+  // Build candidate set via 2-of-3 inverted indexes (same as findFuzzyParallels)
+  const candidates = new Set<string>();
+  for (const p of queryEntry.ab) {
+    const s = _abIndex!.get(p);
+    if (s) for (const id of s) candidates.add(id);
+  }
+  for (const p of queryEntry.bc) {
+    const s = _bcIndex!.get(p);
+    if (s) for (const id of s) candidates.add(id);
+  }
+  for (const p of queryEntry.ac) {
+    const s = _acIndex!.get(p);
+    if (s) for (const id of s) candidates.add(id);
+  }
+  candidates.delete(opts.guestTabletId);
+
+  const minHostTrigrams = Math.ceil(hostSizeMult * qSize);
+  let passingHostFilter = 0;
+  let withOverlap = 0;
+  const results: EmbeddedFragmentMatch[] = [];
+
+  for (const cid of candidates) {
+    const target = corpus.get(cid)!;
+    if (target.trigrams.size < minHostTrigrams) continue;     // host-size guard
+    passingHostFilter++;
+    const { exact, fuzzy, longest_run, examples } = fuzzyIntersection(queryEntry, target);
+    if (fuzzy === 0) continue;
+    withOverlap++;
+    const containment = fuzzy / Math.max(1, qSize);
+    if (containment < minContainment) continue;
+    if (longest_run < minRun) continue;
+    const exactContainment = exact / Math.max(1, qSize);
+    results.push({
+      host_tablet_id: cid,
+      containment: +containment.toFixed(4),
+      exact_containment: +exactContainment.toFixed(4),
+      fuzzy_intersect: fuzzy,
+      exact_intersect: exact,
+      query_trigrams: qSize,
+      host_trigrams: target.trigrams.size,
+      host_size_ratio: +(target.trigrams.size / Math.max(1, qSize)).toFixed(2),
+      longest_contiguous_run: longest_run,
+      shared_fuzzy_examples: examples,
+    });
+  }
+
+  // Rank by containment desc, tie-break by longest_run desc
+  results.sort((a, b) =>
+    b.containment - a.containment ||
+    b.longest_contiguous_run - a.longest_contiguous_run,
+  );
+
+  return {
+    guest_tablet_id: opts.guestTabletId,
+    matches: results.slice(0, topK),
+    index_stats: {
+      total_tablets_indexed: corpus.size,
+      query_trigram_count: qSize,
+      candidates_examined: candidates.size,
+      candidates_passing_host_filter: passingHostFilter,
+      candidates_with_overlap: withOverlap,
+    },
+    warnings,
+  };
+}

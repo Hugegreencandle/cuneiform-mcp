@@ -36,6 +36,7 @@ import {
 } from "./anomalySurface.js";
 import {
   findFuzzyParallels,
+  findEmbeddedFragments,
   fuzzyIndexStats,
 } from "./fuzzyParallels.js";
 import {
@@ -245,7 +246,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.18";
+const VERSION = "0.18.19";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3674,6 +3675,106 @@ server.registerTool(
           warnings: [msg],
         },
         provenance: provenance("local", "local:fuzzy-trigram-parallels", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.18.19 — Embedded-fragment (asymmetric containment) probe ───────────
+
+server.registerTool(
+  "find_embedded_fragments",
+  {
+    description:
+      "Find LARGER HOST tablets that an Archetype-5 small fragment is embedded in, via asymmetric trigram containment (fuzzy_intersect / |query_trigrams|, NOT symmetric Jaccard). Motivation: the 2026-05-23 cluster typology found K.9508 (small Mīs pî fragment) returns ZERO strong fuzzy neighbors when probed symmetrically — K.5896 (its 102-sign-run host, 7.3× larger) sits at fuzzy_J=0.13 because the union-denominator is dominated by K.5896's vocabulary — but the asymmetric containment `intersect / |K.9508|` is 0.986 (99% of K.9508's trigrams reproduced in K.5896). Use this when find_fuzzy_parallels returns weak/empty results for a small tablet (<200 signs) you suspect is a fragment of a known larger manuscript. Defaults are precision-tight (min_containment=0.50 + min_run=20) — calibration audit Round 3 confirmed this suppresses the methods-paper final-2 bi-orphans (IM.49220, K.3306) to zero false positives while preserving the K.9508 ↔ K.5896 positive case (run=142). Companion to find_fuzzy_parallels (symmetric, the right tool for whole-manuscript siblings) and reconstruct_cluster (BFS-expansion via fuzzy parallels).",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number of the small/guest tablet (e.g., 'K.9508'). Must be in the eBL signs cache. For best results, guest should be <2000 trigrams (small enough to plausibly be embedded in a host)."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("Number of host candidates to return. Default 10. Hard cap 50."),
+      min_containment: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Minimum asymmetric containment (fuzzy_intersect / |query|). Default 0.50 — half the guest's trigrams must be reproduced in the host. Lower to 0.30 for exploratory broad-sweep; raise to 0.70 for high-confidence-only."),
+      min_run: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("Minimum longest contiguous trigram run between guest and host. Default 20 — calibrated 2026-05-23 to suppress false-positive hosts on the methods-paper final-2 bi-orphans (IM.49220, K.3306) while keeping K.9508 ↔ K.5896 (run=142). Set to 0 to disable the precision filter for exploratory recall sweeps."),
+      host_size_multiplier: z
+        .number()
+        .min(1)
+        .optional()
+        .describe("Host must be at least this many times the guest's trigram count. Default 5. Lower to 2-3 for 'sibling-or-host' ambiguous cases; raise to 10+ to require strongly-asymmetric embeddings."),
+      max_guest_size: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Cap on guest trigram count. Default 2000. Probing very large tablets here is conceptually mismatched (large tablets are hosts, not guests) — the tool warns but still runs."),
+    },
+  },
+  async ({ tablet_id, top_k, min_containment, min_run, host_size_multiplier, max_guest_size }) => {
+    const SCHEMA = schemaId("find_embedded_fragments");
+    try {
+      const result = findEmbeddedFragments({
+        guestTabletId: tablet_id,
+        topK: top_k,
+        minContainment: min_containment,
+        minRun: min_run,
+        hostSizeMultiplier: host_size_multiplier,
+        maxGuestSize: max_guest_size,
+      });
+      const lines: string[] = [
+        `Guest tablet: ${tablet_id}`,
+        `Index: ${result.index_stats.total_tablets_indexed} tablets · guest has ${result.index_stats.query_trigram_count} trigrams`,
+        `Candidates examined: ${result.index_stats.candidates_examined} · passing host-size filter: ${result.index_stats.candidates_passing_host_filter} · with fuzzy overlap: ${result.index_stats.candidates_with_overlap}`,
+        ``,
+        `Host candidates returned: ${result.matches.length}`,
+        ``,
+      ];
+      for (const m of result.matches) {
+        lines.push(`── ${m.host_tablet_id}`);
+        lines.push(`   containment: ${m.fuzzy_intersect}/${m.query_trigrams} = ${m.containment}  ·  exact containment: ${m.exact_intersect}/${m.query_trigrams} = ${m.exact_containment}  ·  host size ratio: ${m.host_size_ratio}×`);
+        lines.push(`   longest contiguous run: ${m.longest_contiguous_run} positions`);
+        if (m.shared_fuzzy_examples.length > 0) {
+          lines.push(`   examples (guest → host):`);
+          for (const ex of m.shared_fuzzy_examples) {
+            lines.push(`     · '${ex.query}' ↔ '${ex.target}'`);
+          }
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:embedded-fragment-containment", VERSION, {
+          citation:
+            "Asymmetric trigram containment (fuzzy_intersect / |query|) over the eBL all-signs-full.json corpus. v0.18.19. Recovers Archetype-5 embedded-fragment relationships invisible to symmetric fuzzy-Jaccard.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_embedded_fragments error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          guest_tablet_id: tablet_id,
+          matches: [] as never[],
+          index_stats: { total_tablets_indexed: 0, query_trigram_count: 0, candidates_examined: 0, candidates_passing_host_filter: 0, candidates_with_overlap: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:embedded-fragment-containment", VERSION),
         warnings: [msg],
       });
     }
