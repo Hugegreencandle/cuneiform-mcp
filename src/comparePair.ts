@@ -24,6 +24,7 @@
 import { findFuzzyParallels } from "./fuzzyParallels.js";
 import { findThematicParallel } from "./semanticEmbeddings.js";
 import { findSameScribeCandidates } from "./scribalFingerprint.js";
+import { getFragmentMetadata } from "./fragmentMetadata.js";
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -66,6 +67,7 @@ export type PairRelationship =
   | "same_scribe_different_composition" // high scribal + moderate fuzzy
   | "thematic_only" // high thematic + low lexical/fuzzy → paraphrase / bilingual
   | "physical_join_candidate" // very-high fuzzy-J (≥0.5) + scribal match — possible reconstruction
+  | "commentary_quotes_base_text" // v0.18.19: ≥100-position run + one side genre-tagged Commentary
   | "weak_relationship" // some signal but below confident thresholds
   | "unrelated"; // no signal across any axis
 
@@ -200,7 +202,15 @@ function queryScribalPair(a: string, b: string): AxisScore {
   };
 }
 
+function hasCommentaryGenre(tabletId: string): boolean {
+  const m = getFragmentMetadata(tabletId);
+  if (!m || !m.genres_flat) return false;
+  return m.genres_flat.some((g) => g.toLowerCase() === "commentary");
+}
+
 function classify(
+  tabletA: string,
+  tabletB: string,
   fuzzy: AxisScore,
   thematic: AxisScore,
   scribal: AxisScore,
@@ -211,6 +221,25 @@ function classify(
   const themCos = thematic.status === "found" ? (thematic.values.thematic_cosine ?? 0) : 0;
   const scribCos = scribal.status === "found" ? (scribal.values.signature_cosine ?? 0) : 0;
   const longRun = fuzzy.status === "found" ? (fuzzy.values.longest_contiguous_run ?? 0) : 0;
+
+  // v0.18.19 calibration audit Round 3 / Lever 2: commentary-quotes-base detection.
+  // A long contiguous run (≥100 trigram positions) combined with one side being
+  // genre-tagged as Commentary signals quotation, NOT physical join. eBL's
+  // lineToVec /match correctly rejects the BM.47463↔CBS.6060 pair (fuzzy_J=0.81,
+  // run=108) as a join candidate — the relationship is BM.47463 (Šurpu Commentary)
+  // quoting CBS.6060 (Šurpu base text). Methods paper §3.7.1. Branch fires BEFORE
+  // the fuzzyJ≥0.5+scribCos≥0.7 join-candidate branch.
+  if (longRun >= 100 && fuzzyJ >= 0.3) {
+    const aIsCommentary = hasCommentaryGenre(tabletA);
+    const bIsCommentary = hasCommentaryGenre(tabletB);
+    if (aIsCommentary !== bIsCommentary) {
+      const commentarySide = aIsCommentary ? tabletA : tabletB;
+      const baseSide = aIsCommentary ? tabletB : tabletA;
+      evidence.push(`longest_contiguous_run=${longRun} (≥100: continuous text-passage embedding)`);
+      evidence.push(`${commentarySide} genre includes "Commentary" while ${baseSide} does not — relationship is commentary quoting base text, not physical join (cf. methods paper §3.7.1, BM.47463↔CBS.6060)`);
+      return { primary_relationship: "commentary_quotes_base_text", confidence: "high", evidence };
+    }
+  }
 
   // Decision tree mirrors the methods paper §3.4 + §3.4.1 framing
   if (fuzzyJ >= 0.5 && scribCos >= 0.7) {
@@ -271,7 +300,7 @@ export function compareTabletPair(opts: ComparePairOptions): ComparePairResult {
     }
   }
 
-  const verdict = classify(fuzzy, thematic, scribal);
+  const verdict = classify(a, b, fuzzy, thematic, scribal);
 
   return {
     tablet_a: a,
