@@ -3970,7 +3970,7 @@ server.registerTool(
       axis_sequence: z.array(z.enum(["fuzzy", "scribal", "thematic"])).optional().describe("Default ['fuzzy','scribal','fuzzy']."),
       max_depth: z.number().int().min(1).max(6).optional().describe("Default 3."),
       top_k_per_hop: z.number().int().min(1).max(15).optional().describe("Default 3."),
-      max_chain_size: z.number().int().min(2).max(100).optional().describe("Default 15."),
+      max_chain_size: z.number().int().min(2).max(100).optional().describe("Default 8 (v0.18.19 calibration — was 15, lowered to prevent BFS overshoot from dragging means past the stable cutoff for tight liturgical clusters; inner-core size is ~6 in this corpus)."),
       jump_threshold: z.number().min(0).max(1).optional().describe("Default 0.40."),
     },
   },
@@ -4017,7 +4017,7 @@ server.registerTool(
       return structuredResult(`find_signature_evolution_in_lineage error: ${msg}`, {
         schema: SCHEMA,
         data: {
-          query: { seed_tablet_id, axis_sequence: axis_sequence ?? ["fuzzy", "scribal", "fuzzy"], max_depth: max_depth ?? 3, top_k_per_hop: top_k_per_hop ?? 3, max_chain_size: max_chain_size ?? 15, jump_threshold: jump_threshold ?? 0.4 },
+          query: { seed_tablet_id, axis_sequence: axis_sequence ?? ["fuzzy", "scribal", "fuzzy"], max_depth: max_depth ?? 3, top_k_per_hop: top_k_per_hop ?? 3, max_chain_size: max_chain_size ?? 8, jump_threshold: jump_threshold ?? 0.4 },
           chain_with_signatures: [] as never[],
           depth_aggregates: [] as never[],
           signature_jumps: [] as never[],

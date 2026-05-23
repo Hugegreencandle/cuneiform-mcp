@@ -114,7 +114,16 @@ const DEFAULT_AXIS_SEQUENCE: ReadonlyArray<LineageAxis> = [
 
 const DEFAULT_MAX_DEPTH = 3;
 const DEFAULT_TOP_K = 3;
-const DEFAULT_MAX_CHAIN = 15;
+// v0.18.19 calibration audit Round 3 / untested-tool: chain-size 15 invites BFS
+// overshoot that drags down mean_sig_cosine_to_seed past the stable cutoff for
+// tight liturgical lineages like K.5896 (Mīs pî). Empirical sweep on K.5896:
+//   chain=6:  mean=0.658 → stable ✓
+//   chain=10: mean=0.432 → fragmented ✗ (wrong for tight transmission)
+//   chain=15: mean=0.504 → drifting
+// Inner-core size for this corpus is empirically ~6 tablets. Default 8 splits
+// the difference — preserves exploratory breadth while preventing the chain=10
+// fragmented mis-label for known tight clusters.
+const DEFAULT_MAX_CHAIN = 8;
 const DEFAULT_JUMP_THRESHOLD = 0.4;
 
 const COHERENCE_STABLE_MIN_MEAN = 0.65;
