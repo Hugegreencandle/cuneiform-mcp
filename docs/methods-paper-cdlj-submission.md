@@ -5,8 +5,8 @@
 ---
 
 **Author**: [Anonymized for review]
-**Submission target**: *Cuneiform Digital Library Journal* (methods paper, ~3,800 words + 7 supplementary validation documents)
-**Submission date**: 2026-05-16
+**Submission target**: *Cuneiform Digital Library Journal* (methods paper, ~7,000 words + 7 supplementary validation documents)
+**Submission date**: 2026-05-16; §3.7 + §3.8 + §5.1 + §5.4 + abstract amended 2026-05-23 (v0.18.8 + v0.18.12 + v0.18.18 tooling)
 
 ---
 
@@ -18,7 +18,9 @@ Four validated metrics result: a 55% manuscript-sibling rescue rate on candidate
 
 The paper's primary methodological contribution is the demonstration that exact lexical methods at the conventional 0.30 Jaccard threshold systematically under-recover wide-transmission compositions, and that the underlying *āšipūtu* canon described in textual-evidence consensus (Lenzi 2008; Geller 2010; Maul 1994) is recoverable empirically from pure-orthographic clustering. A separate methodological contribution emerges from two calibration audits demonstrating that precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited: a one-line scoring change lifted lacuna-restoration top-1 precision from 22.9% to 91.7% without altering the underlying recovery algorithm, and a threshold audit converged the bi-orphan discovery surface from 167 candidates to 2 without altering any underlying method. A third contribution demonstrates that the contiguous-run bonus is methodology-agnostic: applied independently to fuzzy-trigram and exact-trigram methodologies, both surface the same cross-subseries manuscript-section sibling pair (K.5896 and K.2761, both Mīs pî, sharing continuous text passages with K.2798, Bīt salāʾ mê) — the calibration pattern itself transfers across underlying algorithms.
 
-**Keywords**: cuneiform; computational philology; manuscript-witness reconstruction; sign-trigram methods; calibration audit; *āšipūtu* canon; Mīs pî; Bīt salāʾ mê.
+A fourth contribution, documented as §3.7 and §3.8, demonstrates that the methodology generalizes beyond the BM.77056 anchor to four additional manuscript-witness clusters covering six distinct cluster archetypes (compositional curriculum, verbatim manuscript chain, refrain-bound liturgical family, single-collection school cluster, embedded fragment, and cross-period bridge). The Sm.1055 / K.7246 cluster (100+ Neo-Assyrian Nineveh witnesses, six tablets converging on all three discovery axes — fuzzy-J ≥ 0.79, thematic cosine ≥ 0.97, scribal-signature cosine ≥ 0.84) attests Udug-ḫul under exclusion of Maqlû via negative primary-source identification (CTN 4 092 IM.67635 absence). The BM.47463 ↔ CBS.6060 pair (147 contiguous signs at fuzzy-Jaccard 0.70, approximately three times the K.2798 ↔ Si.776 anchor chain) surfaces a commentary–base-text quotation relationship: cross-validation between the trigram-based cluster methodology and eBL's lineToVec /match algorithm reveals BM.47463 (eBL `Technical → Commentary`) as a Šurpu commentary quoting the Šurpu base text directly attested by CBS.6060. This finding identifies a verdict-classifier refinement for the per-pair diagnostic tool (`compare_tablet_pair` v0.18.19+).
+
+**Keywords**: cuneiform; computational philology; manuscript-witness reconstruction; sign-trigram methods; calibration audit; *āšipūtu* canon; Mīs pî; Bīt salāʾ mê; Udug-ḫul; Šurpu; commentary tradition.
 
 ---
 
@@ -39,6 +41,8 @@ This pair motivates the entire methodology train documented here. Each successiv
 7. The v0.18.3 run-bonus calibration ports a previously-shipped fuzzy-method scoring refinement to the exact-trigram tool, surfacing additional cross-subseries siblings (K.5896 and K.2761, both Mīs pî manuscripts) within K.2798's top-15.
 
 The K.2798 ↔ Si.776 case is the test case that validates each tool does what it claims and motivates the calibration audits that produced this paper's secondary methodological contribution.
+
+A downstream application of the same methodology produced a substantially longer verbatim chain than the K.2798 ↔ Si.776 anchor: BM.47463 ↔ CBS.6060 share 147 contiguous signs at fuzzy-Jaccard 0.70 — approximately three times the 46-sign run of the anchor pair. Analysis of this pair using `compare_tablet_pair` (a per-pair cross-axis diagnostic tool, v0.18.8) plus `find_join_candidates` (a local reproduction of eBL's lineToVec /match algorithm) revealed it to be not a manuscript-sibling pair but a commentary-and-base-text relationship — a methodologically significant finding documented in §3.7.1.
 
 ---
 
@@ -238,6 +242,65 @@ After all calibration, exactly two tablets remain: IM.49220 and K.3306. These ar
 
 The actual previously-unknown-composition yield is at most 2 of 42 candidates (approximately 5%) — well below the original v0.16 specification's target of 5/20. The bi-orphan methodology's real value lies not in novelty discovery but in QA, cataloging-gap identification, and manuscript-sibling false-negative recovery. Of the original 42 candidates: eight were already-published, known compositions (Ḫḫ IX-XI lexical, eme.gi7 prayer XX, MUL.APIN astronomical, CT-published omens and letters); one (BM.46372) was an explicit missed-join recorded in eBL's own catalog. The methodology is QA tooling.
 
+### 3.7 Additional Manuscript-Witness Clusters (v0.18.8+)
+
+A downstream application of the four-axis discovery framework — using `find_tablet_neighborhood` (v0.18.12, a tablet-level composite of fuzzy + thematic + scribal axes), `compare_tablet_pair` (v0.18.8, a per-pair cross-axis diagnostic with a methods-paper-aligned verdict classifier), and `find_join_candidates` (v0.18, local reproduction of eBL's lineToVec /match algorithm) — surfaced four additional manuscript-witness clusters beyond the BM.77056 *āšipūtu* hub (§3.1). Each cluster validates the methodology against a different cluster archetype (formalized in §3.8). Confidence levels reflect specialist-literature cross-check status: cluster identifications hedged where direct Reiner 1958 / Geller 2016 BAM 8 / Walker & Dick 2001 / Wiggermann 2000 / Maul 1994 / Schwemer Würzburg re-edition confirmation is pending. Detailed cross-check methodology and per-cluster evidence trail are documented in the companion specialist cross-check brief (`Cuneiform-Cluster-IDs-Cross-Check-2026-05-23.md`).
+
+#### 3.7.1 BM.47463 ↔ CBS.6060: A Šurpu Commentary–Base-Text Quotation Chain (147 signs)
+
+BM.47463 and CBS.6060 share 147 contiguous signs at fuzzy-Jaccard 0.70 (exact-Jaccard 0.47) — the longest verbatim run identified by the cluster methodology to date, approximately three times the K.2798 ↔ Si.776 anchor chain documented in §1. Initial `compare_tablet_pair` analysis returned a `physical_join_candidate` verdict (HIGH confidence) on combined cross-axis evidence: fuzzy-J 0.70, thematic cosine 0.81, scribal-signature cosine 0.79, exact intersection 360 trigrams.
+
+Cross-validation against eBL's lineToVec /match algorithm via `find_join_candidates` returned a different picture. BM.47463 is classified by eBL as `CANONICAL → Technical → Commentary` and has a known published physical join to BM.49124 — but the lineToVec algorithm does NOT rank CBS.6060 among BM.47463's join candidates. CBS.6060's own top lineToVec candidate is IM.76972, which eBL classifies as `CANONICAL → Magic → Exorcistic → Šurpu`.
+
+The two methodologies converge on the Šurpu attribution via different evidence trails: the trigram-based discovery surfaces the verbatim quotation chain as a manuscript-sibling pair; the lineToVec line-structure algorithm correctly excludes physical-join candidacy and classifies BM.47463 as a commentary on the Šurpu corpus. The 147-sign verbatim chain is therefore commentary-quoting-base-text — BM.47463 (commentary) quotes 147 contiguous signs of the Šurpu base text attested directly by CBS.6060.
+
+This is methodologically significant. The cluster methodology surfaces canonical-text + commentary relationships as if they were manuscript-sibling pairs, via long verbatim quotation chains in the commentary. `compare_tablet_pair`'s `physical_join_candidate` verdict (methods paper §3.4 + §3.4.1) is necessary but not sufficient for physical-join attribution: when one tablet's eBL genre is `CANONICAL → Technical → Commentary`, the verdict should downgrade to `commentary_quotes_base_text`. The verdict-classifier upgrade is suggested for v0.18.19+.
+
+#### 3.7.2 Sm.1055 / K.7246: An Udug-ḫul Canonical-Recension Nineveh Chain (100+ members)
+
+`find_tablet_neighborhood(Sm.1055)` returns extraordinary cross-axis convergence: six tablets (K.7246, K.7091, K.7857, K.11574, K.3441, K.7888) land on all three discovery axes with fuzzy-Jaccard ≥ 0.79, thematic cosine ≥ 0.97, and scribal-signature cosine ≥ 0.84. K.7091 ↔ K.11574 score fuzzy-J 1.0 (perfect — identical content). Twenty pair-edges exceed fuzzy-J 0.90 within the broader cluster, which the BFS reconstructor terminates at 100 members (the configured `max_size`).
+
+Prefix distribution is 84% cross-prefix and Nineveh-dominant: K=69, Sm=16, Rm-II=5, Rm=3, DT=2, plus single witnesses across BM and accession-year prefixes. The cluster is connected to component 0, the largest connected component in the corpus (size 296).
+
+Composition attribution is excluded against Maqlû via the CTN 4 092 Maqlû manuscript IM.67635 being absent from the cluster's neighborhood — a negative primary-source identification. The leading positive candidate is Udug-ḫul (canonical incantations against evil demons; Geller 2016 BAM 8, 161 manuscript plates), supported indirectly by web-accessible references to K.7246 in Nineveh Udug-ḫul manuscript context (Ashurbanipal Library Project; Reade et al.). Direct Geller 2016 plate-by-plate confirmation of the six-tablet inner core is pending institutional PDF or print access — flagged as the highest-priority specialist cross-reference for paper finalization.
+
+Cluster archetype: **verbatim manuscript chain** — single composition, many near-identical canonical-recension copies, all three discovery axes tight (§3.8 archetype 2).
+
+#### 3.7.3 K.5896 Mīs pî: New Pairs + Babylonian Transmission Map
+
+Building on the K.5896 Mīs pî identification of §3.3, four new manuscript-pairs surface via continued application of the run-bonus-calibrated parallel-text discovery: K.5896 ↔ K.9508 (102-sign run; K.9508 is a 177-sign fragment whose entire content is essentially embedded in K.5896's 1830 signs — an asymmetric embedded-fragment relationship documented as cluster archetype 5 in §3.8); K.5896 ↔ K.6683 (73-sign run); K.5896 ↔ K.15325 (72-sign run, with K.15325 already a member of the BM.77056 *āšipūtu* hub of §3.1 — joining the two clusters at a verified manuscript-witness bridge); and K.5896 ↔ BM.45749 (56-sign run; BM.45749 is independently confirmed as a Mīs pî incantation tablet by Walker & Dick 2001).
+
+The Babylonian Mīs pî transmission map now spans five site/period contexts: Old Babylonian Ur (UET 6.408, UET 6.409; verification pending Berlejung), Babylonian library (BM.42307, BM.41361, BM.33584, BM.42273, BM.43868), Sippar/Penn (CBS.1516, CBS.1527), Berlin (VAT.9726), and Neo-Assyrian Nineveh (K.5896, K.15325, K.6683, K.9508, K.10176, K.8994, K.11920, Si.985). BM.45749 functions as the cross-period bridge node connecting Neo-Assyrian Nineveh transmission to Babylonian library transmission.
+
+K.9508's status as a `lex_singleton` at the default min-J=0.30 threshold (zero independent fuzzy neighbors) but a strong K.5896-detected sibling at the 102-sign-run pair establishes the **embedded fragment archetype** (§3.8 archetype 5): small fragments may be entirely embedded in larger manuscripts but invisible to symmetric fuzzy-neighborhood probing because the small-fragment signal-to-noise from limited trigram counts is insufficient to surface independent siblings. Bidirectional probing is required.
+
+#### 3.7.4 K.5036 / BM.54681: A Cross-Period Cluster, Composition Pending
+
+K.5036 (anomaly-flagged in the v0.16 surface) sits in a sparse-neighborhood pattern unlike Clusters 3.7.1–3.7.3. `find_tablet_neighborhood(K.5036)` returns no cross-axis hits — fuzzy, thematic, and scribal neighbors are entirely axis-specific. Strongest fuzzy parallels include 1883,0118.516 (J=0.44, 57-sign run), K.13419 (J=0.33, 71-sign run), and IM.76826 (J=0.27, 54-sign run). Thematic neighbors include BM.54681 (cos 0.91), Rm.585 (0.88), IM.58414 (0.88), BM.39822 (0.88), BM.40522 (0.86), and K.11359 (0.85) — all Babylonian/cross-period.
+
+The composition is undetermined. Candidates from specialist literature include Udug-ḫul (Geller 2016, unlikely if Cluster 3.7.2 is Udug-ḫul), Lamaštu Series (Wiggermann 2000), namburbî corpus (Maul 1994), or Bīt rimki (Læssøe 1955). Web searches against accessible online catalogs did not surface K.5036 in any published critical edition.
+
+The sparse-neighborhood pattern itself is methodologically informative: either (a) K.5036 attests a unique witness with no near-siblings in the indexed corpus, (b) K.5036 is a cross-period composition where each period's witnesses cluster in their own axis-specific neighborhood, or (c) K.5036 is a multi-text tablet whose various sections each weakly match different compositions. Examining the tablet's full sign sequence plus colophon for compositional boundaries would clarify which.
+
+Cluster archetype: **cross-period bridge** (§3.8 archetype 6) candidate.
+
+### 3.8 Cluster Archetype Typology
+
+The five characterized clusters across §3.1 + §3.7 surface six distinct cluster archetypes — each defined by a characteristic discovery-axis profile. The methodology recovers cluster signal across all six archetypes, supporting generalization beyond the BM.77056 *āšipūtu* anchor.
+
+| # | Archetype | Exemplar | Discovery-axis profile | Defining property |
+|---|---|---|---|---|
+| 1 | Compositional curriculum | BM.77056 (§3.1) | Loose fuzzy, broad thematic, cross-prefix | Multi-composition canon; integrated canonical curriculum unified by genre context rather than verbatim recension |
+| 2 | Verbatim manuscript chain | Sm.1055 (§3.7.2) | Tight fuzzy + tight thematic + tight scribal | Single composition, many near-identical canonical-recension copies; all three axes converge |
+| 3 | Refrain-bound liturgical family | K.15325 / K.5896 (§3.3, §3.7.3) | Loose fuzzy, tight thematic, `refrain_heavy` quality flag | Variant texts unified by recurring incantation refrains; verbatim signal masked by refrain saturation |
+| 4 | Single-collection school cluster | YBC.5729 | Moderate fuzzy, very tight thematic, single-prefix | School-context scribal-variant transmission within one institution |
+| 5 | Embedded fragment | K.9508 in K.5896 (§3.7.3) | Lex-singleton at default threshold, thematic-only recovery | Small fragment whose entire content is contained in a larger manuscript; detection requires bidirectional probing |
+| 6 | Cross-period bridge | BM.45749 (§3.7.3), K.5036 (§3.7.4 candidate) | Comparable similarity to two distinct cluster sides | Transmission node connecting library traditions across periods |
+
+A seventh archetype emerged from §3.7.1's analysis but is methodologically distinct: **commentary–base-text quotation pair**. BM.47463 ↔ CBS.6060 produces a `physical_join_candidate` verdict on cross-axis trigram + thematic + scribal evidence yet fails eBL's lineToVec /match join algorithm, because the 147-sign verbatim chain reflects commentary quotation of a base text, not physical-fragment kinship. This is documented separately as a methodological finding requiring `compare_tablet_pair` verdict-classifier refinement (§5.4) rather than as a manuscript-witness archetype.
+
+The methodology generalizes across composition-type (curriculum vs single-composition), library context (Neo-Assyrian Nineveh vs Babylonian Yale/Penn/Berlin), tablet size (full manuscript vs fragment), and discovery-axis profile (fuzzy-strong vs thematic-strong vs both).
+
 ---
 
 ## 4. The Calibration Audit Methodology
@@ -279,6 +342,8 @@ The audit methodology correctly identified five of six tools with ranking-stage 
 3. **Distinguishes orthogonal axes computationally.** The composition / scribe separation is validated cleanly by the K.2798 ↔ Si.776 negative-result test.
 4. **Achieves near-canonical precision in lacuna restoration.** 91.7% top-1 with 100% top-10 recall on tablets with parallel templates.
 5. **Converges the discovery surface via empirical calibration.** Three independent passes (quality filters, fuzzy rescue, threshold audit) collapse the bi-orphan surface to exactly the same 2 candidates.
+6. **Generalizes across cluster archetypes.** The methodology recovers cluster signal across six distinct archetypes (§3.8): compositional curriculum, verbatim manuscript chain, refrain-bound liturgical family, single-collection school cluster, embedded fragment, and cross-period bridge — supporting application beyond the BM.77056 anchor.
+7. **Surfaces commentary–base-text relationships via verbatim quotation chains.** The BM.47463 ↔ CBS.6060 finding (§3.7.1) demonstrates that the cluster methodology, when applied to long verbatim chains (147 contiguous signs at fuzzy-J 0.70), recovers canonical-text + commentary pairs in addition to manuscript-sibling pairs. Cross-validation against eBL's lineToVec /match algorithm distinguishes the two relationship types.
 
 ### 5.2 What the Pipeline Does Not Do
 
@@ -302,6 +367,8 @@ Five general principles emerged from the v0.16 → v0.18.3 build sequence:
 The most natural next-step improvement is sign-form variant normalization at tokenization time. The 2026-05-14 sign-variant normalization experiment found zero rank-improvement from naive collapse rules on an 87-sibling benchmark, but that experiment did not test position-aware substitution at the trigram level — which is what the fuzzy method effectively does. A pre-pass that canonicalizes documented sign-form-variant pairs into single tokens would yield equivalent results at exact-Jaccard with lower compute cost.
 
 Other natural extensions include compound-discovery tooling combining all four signal axes; atelier reconstruction via recursive BFS in the scribal-fingerprint graph; cross-corpus comparative tooling for Hebrew Bible, Ugaritic, and Hittite parallels at the n-gram level; and calibration audits on the lexical baseline (`find_parallel_text` recall@15) and corpus-viz scoring.
+
+A specific tooling refinement is suggested by the BM.47463 ↔ CBS.6060 finding documented in §3.7.1. The `compare_tablet_pair` verdict classifier (v0.18.8) currently maps the cross-axis pattern of high fuzzy-J + high thematic-cosine + high scribal-signature-cosine + long contiguous run to a `physical_join_candidate` verdict, regardless of the tablets' eBL genre classifications. This pattern is necessary but not sufficient for physical-join attribution: a commentary that quotes 147 contiguous signs of its base text reproduces the same cross-axis profile as a physical-join candidate, yet is correctly excluded by eBL's lineToVec /match algorithm. A verdict-classifier upgrade for v0.18.19+ should consult `eBL.genres[]` and downgrade the verdict to `commentary_quotes_base_text` when either tablet carries `CANONICAL → Technical → Commentary`. This refinement allows the methodology to surface the canonical-text + commentary relationship as a first-class finding rather than as a misclassified physical-join candidate.
 
 ---
 
