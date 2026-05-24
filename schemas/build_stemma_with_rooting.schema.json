@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/build_stemma_with_rooting.schema.json",
+  "title": "build_stemma_with_rooting data payload",
+  "description": "v0.33.0 rooted stemma. Extends v0.22 unrooted neighbor-joining with three rooting heuristics: earliest_period (Mesopotamian-canonical OB→MB→MA→NA→NB→LB ordering), most_chunk_hosts (graph-theoretic coverage centroid), outgroup_witness (caller-specified). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "composition_seed",
+    "algorithm",
+    "rooting",
+    "witnesses",
+    "unrooted_newick",
+    "rooted_newick",
+    "rooted_tree_edges",
+    "distance_matrix",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "composition_seed": { "type": "string" },
+    "algorithm": { "type": "string", "enum": ["neighbor_joining", "upgma"] },
+    "rooting": {
+      "type": "object",
+      "required": ["mode", "root_witness", "root_choice_rationale", "candidates_considered"],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["earliest_period", "most_chunk_hosts", "outgroup_witness"]
+        },
+        "root_witness": {
+          "anyOf": [{ "type": "string" }, { "type": "null" }],
+          "description": "Tablet ID chosen as the stemma root. null if no eligible root could be selected (e.g. outgroup_witness mode with a witness not in the cluster)."
+        },
+        "root_choice_rationale": { "type": "string" },
+        "candidates_considered": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "witnesses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tablet_id",
+          "shared_chunks_with_seed",
+          "host_chunks_total",
+          "sign_count",
+          "period",
+          "primary_genre",
+          "provenance"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "shared_chunks_with_seed": { "type": "integer", "minimum": 0 },
+          "host_chunks_total": { "type": "integer", "minimum": 0 },
+          "sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+          "period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "primary_genre": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "provenance": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+        }
+      }
+    },
+    "unrooted_newick": {
+      "type": "string",
+      "description": "The v0.22 NJ Newick output (unrooted; trifurcation at the algorithmic root)."
+    },
+    "rooted_newick": {
+      "type": "string",
+      "description": "Re-rooted Newick after applying the chosen rooting heuristic. Empty string if no root could be chosen."
+    },
+    "rooted_tree_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "branch_length"],
+        "additionalProperties": false,
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "branch_length": { "type": "number" }
+        }
+      }
+    },
+    "distance_matrix": {
+      "type": "array",
+      "items": { "type": "array", "items": { "type": "number" } }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

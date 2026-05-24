@@ -29,6 +29,9 @@ jobs:
       - name: Cache-independent unit audit (round 17 — validation-resolutions)
         run: node scripts/round17-validation-resolutions-audit.mjs
 
-      # Round-18 (identify_composition) is cache-dependent (signs +
-      # chunk index + sign embeddings). Skipped in CI until the
-      # cache-bootstrap orchestration lands in v0.33+.
+      # Rounds 18 (identify_composition) and 19's integration tests are
+      # cache-dependent (signs + chunk index + sign embeddings). Skipped
+      # in CI until cache-bootstrap orchestration lands. Round 19's UNIT
+      # tests (Newick parser + rerooter on a synthetic 4-leaf tree) ARE
+      # cache-independent, but the audit script runs both phases — we'd
+      # need to split them to selectively run only the unit half. v0.34+.

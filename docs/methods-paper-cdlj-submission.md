@@ -558,6 +558,22 @@ The §§3.7 and 3.11 manuscript-sibling and stemma findings establish that the c
 
 ---
 
+### 3.20 Rooted Stemma (v0.33)
+
+§3.11 produces **unrooted** neighbor-joining stemmas: a topology with branch lengths, but no designated archetype direction. Traditional stemma codicum requires a root — the closest extant proxy for the lost archetype, against which all descent direction is defined. v0.33 adds three rooting heuristics that re-root the §3.11 output at a chosen witness without disturbing the topology or branch lengths.
+
+**Heuristics.** (a) `earliest_period`: choose the witness with the earliest period using the Mesopotamian-canonical ordering OB → MB → MA → NA → NB → LB. The implicit claim is that earlier periods are closer to the archetype — a defensible default for canon-tradition manuscripts but explicitly NOT for vernacular or apocryphal traditions where the assumption may fail. (b) `most_chunk_hosts`: choose the witness with the broadest corpus reach. Graph-theoretic coverage centroid; useful when period data is uniform across the cluster. (c) `outgroup_witness`: caller specifies a tablet known externally to be a forerunner (an OB precursor, e.g.).
+
+**Re-rooting algorithm.** Parse the v0.22 Newick output into an undirected edge list; BFS from the chosen leaf, orienting each visited edge away from the new root; render rooted Newick. Branch lengths preserve exactly through this operation (sum-of-branch-lengths invariant verified in Round-19 audit T5).
+
+**Empirical surface — the Mīs pî cluster has no pre-NA witness.** Running `earliest_period` on the K.5896 cluster (Mīs pî, 20-witness expansion) returned **K.10176** as root, period="Neo-Assyrian", rank 4 of 6 in the period scale. The entire BFS-expanded Mīs pî cluster in the eBL chunk-index is post-Neo-Assyrian. This is a substantive observation about either coverage (eBL's transliterated corpus may not include the OB Mīs pî forerunners) or method-sensitivity (the length-20 chunk-overlap threshold may exclude older witnesses whose orthography diverges further from the NA standard form). The tool surfaces the absence honestly rather than fabricating an archetype.
+
+**Claim 40.** *Re-rooting v0.22's unrooted NJ stemma at a witness chosen via period-anchored / coverage-centroid / outgroup-specified heuristics produces a directed manuscript tradition tree while truthfully exposing absences in the corpus. The Mīs pî K.5896 cluster contains no pre-Neo-Assyrian witness in the current chunk-index expansion; the earliest-period root resolves to K.10176 (NA, alphabetical tiebreak), and the tool reports the absence rather than fabricating an OB-rank archetype.*
+
+The §3.11 NJ stemma plus the §3.20 rooting layer together produce the standard stemma codicum object: a directed manuscript tree with a designated archetype-proxy. Output is well-formed Newick consumable by phylogenetic visualization tools (FigTree, iTOL).
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
