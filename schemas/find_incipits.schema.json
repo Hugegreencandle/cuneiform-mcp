@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_incipits.schema.json",
+  "title": "find_incipits data payload",
+  "description": "v0.21.0 corpus-wide opening-formulae (incipits) discovery. Surfaces every length-10 trigram window shared with at least min_hosts tablets (default 50), ranked by host_genres_spanned × log(host_count). Backed by the length-10 incipits-index (~/.cache/cuneiform-mcp/incipits-index.json); built once via scripts/build-incipits-index.mjs. Length-10 is calibrated to catch 3-8 sign opening formulae scholars use to identify compositions; numerical-only chunks (ABZ480/ABZ411 ≥70%) are filtered by default since long numeral runs are calendrical/tabular text, not incipits.",
+  "type": "object",
+  "required": ["incipits", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "incipits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "chunk_hash",
+          "chunk_signs",
+          "chunk_length",
+          "host_count",
+          "host_genres_spanned",
+          "host_periods_spanned",
+          "host_tablets",
+          "novelty_score"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "chunk_hash": { "type": "string", "description": "Canonical pipe-joined trigram window hash (length 10)." },
+          "chunk_signs": { "type": "string", "description": "Reconstructed sign sequence with '…' for X-skip gaps." },
+          "chunk_length": { "type": "integer", "minimum": 1 },
+          "host_count": { "type": "integer", "minimum": 2 },
+          "host_genres_spanned": { "type": "integer", "minimum": 0 },
+          "host_periods_spanned": { "type": "integer", "minimum": 0 },
+          "host_tablets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tablet_id", "period", "genre"],
+              "additionalProperties": false,
+              "properties": {
+                "tablet_id": { "type": "string" },
+                "period": { "type": ["string", "null"] },
+                "genre": { "type": ["string", "null"] }
+              }
+            },
+            "description": "Up to 20 hosts inline; query the incipits-index directly for the full set."
+          },
+          "novelty_score": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "loaded",
+        "total_chunks_in_index",
+        "candidates_above_threshold",
+        "after_filters",
+        "numerical_only_filtered",
+        "metadata_coverage_pct"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "loaded": { "type": "boolean" },
+        "total_chunks_in_index": { "type": "integer", "minimum": 0 },
+        "candidates_above_threshold": { "type": "integer", "minimum": 0 },
+        "after_filters": { "type": "integer", "minimum": 0 },
+        "numerical_only_filtered": { "type": "integer", "minimum": 0, "description": "Number of candidate chunks dropped because ≥70% of their signs are ABZ480/ABZ411 (numeral 1 family)." },
+        "metadata_coverage_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
