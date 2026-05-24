@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/analyze_joins_graph.schema.json",
+  "title": "analyze_joins_graph data payload",
+  "description": "Corpus-wide manuscript-join graph queries. Two modes: `per-tablet` returns the direct join-neighborhood of a single tablet (fetched live from eBL /fragments/{id} and flattened from the nested joins[] groups), and `top-hosts` returns the corpus-wide top join-rich tablets from the cached joins-graph artifact (~/.cache/cuneiform-mcp/joins-graph.json, built by scripts/extract-joins-graph.mjs). Both modes attach period + primary genre from the fragment-metadata cache where available; missing metadata surfaces as null rather than failing.",
+  "type": "object",
+  "required": ["mode", "index_stats"],
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["per-tablet", "top-hosts"],
+      "description": "Which query mode was executed. `per-tablet` is selected when a tablet_id is supplied; `top-hosts` is the default when only list_top_hosts is set."
+    },
+    "tablet_id": {
+      "type": "string",
+      "description": "Echo of the queried tablet id. Present only in `per-tablet` mode."
+    },
+    "join_neighborhood": {
+      "type": "object",
+      "description": "Direct (1-hop) join neighbors of the queried tablet. Present only in `per-tablet` mode.",
+      "required": ["direct_joins", "joins_count"],
+      "additionalProperties": false,
+      "properties": {
+        "direct_joins": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/JoinNeighbor" },
+          "description": "Flattened list of museum-number neighbors from eBL's joins[] groups, with the queried tablet itself removed and duplicates collapsed."
+        },
+        "joins_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unique join neighbors returned (the length of direct_joins). Matches the FragmentMetadata.joins_count field minus the self-entry that eBL includes in its joins[] groups."
+        }
+      }
+    },
+    "top_hosts": {
+      "type": "array",
+      "description": "Top-K corpus-wide join-rich tablets from the cached joins-graph. Present only in `top-hosts` mode.",
+      "items": { "$ref": "#/$defs/TopHost" }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["total_fragments_with_joins", "total_join_edges", "avg_joins_per_join_host"],
+      "additionalProperties": false,
+      "properties": {
+        "total_fragments_with_joins": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of corpus fragments with at least one known join (per the joins-graph cache build)."
+        },
+        "total_join_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of all joins_count values across the corpus — the raw edge count before de-duplication."
+        },
+        "avg_joins_per_join_host": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Mean joins_count over fragments that have ≥1 join (total_join_edges / total_fragments_with_joins, 2 decimal places)."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "JoinNeighbor": {
+      "type": "object",
+      "required": ["tablet_id", "period", "genre"],
+      "additionalProperties": false,
+      "properties": {
+        "tablet_id": { "type": "string" },
+        "period": { "type": ["string", "null"] },
+        "genre": { "type": ["string", "null"], "description": "Primary (first) genre hierarchy string from the fragment-metadata cache, or null when the neighbor was never enriched." }
+      }
+    },
+    "TopHost": {
+      "type": "object",
+      "required": ["tablet_id", "joins_count", "period", "primary_genre"],
+      "additionalProperties": false,
+      "properties": {
+        "tablet_id": { "type": "string" },
+        "joins_count": { "type": "integer", "minimum": 0 },
+        "period": { "type": ["string", "null"] },
+        "primary_genre": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
