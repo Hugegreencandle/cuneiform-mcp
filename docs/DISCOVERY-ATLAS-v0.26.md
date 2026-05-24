@@ -1,0 +1,135 @@
+# cuneiform-mcp — Discovery Atlas (v0.26.0 snapshot)
+
+Auto-generated corpus-wide discovery dump from the v0.20+ tools. Methods-paper appendix material. Run `node scripts/generate-discovery-atlas.mjs` to regenerate against current cache state. Generated 2026-05-24.
+
+## §1 — Top 30 formulaic passages (length-20 chunks, ranked by host_genres_spanned × log(host_count))
+
+Index metadata coverage: 100%. Candidate pool: 257.
+
+| # | host_count | genres | novelty | first signs (truncated) |
+|---|---|---|---|---|
+| 1 | 120 | 32 | 153.47 | `ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 …` |
+| 2 | 119 | 32 | 153.20 | `ABZ108 ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 …` |
+| 3 | 119 | 32 | 153.20 | `ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 …` |
+| 4 | 118 | 32 | 152.93 | `ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 A…` |
+| 5 | 110 | 32 | 150.71 | `ABZ339 ABZ108 ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579…` |
+| 6 | 101 | 32 | 148.00 | `ABZ78 ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ3…` |
+| 7 | 71 | 28 | 119.75 | `ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … AB…` |
+| 8 | 68 | 28 | 118.56 | `ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ…` |
+| 9 | 67 | 28 | 118.15 | `ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i AB…` |
+| 10 | 66 | 28 | 117.73 | `ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+15…` |
+| 11 | 66 | 25 | 105.12 | `ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ…` |
+| 12 | 63 | 25 | 103.97 | `ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 A…` |
+| 13 | 86 | 23 | 102.72 | `ABZ231 ABZ339 ABZ108 ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 ……` |
+| 14 | 61 | 24 | 99.05 | `ABZ78 ABZ367 ABZ78 ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ59…` |
+| 15 | 60 | 24 | 98.66 | `ABZ367 ABZ78 ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ1…` |
+| 16 | 61 | 22 | 90.80 | `ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ…` |
+| 17 | 61 | 22 | 90.80 | `ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ…` |
+| 18 | 79 | 18 | 78.88 | `ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 AB…` |
+| 19 | 78 | 18 | 78.65 | `ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 A…` |
+| 20 | 78 | 18 | 78.65 | `ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 A…` |
+| 21 | 78 | 18 | 78.65 | `ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 A…` |
+| 22 | 77 | 18 | 78.42 | `ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 AB…` |
+| 23 | 76 | 18 | 78.19 | `ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 …` |
+| 24 | 50 | 18 | 70.77 | `ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231 ABZ…` |
+| 25 | 50 | 18 | 70.77 | `ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231 ABZ579 ABZ…` |
+| 26 | 64 | 16 | 66.79 | `ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 ABZ142 …` |
+| 27 | 40 | 17 | 63.13 | `ABZ13 ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 AB…` |
+| 28 | 40 | 17 | 63.13 | `ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 ABZ5 ABZ…` |
+| 29 | 40 | 17 | 63.13 | `ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 ABZ5 ABZ339 AB…` |
+| 30 | 63 | 15 | 62.38 | `ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 A…` |
+
+## §2 — Top 30 incipits (length-10 chunks)
+
+Index: 214896 chunks. Candidates: 181. Numerical-only filtered: 0.
+
+| # | host_count | genres | first signs |
+|---|---|---|---|
+| 1 | 159 | 52 | `ABZ13 ABZ396 ABZ230 ABZ579 ABZ411 ABZ411 ABZ545 ABZ411 ABZ411 ABZ366 ABZ13 ABZ39…` |
+| 2 | 157 | 51 | `ABZ396 ABZ230 ABZ579 ABZ411 ABZ411 ABZ545 ABZ411 ABZ411 ABZ366 ABZ13 ABZ396 ABZ4…` |
+| 3 | 155 | 48 | `ABZ480 ABZ13 ABZ396 ABZ230 ABZ579 ABZ411 ABZ411 ABZ545 ABZ411 ABZ411 ABZ366 ABZ1…` |
+| 4 | 177 | 44 | `ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 ABZ142 ABZ…` |
+| 5 | 175 | 44 | `ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 ABZ142 ABZ579 ABZ…` |
+| 6 | 173 | 44 | `ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 ABZ142 ABZ579 ABZ318 ABZ…` |
+| 7 | 167 | 43 | `ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ3…` |
+| 8 | 167 | 43 | `ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ3…` |
+| 9 | 166 | 43 | `ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ322 ABZ324 ABZ343 ABZ1…` |
+| 10 | 168 | 41 | `ABZ78 ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i A…` |
+| 11 | 162 | 41 | `ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ46…` |
+| 12 | 162 | 41 | `ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ112 ABZ142 ABZ579 ABZ461 ABZ32…` |
+| 13 | 154 | 41 | `ABZ6 ABZ449 ABZ570 ABZ70 ABZ347 ABZ207 ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 A…` |
+| 14 | 166 | 38 | `ABZ339 ABZ108 ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ…` |
+| 15 | 180 | 37 | `ABZ13 ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 ABZ5 ABZ339` |
+| 16 | 180 | 37 | `ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 ABZ5 ABZ339 ABZ61` |
+| 17 | 169 | 37 | `ABZ108 ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ…` |
+| 18 | 131 | 38 | `ABZ579 ABZ575 ABZ57 ABZ86 ABZ142 ABZ579 ABZ554 ABZ342 ABZ532 ABZ68 ABZ354 ABZ579` |
+| 19 | 162 | 36 | `ABZ532 ABZ80 ABZ13 ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55` |
+| 20 | 161 | 36 | `ABZ231 ABZ532 ABZ80 ABZ13 ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ34…` |
+| 21 | 160 | 36 | `ABZ131 ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ…` |
+| 22 | 129 | 37 | `ABZ231 ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231…` |
+| 23 | 129 | 37 | `ABZ592 ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231 ABZ579…` |
+| 24 | 127 | 37 | `ABZ138 ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231 ABZ579 ABZ575…` |
+| 25 | 127 | 37 | `ABZ331e+152i ABZ68 ABZ73 … ABZ353 ABZ1 ABZ151 ABZ533 ABZ231 ABZ579 ABZ575 ABZ57 …` |
+| 26 | 161 | 35 | `ABZ80 ABZ13 ABZ97 ABZ73 |GIŠ%GIŠ| ABZ104 ABZ13 ABZ126 ABZ461 ABZ342 ABZ55 ABZ5` |
+| 27 | 153 | 35 | `ABZ554 ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ4…` |
+| 28 | 153 | 35 | `ABZ575 ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ1…` |
+| 29 | 153 | 35 | `ABZ128 ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ1…` |
+| 30 | 153 | 35 | `ABZ86 ABZ308 ABZ342 … ABZ579 ABZ70 ABZ139 ABZ307 ABZ73 ABZ449 ABZ139 ABZ131 ABZ1…` |
+
+## §3 — Top citation graph edges (commentary → base text)
+
+Total edges (this scan): 13. Metadata coverage: 147.52%.
+
+| # | commentary | → | base | weight | shared chunks |
+|---|---|---|---|---|---|
+| 1 | Sm.803 [Commentary] | → | BM.42262 [Astronomy] | 800 | 40 |
+| 2 | Rm-II.181 [Šumma izbu Principal Commentary] | → | IM.74434 [Teratological] | 600 | 30 |
+| 3 | K.3716 [Commentary] | → | Sm.491 [Magic] | 600 | 30 |
+| 4 | K.3716 [Commentary] | → | K.3499 [Divine] | 200 | 10 |
+| 5 | K.3716 [Commentary] | → | K.7873 [CANONICAL] | 140 | 7 |
+| 6 | K.3716 [Commentary] | → | K.7888 [CANONICAL] | 100 | 5 |
+| 7 | K.3716 [Commentary] | → | K.7913 [CANONICAL] | 80 | 4 |
+| 8 | K.3716 [Commentary] | → | K.3217 [CANONICAL] | 80 | 4 |
+| 9 | K.3716 [Commentary] | → | Rm-II.156 [Asaggiga] | 80 | 4 |
+| 10 | K.3716 [Commentary] | → | K.20519 [CANONICAL] | 40 | 2 |
+| 11 | K.3716 [Commentary] | → | K.2380 [Bīt rimki] | 20 | 1 |
+| 12 | K.3716 [Commentary] | → | K.7916 [CANONICAL] | 20 | 1 |
+| 13 | K.3716 [Commentary] | → | K.3880 [Celestial] | 20 | 1 |
+
+## §4 — Top scribal schools
+
+Tablets scanned: 1500. Components above min_size: 48. Elapsed 102.065s.
+
+| # | anchor | members | cohesion | provenance | top period | top genre |
+|---|---|---|---|---|---|---|
+| 1 | BM.34099 | 215 | 0.8932 | Babylon | Hellenistic | CANONICAL → Technical → Astronomy → Astronomical Diaries |
+| 2 | K.4292 | 153 | 0.815 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Celestial |
+| 3 | MLC.2179 | 149 | 0.9143 | Uruk (Warka) | Hellenistic | ARCHIVAL |
+| 4 | K.127 | 61 | 0.7587 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Extispicy |
+| 5 | K.6256 | 29 | 0.7866 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Teratological → Šumma izbu |
+| 6 | K.3453 | 18 | 0.7237 | Kuyunjik | Neo-Assyrian | CANONICAL → Technical → Medicine → Therapeutic |
+| 7 | BM.34989 | 15 | 0.8681 | Babylon | Neo-Babylonian | CANONICAL → Divination → Celestial → Enūma Anu Enlil → Sîn (EAE 1–22) |
+| 8 | K.2159 | 15 | 0.8354 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Terrestrial → Šumma ālu |
+| 9 | BM.35562 | 13 | 0.9125 | Babylon | Parthian | CANONICAL → Technical → Astronomy |
+| 10 | YBC.3952 | 12 | 0.7605 | Uruk (Warka) | Neo-Babylonian | ARCHIVAL |
+| 11 | AO.8555 | 11 | 0.9231 | Uruk | Hellenistic | (unknown) |
+| 12 | BM.42307 | 9 | 0.7802 | Babylon | Neo-Babylonian | (unknown) |
+| 13 | K.2812 | 9 | 0.7754 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Extispicy |
+| 14 | AO.7037 | 8 | 0.9106 | Uruk | Hellenistic | (unknown) |
+| 15 | K.2227 | 8 | 0.7672 | Kuyunjik | Neo-Assyrian | CANONICAL → Divination → Celestial → Enūma Anu Enlil → Adad (EAE 36–49) |
+
+## §5 — Bi-orphan surface (methods paper §3.6 final residue)
+
+(bi-orphan surface query skipped — Cannot read properties of undefined (reading 'length'))
+
+## §6 — Build state at generation time
+
+- v0.20 chunk-hash index (length-20): ~96,654 non-singleton entries
+- v0.21 incipits index (length-10): ~214,896 non-singleton entries
+- Fragment-metadata cache: ~36,317 entries
+- sign2vec corpus-wide: 635 signs (WINDOW=5, MIN_OCC=20)
+- sign2vec ensemble: 6 configs (4.5 MB)
+- sign2vec per-period: NA 435 / NB 452 signs (387 common)
+- Tool count: 74
+
+Methods paper §3.1–§3.14 documents the methodology behind these results.
