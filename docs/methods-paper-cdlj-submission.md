@@ -454,6 +454,20 @@ This refinement is methodologically deeper than the original claim 30 framing. T
 
 ---
 
+### 3.14 Per-Period Embeddings + Per-Archetype Threshold Matrix (v0.26.0)
+
+v0.26 ships two tools that condition the v0.23+ analytical axes on auxiliary structure: **per-period sign embeddings** (diachronic axis) and **per-archetype threshold matrix** (cluster-shape axis).
+
+**§3.14.1 — Per-period sign embeddings.** PPMI+SVD trained separately on Neo-Assyrian (14,193 tablets, 435 signs) and Neo-Babylonian (10,861 tablets, 452 signs) sub-corpora, with 387 signs in the common-vocabulary intersection. The Round-11 audit measured per-sign top-5 neighbor turnover between the two indexes. Distribution: 0% identical-neighborhood, 1.8% one-drift, 7.0% two-drift, 18.3% three-drift, 28.7% four-drift, and **44.2% full top-5 turnover**. Mean common-neighbors at top-5 = 0.94 / 5. The signal is empirically real but methodologically two-confound: (1) genre asymmetry between NA literary (Library of Ashurbanipal canonical material) and NB administrative/archival registers, and (2) independent SVD bases producing different 100-dim coordinate systems per period. The honest framing for §3.14.1 is therefore **"diachronic + register drift, not pure diachronic substitution"**. Isolating the diachronic axis requires register-matched sub-corpora (omen-series-only across NA and NB) — deferred to v0.27.
+
+**§3.14.2 — Per-archetype threshold matrix.** Round-3 Lever 5 (deferred from v0.18.19) cashed out as 7 hand-curated `ArchetypeThresholdProfile` entries, one per archetype from §3.8 + the §3.7.1 commentary-quotation case. The matrix is empirically defensible via cumulative v0.18.x calibration history; the tighter-vs-looser ordering is strict (verbatim_manuscript_chain > everything > compositional_curriculum across all axes). Range of `min_fuzzy_jaccard`: 0.05 (embedded_fragment) → 0.35 (verbatim_manuscript_chain), an order-of-magnitude span that single-default thresholds cannot accommodate. The accompanying best-effort classification heuristic correctly identifies the three canonical exemplars (K.5896 → refrain_bound_liturgical, BM.77056 → compositional_curriculum, K.9508 → embedded_fragment).
+
+**§3.14.3 — The two axes compose conditionally.** Period and archetype are orthogonal: an NA verbatim-chain probe benefits from BOTH the verbatim_manuscript_chain threshold profile AND the NA-period sign embeddings. Future-work direction: explicit composition tools that route queries through period × archetype matrices simultaneously.
+
+**Refined claim 32 (v0.26):** *Conditional calibration outperforms global defaults. Per-archetype threshold tuning produces order-of-magnitude differences in optimal thresholds across the 7 §3.8 archetypes; per-period embedding produces measurable drift signal even when the dominant component is register-confounded. Both axes are diagnostically useful — neither claims to be a replacement for human philological judgment.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

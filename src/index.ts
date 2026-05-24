@@ -79,6 +79,12 @@ import {
   computeLexicalSubstitutionLift,
 } from "./computeLexicalSubstitutionLift.js";
 import {
+  compareSignNeighborsAcrossPeriods,
+} from "./compareSignNeighborsAcrossPeriods.js";
+import {
+  recommendArchetypeThresholds,
+} from "./recommendArchetypeThresholds.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -285,7 +291,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.25.0";
+const VERSION = "0.26.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4816,6 +4822,117 @@ server.registerTool(
   },
 );
 
+// ─── v0.26.0 — compare_sign_neighbors_across_periods (diachronic + register) ─
+
+server.registerTool(
+  "compare_sign_neighbors_across_periods",
+  {
+    description:
+      "Compare a sign's top-K sign2vec neighbors trained separately on Neo-Assyrian vs Neo-Babylonian sub-corpora. v0.26.0 build trained PPMI+SVD on NA (14,193 tablets, 435 signs) and NB (10,861 tablets, 452 signs) with 387 signs in common. Surfaces (a) common_neighbors — signs in top-K of both periods (the durable distributional neighbors), (b) na_only_neighbors / nb_only_neighbors — drift candidates. IMPORTANT CAVEAT (methods paper §3.14): the v0.26 audit found 44.2% of common signs have full top-5 turnover between periods. This is corpus-shape (NA literary vs NB administrative register asymmetry) confounded with diachronic substitution, NOT pure diachronic drift. Output should be read as 'diachronic + register' drift; isolating the diachronic axis requires further sub-corpus matching (e.g. omen-series-only) deferred to v0.27.",
+    inputSchema: {
+      sign: z.string().describe("The query sign. Need not be in both period indexes — per-period presence is reported in `in_na` / `in_nb` flags."),
+      top_k: z.number().int().min(1).max(50).optional().describe("Top-K per period. Default 5, cap 50."),
+    },
+  },
+  async ({ sign, top_k }) => {
+    const SCHEMA = schemaId("compare_sign_neighbors_across_periods");
+    try {
+      const result = compareSignNeighborsAcrossPeriods({ sign, top_k });
+      const lines: string[] = [
+        `Query sign: ${result.query_sign}  ·  in NA: ${result.in_na}  ·  in NB: ${result.in_nb}`,
+        `NA index: ${result.index_stats.na_signs_indexed} signs from ${result.index_stats.na_tablets_in_period} tablets`,
+        `NB index: ${result.index_stats.nb_signs_indexed} signs from ${result.index_stats.nb_tablets_in_period} tablets`,
+        ``,
+        `NA top-5: ${result.neighbors_na.slice(0, 5).map((n) => `${n.sign}(${n.cosine.toFixed(2)})`).join(" ")}`,
+        `NB top-5: ${result.neighbors_nb.slice(0, 5).map((n) => `${n.sign}(${n.cosine.toFixed(2)})`).join(" ")}`,
+        ``,
+        `Drift signals:`,
+        `  common: [${result.drift_signals.common_neighbors.join(", ") || "—"}]`,
+        `  NA-only: [${result.drift_signals.na_only_neighbors.join(", ") || "—"}] (${result.drift_signals.na_only_count})`,
+        `  NB-only: [${result.drift_signals.nb_only_neighbors.join(", ") || "—"}] (${result.drift_signals.nb_only_count})`,
+      ];
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:sign2vec-per-period-na-vs-nb", VERSION, {
+          citation: "Per-period sign2vec embeddings (NA + NB sub-corpora) via PPMI+SVD at WINDOW=5, MIN_OCC=20. v0.26.0. Methods paper §3.14.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_sign_neighbors_across_periods error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query_sign: sign, in_na: false, in_nb: false,
+          neighbors_na: [] as never[], neighbors_nb: [] as never[],
+          drift_signals: { common_neighbors: [], na_only_neighbors: [], nb_only_neighbors: [], na_only_count: 0, nb_only_count: 0 },
+          index_stats: { na_signs_indexed: 0, nb_signs_indexed: 0, na_tablets_in_period: 0, nb_tablets_in_period: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:sign2vec-per-period-na-vs-nb", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.26.0 — recommend_archetype_thresholds (Round-3 Lever 5 cash-out) ──
+
+server.registerTool(
+  "recommend_archetype_thresholds",
+  {
+    description:
+      "Per-archetype calibration matrix for the 7 cluster archetypes documented in methods paper §3.8. Different archetypes have different precision/recall optima across all tools — a verbatim manuscript chain wants min_fuzzy_J ≈ 0.35 while a compositional curriculum wants ≈ 0.08, an order of magnitude difference. v0.26.0 ships the matrix as a single lookup tool, closing the Round-3 Lever 5 deferral from RELEASE-v0.18.19.md. Pass `archetype` to get one profile, `list_all=true` to dump all 7, or `seed_tablet_id` for a best-effort classification heuristic (3/3 accuracy on canonical exemplars K.5896 / BM.77056 / K.9508). Each profile carries thresholds for find_fuzzy_parallels, find_embedded_fragments, find_chunk_parallels, find_thematic_parallel, find_same_scribe_candidates, and reconstruct_cluster — all anchored to specific v0.18.x calibration audit findings via the `rationale` string.",
+    inputSchema: {
+      archetype: z.enum(["compositional_curriculum", "verbatim_manuscript_chain", "refrain_bound_liturgical", "single_collection_school", "embedded_fragment", "cross_period_bridge", "commentary_quotation"]).optional().describe("Specific archetype to look up."),
+      list_all: z.boolean().optional().describe("Return all 7 profiles."),
+      seed_tablet_id: z.string().optional().describe("Optional: classify this seed via a best-effort heuristic and return its archetype's thresholds. NOT authoritative — the matrix is the primary artifact; classification is best-effort."),
+    },
+  },
+  async ({ archetype, list_all, seed_tablet_id }) => {
+    const SCHEMA = schemaId("recommend_archetype_thresholds");
+    try {
+      const result = recommendArchetypeThresholds({ archetype, list_all, seed_tablet_id });
+      const lines: string[] = [];
+      if (result.classified_archetype) {
+        lines.push(`Classified ${seed_tablet_id} as: ${result.classified_archetype}`);
+        if (result.classification_evidence) {
+          lines.push(`  evidence: ${JSON.stringify(result.classification_evidence).slice(0, 300)}`);
+        }
+        lines.push(``);
+      }
+      lines.push(`Profiles returned: ${result.profiles.length}`);
+      lines.push(``);
+      for (const p of result.profiles) {
+        lines.push(`── ${p.archetype}  (exemplar: ${p.exemplar})`);
+        lines.push(`   ${p.description}`);
+        lines.push(`   fuzzy.min_J=${p.find_fuzzy_parallels.min_fuzzy_jaccard}  ·  embedded(cont=${p.find_embedded_fragments.min_containment}, run=${p.find_embedded_fragments.min_run}, ×=${p.find_embedded_fragments.host_size_multiplier})  ·  chunk.min_len=${p.find_chunk_parallels.min_chunk_len}`);
+        lines.push(`   thematic.min_cos=${p.find_thematic_parallel.min_cosine}  ·  scribal.min_overlap=${p.find_same_scribe_candidates.min_signature_overlap}  ·  cluster(min_J=${p.reconstruct_cluster.min_fuzzy_jaccard}, depth=${p.reconstruct_cluster.max_depth})`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:archetype-thresholds-matrix", VERSION, {
+          citation: "Per-archetype calibration matrix for the 7 cluster archetypes (methods paper §3.8). Hand-curated from cumulative v0.18-v0.25 calibration audit history. Round-3 Lever 5 cash-out. v0.26.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`recommend_archetype_thresholds error: ${msg}`, {
+        schema: SCHEMA,
+        data: { profiles: [] as never[], warnings: [msg] },
+        provenance: provenance("local", "local:archetype-thresholds-matrix", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -8039,7 +8156,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 72 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 74 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles))\n`,
     );
     process.exit(0);
   }
