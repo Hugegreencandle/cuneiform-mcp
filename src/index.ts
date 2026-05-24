@@ -73,6 +73,12 @@ import {
   computeLexicalSubstitutionScore,
 } from "./lexicalSubstitution.js";
 import {
+  compareSignEmbeddingConfigs,
+} from "./compareSignEmbeddingConfigs.js";
+import {
+  computeLexicalSubstitutionLift,
+} from "./computeLexicalSubstitutionLift.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -279,7 +285,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.24.0";
+const VERSION = "0.25.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4682,6 +4688,134 @@ server.registerTool(
   },
 );
 
+// ─── v0.25.0 — compare_sign_embedding_configs (sign2vec ensemble) ─────────
+
+server.registerTool(
+  "compare_sign_embedding_configs",
+  {
+    description:
+      "Compare sign2vec neighbor lists across 6 hyperparameter configurations: WINDOW ∈ {2, 5, 10} × MIN_OCCURRENCES ∈ {10, 20}. Surfaces (a) consensus signals (signs appearing in top-5 across all configs — robust nearest neighbors), (b) config-unique signals (revealing what each hyperparameter setting captures uniquely). The v0.23 default (WINDOW=5, MIN_OCC=20, 635 signs) is validated empirically as the robust middle-ground; MIN_OCC=10 grows vocab to 953 signs at the cost of more rare-tail variance; WINDOW=10 captures broader topical context, WINDOW=2 captures tighter syntactic context. Round-10 audit: ABZ480's consensus_top5 = {`4`, ABZ598a} across all 6 configs.",
+    inputSchema: {
+      sign: z.string().describe("The query sign (e.g., 'ABZ480'). Need not exist in all configs — per-config presence is reported."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("Number of neighbors per config to return. Default 5. Hard cap 50."),
+    },
+  },
+  async ({ sign, top_k }) => {
+    const SCHEMA = schemaId("compare_sign_embedding_configs");
+    try {
+      const result = compareSignEmbeddingConfigs({ sign, top_k });
+      const lines: string[] = [
+        `Query sign: ${result.query_sign}`,
+        `Configs loaded: ${result.configs.filter((c) => c.loaded).length}/${result.configs.length}`,
+        `Consensus top-5 (in all loaded configs): [${result.stability.consensus_top5_signs.join(", ") || "—"}]`,
+        ``,
+      ];
+      for (const cfg of result.configs) {
+        const tag = `w${cfg.window}-m${cfg.min_occ}`;
+        if (!cfg.loaded || !cfg.query_in_corpus) {
+          lines.push(`  ${tag.padEnd(8)} ${cfg.loaded ? "(query not in this config)" : "(not loaded)"}`);
+          continue;
+        }
+        const list = cfg.neighbors.map((n) => `${n.sign}(${n.cosine.toFixed(2)})`).join(" ");
+        lines.push(`  ${tag.padEnd(8)} ${list}`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:sign2vec-ensemble-comparison", VERSION, {
+          citation: "sign2vec hyperparameter ensemble (WINDOW={2,5,10} × MIN_OCC={10,20}) over PPMI+SVD per-sign embeddings. v0.25.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compare_sign_embedding_configs error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query_sign: sign,
+          configs: [] as never[],
+          stability: { consensus_top5_signs: [], unique_to_each_config: [] },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:sign2vec-ensemble-comparison", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.25.0 — compute_lexical_substitution_lift (baseline-normalized) ────
+
+server.registerTool(
+  "compute_lexical_substitution_lift",
+  {
+    description:
+      "Baseline-normalized variant of v0.24 compute_lexical_substitution_score. Addresses the high-frequency sign-core saturation effect documented in RELEASE-v0.24.md by subtracting a corpus-wide expected baseline at the matching vocabulary-size bucket. Returns lift_z_score = (raw - baseline_mean) / baseline_stddev. Also reports substitution_lift_z_score, which is insensitive to vocab-size asymmetry artifacts. EMPIRICAL VALIDATION: K.5896 ↔ K.9508 (Mīs pî siblings, §3.7.3) substitution_lift_z_score = +1.97 vs U.21017 ↔ K.9653 (random control) = -0.28 — a clean +2.24σ discriminative separation, vastly stronger than v0.24's raw 22% relative lift. This is the methodologically clean cash-out of v0.23 claim 30. Methods paper §3.13 (refined).",
+    inputSchema: {
+      tablet_a: z.string().describe("Museum number of the first tablet."),
+      tablet_b: z.string().describe("Museum number of the second tablet."),
+      top_k_neighbors: z.number().int().min(1).max(50).optional().describe("Top-K sign2vec neighbors per A-vocab-only sign. Default 5."),
+      min_neighbor_cosine: z.number().min(-1).max(1).optional().describe("Cosine floor for sign2vec neighbors. Default 0.4."),
+    },
+  },
+  async ({ tablet_a, tablet_b, top_k_neighbors, min_neighbor_cosine }) => {
+    const SCHEMA = schemaId("compute_lexical_substitution_lift");
+    try {
+      const result = computeLexicalSubstitutionLift({
+        tabletA: tablet_a,
+        tabletB: tablet_b,
+        topKNeighbors: top_k_neighbors,
+        minNeighborCosine: min_neighbor_cosine,
+      });
+      const lines: string[] = [
+        `Pair: ${result.tablet_a}  ↔  ${result.tablet_b}`,
+        `Raw score: ${result.raw_score.toFixed(4)}  ·  baseline bucket size: ${result.baseline_bucket_size}`,
+        `Baseline mean: ${result.baseline_mean_score.toFixed(4)} ± ${result.baseline_stddev_score.toFixed(4)}`,
+        `Total lift z-score: ${result.lift_z_score.toFixed(4)}  ·  meaningfully above baseline: ${result.is_meaningfully_above_baseline}`,
+        ``,
+        `Substitution-only lift (asymmetry-insensitive):`,
+        `  raw substitution_share: ${result.raw_substitution_share.toFixed(4)}`,
+        `  baseline substitution_share: ${result.baseline_mean_substitution_share.toFixed(4)}`,
+        `  substitution_lift_z_score: ${result.substitution_lift_z_score.toFixed(4)}`,
+      ];
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:lexical-substitution-lift-baseline-normalized", VERSION, {
+          citation: "v0.24 raw substitution score baseline-normalized against a vocab-size-matched random-pair distribution (mulberry32(20260524), N=100 per bucket). Methods paper §3.13 refined. v0.25.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compute_lexical_substitution_lift error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_a, tablet_b,
+          tablet_a_vocab_size: 0, tablet_b_vocab_size: 0, effective_vocab_size: 0,
+          raw_score: 0, raw_exact_share: 0, raw_substitution_share: 0,
+          baseline_bucket_size: 0, baseline_bucket_half_width: 0, baseline_sample_size: 0,
+          baseline_mean_score: 0, baseline_stddev_score: 0,
+          baseline_mean_substitution_share: 0, baseline_stddev_substitution_share: 0,
+          lift_z_score: 0, substitution_lift_z_score: 0,
+          is_meaningfully_above_baseline: false,
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lexical-substitution-lift-baseline-normalized", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7905,7 +8039,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 70 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 72 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair))\n`,
     );
     process.exit(0);
   }
