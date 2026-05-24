@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compare_sign_neighbors_register_matched.schema.json",
+  "title": "compare_sign_neighbors_register_matched data payload",
+  "description": "v0.27.0 sign2vec register-matched diachronic query tool. For a single query sign and a chosen register (divination | magic | literature | auto), returns the top-K nearest neighbors from the (register, NA) and (register, NB) sub-corpus embeddings (same WINDOW=5 / EMBEDDING_DIM=100 hyperparameters, MIN_OCC=20 by default — lowered to 10 for thin buckets). Surfaces the same drift signals as v0.26's compare_sign_neighbors_across_periods PLUS a comparison_with_mixed_register block that quantifies how much of v0.26's mixed-register drift was register-confounded vs how much is residual diachronic signal. Isolates the diachronic axis from the register confound that v0.26 honestly flagged. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query_sign",
+    "register",
+    "register_was_auto_selected",
+    "in_na",
+    "in_nb",
+    "neighbors_na",
+    "neighbors_nb",
+    "drift_signals",
+    "register_matched_drift_topk",
+    "comparison_with_mixed_register",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_sign": {
+      "type": "string",
+      "description": "The sign code submitted by the caller, after whitespace trim."
+    },
+    "register": {
+      "type": "string",
+      "enum": ["divination", "magic", "literature"],
+      "description": "The register the comparison was actually run against. When `register='auto'` was requested, this is the auto-selected register. Otherwise it equals the caller's choice."
+    },
+    "register_was_auto_selected": {
+      "type": "boolean",
+      "description": "True iff the caller passed `register='auto'` (or omitted it) and the tool picked the register that best supports the query sign across both periods."
+    },
+    "in_na": {
+      "type": "boolean",
+      "description": "True iff the query sign passes the (register, NA) MIN_OCC gate and has an embedding vector there."
+    },
+    "in_nb": {
+      "type": "boolean",
+      "description": "True iff the query sign passes the (register, NB) MIN_OCC gate and has an embedding vector there."
+    },
+    "neighbors_na": {
+      "type": "array",
+      "description": "Top-K nearest neighbors in the (register, Neo-Assyrian) embedding space (empty when in_na=false).",
+      "items": {
+        "type": "object",
+        "required": ["sign", "cosine", "occurrences"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Neighbor sign code (e.g. an ABZ identifier)."
+          },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity between query and neighbor in the (register, NA) embedding. Vectors are L2-normalized at build time so cosine == dot product."
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Occurrence count of this neighbor in the register-filtered Neo-Assyrian sub-corpus."
+          }
+        }
+      }
+    },
+    "neighbors_nb": {
+      "type": "array",
+      "description": "Top-K nearest neighbors in the (register, Neo-Babylonian) embedding space (empty when in_nb=false).",
+      "items": {
+        "type": "object",
+        "required": ["sign", "cosine", "occurrences"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Neighbor sign code."
+          },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity between query and neighbor in the (register, NB) embedding."
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Occurrence count of this neighbor in the register-filtered Neo-Babylonian sub-corpus."
+          }
+        }
+      }
+    },
+    "drift_signals": {
+      "type": "object",
+      "required": [
+        "common_neighbors",
+        "na_only_neighbors",
+        "nb_only_neighbors",
+        "na_only_count",
+        "nb_only_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "common_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes appearing in BOTH (register, NA) top-K and (register, NB) top-K. The stable distributional core for this query sign within this register — neighbors that survive the diachronic crossing once register is held constant."
+        },
+        "na_only_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes in (register, NA) top-K but not in (register, NB) top-K. With register held constant, these are stronger candidates for true Neo-Assyrian-period-specific co-occurrence partners."
+        },
+        "nb_only_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes in (register, NB) top-K but not in (register, NA) top-K. With register held constant, these are stronger candidates for true Neo-Babylonian-period-specific co-occurrence partners."
+        },
+        "na_only_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of NA-only neighbors in this register-matched comparison."
+        },
+        "nb_only_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of NB-only neighbors in this register-matched comparison."
+        }
+      }
+    },
+    "register_matched_drift_topk": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of top-K positions whose neighbor sign changed between (register, NA) and (register, NB). Equivalent to max(na_only_count, nb_only_count) when both periods returned K neighbors. 0 when the sign is missing from one period — the comparison_with_mixed_register block uses null in that case."
+    },
+    "comparison_with_mixed_register": {
+      "type": "object",
+      "description": "Quantifies how much of the v0.26 mixed-register drift signal survives when register is held constant. Positive `drift_attributable_to_register` = register-matching reduced the drift signal (consistent with the v0.26 register-confound hypothesis). null values mean one of the required sources (this register's bucket, or the v0.26 per-period cache) is unavailable for the query sign.",
+      "required": [
+        "mixed_register_drift_topk",
+        "register_matched_drift_topk",
+        "drift_attributable_to_register",
+        "mixed_neighbors_na",
+        "mixed_neighbors_nb"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mixed_register_drift_topk": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "v0.26 mixed-register top-K neighbor-list drift for the same sign + same top_k. null if the v0.26 per-period caches are not loaded or the sign is not in BOTH NA and NB mixed-register vocabs."
+        },
+        "register_matched_drift_topk": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "v0.27 register-matched top-K drift for this register. null when the sign is missing from one side of the matched bucket."
+        },
+        "drift_attributable_to_register": {
+          "type": ["integer", "null"],
+          "description": "mixed_register_drift_topk - register_matched_drift_topk. Positive value = register-matching reduced the drift signal, consistent with the v0.26 register-confound hypothesis. Zero = matching had no effect. Negative = matched drift was higher (small-sample noise dominates the register isolation, or the register IS the diachronic axis for this sign). null if either side is null."
+        },
+        "mixed_neighbors_na": {
+          "type": "array",
+          "description": "v0.26 mixed-register Neo-Assyrian top-K neighbors (empty if the sign is not present). Provided for eyeball comparison with neighbors_na.",
+          "items": {
+            "type": "object",
+            "required": ["sign", "cosine", "occurrences"],
+            "additionalProperties": false,
+            "properties": {
+              "sign": { "type": "string" },
+              "cosine": { "type": "number", "minimum": -1, "maximum": 1 },
+              "occurrences": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "mixed_neighbors_nb": {
+          "type": "array",
+          "description": "v0.26 mixed-register Neo-Babylonian top-K neighbors (empty if the sign is not present). Provided for eyeball comparison with neighbors_nb.",
+          "items": {
+            "type": "object",
+            "required": ["sign", "cosine", "occurrences"],
+            "additionalProperties": false,
+            "properties": {
+              "sign": { "type": "string" },
+              "cosine": { "type": "number", "minimum": -1, "maximum": 1 },
+              "occurrences": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "array",
+      "description": "Per-(register, period) bucket stats so callers can sanity-check sample sizes and small-bucket MIN_OCC relaxations. Always reports stats for ALL configured registers and BOTH periods, regardless of which register the query targeted.",
+      "items": {
+        "type": "object",
+        "required": [
+          "register",
+          "period",
+          "signs_indexed",
+          "tablets_in_bucket",
+          "min_occurrences",
+          "loaded"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "register": {
+            "type": "string",
+            "enum": ["divination", "magic", "literature"]
+          },
+          "period": {
+            "type": "string",
+            "enum": ["NA", "NB"]
+          },
+          "signs_indexed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of signs above MIN_OCC in this (register, period) bucket (0 if the cache failed to load)."
+          },
+          "tablets_in_bucket": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of tablets contributing to this bucket."
+          },
+          "min_occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "The MIN_OCC threshold used for this bucket. 20 by default, lowered to 10 for thin buckets per the v0.26 small-sample heuristic."
+          },
+          "loaded": {
+            "type": "boolean",
+            "description": "True iff this (register, period) cache loaded successfully."
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
