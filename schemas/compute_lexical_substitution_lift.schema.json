@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compute_lexical_substitution_lift.schema.json",
+  "title": "compute_lexical_substitution_lift data payload",
+  "description": "v0.25.0 baseline-normalized variant of compute_lexical_substitution_score. The raw v0.24 score in [0,1] suffers from high-frequency sign-core saturation: nearly all pairs return scores in [0.4, 0.8] because determinatives, numerals, and common syllabograms fill both exact-overlap and sign2vec-neighbor matches. v0.25 subtracts a vocab-size-matched corpus baseline (built from N=100 random pairs per bucket) and reports the lift as a z-score above the baseline mean. lift_z_score > 2 corresponds to roughly the 97.5th percentile of the random-pair distribution and is the cleaner methodological signal. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "tablet_a",
+    "tablet_b",
+    "tablet_a_vocab_size",
+    "tablet_b_vocab_size",
+    "effective_vocab_size",
+    "raw_score",
+    "raw_exact_share",
+    "raw_substitution_share",
+    "baseline_bucket_size",
+    "baseline_bucket_half_width",
+    "in_bucket_range",
+    "baseline_sample_size",
+    "baseline_mean_score",
+    "baseline_stddev_score",
+    "baseline_mean_substitution_share",
+    "baseline_stddev_substitution_share",
+    "lift_z_score",
+    "substitution_lift_z_score",
+    "is_meaningfully_above_baseline",
+    "percentile_above_baseline",
+    "substitution_pairs",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_a": { "type": "string" },
+    "tablet_b": { "type": "string" },
+    "tablet_a_vocab_size": { "type": "integer", "minimum": 0 },
+    "tablet_b_vocab_size": { "type": "integer", "minimum": 0 },
+    "effective_vocab_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "max(|A_vocab|, |B_vocab|) — selects the baseline bucket."
+    },
+    "raw_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "v0.24-compatible raw lexical-substitution score."
+    },
+    "raw_exact_share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "raw_substitution_share": { "type": "number", "minimum": 0, "maximum": 1 },
+    "baseline_bucket_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Center vocab_size_target of the bucket chosen for normalization."
+    },
+    "baseline_bucket_half_width": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Half-width fraction (e.g. 0.2 = ±20% of bucket center)."
+    },
+    "in_bucket_range": {
+      "type": "boolean",
+      "description": "True iff effective_vocab_size lies within ±bucket_half_width of bucket_size."
+    },
+    "baseline_sample_size": { "type": "integer", "minimum": 0 },
+    "baseline_mean_score": { "type": "number" },
+    "baseline_stddev_score": { "type": "number", "minimum": 0 },
+    "baseline_mean_substitution_share": { "type": "number" },
+    "baseline_stddev_substitution_share": { "type": "number", "minimum": 0 },
+    "lift_z_score": {
+      "type": "number",
+      "description": "(raw_score − baseline_mean_score) / baseline_stddev_score — the primary lift signal."
+    },
+    "substitution_lift_z_score": {
+      "type": "number",
+      "description": "Same z-formula applied to the substitution-only component."
+    },
+    "is_meaningfully_above_baseline": {
+      "type": "boolean",
+      "description": "True iff lift_z_score > 2 (≈97.5th percentile of the random-pair distribution)."
+    },
+    "percentile_above_baseline": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Rough one-tail percentile estimate from lift_z_score via the standard-normal CDF approximation."
+    },
+    "substitution_pairs": {
+      "type": "array",
+      "description": "Representative substitution pairs from the v0.24 raw computation, ranked by cosine desc.",
+      "items": {
+        "type": "object",
+        "required": ["a_sign", "b_sign", "cosine"],
+        "additionalProperties": false,
+        "properties": {
+          "a_sign": { "type": "string" },
+          "b_sign": { "type": "string" },
+          "cosine": { "type": "number", "minimum": -1, "maximum": 1 }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "sign_embeddings_loaded",
+        "sign_embeddings_total_indexed",
+        "sign_embeddings_dim",
+        "sign_embeddings_window",
+        "corpus_tablets",
+        "a_signs_without_embedding",
+        "a_signs_probed",
+        "top_k_neighbors",
+        "min_neighbor_cosine",
+        "baseline_loaded",
+        "baseline_total_buckets"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sign_embeddings_loaded": { "type": "boolean" },
+        "sign_embeddings_total_indexed": { "type": "integer", "minimum": 0 },
+        "sign_embeddings_dim": { "type": "integer", "minimum": 0 },
+        "sign_embeddings_window": { "type": "integer" },
+        "corpus_tablets": { "type": "integer", "minimum": 0 },
+        "a_signs_without_embedding": { "type": "integer", "minimum": 0 },
+        "a_signs_probed": { "type": "integer", "minimum": 0 },
+        "top_k_neighbors": { "type": "integer", "minimum": 1, "maximum": 50 },
+        "min_neighbor_cosine": { "type": "number", "minimum": -1, "maximum": 1 },
+        "baseline_loaded": { "type": "boolean" },
+        "baseline_total_buckets": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
