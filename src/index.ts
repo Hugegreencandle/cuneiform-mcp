@@ -55,6 +55,12 @@ import {
   buildCitationGraph,
 } from "./citationGraph.js";
 import {
+  findIncipits,
+} from "./findIncipits.js";
+import {
+  prioritizeValidationQueue,
+} from "./validationQueue.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -261,7 +267,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.20.0";
+const VERSION = "0.21.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4154,6 +4160,170 @@ server.registerTool(
 // Silences unused-import lint when chunkIndexStats is only used in --smoke summary.
 void chunkIndexStats;
 
+// ─── v0.21.0 — find_incipits (length-10 chunk-hash index) ────────────────
+
+server.registerTool(
+  "find_incipits",
+  {
+    description:
+      "Surface short opening formulae (incipits) — length-10 trigram windows reproduced across many tablets — from the v0.21.0 incipits-index. Complements v0.20.0 find_formulaic_passages (length-20 windows for substantive passages). Length-10 catches the 3-8 sign canonical openings that scholars use to identify compositions (e.g. EN₂ Šurpu-tu-šú, i-nu Šamaš É u-pa-az-zar) but admits more numerical-table noise — defaults are calibrated tighter (min_hosts=50 vs 20). The exclude_numerical_only flag drops chunks whose signs are ≥70% ABZ480/ABZ411 (cuneiform numeral 1 + Diš variants — calendrical/numerical tables, NOT text incipits). Ranks by host_genres_spanned × log(1 + host_count) — same novelty score as find_formulaic_passages.",
+    inputSchema: {
+      min_hosts: z
+        .number()
+        .int()
+        .min(2)
+        .optional()
+        .describe("Drop incipit candidates with fewer than this many host tablets. Default 50. Length-10 windows are noisier than length-20; the higher floor compensates."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(200)
+        .optional()
+        .describe("Cap on returned incipits, ranked by novelty_score desc. Default 30. Hard cap 200."),
+      exclude_prefixes: z
+        .array(z.string())
+        .optional()
+        .describe("Drop hosts whose tablet ID starts with any of these prefixes. Useful for suppressing colophon-prototype prefixes like 'Asb.'."),
+      exclude_numerical_only: z
+        .boolean()
+        .optional()
+        .describe("Drop chunks whose signs are ≥70% ABZ480 / ABZ411 (cuneiform numeral 1 family). Default true. These are calendrical/numerical-table fragments masquerading as incipits at length-10 granularity. Set false for exploratory full-recall sweeps."),
+      cross_genre_only: z
+        .boolean()
+        .optional()
+        .describe("Keep only incipits with host_genres_spanned ≥ 2. Default false."),
+    },
+  },
+  async ({ min_hosts, top_k, exclude_prefixes, exclude_numerical_only, cross_genre_only }) => {
+    const SCHEMA = schemaId("find_incipits");
+    try {
+      const result = findIncipits({
+        minHosts: min_hosts,
+        topK: top_k,
+        excludePrefixes: exclude_prefixes,
+        excludeNumericalOnly: exclude_numerical_only,
+        crossGenreOnly: cross_genre_only,
+      });
+      const lines: string[] = [
+        `Incipits index loaded: ${result.index_stats.loaded}`,
+        `Total chunks in index: ${result.index_stats.total_chunks_in_index}  ·  candidates above min_hosts: ${result.index_stats.candidates_above_threshold}  ·  after filters: ${result.index_stats.after_filters}`,
+        `Numerical-only chunks filtered: ${result.index_stats.numerical_only_filtered}  ·  metadata coverage: ${result.index_stats.metadata_coverage_pct}%`,
+        ``,
+        `Incipits returned: ${result.incipits.length}`,
+        ``,
+      ];
+      for (const inc of result.incipits) {
+        lines.push(`── ${inc.chunk_hash.slice(0, 32)}…  (host_count=${inc.host_count}, host_genres_spanned=${inc.host_genres_spanned}, novelty=${inc.novelty_score})`);
+        const signsPreview = inc.chunk_signs.length > 120 ? inc.chunk_signs.slice(0, 120) + "…" : inc.chunk_signs;
+        lines.push(`     signs: ${signsPreview}`);
+        const hostPreview = inc.host_tablets.slice(0, 3).map((h) => h.tablet_id).join(", ");
+        lines.push(`     host preview: ${hostPreview}${inc.host_tablets.length > 3 ? ` … +${inc.host_tablets.length - 3} more` : ""}`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:incipits-from-length-10-chunk-hash-index", VERSION, {
+          citation:
+            "Length-10 chunk-hash incipit discovery over the eBL all-signs-full.json corpus. v0.21.0. Complements v0.20.0 find_formulaic_passages (length-20); the numerical-only filter suppresses calendrical-table false positives unique to the shorter-window regime.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_incipits error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          incipits: [] as never[],
+          index_stats: { loaded: false, total_chunks_in_index: 0, candidates_above_threshold: 0, after_filters: 0, numerical_only_filtered: 0, metadata_coverage_pct: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:incipits-from-length-10-chunk-hash-index", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.21.0 — prioritize_validation_queue (active-learning ranker) ──────
+
+server.registerTool(
+  "prioritize_validation_queue",
+  {
+    description:
+      "Active-learning ranker for the manual-review backlog. Scores candidate tablets (bi-orphans from find_anomalous_tablets, isolate compositions, chunk-discovery surfaces) by information-gain-from-manual-review. Rewards: chunk-host count (log-scaled), bi-orphan status (lex+thematic isolation is rarer than lex-only and represents the methods-paper §3.6 prize), missing fragment-metadata, distinct anomaly_kinds. Penalizes: already in established clusters (low marginal gain), well-curated tablets with many chunk hosts (well-understood already), pure dead ends with no anomaly flags. Returns ranked queue with reasons[] strings explaining each candidate's score — transparency over scoring sophistication. Scope: 'bi_orphans' (the §3.6 final-1 + lex/thematic singletons), 'chunk_discoveries' (find_chunk_parallels hubs), or 'all' (default).",
+    inputSchema: {
+      scope: z
+        .enum(["bi_orphans", "chunk_discoveries", "all"])
+        .optional()
+        .describe("Seed enumeration scope. 'bi_orphans' restricts to the anomaly-index bi-orphan + lex/thematic singleton surface (the methods-paper §3.6 territory). 'chunk_discoveries' uses chunk-host hubs from the v0.20 chunk-hash index. 'all' (default) unifies both."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Number of candidates to return. Default 20. Hard cap 100."),
+      min_score: z
+        .number()
+        .optional()
+        .describe("Optional score floor — only return candidates above this threshold. Unset by default."),
+    },
+  },
+  async ({ scope, top_k, min_score }) => {
+    const SCHEMA = schemaId("prioritize_validation_queue");
+    try {
+      const result = prioritizeValidationQueue({
+        scope,
+        topK: top_k,
+        minScore: min_score,
+      });
+      const lines: string[] = [
+        `Scope: ${result.query.scope}  ·  top_k: ${result.query.top_k}  ·  min_score: ${result.query.min_score ?? "—"}`,
+        `Candidates considered: ${result.index_stats.candidates_considered}  ·  bi_orphan_seeds: ${result.index_stats.bi_orphan_seeds}  ·  isolate_seeds: ${result.index_stats.isolate_seeds}  ·  chunk_discovery_seeds: ${result.index_stats.chunk_discovery_seeds}`,
+        ``,
+        `Queue (top ${result.queue.length}):`,
+        ``,
+      ];
+      for (const [i, entry] of result.queue.entries()) {
+        lines.push(`${i + 1}. ${entry.tablet_id}  ·  score=${entry.score}`);
+        for (const reason of entry.reasons.slice(0, 4)) {
+          lines.push(`     · ${reason}`);
+        }
+        if (entry.reasons.length > 4) lines.push(`     · (+${entry.reasons.length - 4} more reasons)`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:validation-queue-prioritization", VERSION, {
+          citation:
+            "Information-gain-from-manual-review ranking over the anomaly-index + chunk-index + fragment-metadata cache. v0.21.0. Surfaces the highest-marginal-utility tablets for scholar review from a unified candidate set (bi-orphans + isolates + chunk-discovery hubs).",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`prioritize_validation_queue error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { scope: scope ?? "all", top_k: top_k ?? 20, min_score: min_score ?? null },
+          queue: [] as never[],
+          index_stats: { candidates_considered: 0, bi_orphan_seeds: 0, isolate_seeds: 0, chunk_discovery_seeds: 0, anomaly_index_loaded: false, chunk_index_loaded: false },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:validation-queue-prioritization", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7377,7 +7547,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 64 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 66 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker))\n`,
     );
     process.exit(0);
   }
