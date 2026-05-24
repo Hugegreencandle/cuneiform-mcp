@@ -67,6 +67,9 @@ import {
   buildScribalSchoolGraph,
 } from "./scribalSchoolGraph.js";
 import {
+  findSimilarSigns,
+} from "./findSimilarSigns.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -273,7 +276,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.22.0";
+const VERSION = "0.23.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4511,6 +4514,77 @@ server.registerTool(
   },
 );
 
+// ─── v0.23.0 — find_similar_signs (sign2vec sign-level semantic embeddings) ─
+
+server.registerTool(
+  "find_similar_signs",
+  {
+    description:
+      "Find the nearest-neighbor signs of a query sign in the v0.23.0 sign2vec embedding space. Embeddings are learned from corpus co-occurrence via PPMI + truncated SVD (Levy & Goldberg 2014, Halko–Martinsson–Tropp 2011 randomized SVD), L2-normalized so cosine similarity is dot product. ~635 signs indexed at MIN_OCCURRENCES=20 covering 99.6% of the corpus's ~4.87M sign occurrences. The semantic axis BELOW v0.15's tablet-level thematic embeddings — operates at the sign granularity, not the tablet granularity. Useful for: (a) discovering empirical sign equivalences (logogram substitutions, phonetic clusters) without scholar curation, (b) probing folk-Assyriological claims of sign kinship against distributional reality (e.g., the v0.21 find_incipits numerical-only filter hypothesizes ABZ480/ABZ411 are interchangeable; v0.23 says their cosine is 0.097 — falsification of the equivalence assumption), (c) semantic-aware lacuna restoration in v0.24+.",
+    inputSchema: {
+      sign: z.string().describe("The query sign (e.g., 'ABZ480', 'ABZ013', or any sign code present in the eBL signs corpus). Must appear with ≥ MIN_OCCURRENCES=20 occurrences in the corpus to be embedded."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("Number of nearest neighbors to return, ranked by cosine descending. Default 10. Hard cap 50."),
+      min_cosine: z
+        .number()
+        .min(-1)
+        .max(1)
+        .optional()
+        .describe("Optional cosine floor — drop neighbors below this threshold. Useful for filtering low-confidence matches. Default 0.0 (no floor; ranking handles low-confidence)."),
+    },
+  },
+  async ({ sign, top_k, min_cosine }) => {
+    const SCHEMA = schemaId("find_similar_signs");
+    try {
+      const result = findSimilarSigns({
+        sign,
+        topK: top_k,
+        minCosine: min_cosine,
+      });
+      const lines: string[] = [
+        `Query sign: ${result.query_sign}  ·  in corpus: ${result.query_in_corpus}`,
+        `Index: ${result.index_stats.total_signs_indexed} signs indexed at ${result.index_stats.embedding_dim} dimensions  ·  window=±${result.index_stats.window_size}`,
+        `Build timestamp: ${result.index_stats.build_timestamp}`,
+        ``,
+        `Top ${result.neighbors.length} nearest neighbors:`,
+      ];
+      for (const [i, n] of result.neighbors.entries()) {
+        lines.push(`  ${(i + 1).toString().padStart(2)}.  ${n.sign.padEnd(12)}  cos=${n.cosine.toFixed(4)}  occ=${n.occurrences}`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:sign2vec-ppmi-svd-embeddings", VERSION, {
+          citation:
+            "Sign-level semantic embeddings via PPMI + truncated SVD (Levy & Goldberg 2014; randomized SVD per Halko-Martinsson-Tropp 2011) over the eBL all-signs-full.json corpus. v0.23.0. WINDOW=5, MIN_OCCURRENCES=20, EMBEDDING_DIM=100. Methods paper §3.12.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_similar_signs error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query_sign: sign,
+          query_in_corpus: false,
+          neighbors: [] as never[],
+          index_stats: { total_signs_indexed: 0, embedding_dim: 0, window_size: 0, build_timestamp: "" },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:sign2vec-ppmi-svd-embeddings", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7734,7 +7808,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 68 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 69 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings))\n`,
     );
     process.exit(0);
   }
