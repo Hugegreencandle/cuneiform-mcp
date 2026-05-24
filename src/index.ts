@@ -94,6 +94,15 @@ import {
   findFormulaicPassagesPerPeriod,
 } from "./findFormulaicPassagesPerPeriod.js";
 import {
+  computeJointPairScore,
+} from "./computeJointPairScore.js";
+import {
+  analyzeJoinsGraph,
+} from "./analyzeJoinsGraph.js";
+import {
+  findNumericalChunks,
+} from "./findNumericalChunks.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -300,7 +309,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.28.0";
+const VERSION = "0.29.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5101,6 +5110,173 @@ server.registerTool(
   },
 );
 
+// ─── v0.29.0 — compute_joint_pair_score (cross-axis Bayesian fusion) ──────
+
+server.registerTool(
+  "compute_joint_pair_score",
+  {
+    description:
+      "v1.0-readiness bootstrap: logistic regression on the 5-axis feature vector (lex_jaccard, fuzzy_jaccard, thematic_cosine, scribal_cosine, substitution_lift_z) trained on 12 labeled positives + 40 synthetic negatives from the methods paper. Training accuracy 98.1% (51/52). Returns P(positive) + per-feature contribution decomposition + explicit warning that the model is BOOTSTRAP-QUALITY (small label set; v1.0 will need ≥100 labeled pairs for production). Coefficients reveal fuzzy_jaccard is the strongest predictor (+1.94), followed by lex_jaccard (+0.82) and thematic_cosine (+0.76). Methods paper §3.16.",
+    inputSchema: {
+      tablet_a: z.string().describe("Museum number of the first tablet."),
+      tablet_b: z.string().describe("Museum number of the second tablet."),
+    },
+  },
+  async ({ tablet_a, tablet_b }) => {
+    const SCHEMA = schemaId("compute_joint_pair_score");
+    try {
+      const result = computeJointPairScore({ tabletA: tablet_a, tabletB: tablet_b });
+      const lines: string[] = [
+        `Pair: ${result.tablet_a}  ↔  ${result.tablet_b}`,
+        `P(positive): ${result.probability_positive.toFixed(4)}  ·  log_odds: ${result.log_odds.toFixed(4)}`,
+        `Classification: ${result.classification}`,
+        ``,
+        `Features:`,
+        `  lex_jaccard:        ${result.features.lex_jaccard.toFixed(4)}`,
+        `  fuzzy_jaccard:      ${result.features.fuzzy_jaccard.toFixed(4)}`,
+        `  thematic_cosine:    ${result.features.thematic_cosine.toFixed(4)}`,
+        `  scribal_cosine:     ${result.features.scribal_cosine.toFixed(4)}`,
+        `  substitution_lift_z: ${result.features.substitution_lift_z.toFixed(4)}`,
+        ``,
+        `Per-feature contribution to log-odds:`,
+      ];
+      for (const c of result.per_feature_contribution) {
+        lines.push(`  ${c.feature.padEnd(22)} weight=${c.weight.toFixed(4)}  contribution=${c.contribution_to_log_odds.toFixed(4)}`);
+      }
+      lines.push(``);
+      lines.push(`Model: trained on n=${result.model_metadata.trained_on_n_positives} positives + n=${result.model_metadata.trained_on_n_negatives} negatives, training accuracy ${result.model_metadata.training_accuracy.toFixed(4)}`);
+      if (result.model_metadata.warning) lines.push(`⚠ ${result.model_metadata.warning}`);
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:bayesian-fusion-logistic-regression", VERSION, {
+          citation: "Cross-axis Bayesian fusion via logistic regression on 5 axes (lex/fuzzy/thematic/scribal/substitution-lift). Bootstrap from methods-paper labeled pairs. v0.29.0. Methods paper §3.16.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compute_joint_pair_score error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_a, tablet_b,
+          features: { lex_jaccard: 0, fuzzy_jaccard: 0, thematic_cosine: 0, scribal_cosine: 0, substitution_lift_z: 0 },
+          features_standardized: { lex_jaccard: 0, fuzzy_jaccard: 0, thematic_cosine: 0, scribal_cosine: 0, substitution_lift_z: 0 },
+          probability_positive: 0, log_odds: 0, classification: "uncertain",
+          per_feature_contribution: [] as never[],
+          model_metadata: { trained_on_n_positives: 0, trained_on_n_negatives: 0, training_accuracy: 0, warning: msg },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:bayesian-fusion-logistic-regression", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.29.0 — analyze_joins_graph (manuscript joins corpus-wide) ─────────
+
+server.registerTool(
+  "analyze_joins_graph",
+  {
+    description:
+      "Corpus-wide manuscript-join graph analysis. Two modes: (a) per-tablet — given a tablet, return its direct-join neighborhood resolved to tablet IDs + period + genre; (b) top-hosts — return top-K join-rich tablets corpus-wide. EMPIRICAL: 4,361 fragments have ≥1 join, 17,203 total join edges, top join-rich tablet K.7563 with 70 joins. Per-tablet mode goes live to eBL API per call (uncached); top-hosts reads the pre-built joins-graph cache. Used by Assyriologists to surface manuscript reconstruction candidates (physical joins) and multi-piece tablet identifications.",
+    inputSchema: {
+      tablet_id: z.string().optional().describe("Mode (a): query this tablet's join neighborhood. Provide either this OR list_top_hosts."),
+      list_top_hosts: z.boolean().optional().describe("Mode (b): return the top-K join-rich tablets corpus-wide instead of a per-tablet query."),
+      top_k: z.number().int().min(1).max(500).optional().describe("Top-K for top_hosts mode. Default 30."),
+    },
+  },
+  async ({ tablet_id, list_top_hosts, top_k }) => {
+    const SCHEMA = schemaId("analyze_joins_graph");
+    try {
+      const result = await analyzeJoinsGraph({ tabletId: tablet_id, listTopHosts: list_top_hosts, topK: top_k });
+      const lines: string[] = [
+        `Mode: ${result.mode}`,
+        `Index stats: ${result.index_stats.total_fragments_with_joins} fragments with joins, ${result.index_stats.total_join_edges} edges, avg ${result.index_stats.avg_joins_per_join_host.toFixed(2)}/host`,
+        ``,
+      ];
+      if (result.join_neighborhood) {
+        lines.push(`Tablet: ${result.tablet_id}  ·  direct joins: ${result.join_neighborhood.joins_count}`);
+        for (const j of result.join_neighborhood.direct_joins.slice(0, 20)) {
+          lines.push(`  ${j.tablet_id}  (${j.period ?? "?"} · ${j.genre ?? "?"})`);
+        }
+      }
+      if (result.top_hosts) {
+        lines.push(`Top ${result.top_hosts.length} join-rich tablets:`);
+        for (const [i, h] of result.top_hosts.entries()) {
+          lines.push(`  ${(i + 1).toString().padStart(2)}. ${h.tablet_id}  joins=${h.joins_count}  (${h.period ?? "?"} · ${h.primary_genre ?? "?"})`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:joins-graph-from-fragment-metadata", VERSION, {
+          citation: "Corpus-wide manuscript joins graph extracted from cached fragment-metadata. Per-tablet mode fetches live from eBL. v0.29.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`analyze_joins_graph error: ${msg}`, {
+        schema: SCHEMA,
+        data: { mode: "top-hosts" as const, index_stats: { total_fragments_with_joins: 0, total_join_edges: 0, avg_joins_per_join_host: 0 }, warnings: [msg] },
+        provenance: provenance("local", "local:joins-graph-from-fragment-metadata", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.29.0 — find_numerical_chunks (data-driven sign2vec replacement) ───
+
+server.registerTool(
+  "find_numerical_chunks",
+  {
+    description:
+      "Data-driven numerical-context chunk detection using the v0.28 sign2vec k-means clustering. Replaces v0.21 find_incipits' hardcoded {ABZ480, ABZ411} numerical filter with a 112-sign empirically-derived numerical-sign-set drawn from sign2vec clusters #5 + #9. Surfaces chunks whose signs are ≥50% numerical-cluster members. v0.21 → v0.30 overlap on the length-10 index: 100% (88/88 v0.21-filtered chunks all caught), plus 21,389 additional numerical chunks v0.21 missed (chunks numerical by sign2vec composition but not pure ABZ480/ABZ411). Methods paper §3.13.1 — the principled replacement for the v0.21 folk-Assyriological filter.",
+    inputSchema: {
+      min_numerical_density: z.number().min(0).max(1).optional().describe("Fraction of chunk signs in the empirical numerical-sign-set. Default 0.5."),
+      min_hosts: z.number().int().min(2).optional().describe("Host-count floor. Default 5."),
+      top_k: z.number().int().min(1).max(500).optional().describe("Default 30."),
+    },
+  },
+  async ({ min_numerical_density, min_hosts, top_k }) => {
+    const SCHEMA = schemaId("find_numerical_chunks");
+    try {
+      const result = findNumericalChunks({ min_numerical_density, min_hosts, top_k });
+      const lines: string[] = [
+        `Empirical numerical sign-set size: ${result.numerical_sign_set_size}  (k=${result.index_stats.k_used_for_clustering})`,
+        `Chunks examined: ${result.index_stats.chunks_examined}  ·  above density threshold: ${result.index_stats.chunks_above_density_threshold}  ·  returned: ${result.chunks.length}`,
+        ``,
+      ];
+      for (const [i, c] of result.chunks.entries()) {
+        const preview = c.chunk_signs.length > 80 ? c.chunk_signs.slice(0, 80) + "…" : c.chunk_signs;
+        lines.push(`  ${(i + 1).toString().padStart(2)}. hosts=${c.host_count} density=${c.numerical_density.toFixed(3)} (${c.numerical_sign_count}/${c.total_signs})  ${preview}`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:numerical-chunks-from-sign2vec-clusters", VERSION, {
+          citation: "Numerical-chunk detection via the v0.28 sign2vec k-means cluster #5 + #9 (numerical class). Empirical 112-sign vocabulary, replaces v0.21 hardcoded 2-sign filter. v0.29.0. Methods paper §3.13.1.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_numerical_chunks error: ${msg}`, {
+        schema: SCHEMA,
+        data: { numerical_sign_set: [] as never[], numerical_sign_set_size: 0, chunks: [] as never[], index_stats: { chunks_examined: 0, chunks_above_density_threshold: 0, k_used_for_clustering: 12 }, warnings: [msg] },
+        provenance: provenance("local", "local:numerical-chunks-from-sign2vec-clusters", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -8324,7 +8500,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 77 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 80 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list))\n`,
     );
     process.exit(0);
   }

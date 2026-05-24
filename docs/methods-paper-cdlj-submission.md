@@ -486,6 +486,28 @@ The clean verdict: **the diachronic axis is real and population-dominant**. Regi
 
 ---
 
+### 3.15 Sign-Class Clustering + Per-Period Chunk-Hash Partition (v0.28)
+
+K-means on the v0.23 sign2vec embedding space at k=12 surfaces four empirical sign-classes without scholar curation: 2 numerical clusters (one anchored by ABZ480 with `4`/`0`/BAHAR₂ as nearest representatives; one anchored by ABZ411 with `27`/ABZ427/`19`), 3 compound-logogram clusters, 1 phonetic-reading-family cluster (`diš`/`u`/`aš`), 6 ABZ-syllabogram clusters. The numerical class is geometrically tightest (intra-cosine 0.378 vs corpus median ~0.14); resolution requires k ≥ 12 (at k=8, `4` merges into a common-syllabogram cluster — frequency dominates at coarse k).
+
+The corpus-wide chunk-hash index of §3.10 (v0.20) partitions by `script.period` into Neo-Assyrian (n=7,831 tablets, **50,083** non-singleton length-20 windows) and Neo-Babylonian (n=7,591 tablets, **11,979** non-singleton windows). The 4.2× density gap is corpus-shape, not methodology — identical WINDOW=20 + X-skip rule applied to both partitions. Top NA-only formula has 120 NA hosts and **0 NB transmission** (anchored by BM accession tablets 1879,0708.49 / 1879,0708.48 / 1880,0719.152 — a candidate Library-of-Ashurbanipal canonical text registered to those BM acquisition numbers).
+
+**Claim 33:** *Sign-class structure emerges empirically from k-means clustering of the sign2vec embedding space. At k=12, the 635-sign vocabulary partitions into 4 surface-form-coherent classes; cluster geometry directly reflects Assyriological notions of sign type without scholar curation.*
+
+**Claim 34:** *Per-period chunk-hash partition reveals corpus-shape asymmetry between NA and NB. NA's canonical-period corpus supports top-host counts of 120 at length 20; NB's predominantly administrative/archival corpus caps at 8. The 4.2× density gap is corpus structure, not methodology. NA-only formulae the v0.20 mixed-period tool can't isolate become visible.*
+
+### 3.16 Cross-Axis Bayesian Fusion + Manuscript Joins + Smart Numerical Filter (v0.29)
+
+Three orthogonal v0.29 deliverables: cross-axis Bayesian fusion (the v1.0-readiness item), corpus-wide manuscript-joins graph, and data-driven numerical-chunk detection (the principled replacement for v0.21's hardcoded filter).
+
+**§3.16.1 — Cross-axis Bayesian fusion bootstrap.** Logistic regression on the 5-axis feature vector (lex_jaccard, fuzzy_jaccard, thematic_cosine, scribal_cosine, substitution_lift_z) trained on 12 methods-paper-confirmed positive pairs + 40 synthetic negatives. Training accuracy 98.1% (51/52). Feature importance: fuzzy_jaccard β=+1.94 (dominant), lex_jaccard +0.82, thematic_cosine +0.76, scribal_cosine +0.28, substitution_lift_z −1.01. **Claim 35:** *Cross-axis Bayesian fusion is feasible with a small label set as a bootstrap; production-quality fusion requires ≥100 labeled pairs (v1.0 prerequisite). Fuzzy_jaccard emerges as the dominant predictor, validating the v0.18.2 fuzzy-axis investment as the load-bearing whole-tablet axis.*
+
+**§3.16.2 — Corpus-wide manuscript joins.** The eBL `joins[]` field surfaces 4,361 fragments with ≥1 join, 17,203 total edges, average 3.94 joins per host. **K.7563 is the densest reconstruction candidate at 70 joins** — a candidate for philological investigation as the corpus's most-reconstructed single manuscript. The Nineveh Medical Compendium VI Teeth cluster (K.2290, K.2419, K.8946 each at 28 joins) is the largest documented multi-piece reconstruction in therapeutic medicine. **Claim 36:** *Manuscript reconstruction signal is independent of the orthographic/thematic/scribal axes and surfaces compositionally-distinct discovery targets. Physical joins encode reconstruction confidence the other axes can't directly access.*
+
+**§3.16.3 — Data-driven numerical-chunk detection.** v0.21's `find_incipits` numerical filter used a hardcoded 2-sign list `{ABZ480, ABZ411}`. The v0.23 sign2vec embedding falsified the interchangeability assumption (cosine 0.097); the v0.28 k-means clustering revealed the numerical class is two structurally-distinct clusters spanning 112 signs. v0.29 ships the principled replacement: an empirical numerical-sign-set drawn from clusters #5 + #9, used as the density-based filter. **v0.21 → v0.30 overlap: 100% (88/88 v0.21-flagged chunks all caught), plus 21,389 additional numerical chunks v0.21 missed.** The §3.13.1 v0.21-filter "correct-behavior-wrong-rationale" finding gets its principled cash-out: the filter's behavior was right by accident, but the same behavior is now derivable from the empirical embedding space.
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
