@@ -466,6 +466,24 @@ v0.26 ships two tools that condition the v0.23+ analytical axes on auxiliary str
 
 **Refined claim 32 (v0.26):** *Conditional calibration outperforms global defaults. Per-archetype threshold tuning produces order-of-magnitude differences in optimal thresholds across the 7 §3.8 archetypes; per-period embedding produces measurable drift signal even when the dominant component is register-confounded. Both axes are diagnostically useful — neither claims to be a replacement for human philological judgment.*
 
+### §3.14.4 — Register-matched per-period embeddings (v0.27)
+
+v0.27 closes the §3.14.1 honest-caveat thread by training six register-matched (genre × period) sub-corpora: (divination, magic, literature) × (NA, NB). Each bucket runs the same v0.23 PPMI+SVD pipeline at WINDOW=5; MIN_OCC is relaxed from 20 → 10 in registers where the smaller bucket has fewer than 1,500 tablets (magic and literature). Per-bucket sample sizes: divination 3,568 NA + 1,580 NB tablets, magic 1,201 NA + 1,254 NB, literature 1,403 NA + 1,117 NB.
+
+The Round-12 audit measures the same top-5 mean drift metric as v0.26's Round-11, but only on the (NA-register, NB-register) paired indexes for each register. Results:
+
+| Register | n paired signs | Matched mean drift | v0.26 mixed mean | Δ |
+|---|---:|---:|---:|---:|
+| divination | 289 | **3.772** / 5 | 4.048 / 5 | −0.277 (−6.8%) |
+| magic | 312 | 4.083 / 5 | 4.035 / 5 | +0.048 (+1.2%) |
+| literature | 297 | 4.293 / 5 | 4.057 / 5 | +0.236 (+5.8%, small-sample noise) |
+
+The clean verdict: **the diachronic axis is real and population-dominant**. Register-matching reduces drift only modestly (the largest reduction, divination at -6.8%, is well within the noise band of the smaller registers). The bulk of v0.26's mixed-register drift signal is genuinely diachronic, not register-confounded at the population level.
+
+**But** v0.26's named "diachronic candidates" (ABZ480, ABZ411, ABZ342) tell a different story at the individual-sign level: under register matching, ABZ480 drift collapses from 5/5 to 3/5 (divination), ABZ411 from 5/5 to 3/5 (magic), ABZ342 from 5/5 to 2/5 (divination). **Specific high-frequency signs were the channel through which register confound entered v0.26's mixed-register report** — even though the population-level claim held up.
+
+**Refined claim 32 (v0.27):** *The conditional-calibration axes compose, but their empirical interpretation depends on the slice. Population-level register matching confirms the diachronic axis dominates v0.26's mixed-register signal (~93% of the drift is genuine diachronic); individual-sign-level register matching reveals that v0.26's headline named candidates were the high-leverage tail through which the register confound entered the methodologically-noisier mixed result. Both v0.26's honest caveat and its drift-signal claim survive, applied to different parts of the distribution. The methodological lesson is that aggregate-level and case-level findings can diverge under axis-control, and analysts should report at both granularities when the distribution is heavy-tailed.*
+
 ---
 
 ## 4. The Calibration Audit Methodology
