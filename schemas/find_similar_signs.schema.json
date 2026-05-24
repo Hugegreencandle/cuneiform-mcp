@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_similar_signs.schema.json",
+  "title": "find_similar_signs data payload",
+  "description": "v0.23.0 sign2vec query tool. Returns the top-K signs whose distributional-context vectors are closest in cosine to the query sign. Embeddings learned from corpus co-occurrence via PPMI + truncated SVD (Levy & Goldberg 2014 baseline; Halko–Martinsson–Tropp 2011 randomized SVD). Companion to v0.15's tablet-level Random Indexing embeddings — that axis exposes thematic similarity at composition level; this axis exposes sign-level distributional equivalence (logogram substitutions, period-specific sign equivalences, phonetic/semantic clusters). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query_sign",
+    "query_in_corpus",
+    "neighbors",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_sign": {
+      "type": "string",
+      "description": "The sign code submitted by the caller, after whitespace trim."
+    },
+    "query_in_corpus": {
+      "type": "boolean",
+      "description": "True iff the query sign passes the min_occurrences gate and has an embedding vector in the index."
+    },
+    "neighbors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["sign", "cosine", "occurrences"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Neighbor sign code (e.g. an ABZ identifier)."
+          },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity between the query sign's embedding and this neighbor's embedding. Both vectors are L2-normalized at build time so cosine is a direct dot product."
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "How many times this neighbor sign occurs in the cleaned corpus (X tokens excluded; corpus-exclusions list applied)."
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "total_signs_indexed",
+        "embedding_dim",
+        "window_size",
+        "build_timestamp"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "total_signs_indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Vocab size of the sign2vec index — signs occurring ≥ min_occurrences times in the corpus."
+        },
+        "embedding_dim": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Truncated-SVD rank K (default 100 in v0.23.0)."
+        },
+        "window_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "±window context width used at build time (default 5 in v0.23.0)."
+        },
+        "build_timestamp": {
+          "type": "string",
+          "description": "ISO 8601 timestamp at which scripts/build-sign-embeddings.mjs produced the on-disk index. Empty string when the index is unavailable."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
