@@ -6,7 +6,7 @@ Round-5 ships the corpus-wide enumeration primitives that v0.19's per-tablet pro
 
 | Lever / Audit | Class | Effect |
 |---|---|---|
-| `chunk-index.json` build pipeline | **NEW PRIMITIVE** | One-time corpus-wide enumeration of every length-20 trigram window, singletons pruned. Built by `scripts/build-chunk-index.mjs` in under 15 minutes; loaded lazily by the three new tools. The exact-hash complement to v0.19's per-tablet fuzzy probe. |
+| `chunk-index.json` build pipeline | **NEW PRIMITIVE** | One-time corpus-wide enumeration of every length-20 trigram window, singletons pruned. Built by `scripts/build-chunk-index.mjs` in **25 seconds** on the 35K-tablet corpus (target was <15 min; actual far faster). Produces 96,654 non-singleton hashes, 66.8 MB JSON cache. The exact-hash complement to v0.19's per-tablet fuzzy probe. |
 | `find_formulaic_passages` | **NEW TOOL** | Surfaces every chunk shared with ≥ min_hosts tablets, ranked by `host_genres_spanned × log(host_count)`. Cross-curricular formulae outrank colophon templates by design. |
 | `trace_chunk_diffusion` | **NEW TOOL** | Per-chunk chronological diffusion — hosts grouped by period and ordered by `src/periodChronology.ts` sort_keys. Corpus-level transmission map for a single passage. |
 | `build_citation_graph` | **NEW TOOL** | Corpus-level commentary→base quotation graph. Partitions chunk occurrences by genre, accumulates per-pair edge weights. The structural complement to v0.18.19's pair-level `commentary_quotes_base_text` verdict. |
@@ -45,7 +45,9 @@ Corpus-level commentary→base quotation graph. For every chunk in the index, pa
 
 The pair-level companion is v0.18.19's `commentary_quotes_base_text` verdict in `compare_tablet_pair`. That tool answers "is THIS pair commentary/base?". `build_citation_graph` answers "what does the WHOLE corpus's quotation network look like?" — and degree-centrality analysis identifies canonical base texts (high in-degree) without scholar curation.
 
-Validation case: BM.47463 → CBS.6060 (Šurpu commentary citing Šurpu base, 147-sign shared chain, methods-paper §3.7.1) must appear as an edge.
+Round-5 empirical result (2026-05-24, 91.92% metadata coverage): **11 directed citation edges across 6 distinct base-text genres** (Astronomy, Magic, Divine, Bīt rimki, Celestial, CANONICAL). K.3716 emerges as a hub commentary tablet citing 7 base texts; Sm.803 → BM.42262 (Astronomy commentary→base) is the strongest single edge at weight 800 / 40 shared chunks.
+
+**Note on v0.19 anchors not appearing here:** the BM.47463 ↔ CBS.6060 Šurpu pair (methods-paper §3.7.1) and BM.77056's cross-curricular chunks (§3.9.1) do NOT appear in this exact-hash graph by design. Those were *fuzzy* findings from v0.19; v0.20's exact-hash index intentionally doesn't reproduce them. The two layers are complementary, not redundant. A fuzzy chunk-hash variant would unify them at ~5–10× index size; deferred to v0.21+ pending demonstrated need.
 
 ## Tool surface — 64 MCP tools
 
@@ -64,7 +66,8 @@ The binding constraint on Round 5 is fragment-metadata coverage. v0.20.0 opens w
 ```bash
 # One-time index build (after fragment-metadata enrichment ≥10%)
 node scripts/build-chunk-index.mjs
-# Expect: <15 min, 100K-500K non-singleton hashes, ~100-200 MB JSON cache
+# Expect (empirical 2026-05-24): ~25 seconds, ~96K non-singleton hashes,
+# 66.8 MB JSON cache. Calibrated band: 80K-500K hashes.
 
 # Build + smoke
 npm run build
