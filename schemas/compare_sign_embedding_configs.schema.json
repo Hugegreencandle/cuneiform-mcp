@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compare_sign_embedding_configs.schema.json",
+  "title": "compare_sign_embedding_configs data payload",
+  "description": "v0.25.0 sign2vec ensemble query tool. For a single query sign, returns the top-K nearest neighbors from each of six (WINDOW, MIN_OCC) configurations — WINDOW ∈ {2, 5, 10} × MIN_OCC ∈ {10, 20} — plus stability metadata (consensus neighbors across all loaded configs, per-config uniqueness counts). Documents that the v0.23 canonical setting (WINDOW=5, MIN_OCC=20) is robust to hyperparameter choice (consensus_top5_signs non-empty) while the configs do produce distinguishable results (unique_to_each_config non-zero somewhere). Companion to v0.23's find_similar_signs — that tool queries the single canonical config; this one runs the ensemble side-by-side. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query_sign",
+    "configs",
+    "stability",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_sign": {
+      "type": "string",
+      "description": "The sign code submitted by the caller, after whitespace trim."
+    },
+    "configs": {
+      "type": "array",
+      "description": "One entry per (WINDOW, MIN_OCC) configuration in the ensemble, in the order they were requested (default: w2-m10, w2-m20, w5-m10, w5-m20, w10-m10, w10-m20).",
+      "items": {
+        "type": "object",
+        "required": [
+          "window",
+          "min_occ",
+          "loaded",
+          "query_in_corpus",
+          "neighbors"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "window": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "±window context width this config was built with."
+          },
+          "min_occ": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Minimum corpus occurrences a sign needed to enter this config's vocab."
+          },
+          "loaded": {
+            "type": "boolean",
+            "description": "True iff the on-disk cache for this config was found and parsed successfully. When false, see warnings[]."
+          },
+          "query_in_corpus": {
+            "type": "boolean",
+            "description": "True iff the query sign passes this config's min_occ gate and has an embedding vector. A high-frequency sign typically passes all six configs; a borderline sign may pass only MIN_OCC=10 configs."
+          },
+          "neighbors": {
+            "type": "array",
+            "description": "Top-K nearest neighbors in this config's embedding space (empty when loaded=false or query_in_corpus=false).",
+            "items": {
+              "type": "object",
+              "required": ["sign", "cosine", "occurrences"],
+              "additionalProperties": false,
+              "properties": {
+                "sign": {
+                  "type": "string",
+                  "description": "Neighbor sign code (e.g. an ABZ identifier)."
+                },
+                "cosine": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 1,
+                  "description": "Cosine similarity between the query sign's vector and this neighbor's vector in this config. Both vectors are L2-normalized at build time so cosine is a direct dot product."
+                },
+                "occurrences": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Occurrence count of this neighbor in this config's filtered corpus."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "stability": {
+      "type": "object",
+      "required": ["consensus_top5_signs", "unique_to_each_config"],
+      "additionalProperties": false,
+      "properties": {
+        "consensus_top5_signs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes appearing in the top-K of EVERY config where the query was in-corpus. Sorted by mean cosine across those configs (highest first). A non-empty consensus is the 'robust to hyperparameter choice' signal — these are the signs the v0.23 paper claim rests on."
+        },
+        "unique_to_each_config": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "description": "Per-config count of top-K neighbors that don't appear in ANY other config's top-K. Ordered to match configs[]. A non-zero value somewhere is the 'configs are distinguishable' signal — confirms the ensemble isn't redundant."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
