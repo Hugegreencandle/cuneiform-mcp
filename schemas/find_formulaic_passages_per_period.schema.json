@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_formulaic_passages_per_period.schema.json",
+  "title": "find_formulaic_passages_per_period data payload",
+  "description": "v0.28.0 diachronic chunk discovery. Compares length-20 chunk-hash indexes trained on Neo-Assyrian (NA) and Neo-Babylonian (NB) sub-corpora independently, then surfaces chunks that are period-specific (na_only / nb_only) or shared with majority skew. Backed by ~/.cache/cuneiform-mcp/chunk-index-{na,nb}.json; built once via scripts/build-chunk-index-per-period.mjs. na_only chunks are the canonical Library-of-Ashurbanipal formulae absent from administrative-period transmission.",
+  "type": "object",
+  "required": ["na_index_stats", "nb_index_stats", "passages", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "na_index_stats": { "$ref": "#/definitions/PeriodIndexStats" },
+    "nb_index_stats": { "$ref": "#/definitions/PeriodIndexStats" },
+    "passages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "chunk_hash",
+          "chunk_signs",
+          "chunk_length",
+          "na_host_count",
+          "nb_host_count",
+          "period_specificity",
+          "host_sample_na",
+          "host_sample_nb"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "chunk_hash": {
+            "type": "string",
+            "description": "Canonical pipe-joined trigram window hash (length 20)."
+          },
+          "chunk_signs": {
+            "type": "string",
+            "description": "Reconstructed sign sequence with '…' for X-skip gaps."
+          },
+          "chunk_length": { "type": "integer", "minimum": 1 },
+          "na_host_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of NA-period tablets that host this chunk. 0 means the chunk is not in the NA non-singleton index (either never seen or singleton-pruned)."
+          },
+          "nb_host_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of NB-period tablets that host this chunk. Same semantics as na_host_count."
+          },
+          "period_specificity": {
+            "type": "string",
+            "enum": ["na_only", "nb_only", "both", "shared_majority_na", "shared_majority_nb"],
+            "description": "na_only / nb_only: chunk only appears in one period's non-singleton index. shared_majority_*: in both, but ≥ 67% of hosts are in the named period. both: present in both with neither side dominant."
+          },
+          "host_sample_na": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 3,
+            "description": "Up to 3 NA host tablet ids (first occurrences from the index, which is host-count desc)."
+          },
+          "host_sample_nb": {
+            "type": "array",
+            "items": { "type": "string" },
+            "maxItems": 3,
+            "description": "Up to 3 NB host tablet ids."
+          }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "definitions": {
+    "PeriodIndexStats": {
+      "type": "object",
+      "required": [
+        "period",
+        "period_label",
+        "loaded",
+        "load_error",
+        "entries",
+        "window_length",
+        "build_timestamp",
+        "total_tablets",
+        "total_windows_seen",
+        "total_unique_hashes",
+        "total_non_singleton_hashes",
+        "cache_path"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "period": { "type": "string", "enum": ["NA", "NB"] },
+        "period_label": { "type": "string" },
+        "loaded": { "type": "boolean" },
+        "load_error": { "type": ["string", "null"] },
+        "entries": { "type": "integer", "minimum": 0 },
+        "window_length": { "type": ["integer", "null"], "minimum": 1 },
+        "build_timestamp": { "type": ["string", "null"] },
+        "total_tablets": { "type": "integer", "minimum": 0 },
+        "total_windows_seen": { "type": "integer", "minimum": 0 },
+        "total_unique_hashes": { "type": "integer", "minimum": 0 },
+        "total_non_singleton_hashes": { "type": "integer", "minimum": 0 },
+        "cache_path": { "type": "string" }
+      }
+    }
+  }
+}
