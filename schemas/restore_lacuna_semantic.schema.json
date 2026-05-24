@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/restore_lacuna_semantic.schema.json",
+  "title": "restore_lacuna_semantic data payload",
+  "description": "v0.30 sign2vec-augmented single-position lacuna restorer. Composes v0.18.0's bigram-context score with v0.23.0's sign2vec semantic prior. Joint score = alpha * normalized_bigram + (1-alpha) * normalized_sign2vec. alpha=1 collapses to pure bigram (≈ v0.18 baseline); alpha=0 collapses to pure sign2vec (semantic-only). Returns top-K candidates plus an ablation block exposing the disagreement between the two axes.",
+  "type": "object",
+  "required": [
+    "tablet_id",
+    "lacuna_position",
+    "surrounding_signs",
+    "predictions",
+    "ablation",
+    "alpha",
+    "embedding_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": {
+      "type": ["string", "null"],
+      "description": "eBL _id of the tablet whose position was queried, or null if signs were supplied inline."
+    },
+    "lacuna_position": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Index of the predicted position in the tablet's tokenized sign sequence."
+    },
+    "surrounding_signs": {
+      "type": "object",
+      "description": "The up-to-4 visible signs adjacent to lacuna_position, walking outward and skipping damage tokens (X / x / ?). Any slot may be null if the lacuna sits near a tablet boundary or the surrounding region is itself damaged.",
+      "required": ["left2", "left1", "right1", "right2"],
+      "additionalProperties": false,
+      "properties": {
+        "left2": { "type": ["string", "null"] },
+        "left1": { "type": ["string", "null"] },
+        "right1": { "type": ["string", "null"] },
+        "right2": { "type": ["string", "null"] }
+      }
+    },
+    "predictions": {
+      "type": "array",
+      "description": "Candidates ranked by joint score, descending. Length ≤ top_k.",
+      "items": {
+        "type": "object",
+        "required": [
+          "sign",
+          "joint_score",
+          "bigram_score",
+          "sign2vec_score",
+          "rank_by_joint"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Candidate sign code."
+          },
+          "joint_score": {
+            "type": "number",
+            "description": "alpha * normalized_bigram + (1-alpha) * normalized_sign2vec, where each axis is min-max normalized across the candidate pool. Values in [0, 1] when both axes have spread; 0 when one axis is degenerate."
+          },
+          "bigram_score": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Raw (unnormalized) bigram score: sqrt((P(s|left1)+eps) * (P(right1|s)+eps)) with Laplace smoothing. Reported for diagnostic transparency — the joint uses the min-max normalized form."
+          },
+          "sign2vec_score": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Raw cosine similarity between the candidate's sign2vec embedding and the L2-normalized mean of the surrounding signs' embeddings. 0 when the candidate has no embedding or the centroid is empty."
+          },
+          "rank_by_joint": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-indexed rank by joint_score."
+          }
+        }
+      }
+    },
+    "ablation": {
+      "type": "object",
+      "description": "Top-1 from each axis, plus a label classifying how the joint top-1 relates to the two pure axes. Lets the caller diagnose whether sign2vec is adding signal or just echoing the bigram baseline.",
+      "required": [
+        "pure_bigram_top1",
+        "pure_sign2vec_top1",
+        "joint_top1",
+        "agreement"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pure_bigram_top1": {
+          "type": ["string", "null"],
+          "description": "Top-1 candidate ranked by normalized bigram score alone (≈ v0.18 baseline output)."
+        },
+        "pure_sign2vec_top1": {
+          "type": ["string", "null"],
+          "description": "Top-1 candidate ranked by normalized sign2vec centroid cosine alone."
+        },
+        "joint_top1": {
+          "type": ["string", "null"],
+          "description": "Top-1 candidate ranked by the joint score at the requested alpha."
+        },
+        "agreement": {
+          "type": "string",
+          "enum": [
+            "all_agree",
+            "bigram_dominates",
+            "sign2vec_dominates",
+            "joint_compromise",
+            "insufficient_signal"
+          ],
+          "description": "all_agree: both axes and the joint pick the same top-1. bigram_dominates: joint top-1 matches bigram top-1 but not sign2vec. sign2vec_dominates: joint top-1 matches sign2vec top-1 but not bigram. joint_compromise: joint top-1 is neither axis's top-1 — the convex combination found a different leader. insufficient_signal: candidate pool empty or one of the rankings unavailable."
+        }
+      }
+    },
+    "alpha": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Weight on the bigram axis in the joint score. Echoed back so callers can confirm clamping behavior."
+    },
+    "embedding_stats": {
+      "type": "object",
+      "required": [
+        "context_signs_with_embedding",
+        "centroid_dim",
+        "embedding_index_loaded"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "context_signs_with_embedding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "How many of the up-to-4 surrounding signs (left2, left1, right1, right2) had a sign2vec embedding and contributed to the centroid."
+        },
+        "centroid_dim": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Dimensionality of the centroid vector (0 when no embeddings were found)."
+        },
+        "embedding_index_loaded": {
+          "type": "boolean",
+          "description": "True iff the sign2vec embedding index was successfully loaded for this call."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
