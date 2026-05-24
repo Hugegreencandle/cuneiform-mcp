@@ -74,9 +74,22 @@ export type FindIncipitsOptions = {
 
 // ─── Implementation ────────────────────────────────────────────────────────
 
-// ABZ480 = cuneiform numeral 1; ABZ411 = the same family used in numeral
-// tables (Diš variants). Long runs of either mark calendrical / tabular
-// text, NOT text incipits — drop those chunks from the candidate pool.
+// Pattern-detection filter for numerical-table residue. ABZ480 is the
+// cuneiform numeral 1; ABZ411 is a high-frequency sign that EMPIRICALLY
+// appears as a recurring count token in numerical/calendrical structures,
+// typically interleaved with ABZ480 separators.
+// NOTE — v0.23 finding: ABZ480 ↔ ABZ411 are NOT distributionally
+// interchangeable (sign2vec embedding cosine = 0.097; their contexts in
+// the corpus are largely disjoint). The earlier comment "same family used
+// in numeral tables (Diš variants)" was a folk-Assyriological assumption
+// that the v0.23 embedding falsified. The filter works anyway because
+// chunks dominated by repeated ABZ411 with ABZ480 separators ARE
+// numerical-table residue at the *pattern* level, independent of whether
+// the two signs are distributionally equivalent.
+// Round-8.1 audit (docs/v0.23.1-incipit-filter-reaudit.md, 2026-05-24)
+// confirmed: 67 of 88 filtered chunks owe their filtering to ABZ411
+// specifically; all 67 are genuine numerical-pattern structure when
+// inspected. Filter stays as-is; only the named rationale was wrong.
 const NUMERICAL_SIGNS = new Set(["ABZ480", "ABZ411"]);
 const NUMERICAL_DENSITY_THRESHOLD = 0.7;
 
