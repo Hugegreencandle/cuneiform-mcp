@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/list_validation_resolutions.schema.json",
+  "title": "list_validation_resolutions data payload",
+  "description": "v0.31.0 read companion to record_validation_resolution. Returns persisted verdicts from ~/.cache/cuneiform-mcp/validation-resolutions.json, optionally filtered by verdict / source / tablet / since. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["resolutions", "total_matched", "total_in_store", "filter_applied", "store_stats", "cache_path"],
+  "additionalProperties": false,
+  "properties": {
+    "resolutions": {
+      "type": "array",
+      "description": "Filtered + limit-applied resolutions, sorted most-recent first by recorded_at.",
+      "items": {
+        "type": "object",
+        "required": [
+          "pair_id",
+          "tablet_a",
+          "tablet_b",
+          "verdict",
+          "rationale",
+          "recorded_at",
+          "recorded_by",
+          "source",
+          "methods_paper_section",
+          "tool_version"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "pair_id": { "type": "string" },
+          "tablet_a": { "type": "string" },
+          "tablet_b": { "type": "string" },
+          "verdict": { "type": "string", "enum": ["positive", "negative", "uncertain"] },
+          "rationale": { "type": "string" },
+          "recorded_at": { "type": "string", "format": "date-time" },
+          "recorded_by": { "type": "string" },
+          "source": { "type": "string", "enum": ["validation_queue", "user_manual", "methods_paper", "audit_resolution"] },
+          "methods_paper_section": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "tool_version": { "type": "string" }
+        }
+      }
+    },
+    "total_matched": { "type": "integer", "minimum": 0, "description": "Count after filter application, before limit." },
+    "total_in_store": { "type": "integer", "minimum": 0, "description": "Count of all persisted resolutions, irrespective of filter." },
+    "filter_applied": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "verdict": { "type": "string", "enum": ["positive", "negative", "uncertain"] },
+        "source": { "type": "string", "enum": ["validation_queue", "user_manual", "methods_paper", "audit_resolution"] },
+        "tablet": { "type": "string" },
+        "sinceIso": { "type": "string", "format": "date-time" },
+        "limit": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "store_stats": {
+      "type": "object",
+      "required": [
+        "n_total",
+        "n_positive",
+        "n_negative",
+        "n_uncertain",
+        "n_by_source",
+        "progress_to_v1_target",
+        "v1_target_positives",
+        "bootstrap_positives_from_methods_paper"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "n_total": { "type": "integer", "minimum": 0 },
+        "n_positive": { "type": "integer", "minimum": 0 },
+        "n_negative": { "type": "integer", "minimum": 0 },
+        "n_uncertain": { "type": "integer", "minimum": 0 },
+        "n_by_source": {
+          "type": "object",
+          "required": ["validation_queue", "user_manual", "methods_paper", "audit_resolution"],
+          "additionalProperties": false,
+          "properties": {
+            "validation_queue": { "type": "integer", "minimum": 0 },
+            "user_manual": { "type": "integer", "minimum": 0 },
+            "methods_paper": { "type": "integer", "minimum": 0 },
+            "audit_resolution": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "progress_to_v1_target": { "type": "number", "minimum": 0, "maximum": 1 },
+        "v1_target_positives": { "type": "integer", "minimum": 1 },
+        "bootstrap_positives_from_methods_paper": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "cache_path": { "type": "string" }
+  }
+}

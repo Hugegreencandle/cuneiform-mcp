@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/record_validation_resolution.schema.json",
+  "title": "record_validation_resolution data payload",
+  "description": "v0.31.0 active-learning feedback loop. Persists a human-confirmed verdict (positive/negative/uncertain) on a tablet pair to ~/.cache/cuneiform-mcp/validation-resolutions.json. Each positive grows the labeled set toward the v1.0 ≥100-positives threshold (currently bootstrapped at n=12 from methods-paper hardcoded list). Closes one of the v1.0-readiness-checklist gates organically as Dane works the prioritize_validation_queue ranker. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["resolution", "action", "previous", "store_stats", "cache_path"],
+  "additionalProperties": false,
+  "properties": {
+    "resolution": {
+      "$ref": "#/$defs/resolution"
+    },
+    "action": {
+      "type": "string",
+      "enum": ["created", "updated"],
+      "description": "'created' for a new pair; 'updated' if a prior verdict for the same canonical pair_id was overwritten."
+    },
+    "previous": {
+      "anyOf": [{ "$ref": "#/$defs/resolution" }, { "type": "null" }],
+      "description": "The prior resolution that was overwritten when action='updated', or null when action='created'."
+    },
+    "store_stats": {
+      "$ref": "#/$defs/storeStats"
+    },
+    "cache_path": {
+      "type": "string",
+      "description": "Absolute path of the JSON store file."
+    }
+  },
+  "$defs": {
+    "resolution": {
+      "type": "object",
+      "required": [
+        "pair_id",
+        "tablet_a",
+        "tablet_b",
+        "verdict",
+        "rationale",
+        "recorded_at",
+        "recorded_by",
+        "source",
+        "methods_paper_section",
+        "tool_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pair_id": {
+          "type": "string",
+          "description": "Canonical pair identifier — '{tablet_a}↔{tablet_b}' with tablet_a < tablet_b lexicographically. Ensures the same pair is never double-stored as (A,B) and (B,A)."
+        },
+        "tablet_a": { "type": "string", "description": "Lexicographically-smaller museum number." },
+        "tablet_b": { "type": "string", "description": "Lexicographically-larger museum number." },
+        "verdict": {
+          "type": "string",
+          "enum": ["positive", "negative", "uncertain"],
+          "description": "Human-confirmed relationship classification. 'positive' = sibling/host/recension-member pair worth feeding to the Bayesian fusion training set. 'negative' = false-positive surfaced by the queue. 'uncertain' = needs more eyeballs (e.g. fragmentary witness)."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Free-form scholar note — why this verdict was assigned. Surfaces in list_validation_resolutions output and propagates into the eventual labeled-pair audit trail."
+        },
+        "recorded_at": { "type": "string", "format": "date-time" },
+        "recorded_by": { "type": "string", "description": "Free-form identifier of the recorder (default 'manual'). Use an email or initials for multi-scholar projects." },
+        "source": {
+          "type": "string",
+          "enum": ["validation_queue", "user_manual", "methods_paper", "audit_resolution"],
+          "description": "Which path produced the verdict. 'validation_queue' = surfaced by prioritize_validation_queue. 'methods_paper' = curated from §3.x findings. 'audit_resolution' = closing out an audit-script discovery. 'user_manual' = ad-hoc."
+        },
+        "methods_paper_section": {
+          "anyOf": [{ "type": "string" }, { "type": "null" }],
+          "description": "Optional methods-paper section reference (e.g. '§3.7.3') if the verdict ties to a published claim."
+        },
+        "tool_version": { "type": "string", "description": "VERSION constant at time of record — lets future re-trains flag verdicts made under stale tool calibrations." }
+      }
+    },
+    "storeStats": {
+      "type": "object",
+      "required": [
+        "n_total",
+        "n_positive",
+        "n_negative",
+        "n_uncertain",
+        "n_by_source",
+        "progress_to_v1_target",
+        "v1_target_positives",
+        "bootstrap_positives_from_methods_paper"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "n_total": { "type": "integer", "minimum": 0 },
+        "n_positive": { "type": "integer", "minimum": 0 },
+        "n_negative": { "type": "integer", "minimum": 0 },
+        "n_uncertain": { "type": "integer", "minimum": 0 },
+        "n_by_source": {
+          "type": "object",
+          "required": ["validation_queue", "user_manual", "methods_paper", "audit_resolution"],
+          "additionalProperties": false,
+          "properties": {
+            "validation_queue": { "type": "integer", "minimum": 0 },
+            "user_manual": { "type": "integer", "minimum": 0 },
+            "methods_paper": { "type": "integer", "minimum": 0 },
+            "audit_resolution": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "progress_to_v1_target": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "(n_positive + bootstrap_positives_from_methods_paper) / v1_target_positives, capped at 1.0."
+        },
+        "v1_target_positives": { "type": "integer", "minimum": 1, "description": "The ≥100 positives target from docs/v1.0-readiness-checklist.md." },
+        "bootstrap_positives_from_methods_paper": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Positives hardcoded in scripts/train-joint-pair-model.mjs (currently 12). Persisted resolutions add to this count toward v1.0."
+        }
+      }
+    }
+  }
+}

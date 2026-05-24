@@ -526,6 +526,20 @@ The §3.5 92% top-1 figure is on multi-position parallel-template alignment, a d
 
 ---
 
+### 3.18 Active-Learning Feedback Loop (v0.31)
+
+The v0.29 Bayesian fusion model (§3.16) trains on n=12 hardcoded positives drawn from §§3.6–3.7.3 plus §3.11 stemma sisters, joined with n=40 synthetic random-pair negatives, and emits a self-described `bootstrap_warning`: *"v1.0 will require ≥100 labeled pairs for production-quality fusion."* v0.31 ships the infrastructure that closes this gap organically rather than via one-shot curation: a persistent validation-resolutions store coupled to the v0.21 prioritize_validation_queue ranker.
+
+**The closed loop.** Each iteration consists of (1) prioritize_validation_queue surfaces the top-K highest information-gain candidates from the bi-orphan + isolate + chunk-discovery seed set; (2) the scholar reviews one candidate; (3) record_validation_resolution persists a verdict (positive / negative / uncertain) with rationale, canonical pair_id, source provenance, and tool_version; (4) periodically, scripts/train-joint-pair-model.mjs unions the persisted positives with the methods-paper hardcoded list and retrains the §3.16 Bayesian model. The decoupling of verdict persistence (JSON store) from model retraining (offline script) preserves reproducibility and makes the active-learning trajectory auditable: every positive that enters the v1.0 training set carries a recorded_at, recorded_by, source, and rationale, so the eventual ≥100-positive set is not a black-box hand-curation but a documented sequence of micro-decisions.
+
+**Canonical pair_id.** Verdicts are keyed on `pair_id = "{tablet_a}↔{tablet_b}"` with `tablet_a < tablet_b` lexicographically. This collapses (A,B) and (B,A) to one record; re-recording the same pair produces an `action='updated'` response carrying the previous verdict, so the audit trail preserves verdict-change history without duplicating records. Self-pairs are refused at the canonicalization layer.
+
+**Why this is methodologically significant.** The dominant alternative — one-shot curation of 100 positives by an expert team — collides with the §3.7 finding that manuscript-sibling status is often non-obvious at whole-tablet granularity and requires sub-tablet (§3.9) or sign-level (§3.13) evidence. Active learning, by definition, surfaces the cases where the current model is most uncertain — exactly the cases where adding a label provides the largest signal. The store thus accumulates a labeled set with higher per-pair information content than uniform sampling would produce.
+
+**Claim 38.** *Persistent active-learning feedback (validation-resolutions store) is the production-readiness infrastructure for migrating the v0.29 Bayesian fusion model from bootstrap quality (n=12 hardcoded positives, 98.1% training accuracy on a small set with high variance) to production quality (≥100 confirmed positives). The closed loop — rank uncertain pairs via prioritize_validation_queue → human review → persist verdict → retrain — is the v1.0 readiness path.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

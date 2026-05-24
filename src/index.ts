@@ -61,6 +61,12 @@ import {
   prioritizeValidationQueue,
 } from "./validationQueue.js";
 import {
+  recordResolution,
+  listResolutions,
+  type ResolutionVerdict,
+  type ResolutionSource,
+} from "./validationResolutions.js";
+import {
   buildCanonicalRecensionTree,
 } from "./recensionTree.js";
 import {
@@ -312,7 +318,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.30.0";
+const VERSION = "0.31.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5342,6 +5348,131 @@ server.registerTool(
   },
 );
 
+// ─── v0.31.0 — record_validation_resolution (active-learning feedback loop) ─
+
+server.registerTool(
+  "record_validation_resolution",
+  {
+    description:
+      "Persist a human-confirmed verdict (positive / negative / uncertain) on a tablet pair. Closes one of the v1.0 readiness gates: grows the labeled-pair set from n=12 (methods-paper hardcoded positives in scripts/train-joint-pair-model.mjs) toward the ≥100-positive production threshold for v0.29 Bayesian fusion. Storage: ~/.cache/cuneiform-mcp/validation-resolutions.json. Pair-id is canonical (alphabetically sorted) so (A,B) and (B,A) collapse to one record. Re-recording the same pair UPDATES the prior verdict and returns the previous state in `previous`. Workflow: run prioritize_validation_queue → manually review the top candidate → record_validation_resolution with verdict + rationale → repeat. Periodically rerun scripts/train-joint-pair-model.mjs which reads this store alongside the hardcoded methods-paper positives.",
+    inputSchema: {
+      tablet_a: z.string().min(1).describe("First tablet museum number (e.g. 'K.5896'). Order does not matter — canonical pair_id is sorted alphabetically."),
+      tablet_b: z.string().min(1).describe("Second tablet museum number. Must differ from tablet_a."),
+      verdict: z.enum(["positive", "negative", "uncertain"]).describe("Human-confirmed classification. 'positive' = sibling/host/recension-member worth feeding to Bayesian retrain. 'negative' = surfaced-but-rejected false positive. 'uncertain' = needs more eyeballs."),
+      rationale: z.string().min(1).describe("Free-form scholar note explaining the verdict. Surfaces in list_validation_resolutions output and propagates into the labeled-pair audit trail."),
+      recorded_by: z.string().optional().describe("Free-form identifier (default 'manual'). Use email or initials for multi-scholar projects."),
+      source: z.enum(["validation_queue", "user_manual", "methods_paper", "audit_resolution"]).optional().describe("Provenance of the verdict (default 'validation_queue'). Tags 'methods_paper' for §3.x-cited findings and 'audit_resolution' for closing out audit-script discoveries."),
+      methods_paper_section: z.string().optional().describe("Optional methods-paper section reference (e.g. '§3.7.3') tying the verdict to a published claim."),
+    },
+  },
+  async ({ tablet_a, tablet_b, verdict, rationale, recorded_by, source, methods_paper_section }) => {
+    const SCHEMA = schemaId("record_validation_resolution");
+    try {
+      const result = recordResolution({
+        tabletA: tablet_a,
+        tabletB: tablet_b,
+        verdict: verdict as ResolutionVerdict,
+        rationale,
+        recordedBy: recorded_by,
+        source: source as ResolutionSource | undefined,
+        methodsPaperSection: methods_paper_section,
+        toolVersion: VERSION,
+      });
+      const r = result.resolution;
+      const s = result.store_stats;
+      const lines: string[] = [
+        `Resolution ${result.action}: ${r.pair_id}`,
+        `  verdict: ${r.verdict}  ·  source: ${r.source}  ·  recorded_by: ${r.recorded_by}`,
+        `  rationale: ${r.rationale}`,
+        r.methods_paper_section ? `  methods_paper: ${r.methods_paper_section}` : null,
+        result.previous ? `  previous_verdict: ${result.previous.verdict} (recorded ${result.previous.recorded_at})` : null,
+        ``,
+        `Store stats:`,
+        `  total: ${s.n_total}  ·  positive: ${s.n_positive}  ·  negative: ${s.n_negative}  ·  uncertain: ${s.n_uncertain}`,
+        `  bootstrap positives (methods-paper hardcoded): ${s.bootstrap_positives_from_methods_paper}`,
+        `  v1.0 progress: ${(s.progress_to_v1_target * 100).toFixed(1)}% toward ${s.v1_target_positives} positives target`,
+        `  cache: ${result.cache_path}`,
+      ].filter((l): l is string => l !== null);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:validation-resolutions-store", VERSION, {
+          citation:
+            "Persistent active-learning feedback store. Each positive grows the v0.29 Bayesian fusion labeled-pair set toward the v1.0 ≥100-positives readiness gate. v0.31.0.",
+        }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`record_validation_resolution error: ${msg}`, {
+        schema: SCHEMA,
+        data: { error: msg } as unknown,
+        provenance: provenance("local", "local:validation-resolutions-store", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.31.0 — list_validation_resolutions (read companion) ──────────────
+
+server.registerTool(
+  "list_validation_resolutions",
+  {
+    description:
+      "Read companion to record_validation_resolution. Returns persisted verdicts from ~/.cache/cuneiform-mcp/validation-resolutions.json sorted most-recent first, with optional filtering by verdict / source / tablet / since. Use this to audit the feedback loop, generate a positives list for the next Bayesian retrain, or spot-check recent resolutions. Also surfaces v1.0-readiness progress: (n_positive + 12 bootstrap) / 100.",
+    inputSchema: {
+      verdict: z.enum(["positive", "negative", "uncertain"]).optional().describe("Filter to a single verdict class."),
+      source: z.enum(["validation_queue", "user_manual", "methods_paper", "audit_resolution"]).optional().describe("Filter to a single provenance source."),
+      tablet: z.string().optional().describe("Filter to resolutions involving this tablet (matches either tablet_a or tablet_b)."),
+      since_iso: z.string().optional().describe("Filter to resolutions recorded at or after this ISO 8601 timestamp."),
+      limit: z.number().int().min(1).max(500).optional().describe("Cap on returned entries after filter+sort. Default: all matched."),
+    },
+  },
+  async ({ verdict, source, tablet, since_iso, limit }) => {
+    const SCHEMA = schemaId("list_validation_resolutions");
+    try {
+      const result = listResolutions({
+        verdict: verdict as ResolutionVerdict | undefined,
+        source: source as ResolutionSource | undefined,
+        tablet,
+        sinceIso: since_iso,
+        limit,
+      });
+      const s = result.store_stats;
+      const lines: string[] = [
+        `Resolutions: ${result.resolutions.length} returned  ·  ${result.total_matched} matched filter  ·  ${result.total_in_store} total in store`,
+        `Store stats: positive=${s.n_positive}  negative=${s.n_negative}  uncertain=${s.n_uncertain}  ·  v1.0 progress: ${(s.progress_to_v1_target * 100).toFixed(1)}% toward ${s.v1_target_positives}`,
+        ``,
+      ];
+      if (result.resolutions.length === 0) {
+        lines.push("(no resolutions matched)");
+      } else {
+        for (const r of result.resolutions) {
+          lines.push(`${r.pair_id}  ·  ${r.verdict}  ·  ${r.recorded_at}  ·  source=${r.source}  ·  by=${r.recorded_by}`);
+          lines.push(`    ${r.rationale}${r.methods_paper_section ? `  [${r.methods_paper_section}]` : ""}`);
+        }
+      }
+      lines.push(``);
+      lines.push(`cache: ${result.cache_path}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:validation-resolutions-store", VERSION),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`list_validation_resolutions error: ${msg}`, {
+        schema: SCHEMA,
+        data: { error: msg } as unknown,
+        provenance: provenance("local", "local:validation-resolutions-store", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -8565,7 +8696,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 81 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 83 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked))\n`,
     );
     process.exit(0);
   }
