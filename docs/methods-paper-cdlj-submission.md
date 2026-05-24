@@ -303,6 +303,35 @@ The methodology generalizes across composition-type (curriculum vs single-compos
 
 ---
 
+### 3.9 Sub-Tablet Chunk-Parallel Discovery (v0.19.0)
+
+The §3.8 archetype-5 (embedded fragment, K.9508 in K.5896) and §3.7.3 K.5896 case both invoke a contiguous-trigram run as the discriminating signal — but v0.18.19's `find_embedded_fragments` exposes this signal as a single `longest_contiguous_run` scalar buried inside a per-host record. v0.19.0 ships a complementary tool, `find_chunk_parallels`, that surfaces every maximal matched-position run ≥ threshold as a **primary object**: `chunk_start` + `chunk_length` + `host_tablets[]` + cross-genre/cross-period attribution + novelty score. The new structure has no host-size guard (chunks can be shared with hosts of any size), and the same alignment walk that produced v0.18.19's scalar emits every qualifying run instead of `max()`-ing them.
+
+The structural reformulation revises one of this paper's existing claims:
+
+**Amendment to §3.6.** The "final-2 bi-orphans (IM.49220 + K.3306)" claim was based on whole-tablet methods (lex, fuzzy, thematic, scribal). Re-running the calibration triple under `find_chunk_parallels` at default `min_chunk_len=20` shows:
+
+- **IM.49220** — 0 chunks across 24,483 examined candidates. ✅ Remains bi-orphan at chunk granularity. Truly isolated.
+- **K.3306** — 2 chunks shared with K.6685: chunk `1:51` (~53 signs) and chunk `58:37` (~39 signs). Together these cover **92.63% of K.3306's trigram positions**. K.6685's size ratio is 4.21× — *below* `find_embedded_fragments`' default `host_size_multiplier=5`, which is why the relationship was invisible to v0.18.19's probe.
+
+K.3306 should therefore be reclassified from "final-2 bi-orphan" to **"chunk-related to K.6685, whole-tablet-isolated"** pending manual scholarly review of the shared text. The §3.6 final-bi-orphan count narrows to **one (IM.49220)** after sub-tablet investigation.
+
+K.9508 → K.5896 reproduces exactly: chunk `0:142` length=142 surfaces as the top-ranked result, identical to v0.18.19 Lever 1's `longest_contiguous_run=142` finding. The other 9 entries in K.9508's top-10 chunk list match v0.18.19's top-10 host list verbatim (BM.45749, K.2987.B, K.163, K.2550, VAT.8247, SU-1952.222, BM.38709, IM.65052, BM.42273).
+
+The 20-tablet random sample (`mulberry32(20260523)` seed identical to v0.18.19 Lever 1) yields **8 of 20** lex-singletons surfacing ≥1 chunk — same ratio as v0.18.19 Lever 1's 8/20. Calibration consistency across the two tools is concrete; the threshold sweep identifies `min_chunk_len=20` as the precision sweet spot just as v0.18.19 identified `min_run=20`.
+
+**Three additional [my synthesis] claims:**
+
+20. Sub-tablet chunk granularity reveals relationships invisible to whole-tablet methods. K.3306 → K.6685 (chunk `1:51` covering 92.63% of K.3306) is the documented case: a methods-paper §3.6 final-2 bi-orphan since v0.18.2, reconfirmed bi-orphan under v0.18.19's asymmetric containment, but unambiguously chunk-related under v0.19.0. The §3.6 final-bi-orphan count narrows from 2 to 1 (IM.49220 only) after sub-tablet investigation.
+
+21. Chunk-level decomposition preserves whole-tablet calibration thresholds. The `min_chunk_len=20` default reproduces v0.18.19 Lever 1's bi-orphan suppression (IM.49220 → 0 chunks at threshold 20, 20 spurious chunks at threshold 10). The same precision/noise tradeoff governs both run-as-scalar and run-as-primary-object framings — the underlying signal is identical; only the output structure differs.
+
+22. Per-tablet chunk discovery does not require a corpus-wide chunk-hash index. Reusing the v0.18.19 2-of-3 inverted-index infrastructure handles per-tablet queries in milliseconds with zero new build artifacts. The chunk-hash index is the right structure for corpus-wide enumeration (`find_formulaic_passages`, `build_citation_graph`) — which can be designed against actual API demands in v0.20+.
+
+The full audit (six tests including a deferred cross-genre stress on the *āšipūtu* cluster seed BM.77056, blocked by missing fragment-metadata) is documented in `docs/v0.19-calibration-round4-chunk-parallels.md`. The audit script `scripts/round4-chunk-parallels-audit.mjs` is re-runnable end-to-end against `~/.cache/cuneiform-mcp/all-signs-full.json` + the anomaly-index cache.
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
