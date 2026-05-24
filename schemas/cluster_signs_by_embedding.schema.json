@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/cluster_signs_by_embedding.schema.json",
+  "title": "cluster_signs_by_embedding data payload",
+  "description": "v0.28.0 sign-class clustering. Runs k-means++ (Lloyd's algorithm, deterministic seed mulberry32(20260525)) over the L2-normalized 100-dim sign2vec embeddings produced by v0.23. Surfaces empirical sign-semantic groups (numerals, common syllabograms, compound logograms, phonetic-variant families) without scholar curation. Companion to find_similar_signs: that tool answers `who are this sign's nearest neighbors?`, this tool answers `does the embedding space separate into coherent CLASSES, and what are they?`. The per-cluster member dumps + representative-sign tables are designed to be a publishable empirical sign-taxonomy in their own right. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "k",
+    "total_signs_clustered",
+    "iterations_run",
+    "converged",
+    "silhouette_score",
+    "clusters",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "k": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Effective number of clusters produced. May be lower than the request if fewer than k signs are available, or if the requested k was outside [2, 50] (in which case it is clamped and a warning is emitted)."
+    },
+    "total_signs_clustered": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many signs from the sign2vec vocab were partitioned. Equals total_signs_indexed when the index is healthy."
+    },
+    "iterations_run": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Lloyd's-algorithm iterations actually executed. Equals max_iterations when convergence wasn't reached."
+    },
+    "converged": {
+      "type": "boolean",
+      "description": "True iff no assignment changed in the final pass (the standard k-means stopping criterion)."
+    },
+    "silhouette_score": {
+      "type": "number",
+      "minimum": -1,
+      "maximum": 1,
+      "description": "Mean silhouette coefficient over all clustered signs. Range [-1, 1]; > 0 indicates the clustering produces real separation (each point closer to its own cluster than to its nearest neighbor cluster). v0.28 calibration floor is > 0.05."
+    },
+    "clusters": {
+      "type": "array",
+      "description": "Per-cluster reports, sorted by `size` descending. The 0-indexed `id` field preserves the original cluster identity, which is reproducible across runs given the deterministic seed.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "size",
+          "mean_intra_cluster_cosine",
+          "nearest_other_cluster_distance",
+          "representative_signs",
+          "top_signs_by_occurrence",
+          "all_members",
+          "suggested_label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "0-indexed cluster identifier. Reproducible across runs at the same k thanks to the fixed mulberry32 seed."
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of sign vocab members assigned to this cluster."
+          },
+          "mean_intra_cluster_cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Average pairwise cosine similarity over all member-pairs in this cluster. Higher = tighter cluster. For singletons, 1.0 by convention."
+          },
+          "nearest_other_cluster_distance": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Euclidean distance from this cluster's centroid to the nearest other centroid. Larger = better separation from the rest of the partition."
+          },
+          "representative_signs": {
+            "type": "array",
+            "description": "Top 3 cluster members ranked by cosine to the cluster centroid — the signs that most exemplify the cluster's center.",
+            "items": { "$ref": "#/$defs/ClusterMember" }
+          },
+          "top_signs_by_occurrence": {
+            "type": "array",
+            "description": "Top 10 cluster members by corpus occurrence count. Where representative_signs surfaces the geometric center, this surfaces the diagnostic high-frequency members (useful for label inference and human inspection).",
+            "items": { "$ref": "#/$defs/ClusterMember" }
+          },
+          "all_members": {
+            "type": "array",
+            "description": "Full member list, sorted by occurrence count desc.",
+            "items": { "type": "string" }
+          },
+          "suggested_label": {
+            "type": "string",
+            "description": "Best-effort human label derived from the top-10 members by a documented surface-form heuristic: ≥60% pure digit strings → 'numerical'; ≥60% containing × (e.g. LAGAB×HAL) or compound markers → 'compound_logogram'; ≥60% ABZNNN-prefixed → 'abz_syllabogram_family'; ≥60% with subscript-digit suffix → 'phonetic_variant_family'; else 'mixed_distributional_group_<id>'. Treat as literature-facing shorthand, not a typological claim."
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "total_signs_indexed",
+        "embedding_dim",
+        "window_size",
+        "build_timestamp"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "total_signs_indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Vocab size of the underlying sign2vec index — signs occurring ≥ min_occurrences times in the corpus."
+        },
+        "embedding_dim": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Truncated-SVD rank K of the underlying embeddings (default 100 in v0.23)."
+        },
+        "window_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "±window context width used at embedding-build time."
+        },
+        "build_timestamp": {
+          "type": "string",
+          "description": "ISO 8601 timestamp at which the sign-embeddings index was produced. Empty string when the index is unavailable."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "ClusterMember": {
+      "type": "object",
+      "required": ["sign", "occurrences", "cosine_to_centroid"],
+      "additionalProperties": false,
+      "properties": {
+        "sign": {
+          "type": "string",
+          "description": "Sign code (typically an ABZ identifier, a digit string, or a compound logogram name)."
+        },
+        "occurrences": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total occurrences of this sign in the cleaned corpus."
+        },
+        "cosine_to_centroid": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Cosine similarity between this sign's embedding and its cluster centroid. Higher = more representative of the cluster's center."
+        }
+      }
+    }
+  }
+}
