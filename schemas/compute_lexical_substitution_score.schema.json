@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compute_lexical_substitution_score.schema.json",
+  "title": "compute_lexical_substitution_score data payload",
+  "description": "v0.24.0 sign2vec axis cash-out (methods paper §3.12 claim 30). Given two tablets A and B, aggregates per-sign sign2vec cosines into a tablet-level lexical-substitution score: the fraction of the larger vocabulary that is either exactly present in the other tablet OR represented via a sign2vec near-neighbor. Complements (does not replace) the existing lexical/fuzzy/thematic/scribal axes by surfacing same-MEANING-different-SIGN-TOKEN relationships. Score formula: (exact_overlap + substitution_matches) / max(|A_vocab|, |B_vocab|). max() denominator matches v0.22 stemma-distance design — does not over-penalize asymmetric size mismatches. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "tablet_a",
+    "tablet_b",
+    "tablet_a_vocab_size",
+    "tablet_b_vocab_size",
+    "exact_overlap",
+    "substitution_matches",
+    "substitution_pairs",
+    "lexical_substitution_score",
+    "score_breakdown",
+    "axis_comparison",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_a": {
+      "type": "string",
+      "description": "Museum number of the first tablet (whitespace-trimmed)."
+    },
+    "tablet_b": {
+      "type": "string",
+      "description": "Museum number of the second tablet (whitespace-trimmed)."
+    },
+    "tablet_a_vocab_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of distinct non-X sign tokens in tablet A's trigrams_ordered stream."
+    },
+    "tablet_b_vocab_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of distinct non-X sign tokens in tablet B's trigrams_ordered stream."
+    },
+    "exact_overlap": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of signs in |A_vocab ∩ B_vocab| — distinct sign tokens that appear in both tablets."
+    },
+    "substitution_matches": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of signs s ∈ A_vocab \\ B_vocab for which at least one of s's top-K sign2vec neighbors (cosine ≥ min_neighbor_cosine) appears in B_vocab. Each A-vocab sign contributes at most 1 to this count regardless of how many of its neighbors land in B."
+    },
+    "substitution_pairs": {
+      "type": "array",
+      "description": "Up to pair_sample_cap representative substitution pairs (a_sign in A_vocab, b_sign in B_vocab, cosine in sign2vec space). Ranked by cosine desc.",
+      "items": {
+        "type": "object",
+        "required": ["a_sign", "b_sign", "cosine"],
+        "additionalProperties": false,
+        "properties": {
+          "a_sign": { "type": "string", "description": "Sign in A_vocab that is not in B_vocab." },
+          "b_sign": { "type": "string", "description": "Neighbor of a_sign in sign2vec space that appears in B_vocab." },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine between a_sign and b_sign in the sign2vec embedding."
+          }
+        }
+      }
+    },
+    "lexical_substitution_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Primary output: (exact_overlap + substitution_matches) / max(|A_vocab|, |B_vocab|). Bounded in [0,1]."
+    },
+    "score_breakdown": {
+      "type": "object",
+      "required": ["exact_share", "substitution_share", "combined"],
+      "additionalProperties": false,
+      "properties": {
+        "exact_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "exact_overlap / max(|A_vocab|, |B_vocab|) — the fraction of the larger vocab that is matched EXACTLY."
+        },
+        "substitution_share": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "substitution_matches / max(|A_vocab|, |B_vocab|) — the fraction of the larger vocab matched via a sign2vec near-neighbor. The cash-out: a non-trivial substitution_share validates claim 30's hypothesis that sign2vec adds signal beyond exact-vocab share."
+        },
+        "combined": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "exact_share + substitution_share == lexical_substitution_score."
+        }
+      }
+    },
+    "axis_comparison": {
+      "type": "object",
+      "description": "Optional 4-axis context populated when include_axis_comparison=true. Lets callers read this tool's output as a 5-axis view of a tablet pair.",
+      "required": ["notes"],
+      "additionalProperties": false,
+      "properties": {
+        "lexical_jaccard": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Exact trigram-Jaccard from compareTabletPair (when found)."
+        },
+        "fuzzy_jaccard": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fuzzy 1-substitution Jaccard from compareTabletPair (when found)."
+        },
+        "thematic_cosine": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Random-indexing tablet-embedding cosine from compareTabletPair (when found)."
+        },
+        "scribal_cosine": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "LLR scribal-signature cosine from compareTabletPair (when found)."
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Diagnostic notes for any axis that returned below_threshold or missing-index."
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "sign_embeddings_loaded",
+        "sign_embeddings_total_indexed",
+        "sign_embeddings_dim",
+        "sign_embeddings_window",
+        "corpus_tablets",
+        "a_signs_without_embedding",
+        "a_signs_probed",
+        "top_k_neighbors",
+        "min_neighbor_cosine"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sign_embeddings_loaded": { "type": "boolean" },
+        "sign_embeddings_total_indexed": { "type": "integer", "minimum": 0 },
+        "sign_embeddings_dim": { "type": "integer", "minimum": 0 },
+        "sign_embeddings_window": { "type": "integer" },
+        "corpus_tablets": { "type": "integer", "minimum": 0 },
+        "a_signs_without_embedding": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of A-vocab-only signs skipped because they lack a sign2vec embedding (corpus occurrences < min_occurrences gate)."
+        },
+        "a_signs_probed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of A-vocab-only signs that were actually queried against sign2vec."
+        },
+        "top_k_neighbors": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Effective top-K (clamped from input)."
+        },
+        "min_neighbor_cosine": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Effective cosine floor for sign2vec neighbors."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
