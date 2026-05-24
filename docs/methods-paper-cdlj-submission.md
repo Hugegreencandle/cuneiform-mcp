@@ -366,6 +366,30 @@ The v0.20 chunk-hash index uses a fixed length-20 window, matching v0.19's preci
 
 ---
 
+### 3.11 Stemma Reconstruction and Scribal-School Mapping (v0.22.0)
+
+v0.22 ships two tools that bridge the chunk-discovery infrastructure (§3.9–§3.10) with the canonical Assyriological reconstruction problems: textual family trees and scribal schools.
+
+`build_canonical_recension_tree` automates **stemma reconstruction** at corpus scale. Given a seed manuscript, the tool BFS-expands its witness set via shared-chunk overlap, computes a pairwise distance matrix using `distance(A,B) = 1 - shared_chunks(A,B) / max(|H_A|, |H_B|)`, and runs neighbor-joining (Saitou & Nei 1987) to produce an unrooted binary tree in Newick format. UPGMA is the secondary algorithm option for rooted-tree consumers.
+
+The K.5896 (Mīs pî) test case (Round-7 audit, 2026-05-24) recovers **16 witnesses, 12 of which carry the canonical `Magic → Purification → Mīs pî` genre label** — auto-recovered without scholar curation. The distance ranking surfaces **K.6683 as K.5896's closest sister** (76 shared length-20 chunks, d=0.749) — closer than the canonical K.9508 example documented in §3.7.3 (65 shared, d=0.786). Newick output places K.5896 and K.6683 as immediate sisters under internal node N4. K.6683 was not previously highlighted in the §3.7.3 narrative; either a genuinely-undocumented close sister manuscript (worth verifying against Walker & Dick 2001's Mīs pî MS sigla) or a chunk-overlap-overweighting case — recorded as a follow-up.
+
+`build_scribal_school_graph` reconstructs **scribal schools** by joint clustering on scribal orthographic signature (LLR fingerprint, §3.4) and provenance/find-spot. Connected components on a thresholded scribal-cosine graph (default `min_scribal_similarity=0.65`), restricted to same-provenance edges, surface 30 schools at defaults. The top result (BM.33837, 288 members, internal cohesion 0.895) is the **Babylon Hellenistic-Parthian astronomical-diary scribes** — a known late-period scholastic community empirically reconstructed from fingerprint + find-spot alone. School #2 (K.4292, 185 members) is the Nineveh celestial-divination atelier (EAE tradition); school #5 (K.3453, 20 members) is the Nineveh therapeutic-medicine atelier spanning five body-region tablets in the Medical Compendium.
+
+Three claims surface, each validated by the Round-7 audit at the 91.92% fragment-metadata coverage achieved in v0.20.0-alpha:
+
+26. **`[my synthesis]`** **Stemma reconstruction is automatable at corpus scale from chunk-overlap distance alone.** Given the v0.20 chunk-hash index + neighbor-joining over the max-denominator distance metric, every composition with ≥3 chunk-related witnesses can have a stemma proposed in milliseconds. K.5896 (Mīs pî) demonstrates the method recovers 12/16 witnesses with the canonical genre label and surfaces K.6683 as a potentially-undocumented close sister. No scholar curation required during reconstruction.
+
+27. **`[my synthesis]`** **Scribal schools emerge empirically from joint clustering on orthographic signature + find-spot.** Connected-components on a thresholded scribal-cosine graph, restricted to same-provenance edges, surfaces 30 candidate schools in the eBL corpus. Top results align with known scholastic communities (Babylon Hellenistic astronomers, Nineveh EAE ateliers, Nineveh therapeutic-medicine atelier) — empirical reconstruction with no curation.
+
+28. **`[my synthesis]`** **The composition-level and physical-place axes are independently learnable but convergent.** §3.1–§3.10's composition-level clustering (BM.77056 *āšipūtu* curriculum) and §3.11's scribal-school clustering recover overlapping but non-identical structure. The composition axis traces *what* people copied; the scribal-school axis traces *where* and *with whom*. Methodological independence of the two axes is the empirical basis for treating both as primary reconstructions of cuneiform scribal culture, not as alternative views of the same phenomenon.
+
+**Validation gap:** the recension-tree output has not yet been benchmarked against hand-built stemmata (Walker & Dick 2001 for Mīs pî is the natural target — Robinson–Foulds distance to the published stemma is the proposed v0.22.1 follow-up). The methodological claim that NJ on chunk-overlap recovers a "correct" stemma is empirically supported by genre-label retention (12/16) and by the K.9508 near-sister placement, but not yet by direct comparison to scholar-authored trees.
+
+**Scribal-school caveat:** "scribal school" is an inferential leap from "shared orthographic fingerprint + same find-spot." The tool's output is a *candidate* for further philological evaluation — colophon-name overlap, dated rituals, archaeological context — not a historical claim. Documented in `docs/v0.22-recension-tree-design.md`.
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
