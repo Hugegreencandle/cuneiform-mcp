@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_numerical_chunks.schema.json",
+  "title": "find_numerical_chunks data payload",
+  "description": "v0.30.0 data-driven numerical-context chunk discovery. Replaces v0.21's hardcoded `NUMERICAL_SIGNS = {ABZ480, ABZ411}` filter with an empirical numerical-sign vocabulary derived from the v0.28 k-means clustering of the v0.23 sign2vec embedding space. The numerical_sign_set is the union of `all_members` across every cluster whose suggested_label is 'numerical' OR whose representative_signs include a pure-digit string. This typically yields ~80-150 signs (vs v0.21's 2). The tool then scans the v0.20 length-20 chunk-hash index and surfaces chunks at or above min_numerical_density (default 0.5). Where v0.21 used a 70%-density DROP filter to suppress numerical noise, v0.30 inverts the polarity: numerical-context chunks ARE the object of interest. Methods-paper §3.13 documents the v0.21 correct-behavior-wrong-rationale finding; v0.30 ships the principled replacement on the v0.28 empirical basis. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "numerical_sign_set",
+    "numerical_sign_set_size",
+    "chunks",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "numerical_sign_set": {
+      "type": "array",
+      "description": "The empirically-derived numerical-class sign vocabulary, sorted alphabetically for stability. Computed each call from a fresh clusterSignsByEmbedding({ k }) run so the set tracks the embedding index. Round-15 calibration expects ≥50 signs at default k=12, with ABZ480, ABZ411, ABZ427, ABZ598a, BAHAR₂, and the digit strings '0', '4', '19', '27' all members.",
+      "items": { "type": "string" }
+    },
+    "numerical_sign_set_size": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Cardinality of numerical_sign_set, surfaced separately so callers can gate on size without iterating the array."
+    },
+    "chunks": {
+      "type": "array",
+      "description": "Surfaced numerical-context chunks, ranked by host_count desc with numerical_density as tiebreaker (rewards purer numerical templates at equal host count). Capped by top_k.",
+      "items": {
+        "type": "object",
+        "required": [
+          "chunk_hash",
+          "chunk_signs",
+          "host_count",
+          "numerical_density",
+          "numerical_sign_count",
+          "total_signs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "chunk_hash": {
+            "type": "string",
+            "description": "Canonical trigram-joined hash from the v0.20 chunk-index (length-20 window). Pipe-separated."
+          },
+          "chunk_signs": {
+            "type": "string",
+            "description": "Reconstructed sign sequence (whitespace-joined). '…' marks an X-skip gap and is excluded from the density count."
+          },
+          "host_count": {
+            "type": "integer",
+            "minimum": 2,
+            "description": "Number of distinct tablets in which the chunk occurs. The v0.20 chunk-index pre-prunes singletons, so the structural floor is 2; the min_hosts option defaults to 5."
+          },
+          "numerical_density": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Fraction of chunk_signs tokens (excluding '…' gaps) that fall in numerical_sign_set. 1.0 = every sign is numerical-class. Default surface threshold is 0.5."
+          },
+          "numerical_sign_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of chunk_signs tokens in numerical_sign_set. Numerator of numerical_density."
+          },
+          "total_signs": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of chunk_signs tokens excluding '…' gap markers. Denominator of numerical_density."
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "chunks_examined",
+        "chunks_above_density_threshold",
+        "k_used_for_clustering"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "chunks_examined": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many chunk-index entries the scan visited before either exhausting the index or hitting an entry below min_hosts (entries are pre-sorted by host count desc, enabling an early-exit scan)."
+        },
+        "chunks_above_density_threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many of the examined chunks scored at or above min_numerical_density. Equals chunks.length when top_k is not the binding constraint."
+        },
+        "k_used_for_clustering": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Effective k passed through to clusterSignsByEmbedding. May differ from the request if outside [2, 50]; the underlying tool clamps and surfaces a warning."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
