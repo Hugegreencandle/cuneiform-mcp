@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compute_joint_pair_score.schema.json",
+  "title": "compute_joint_pair_score data payload",
+  "description": "v0.29.0 cross-axis Bayesian fusion bootstrap. Aggregates the 5 per-axis discovery signals (lex_jaccard, fuzzy_jaccard, thematic_cosine, scribal_cosine, substitution_lift_z) into ONE calibrated probability that the pair is a positive (sibling / commentary / stemma-sister / chunk-discovery-sister) via a logistic-regression model trained on n≈12 positives from the methods paper + n≈30-50 synthetic random-pair negatives. BOOTSTRAP QUALITY, NOT PRODUCTION. v1.0 requires ≥100 labeled pairs. The model is z-standardized in feature space; per_feature_contribution surfaces the additive decomposition: log_odds = intercept + Σ (standardized_x_i × weight_i). Classification: probability_positive ≥ 0.7 → 'positive', ≤ 0.3 → 'negative', else 'uncertain'. Missing axes default to 0 with an explicit warning. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "tablet_a",
+    "tablet_b",
+    "features",
+    "features_standardized",
+    "per_axis_status",
+    "probability_positive",
+    "log_odds",
+    "classification",
+    "per_feature_contribution",
+    "model_metadata",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_a": { "type": "string" },
+    "tablet_b": { "type": "string" },
+    "features": {
+      "type": "object",
+      "description": "Raw 5-axis feature vector. Missing axes default to 0.",
+      "required": [
+        "lex_jaccard",
+        "fuzzy_jaccard",
+        "thematic_cosine",
+        "scribal_cosine",
+        "substitution_lift_z"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lex_jaccard": { "type": "number", "description": "Exact trigram Jaccard from compareTabletPair.lexical." },
+        "fuzzy_jaccard": { "type": "number", "description": "Fuzzy (1-substitution) Jaccard from compareTabletPair.fuzzy." },
+        "thematic_cosine": { "type": "number", "description": "Random-indexing embedding cosine from findThematicParallel." },
+        "scribal_cosine": { "type": "number", "description": "LLR signature cosine from findSameScribeCandidates." },
+        "substitution_lift_z": { "type": "number", "description": "v0.25 baseline-normalized lift z-score on lexical substitution." }
+      }
+    },
+    "features_standardized": {
+      "type": "object",
+      "description": "Same 5 features after z-standardization with the training-set per-feature mean and stddev. Used to compute log_odds.",
+      "required": [
+        "lex_jaccard",
+        "fuzzy_jaccard",
+        "thematic_cosine",
+        "scribal_cosine",
+        "substitution_lift_z"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lex_jaccard": { "type": "number" },
+        "fuzzy_jaccard": { "type": "number" },
+        "thematic_cosine": { "type": "number" },
+        "scribal_cosine": { "type": "number" },
+        "substitution_lift_z": { "type": "number" }
+      }
+    },
+    "per_axis_status": {
+      "type": "object",
+      "description": "How each axis was sourced: 'ok' = value present, 'below_threshold' = pair below top-K for that axis, 'missing' = tablet not in axis index.",
+      "required": [
+        "lex_jaccard",
+        "fuzzy_jaccard",
+        "thematic_cosine",
+        "scribal_cosine",
+        "substitution_lift_z"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "lex_jaccard": { "type": "string", "enum": ["ok", "below_threshold", "missing"] },
+        "fuzzy_jaccard": { "type": "string", "enum": ["ok", "below_threshold", "missing"] },
+        "thematic_cosine": { "type": "string", "enum": ["ok", "below_threshold", "missing"] },
+        "scribal_cosine": { "type": "string", "enum": ["ok", "below_threshold", "missing"] },
+        "substitution_lift_z": { "type": "string", "enum": ["ok", "below_threshold", "missing"] }
+      }
+    },
+    "probability_positive": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Calibrated P(positive | features) — sigmoid(log_odds)."
+    },
+    "log_odds": {
+      "type": "number",
+      "description": "intercept + Σ (standardized_x_i × weight_i). Additive transparency."
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["positive", "negative", "uncertain"],
+      "description": "probability_positive ≥ 0.7 → 'positive'; ≤ 0.3 → 'negative'; else 'uncertain'."
+    },
+    "per_feature_contribution": {
+      "type": "array",
+      "description": "Per-feature additive decomposition of log_odds. Sum of contribution_to_log_odds + intercept = log_odds.",
+      "items": {
+        "type": "object",
+        "required": [
+          "feature",
+          "raw_value",
+          "standardized_value",
+          "weight",
+          "contribution_to_log_odds"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "feature": {
+            "type": "string",
+            "enum": [
+              "lex_jaccard",
+              "fuzzy_jaccard",
+              "thematic_cosine",
+              "scribal_cosine",
+              "substitution_lift_z"
+            ]
+          },
+          "raw_value": { "type": "number" },
+          "standardized_value": { "type": "number" },
+          "weight": { "type": "number" },
+          "contribution_to_log_odds": { "type": "number" }
+        }
+      },
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "model_metadata": {
+      "type": "object",
+      "required": [
+        "version",
+        "build_timestamp",
+        "trained_on_n_positives",
+        "trained_on_n_negatives",
+        "training_accuracy",
+        "intercept",
+        "warning"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "build_timestamp": { "type": "string" },
+        "trained_on_n_positives": { "type": "integer", "minimum": 0 },
+        "trained_on_n_negatives": { "type": "integer", "minimum": 0 },
+        "training_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "intercept": { "type": "number" },
+        "warning": {
+          "type": "string",
+          "description": "Explicit bootstrap caveat: trained on small labeled set; not production-quality."
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
