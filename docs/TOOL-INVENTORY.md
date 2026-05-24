@@ -2,7 +2,7 @@
 
 Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-05-24 against v0.26.0.
 
-**Total tools: 74**
+**Total tools: 81**
 
 ## `lookup_sign`
 
@@ -167,6 +167,34 @@ Compare a sign's top-K sign2vec neighbors trained separately on Neo-Assyrian vs 
 ## `recommend_archetype_thresholds`
 
 Per-archetype calibration matrix for the 7 cluster archetypes documented in methods paper §3.8. Different archetypes have different precision/recall optima across all tools — a verbatim manuscript chain wants min_fuzzy_J ≈ 0.35 while a compositional curriculum wants ≈ 0.08, an order of magnitude dif…
+
+## `compare_sign_neighbors_register_matched`
+
+Compare a sign's top-K sign2vec neighbors trained on REGISTER-MATCHED (period, genre) sub-corpora to isolate the diachronic axis from the register confound that v0.26 flagged. v0.27 trains 6 separate embeddings: (divination, magic, literature) × (NA, NB). EMPIRICAL FINDING: matched-register mean top…
+
+## `cluster_signs_by_embedding`
+
+K-means clustering on the v0.23 sign2vec embedding space. Surfaces empirical sign-type structure without scholar curation. EMPIRICAL FINDING at k=12 over the 635-sign vocabulary: the partition produces 4 surface-form-coherent classes — 2 numerical clusters (one anchored by ABZ480 with `4`/`0`/BAHAR₂…
+
+## `find_formulaic_passages_per_period`
+
+v0.20 find_formulaic_passages partitioned by script.period. Trains separate length-20 chunk-hash indexes on NA (7,831 tablets, 50,083 non-singleton hashes) and NB (7,591 tablets, 11,979 non-singleton hashes). The 4.2× NA/NB density gap is the central observation — NA's Library-of-Ashurbanipal canoni…
+
+## `compute_joint_pair_score`
+
+v1.0-readiness bootstrap: logistic regression on the 5-axis feature vector (lex_jaccard, fuzzy_jaccard, thematic_cosine, scribal_cosine, substitution_lift_z) trained on 12 labeled positives + 40 synthetic negatives from the methods paper. Training accuracy 98.1% (51/52). Returns P(positive) + per-fe…
+
+## `analyze_joins_graph`
+
+Corpus-wide manuscript-join graph analysis. Two modes: (a) per-tablet — given a tablet, return its direct-join neighborhood resolved to tablet IDs + period + genre; (b) top-hosts — return top-K join-rich tablets corpus-wide. EMPIRICAL: 4,361 fragments have ≥1 join, 17,203 total join edges, top join-…
+
+## `find_numerical_chunks`
+
+Data-driven numerical-context chunk detection using the v0.28 sign2vec k-means clustering. Replaces v0.21 find_incipits' hardcoded {ABZ480, ABZ411} numerical filter with a 112-sign empirically-derived numerical-sign-set drawn from sign2vec clusters #5 + #9. Surfaces chunks whose signs are ≥50% numer…
+
+## `restore_lacuna_semantic`
+
+Single-position lacuna restoration using a joint score combining (a) the v0.18.0 bigram-context heuristic and (b) the v0.23 sign2vec semantic prior derived from the surrounding visible signs. α∈[0,1] interpolates: α=1 = pure bigram (v0.18.0 baseline), α=0 = pure sign2vec semantic, α=0.5 = balanced (…
 
 ## `reconstruct_cluster`
 
