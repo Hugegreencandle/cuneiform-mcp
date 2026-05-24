@@ -88,6 +88,12 @@ import {
   compareSignNeighborsRegisterMatched,
 } from "./compareSignNeighborsRegisterMatched.js";
 import {
+  clusterSignsByEmbedding,
+} from "./clusterSignsByEmbedding.js";
+import {
+  findFormulaicPassagesPerPeriod,
+} from "./findFormulaicPassagesPerPeriod.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -294,7 +300,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.27.0";
+const VERSION = "0.28.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4995,6 +5001,106 @@ server.registerTool(
   },
 );
 
+// ─── v0.28.0 — cluster_signs_by_embedding (k-means sign-taxonomy) ─────────
+
+server.registerTool(
+  "cluster_signs_by_embedding",
+  {
+    description:
+      "K-means clustering on the v0.23 sign2vec embedding space. Surfaces empirical sign-type structure without scholar curation. EMPIRICAL FINDING at k=12 over the 635-sign vocabulary: the partition produces 4 surface-form-coherent classes — 2 numerical clusters (one anchored by ABZ480 with `4`/`0`/BAHAR₂ as nearest reps; one anchored by ABZ411 with `27`/ABZ427/`19`), 3 compound-logogram clusters, 1 phonetic-reading-family cluster, 6 ABZ-syllabogram clusters. The numerical class is geometrically tightest (intra-cosine 0.378). Requires k ≥ 12 to resolve numerical-class structure — at k=8, `4` merges into a common-syllabogram cluster. Deterministic via mulberry32(20260525). Methods paper §3.15.",
+    inputSchema: {
+      k: z.number().int().min(2).max(50).optional().describe("Number of k-means clusters. Default 12. Floor 2, hard cap 50. Numerical-class structure requires k ≥ 12."),
+      max_iterations: z.number().int().min(10).max(1000).optional().describe("Max k-means iterations. Default 100. Convergence typically in 10-30 iterations."),
+    },
+  },
+  async ({ k, max_iterations }) => {
+    const SCHEMA = schemaId("cluster_signs_by_embedding");
+    try {
+      const result = clusterSignsByEmbedding({ k, max_iterations });
+      const lines: string[] = [
+        `K-means: k=${result.k}  ·  total_signs_clustered=${result.total_signs_clustered}  ·  silhouette=${result.silhouette_score.toFixed(4)}`,
+        ``,
+        `Clusters:`,
+      ];
+      for (const c of result.clusters) {
+        const reps = c.representative_signs.slice(0, 3).map((r) => `${r.sign}(${r.cosine_to_centroid.toFixed(2)})`).join(" ");
+        lines.push(`  #${c.id.toString().padStart(2)}  size=${c.size.toString().padStart(3)}  intra_cos=${c.mean_intra_cluster_cosine.toFixed(3)}  ${c.suggested_label.padEnd(28)} reps: ${reps}`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:sign2vec-kmeans-clustering", VERSION, {
+          citation: "K-means clustering on the v0.23 sign2vec PPMI+SVD embedding space. Deterministic mulberry32(20260525). v0.28.0. Methods paper §3.15.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`cluster_signs_by_embedding error: ${msg}`, {
+        schema: SCHEMA,
+        data: { k: k ?? 12, total_signs_clustered: 0, clusters: [] as never[], silhouette_score: 0, warnings: [msg] },
+        provenance: provenance("local", "local:sign2vec-kmeans-clustering", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.28.0 — find_formulaic_passages_per_period (NA/NB partition) ───────
+
+server.registerTool(
+  "find_formulaic_passages_per_period",
+  {
+    description:
+      "v0.20 find_formulaic_passages partitioned by script.period. Trains separate length-20 chunk-hash indexes on NA (7,831 tablets, 50,083 non-singleton hashes) and NB (7,591 tablets, 11,979 non-singleton hashes). The 4.2× NA/NB density gap is the central observation — NA's Library-of-Ashurbanipal canonical corpus supports top-host count 120 at length 20; NB's predominantly administrative/archival corpus caps at 8. EMPIRICAL: top-10 NA-only formulae each have ≥80 NA hosts (anchored by BM accession-number tablets 1879,0708.49 / 1879,0708.48 / 1880,0719.152) with 0 NB transmission — canonical-period-only formulae the v0.20 mixed-period tool can't isolate. Strongest cross-period transmission band caps at na=15, nb=3 (BM.48206 + K.10906 + K.5364 carry the NB side). Methods paper §3.15.x.",
+    inputSchema: {
+      min_hosts: z.number().int().min(2).optional().describe("Drop chunks below this host count in BOTH periods combined. Default 10. NB's distribution caps at 8 so very high min_hosts saturates to NA-only output."),
+      top_k: z.number().int().min(1).max(5000).optional().describe("Top-K returned, ranked by max(na_host_count, nb_host_count) desc. Default 30, hard cap 5000."),
+      period_specific_only: z.boolean().optional().describe("If true, only return chunks classified `na_only` or `nb_only` (drop shared chunks). Useful for isolating canonical-period-only formulae."),
+    },
+  },
+  async ({ min_hosts, top_k, period_specific_only }) => {
+    const SCHEMA = schemaId("find_formulaic_passages_per_period");
+    try {
+      const result = findFormulaicPassagesPerPeriod({ minHosts: min_hosts, topK: top_k, periodSpecificOnly: period_specific_only });
+      const lines: string[] = [
+        `NA index: ${result.na_index_stats.total_non_singleton_hashes} hashes from ${result.na_index_stats.total_tablets} tablets`,
+        `NB index: ${result.nb_index_stats.total_non_singleton_hashes} hashes from ${result.nb_index_stats.total_tablets} tablets`,
+        ``,
+        `Passages returned: ${result.passages.length}`,
+        ``,
+      ];
+      for (const [i, p] of result.passages.slice(0, 20).entries()) {
+        const signsPreview = p.chunk_signs.length > 80 ? p.chunk_signs.slice(0, 80) + "…" : p.chunk_signs;
+        lines.push(`  ${(i + 1).toString().padStart(2)}. na=${p.na_host_count} nb=${p.nb_host_count} [${p.period_specificity}]  ${signsPreview}`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:chunk-hash-per-period-na-vs-nb", VERSION, {
+          citation: "Per-period length-20 chunk-hash indexes. v0.28.0. Methods paper §3.15.x.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_formulaic_passages_per_period error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          na_index_stats: {} as Record<string, never>,
+          nb_index_stats: {} as Record<string, never>,
+          passages: [] as never[],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:chunk-hash-per-period-na-vs-nb", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -8218,7 +8324,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 75 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 77 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission))\n`,
     );
     process.exit(0);
   }
