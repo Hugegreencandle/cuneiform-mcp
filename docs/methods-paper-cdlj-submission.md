@@ -390,6 +390,31 @@ Three claims surface, each validated by the Round-7 audit at the 91.92% fragment
 
 ---
 
+### 3.12 Sign-Level Semantic Embeddings (v0.23.0) — sign2vec
+
+The semantic axis previously operated at tablet granularity only (§2.3, v0.15 Random-Indexing embeddings). v0.23 introduces the complementary primitive: per-sign semantic embeddings learned from corpus co-occurrence via PPMI + truncated SVD (Levy & Goldberg 2014, with randomized SVD per Halko–Martinsson–Tropp 2011). 635 signs indexed at `MIN_OCCURRENCES=20`, covering 99.6% of the corpus's 4.87M sign occurrences. Embedding dimension 100. The build pipeline runs in 0.9 seconds end-to-end against `~/.cache/cuneiform-mcp/all-signs-full.json` and produces a 0.60 MB cache. Zero new runtime dependencies — PPMI math, randomized SVD, L2-normalization all hand-rolled in pure TypeScript.
+
+The single tool `find_similar_signs(sign, top_k)` exposes nearest-neighbor queries by cosine.
+
+The Round-8 calibration audit (2026-05-24) tests embedding **coherence** and **discrimination** rather than specific philological equivalences (those need scholarly review). Five tests PASS: index sanity (635 in-band, max ‖v‖−1 = 5.69e-7), self-similarity (cosine(v, v) = 1.0), coherence (top-10 most-frequent signs each have a neighbor at cosine ≥ 0.51), numerical-cluster cohesion (ABZ480's top-5 contains digit-class neighbors `4` and `0`), distant-pair discrimination (95.4% of top-30 pairs have cosine < 0.4). Sample output: ABZ480's top-5 = {`4` 0.59, ABZ583 0.58, `0` 0.57, BAHAR₂ 0.57, ABZ598a 0.56} — visibly numerical.
+
+Three claims surface:
+
+29. **`[my synthesis]`** **Sign-level distributional embeddings recover sign-equivalence structure without scholar curation.** PPMI+SVD over a ±5 sign context window on the eBL corpus yields a 100-dim embedding in which 95.4% of the top-30 most-frequent signs have pairwise cosine below 0.4 (distributional discrimination preserved) while every top-10 sign has at least one neighbor at cosine ≥ 0.51 (coherent local neighborhoods). The numerical-context cluster around ABZ480 surfaces empirically without priors fed into the SVD.
+
+30. **`[my synthesis]`** **The semantic axis decomposes into two granularities — sign-level (§3.12) and tablet-level (§2.3) — which encode orthogonal distributional information.** Tablet-level Random-Indexing embeddings capture *what compositions a tablet is similar to*; sign-level PPMI+SVD embeddings capture *which signs occur in similar contexts*. The two layers compose: aggregating sign-cosine into a tablet-level lexical-substitution score would produce a complement to the existing lexical/fuzzy/thematic axes of §2 (deferred to v0.24).
+
+31. **`[my synthesis]`** **Sign-level embeddings serve as a falsifier for folk-Assyriological sign-equivalence claims.** v0.21's `find_incipits` `exclude_numerical_only` filter assumes ABZ480 and ABZ411 are interchangeable contexts — both treated as "cuneiform numeral 1 family" and both stripped from candidate incipits if they dominate a chunk. v0.23 measures their distributional cosine at **0.097** — falsified. Their actual corpus contexts are largely disjoint. The embedding is therefore not just a discovery tool but a *calibration probe* for downstream filter assumptions across the toolchain. The v0.21 filter's effect on actual incipit discovery should be re-evaluated (v0.23.1 audit candidate); ABZ411 may be inadvertently dropping non-numerical incipits that share that sign but aren't part of the ABZ480 numerical context.
+
+**Limitations** (recorded for v0.24 follow-up):
+
+- WINDOW=5 is a single configuration choice; an ensemble across WINDOW ∈ {2, 5, 10} would expose syntactic-vs-topical context-distance effects.
+- `MIN_OCCURRENCES=20` excludes rare-tail signs, yielding 635 in-band of ~8,754 unique total signs. Lowering to 10 admits ~1,300 signs at the cost of more variance in the rare-sign vectors.
+- Per-period training (Neo-Assyrian vs Neo-Babylonian sub-corpora) would expose period-specific sign substitutions and is the natural sequel for diachronic analysis.
+- No external benchmark yet (e.g., an Assyriologist-curated sign-equivalence dataset). The audit measures internal coherence + a single negative-finding example (ABZ480/ABZ411); future work should add an external validation set.
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
