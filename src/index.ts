@@ -43,6 +43,18 @@ import {
   findChunkParallels,
 } from "./chunkParallels.js";
 import {
+  chunkIndexStats,
+} from "./chunkIndex.js";
+import {
+  findFormulaicPassages,
+} from "./formulaicPassages.js";
+import {
+  traceChunkDiffusion,
+} from "./chunkDiffusion.js";
+import {
+  buildCitationGraph,
+} from "./citationGraph.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -249,7 +261,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.19.0";
+const VERSION = "0.20.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3886,6 +3898,262 @@ server.registerTool(
   },
 );
 
+// ─── v0.20.0 — Corpus-wide chunk discovery ───────────────────────────────
+
+server.registerTool(
+  "find_formulaic_passages",
+  {
+    description:
+      "Corpus-wide enumeration of formulaic passages: every length-20 trigram window shared with ≥ min_hosts tablets, ranked by host_genres_spanned × log(host_count). Backbone is the v0.20 chunk-hash index (~/.cache/cuneiform-mcp/chunk-index.json, built once via scripts/build-chunk-index.mjs). v0.19's find_chunk_parallels probes ONE source tablet; this tool surfaces formulaic chunks ACROSS the whole corpus in milliseconds. Genre-diversity weighting rewards cross-curricular formulae (e.g. *āšipūtu* incipits appearing in Mīs pî + Ritual + Lexical hosts) and demotes within-prefix colophon templates (Library of Ashurbanipal Asb.c / Asb.d) whose host_genres_spanned collapses to 1. Companion to trace_chunk_diffusion (per-chunk chronological transmission) and build_citation_graph (commentary→base edges).",
+    inputSchema: {
+      min_hosts: z
+        .number()
+        .int()
+        .min(2)
+        .optional()
+        .describe("Minimum host count per chunk. Default 20. Lower for exploratory recall; higher (50+) to restrict to canonical KAR-44 incipits."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Number of passages to return. Default 50, hard cap 100."),
+      cross_genre_only: z
+        .boolean()
+        .optional()
+        .describe("Keep only chunks whose hosts span ≥ 2 distinct primary genres. Requires fragment-metadata; chunks with no resolvable genre are dropped."),
+      cross_period_only: z
+        .boolean()
+        .optional()
+        .describe("Keep only chunks whose hosts span ≥ 2 distinct periods. Useful for surfacing diachronically-transmitted formulae."),
+      exclude_prefixes: z
+        .array(z.string())
+        .optional()
+        .describe("Drop hosts whose tablet ID starts with any of these prefixes (e.g. ['Asb.'] to suppress colophon prototypes)."),
+    },
+  },
+  async ({ min_hosts, top_k, cross_genre_only, cross_period_only, exclude_prefixes }) => {
+    const SCHEMA = schemaId("find_formulaic_passages");
+    try {
+      const result = findFormulaicPassages({
+        minHosts: min_hosts,
+        topK: top_k,
+        crossGenreOnly: cross_genre_only,
+        crossPeriodOnly: cross_period_only,
+        excludePrefixes: exclude_prefixes,
+      });
+      const lines: string[] = [
+        `Chunk index: ${result.index_stats.loaded ? "loaded" : "NOT LOADED"} · ${result.index_stats.total_chunks_in_index} non-singleton chunks`,
+        `Candidates ≥ min_hosts: ${result.index_stats.candidates_above_threshold} · after filters: ${result.index_stats.after_filters}`,
+        `Host metadata coverage: ${result.index_stats.metadata_coverage_pct}%`,
+        ``,
+        `Passages returned: ${result.passages.length}`,
+        ``,
+      ];
+      for (const p of result.passages) {
+        lines.push(`── chunk ${p.chunk_hash.slice(0, 24)}…  (length ${p.chunk_length} trigrams ≈ ${p.chunk_length + 2} signs)`);
+        lines.push(`   hosts: ${p.host_count}  ·  genres spanned: ${p.host_genres_spanned}  ·  periods spanned: ${p.host_periods_spanned}  ·  novelty: ${p.novelty_score}`);
+        const hostPreview = p.host_tablets.slice(0, 4).map((h) => `${h.tablet_id}${h.genre ? `[${h.genre.split(" → ")[0]}]` : ""}`).join(", ");
+        const moreHosts = p.host_count > 4 ? ` … +${p.host_count - 4} more` : "";
+        lines.push(`   host preview: ${hostPreview}${moreHosts}`);
+        const signsPreview = p.chunk_signs.length > 200 ? p.chunk_signs.slice(0, 200) + "…" : p.chunk_signs;
+        lines.push(`   signs: ${signsPreview}`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:formulaic-passages-from-chunk-hash-index", VERSION, {
+          citation:
+            "Corpus-wide formulaic-passage enumeration over the v0.20.0 chunk-hash index. Sliding length-20 trigram windows aggregated across the eBL all-signs-full.json corpus; singletons pruned at build; ranked by host_genres_spanned × log(host_count). Companion to find_chunk_parallels' per-tablet probe.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_formulaic_passages error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          passages: [] as never[],
+          index_stats: { loaded: false, total_chunks_in_index: 0, candidates_above_threshold: 0, after_filters: 0, metadata_coverage_pct: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:formulaic-passages-from-chunk-hash-index", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "trace_chunk_diffusion",
+  {
+    description:
+      "Per-chunk chronological diffusion: given a chunk (by hash, or by source tablet + which chunk to pick), return its hosts grouped by period and ordered chronologically. The diffusion array is the corpus-level transmission map for a single passage. Validation case: a canonical KAR-44 incipit chunk should diffuse Old Babylonian → Middle Babylonian → Neo-Assyrian → Neo-Babylonian → Hellenistic, mirroring the documented *āšipūtu* curriculum. Backbone is the v0.20.0 chunk-hash index + src/periodChronology.ts curated period ordering.",
+    inputSchema: {
+      chunk_hash: z
+        .string()
+        .optional()
+        .describe("Exact chunk hash to trace. Get hashes from find_formulaic_passages output. Either chunk_hash OR tablet_id must be provided."),
+      tablet_id: z
+        .string()
+        .optional()
+        .describe("Source tablet; the tool picks the tablet's chunks in the index. Combine with chunk_index_in_tablet to select among multiple."),
+      chunk_index_in_tablet: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe("When tablet_id is set: 0-based selector among the tablet's non-singleton chunks. Default 0 (highest-host-count chunk first)."),
+    },
+  },
+  async ({ chunk_hash, tablet_id, chunk_index_in_tablet }) => {
+    const SCHEMA = schemaId("trace_chunk_diffusion");
+    try {
+      const result = traceChunkDiffusion({
+        chunkHash: chunk_hash,
+        tabletId: tablet_id,
+        chunkIndexInTablet: chunk_index_in_tablet,
+      });
+      const lines: string[] = [
+        `chunk_hash: ${result.chunk_hash ?? "(none)"}`,
+        `chunk_length: ${result.chunk_length} trigram positions`,
+        `hosts: ${result.hosts_total} total · ${result.hosts_with_period} with period metadata`,
+        `period span: ${result.earliest_period ?? "(unknown)"} → ${result.latest_period ?? "(unknown)"}  ·  approx ${result.period_span_years_approx ?? "—"} years  ·  ${result.cross_period_count} distinct periods`,
+        ``,
+        `signs: ${result.chunk_signs.slice(0, 200)}${result.chunk_signs.length > 200 ? "…" : ""}`,
+        ``,
+        `Diffusion (ordered by sort_key):`,
+      ];
+      for (const bucket of result.diffusion) {
+        const periodLabel = bucket.period ?? "(unknown period)";
+        const range = bucket.approx_start_bce !== null && bucket.approx_end_bce !== null
+          ? `  [~${bucket.approx_start_bce}–${bucket.approx_end_bce} BCE]`
+          : "";
+        lines.push(`  ${periodLabel}${range}  ·  ${bucket.tablets.length} host(s)`);
+        const preview = bucket.tablets.slice(0, 5).map((t) => `${t.tablet_id}${t.genre ? `[${t.genre.split(" → ")[0]}]` : ""}`).join(", ");
+        const more = bucket.tablets.length > 5 ? ` … +${bucket.tablets.length - 5} more` : "";
+        lines.push(`    ${preview}${more}`);
+      }
+      if (result.warnings.length > 0) lines.push("", `Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:chunk-diffusion-from-chunk-hash-index", VERSION, {
+          citation:
+            "Per-chunk chronological diffusion over the v0.20.0 chunk-hash index. Period attribution via cached eBL fragment metadata (script.period); ordering via src/periodChronology.ts curated sort_keys.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`trace_chunk_diffusion error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          chunk_hash: null,
+          chunk_signs: "",
+          chunk_length: 0,
+          diffusion: [] as never[],
+          earliest_period: null,
+          latest_period: null,
+          period_span_years_approx: null,
+          cross_period_count: 0,
+          hosts_total: 0,
+          hosts_with_period: 0,
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:chunk-diffusion-from-chunk-hash-index", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+server.registerTool(
+  "build_citation_graph",
+  {
+    description:
+      "Corpus-level commentary→base quotation graph derived from the v0.20.0 chunk-hash index. For every chunk, partitions occurrences into commentary-genre hosts vs. base-text hosts (by primary-genre substring match against commentary_genres); each (commentary, base) pair earns one edge credit per shared chunk, weighted by chunk length. Edges below min_shared_chunks are dropped. Pair-level companion: v0.18.19 commentary_quotes_base_text answers 'is THIS pair a commentary/base relationship?'; this tool answers 'what does the WHOLE corpus's quotation network look like?'. Validation case: BM.47463 (Šurpu commentary) → CBS.6060 (Šurpu base) — methods-paper §3.7.1's 147-sign chain — must appear as an edge.",
+    inputSchema: {
+      min_shared_chunks: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Drop edges with fewer than this many shared chunks. Default 2. Set to 1 to inspect every commentary/base pair candidate; raise to 3+ for high-confidence-only edges."),
+      commentary_genres: z
+        .array(z.string())
+        .optional()
+        .describe("Substring needles (case-insensitive) matched against host primary genre to classify it as 'commentary'. Default ['Commentary', 'Commentaries']."),
+      top_k_edges: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on returned edges, ranked by edge_weight desc. Default 100, hard cap 500."),
+    },
+  },
+  async ({ min_shared_chunks, commentary_genres, top_k_edges }) => {
+    const SCHEMA = schemaId("build_citation_graph");
+    try {
+      const result = buildCitationGraph({
+        minSharedChunks: min_shared_chunks,
+        commentaryGenres: commentary_genres,
+        topKEdges: top_k_edges,
+      });
+      const lines: string[] = [
+        `Chunk index loaded: ${result.index_stats.loaded}`,
+        `Chunks examined: ${result.index_stats.chunks_examined}  ·  candidate edges: ${result.index_stats.candidate_edges}`,
+        `Edges after min_shared_chunks filter: ${result.index_stats.edges_after_filter}  ·  returned (top-k): ${result.index_stats.edges_returned}`,
+        `Corpus metadata coverage: ${result.index_stats.metadata_coverage_pct}%`,
+        ``,
+      ];
+      for (const e of result.edges) {
+        lines.push(`── ${e.cited_by} → ${e.cites}`);
+        lines.push(`     genres: ${e.cited_by_genre ?? "?"} → ${e.cites_genre ?? "?"}`);
+        lines.push(`     shared chunks: ${e.shared_chunks_count}  ·  edge_weight: ${e.edge_weight}`);
+        if (e.shared_chunks.length > 0) {
+          const ex = e.shared_chunks[0];
+          const preview = ex.signs.length > 120 ? ex.signs.slice(0, 120) + "…" : ex.signs;
+          lines.push(`     example signs: ${preview}`);
+        }
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:citation-graph-from-chunk-hash-index", VERSION, {
+          citation:
+            "Corpus-level commentary→base citation graph derived from the v0.20.0 chunk-hash index by genre-partitioning each chunk's occurrences and accumulating per-pair edge weights. Complements v0.18.19's pair-level commentary_quotes_base_text verdict.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`build_citation_graph error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          edges: [] as never[],
+          index_stats: { loaded: false, chunks_examined: 0, candidate_edges: 0, edges_after_filter: 0, edges_returned: 0, metadata_coverage_pct: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:citation-graph-from-chunk-hash-index", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// Silences unused-import lint when chunkIndexStats is only used in --smoke summary.
+void chunkIndexStats;
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7109,7 +7377,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 61 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels — sub-tablet chunk parallel detection)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 64 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph)\n`,
     );
     process.exit(0);
   }

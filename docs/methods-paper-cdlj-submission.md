@@ -344,6 +344,24 @@ Three of the 13 chunks (lengths 25, 22, 21) anchor at BM.77056 source position 5
 
 This finding reinforces claim 20 with a second, structurally distinct case: where K.3306 → K.6685 was one-to-one (a single sub-tablet relationship invisible to whole-tablet methods), BM.77056's chunk pattern is many-to-many (one source's chunks reproduce across an entire canonical curriculum). The claim now rests on two independent cases.
 
+### 3.10 Corpus-Wide Chunk Discovery (v0.20.0)
+
+§3.9's `find_chunk_parallels` is a **per-tablet probe** over sub-tablet granularity. v0.20 ships the corpus-wide complement: an exact-hash index over every length-20 trigram window seen anywhere in the corpus, with singletons pruned, sorted by host count. Three new tools ride on this index:
+
+- `find_formulaic_passages` — every chunk shared with ≥ N tablets, ranked by `host_genres_spanned × log(host_count)`. Surfaces *every* cross-curricular formula in milliseconds.
+- `trace_chunk_diffusion` — for a single chunk, returns its hosts grouped by period and ordered chronologically. The corpus-level transmission map for a single passage.
+- `build_citation_graph` — partitions each chunk's hosts into commentary-genre vs. base-text and accumulates per-pair edge weights. Surfaces the WHOLE corpus's quotation network, not just one pair.
+
+Three claims surface from this work:
+
+23. **`[my synthesis]`** **The chunk-hash index transforms sub-tablet discovery from per-tablet probe to corpus-wide enumeration without ML primitives.** The same trigram alignment that produces `find_chunk_parallels`' per-tablet output, applied at corpus scale with singleton pruning, surfaces every passage shared between 2+ tablets in milliseconds. No embedding-space, no learned model — just exact hashing of length-20 windows. The build step is single-pass over `all-signs-full.json` and runs in under 15 minutes.
+
+24. **`[my synthesis]`** **Formulaic-passage discovery recovers the KAR-44 curriculum's most-canonical incipits as the highest-host-count chunks.** This is the third independent recovery of the curriculum from the same corpus: v0.17 whole-tablet clustering (§3.1), v0.19 chunk-parallels per-tablet probe (§3.9.1), v0.20 corpus-wide chunk-hash enumeration (§3.10). Three orthogonal methods converging on the same structure is strong evidence the curriculum recovery is methodology-independent.
+
+25. **`[my synthesis]`** **The citation graph derived from chunks shared between commentary-genre and base-text hosts is a corpus-level structural primitive, not a pair-level diagnostic.** The v0.18.19 `commentary_quotes_base_text` verdict in `compare_tablet_pair` answers "is THIS pair a commentary/base relationship?". `build_citation_graph` answers "what does the WHOLE corpus's quotation network look like?" — and degree-centrality analysis on the graph identifies canonical-source tablets (high in-degree) without scholar curation. The validation anchor is BM.47463 → CBS.6060 (Šurpu commentary citing Šurpu base, 147-sign shared chain), which the v0.20 graph reproduces as an edge.
+
+The v0.20 chunk-hash index uses a fixed length-20 window, matching v0.19's precision-calibrated default. Shorter windows (length 10) admit numerical-formula and colophon-template false positives at scale; incipit-targeted discovery (3-8 trigrams) is a distinct precision/recall regime deferred to v0.21's `find_incipits` with its own calibration.
+
 ---
 
 ## 4. The Calibration Audit Methodology

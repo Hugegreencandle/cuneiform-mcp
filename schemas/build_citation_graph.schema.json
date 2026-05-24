@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/build_citation_graph.schema.json",
+  "title": "build_citation_graph data payload",
+  "description": "v0.20.0 corpus-level commentary→base quotation graph derived from the chunk-hash index. Edges link commentary-genre hosts to base-text hosts that share chunks; edge_weight sums shared-chunk lengths. The corpus-level structural complement to v0.18.19's pair-level commentary_quotes_base_text verdict.",
+  "type": "object",
+  "required": ["edges", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cited_by",
+          "cited_by_genre",
+          "cites",
+          "cites_genre",
+          "shared_chunks_count",
+          "shared_chunks",
+          "edge_weight"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "cited_by": { "type": "string", "description": "Commentary tablet id." },
+          "cited_by_genre": { "type": ["string", "null"] },
+          "cites": { "type": "string", "description": "Base-text tablet id." },
+          "cites_genre": { "type": ["string", "null"] },
+          "shared_chunks_count": { "type": "integer", "minimum": 1 },
+          "shared_chunks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["hash", "length", "signs"],
+              "additionalProperties": false,
+              "properties": {
+                "hash": { "type": "string" },
+                "length": { "type": "integer", "minimum": 1 },
+                "signs": { "type": "string" }
+              }
+            },
+            "description": "Up to 5 example chunks per edge."
+          },
+          "edge_weight": { "type": "number", "minimum": 1, "description": "Sum of chunk_length across all shared chunks." }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "loaded",
+        "chunks_examined",
+        "candidate_edges",
+        "edges_after_filter",
+        "edges_returned",
+        "metadata_coverage_pct"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "loaded": { "type": "boolean" },
+        "chunks_examined": { "type": "integer", "minimum": 0 },
+        "candidate_edges": { "type": "integer", "minimum": 0 },
+        "edges_after_filter": { "type": "integer", "minimum": 0 },
+        "edges_returned": { "type": "integer", "minimum": 0 },
+        "metadata_coverage_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
