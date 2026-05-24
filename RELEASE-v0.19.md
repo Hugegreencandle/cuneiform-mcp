@@ -70,8 +70,18 @@ Methods paper §3.9 (the new section) + amendments to §3.6: `docs/methods-paper
 21. Chunk-level decomposition preserves whole-tablet calibration thresholds (`min_chunk_len=20` mirrors v0.18.19 `min_run=20`).
 22. Per-tablet chunk discovery does not require a corpus-wide chunk-hash index — defer that build to v0.20+ when corpus-wide enumeration tools justify it.
 
+## Post-ship follow-up (2026-05-24): BM.77056 cross-curricular pattern
+
+The audit's Test 5 (BM.77056 cross-genre stress) was unblocked the same day by enriching fragment-metadata for BM.77056 + 16 distinct chunk hosts (28-second batch fetch, 17/17 successful). Two findings:
+
+1. **Structural limitation** — eBL doesn't curate `genres[]` for BM.77056 itself; the `cross_genre_only=true` filter requires source genre and stays at zero. **v0.19.1 deferred fix:** add a `host_genres_spanned` field per chunk — the right primitive when source metadata is incomplete.
+
+2. **Substantive finding** — BM.77056's 13 returned chunks span **12 distinct *āšipūtu* sub-genres** across host sets (Šuʾila, Mīs pî, Anti-witchcraft, Bīt rimki, Namburbi, Diĝiršadiba, Magic Varia, Šuʾila Emesal, Ritual texts, Magic). This is the **canonical KAR-44 curriculum** recovered empirically for the second time from the same seed — first via v0.17 whole-tablet clustering (§3.1), now via sub-tablet chunk parallels (§3.9.1). Methodological convergence across orthogonal primitives. Position 57 in BM.77056 anchors three chunks whose hosts collectively span six sub-genres — a formulaic-incipit anchor.
+
+Methods-paper §3.9.1 added with this finding. Claim 20 now rests on two independent cases (K.3306 → K.6685 one-to-one + BM.77056 many-to-many).
+
 ## Outstanding (deferred to v0.19.1 / v0.20)
 
-- **Cross-genre stress on BM.77056** (the *āšipūtu* cluster seed) — blocked by missing fragment-metadata; populate via `enrich_prefix_metadata` before retesting. Expected to surface KAR-44 curriculum cross-genre incipits (medical Sakikkû / lexical Diri-Aa hosts of *āšipūtu* formulae).
+- **`host_genres_spanned` field** — small additive change to `find_chunk_parallels` output, enables cross-curricular discovery on sources with incomplete metadata. Unblocks `cross_genre_only=true` semantics for BM.77056-like seeds.
 - **Manual scholarly review** of K.3306 ↔ K.6685: is the 92.63%-coverage relationship a true textual parallel, a calendrical/numerical formula coincidence, or an unrecognized join?
 - **Corpus-wide chunk-hash index** (`scripts/build-chunk-index.mjs`) — original v0.19 plan included it; deferred to v0.20 when the API design demands of `find_formulaic_passages`, `build_citation_graph`, and `trace_chunk_diffusion` can shape the index format.

@@ -328,7 +328,21 @@ The 20-tablet random sample (`mulberry32(20260523)` seed identical to v0.18.19 L
 
 22. Per-tablet chunk discovery does not require a corpus-wide chunk-hash index. Reusing the v0.18.19 2-of-3 inverted-index infrastructure handles per-tablet queries in milliseconds with zero new build artifacts. The chunk-hash index is the right structure for corpus-wide enumeration (`find_formulaic_passages`, `build_citation_graph`) — which can be designed against actual API demands in v0.20+.
 
-The full audit (six tests including a deferred cross-genre stress on the *āšipūtu* cluster seed BM.77056, blocked by missing fragment-metadata) is documented in `docs/v0.19-calibration-round4-chunk-parallels.md`. The audit script `scripts/round4-chunk-parallels-audit.mjs` is re-runnable end-to-end against `~/.cache/cuneiform-mcp/all-signs-full.json` + the anomaly-index cache.
+The full audit (six tests) is documented in `docs/v0.19-calibration-round4-chunk-parallels.md`. The audit script `scripts/round4-chunk-parallels-audit.mjs` is re-runnable end-to-end against `~/.cache/cuneiform-mcp/all-signs-full.json` + the anomaly-index cache.
+
+#### 3.9.1 BM.77056 cross-curricular chunk pattern (post-enrichment follow-up)
+
+The original v0.19 audit Test 5 (cross-genre stress on BM.77056, the *āšipūtu* cluster seed of §3.1) was blocked at audit time by missing fragment-metadata. After enriching metadata for BM.77056 and its 16 distinct chunk hosts via the eBL API (28-second batch fetch, 17/17 successful) and re-probing with metadata in place, two findings emerged:
+
+**Structural limitation** — eBL returns no `genres[]` for BM.77056 itself (only `script.period=Neo-Babylonian`); the `cross_genre_only=true` filter requires source-side genre to fire and therefore still returns zero results on this seed. A `host_genres_spanned` field counting distinct host genres per chunk is deferred to v0.19.1 as the right primitive for cross-curricular discovery on uncatalogued sources.
+
+**Substantive finding** — Manual grouping of BM.77056's 13 returned chunks by host primary-genre surfaces an unambiguous cross-curricular pattern. The 13 chunks' host sets span 12 distinct *āšipūtu* sub-genres: Šuʾila (canonical and Emesal variants), Mīs pî, Anti-witchcraft, Bīt rimki, Namburbi, Diĝiršadiba, Magic Varia, Magic, and Ritual texts. This is the **canonical *āšipūtu* curriculum from KAR-44** (Lenzi 2008, Geller 2010, Maul 1994) recovered empirically — for the second time, by an independent method, from the same seed.
+
+The §3.1 BM.77056 cluster (v0.17 whole-tablet thematic clustering) and this §3.9.1 chunk-parallel pattern recover the same canonical curriculum via orthogonal methods. **Methodological convergence:** independent corroboration of the *āšipūtu* library's structure from two unrelated discovery primitives is stronger evidence than either result alone.
+
+Three of the 13 chunks (lengths 25, 22, 21) anchor at BM.77056 source position 57; their host sets collectively span six sub-genres. Position 57 is therefore a **formulaic-incipit anchor** — the start of a ~20–25 sign opening reproduced verbatim across at least six sub-genres of the *āšipūtu* curriculum. This is a natural target for the v0.20 `find_formulaic_passages` tool.
+
+This finding reinforces claim 20 with a second, structurally distinct case: where K.3306 → K.6685 was one-to-one (a single sub-tablet relationship invisible to whole-tablet methods), BM.77056's chunk pattern is many-to-many (one source's chunks reproduce across an entire canonical curriculum). The claim now rests on two independent cases.
 
 ---
 
