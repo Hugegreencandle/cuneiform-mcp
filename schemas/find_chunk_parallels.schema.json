@@ -21,6 +21,7 @@
           "host_count",
           "cross_genre_count",
           "cross_period_count",
+          "host_genres_spanned",
           "novelty_score"
         ],
         "additionalProperties": false,
@@ -68,6 +69,11 @@
             "type": "integer",
             "minimum": 0,
             "description": "Hosts whose period differs from the source's period. Zero when either side lacks fragment-metadata."
+          },
+          "host_genres_spanned": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Count of DISTINCT host primary genres for this chunk, independent of source-metadata availability. v0.19.1 primitive for downstream cross-curricular ranking; differs from cross_genre_count, which is anchored to the source's genre."
           },
           "novelty_score": {
             "type": "number",

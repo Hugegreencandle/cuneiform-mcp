@@ -62,6 +62,13 @@ export type ChunkParallel = {
   /** Hosts whose period differs from the source's period. */
   cross_period_count: number;
   /**
+   * Count of DISTINCT host genres represented in this chunk's hosts, regardless
+   * of source-metadata availability. v0.19.1 — the cross-curricular primitive
+   * for downstream corpus-wide ranking (find_formulaic_passages). Differs from
+   * cross_genre_count, which requires source genre attribution to compute.
+   */
+  host_genres_spanned: number;
+  /**
    * log-scaled inverse host count × cross-boundary boost:
    *   novelty = (1 / log2(2 + host_count)) × (1 + 0.5 × cross_genre_fraction + 0.5 × cross_period_fraction)
    */
@@ -213,6 +220,7 @@ export function findChunkParallels(opts: ChunkParallelsOptions): ChunkParallelsR
     hosts: ChunkParallelHost[];
     crossGenre: number;
     crossPeriod: number;
+    hostGenres: Set<string>;
   }>();
   let candidatesWithRuns = 0;
 
@@ -241,12 +249,14 @@ export function findChunkParallels(opts: ChunkParallelsOptions): ChunkParallelsR
           hosts: [],
           crossGenre: 0,
           crossPeriod: 0,
+          hostGenres: new Set<string>(),
         };
         chunkMap.set(key, entry);
       }
       entry.hosts.push({ tablet_id: cid, host_size_ratio: +hostRatio.toFixed(2) });
       if (isCrossGenre) entry.crossGenre++;
       if (isCrossPeriod) entry.crossPeriod++;
+      if (hostGenre) entry.hostGenres.add(hostGenre);
     }
   }
 
@@ -273,6 +283,7 @@ export function findChunkParallels(opts: ChunkParallelsOptions): ChunkParallelsR
       host_count: hostCount,
       cross_genre_count: entry.crossGenre,
       cross_period_count: entry.crossPeriod,
+      host_genres_spanned: entry.hostGenres.size,
       novelty_score: +novelty.toFixed(4),
     });
   }

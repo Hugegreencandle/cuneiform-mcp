@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/trace_chunk_diffusion.schema.json",
+  "title": "trace_chunk_diffusion data payload",
+  "description": "v0.20.0 chronological diffusion of a single chunk. Returns its hosts grouped by period and ordered by sort_key ascending. Earliest_period and latest_period bound the chronologically-known buckets; period_span_years_approx is null when either endpoint is unknown.",
+  "type": "object",
+  "required": [
+    "chunk_hash",
+    "chunk_signs",
+    "chunk_length",
+    "diffusion",
+    "earliest_period",
+    "latest_period",
+    "period_span_years_approx",
+    "cross_period_count",
+    "hosts_total",
+    "hosts_with_period",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "chunk_hash": { "type": ["string", "null"] },
+    "chunk_signs": { "type": "string" },
+    "chunk_length": { "type": "integer", "minimum": 0 },
+    "diffusion": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "period",
+          "period_sort_key",
+          "approx_start_bce",
+          "approx_end_bce",
+          "tablets"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "period": { "type": ["string", "null"] },
+          "period_sort_key": { "type": "number" },
+          "approx_start_bce": { "type": ["number", "null"] },
+          "approx_end_bce": { "type": ["number", "null"] },
+          "tablets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tablet_id", "genre"],
+              "additionalProperties": false,
+              "properties": {
+                "tablet_id": { "type": "string" },
+                "genre": { "type": ["string", "null"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "earliest_period": { "type": ["string", "null"] },
+    "latest_period": { "type": ["string", "null"] },
+    "period_span_years_approx": { "type": ["number", "null"] },
+    "cross_period_count": { "type": "integer", "minimum": 0 },
+    "hosts_total": { "type": "integer", "minimum": 0 },
+    "hosts_with_period": { "type": "integer", "minimum": 0 },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
