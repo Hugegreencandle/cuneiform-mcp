@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/build_canonical_recension_tree.schema.json",
+  "title": "build_canonical_recension_tree data payload",
+  "description": "v0.22.0 automated stemma (textual-family-tree) reconstruction from chunk-hash overlap. Single-hop BFS-expand witnesses from a seed tablet, build a pairwise distance matrix via 1 - shared_chunks/max(|HA|,|HB|), then run neighbor-joining (default) or UPGMA to produce a phylogenetic tree in Newick format plus a flat edge list. The watershed v0.22 tool: automates a problem scholars currently solve by hand over weeks per composition.",
+  "type": "object",
+  "required": [
+    "composition_seed",
+    "algorithm",
+    "witnesses",
+    "distance_matrix",
+    "tree",
+    "tree_edges",
+    "internal_nodes",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "composition_seed": {
+      "type": "string",
+      "description": "The seed_tablet_id passed in by the caller."
+    },
+    "algorithm": {
+      "type": "string",
+      "enum": ["neighbor_joining", "upgma"],
+      "description": "Which phylogenetic algorithm was applied. NJ is the default (unrooted, no clock assumption); UPGMA is offered for callers who want a rooted ultrametric tree."
+    },
+    "witnesses": {
+      "type": "array",
+      "description": "Tablets included in the stemma. Index in this array corresponds to row/column index in distance_matrix and to the leaf labels in tree / tree_edges.",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "shared_chunks_with_seed", "host_chunks_total"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "shared_chunks_with_seed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of chunk-hash entries shared with the seed tablet. Will be |H_seed| for the seed itself."
+          },
+          "host_chunks_total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total number of non-singleton chunks for which this tablet is a host (|HA| in the distance formula)."
+          },
+          "sign_count": { "type": ["integer", "null"], "minimum": 0 },
+          "period": { "type": ["string", "null"] },
+          "primary_genre": { "type": ["string", "null"] },
+          "provenance": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "distance_matrix": {
+      "type": "array",
+      "description": "NxN symmetric distance matrix where N = witnesses.length. Diagonal entries are 0. Off-diagonal entries are in [0, 1] where 0 = identical chunk-set and 1 = no shared chunks. Indexing matches witnesses[].",
+      "items": {
+        "type": "array",
+        "items": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "tree": {
+      "type": "string",
+      "description": "Newick-format tree string (terminated by ';'). For neighbor_joining, the tree is unrooted (trifurcation at the final NJ node). For upgma, the tree is rooted with ultrametric branch lengths. Internal nodes are labelled N1, N2, …; leaves carry the tablet_id verbatim. Branch lengths follow the conventional ':<float>' syntax."
+    },
+    "tree_edges": {
+      "type": "array",
+      "description": "Flat representation of the same tree as `tree`. Each edge has from/to node IDs (leaves are tablet_ids; internal nodes are 'N1', 'N2', …) and a non-negative branch_length. The number of edges is one fewer than the number of nodes for a rooted tree, or equal to the number of internal-leaf incidences for unrooted.",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "branch_length"],
+        "additionalProperties": false,
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "branch_length": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "internal_nodes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of inferred ancestral (internal) nodes in the tree. For an NJ tree with N leaves this is N-2; for UPGMA it is N-1."
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "chunk_index_loaded",
+        "seed_host_chunks",
+        "candidate_witnesses_examined",
+        "witnesses_after_filter",
+        "witnesses_returned",
+        "metric_max_distance",
+        "metric_min_nonzero_distance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "chunk_index_loaded": { "type": "boolean" },
+        "seed_host_chunks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "|H_seed| — total chunk-hash entries containing the seed."
+        },
+        "candidate_witnesses_examined": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct other tablets that appear in any of the seed's chunks before the min_pairwise_chunks filter."
+        },
+        "witnesses_after_filter": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Candidates surviving the min_pairwise_chunks filter, before the max_witnesses cap."
+        },
+        "witnesses_returned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metric_max_distance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "metric_min_nonzero_distance": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
