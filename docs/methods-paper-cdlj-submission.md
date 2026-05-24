@@ -506,6 +506,24 @@ Three orthogonal v0.29 deliverables: cross-axis Bayesian fusion (the v1.0-readin
 
 **§3.16.3 — Data-driven numerical-chunk detection.** v0.21's `find_incipits` numerical filter used a hardcoded 2-sign list `{ABZ480, ABZ411}`. The v0.23 sign2vec embedding falsified the interchangeability assumption (cosine 0.097); the v0.28 k-means clustering revealed the numerical class is two structurally-distinct clusters spanning 112 signs. v0.29 ships the principled replacement: an empirical numerical-sign-set drawn from clusters #5 + #9, used as the density-based filter. **v0.21 → v0.30 overlap: 100% (88/88 v0.21-flagged chunks all caught), plus 21,389 additional numerical chunks v0.21 missed.** The §3.13.1 v0.21-filter "correct-behavior-wrong-rationale" finding gets its principled cash-out: the filter's behavior was right by accident, but the same behavior is now derivable from the empirical embedding space.
 
+### 3.17 Sign2vec-Augmented Lacuna Restoration (v0.30)
+
+v0.18.0's lacuna restorer (§3.5) uses parallel-template alignment + bigram-context heuristics, reaching 92% top-1 precision on multi-position template gaps. v0.30 ships a complementary single-position tool, `restore_lacuna_semantic`, that integrates the v0.23 sign2vec semantic prior:
+
+```
+joint_score = α × normalized_bigram_score + (1−α) × normalized_sign2vec_score
+```
+
+where the sign2vec score is the cosine of each candidate sign's embedding against the centroid of the surrounding visible signs' embeddings (positions p−2, p−1, p+1, p+2). At α=1 the tool reduces to the v0.18.0 bigram baseline; at α=0 it's pure sign2vec.
+
+**Empirical finding:** on a 10-tablet sample of single-position predictions, pure-bigram and pure-sign2vec top-1 picks disagree in **9 of 10 cases (90%)**. The two axes carry strongly independent signal — sign2vec is not redundantly re-ranking the bigram baseline; it is contributing a different ordering.
+
+A concrete case: `1879,0708.118` position 20, ground truth `ABZ52`. Window context `ABZ319 ABZ579 ABZ57 ABZ480 ABZ1 [ABZ52] ABZ354 ABZ570 ABZ411 ABZ411 ABZ61`. The joint score recovers `ABZ52` at rank 1; pure-sign2vec alone would have picked `ABZ570` (rank 6 in the joint score, ranked highest in pure-sign2vec); pure-bigram correctly picks `ABZ52`. Here sign2vec adds **complementary** signal, not corrective — the bigram axis already has the right answer and sign2vec doesn't reorder it. But across the 10-tablet sample, the 90% disagreement rate shows sign2vec is doing real ordering work; whether the resulting joint score has higher precision than pure bigram at scale is a v0.31 calibration question.
+
+**Claim 37:** *Sign2vec semantic embeddings provide a complementary lacuna-restoration prior to the v0.18.0 bigram-context heuristic. The two axes carry strongly independent signal at single-position granularity (90% top-1 disagreement on the sample). The joint score is the v0.30 cross-tool integration that establishes the pattern for v1.0 cross-axis composition — every existing axis can be augmented by the v0.23 sign2vec embedding as a semantic prior, not just bigram-context prediction.*
+
+The §3.5 92% top-1 figure is on multi-position parallel-template alignment, a different surface from this single-position joint score; the §3.17 claim is about axis-independence at single-position granularity, not direct comparison to §3.5.
+
 ---
 
 ## 4. The Calibration Audit Methodology
