@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_chunk_parallels.schema.json",
+  "title": "find_chunk_parallels data payload",
+  "description": "v0.19.0 sub-tablet chunk-parallel detector. Surfaces every contiguous matched-trigram run ≥ minChunkLen between a source tablet and any candidate tablet in the corpus as a primary object (chunk_start + chunk_length + host_tablets[]). Reuses the fuzzy 2-of-3 inverted-index infrastructure from fuzzyParallels.ts; the alignment walk is identical to find_embedded_fragments' but emits every maximal run instead of the longest. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["tablet_id", "chunks", "source_coverage_pct", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "chunk_key",
+          "chunk_start",
+          "chunk_length",
+          "chunk_signs",
+          "host_tablets",
+          "host_count",
+          "cross_genre_count",
+          "cross_period_count",
+          "novelty_score"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "chunk_key": {
+            "type": "string",
+            "description": "Canonical \"<start>:<length>\" identifier within the source tablet."
+          },
+          "chunk_start": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Position in the source's ordered-trigram stream where the matched run begins."
+          },
+          "chunk_length": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Length of the run in trigram positions (sign count ≈ chunk_length + 2 for clean tablets)."
+          },
+          "chunk_signs": {
+            "type": "string",
+            "description": "Reconstructed sign sequence. When trigrams_ordered skips X-heavy positions, discontinuities are marked with ' … '."
+          },
+          "host_tablets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tablet_id", "host_size_ratio"],
+              "additionalProperties": false,
+              "properties": {
+                "tablet_id": { "type": "string" },
+                "host_size_ratio": {
+                  "type": "number",
+                  "description": "host_trigrams / source_trigrams."
+                }
+              }
+            }
+          },
+          "host_count": { "type": "integer", "minimum": 1 },
+          "cross_genre_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Hosts whose primary genre differs from the source's primary genre. Zero when either side lacks fragment-metadata."
+          },
+          "cross_period_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Hosts whose period differs from the source's period. Zero when either side lacks fragment-metadata."
+          },
+          "novelty_score": {
+            "type": "number",
+            "minimum": 0,
+            "description": "(1 / log2(2 + host_count)) × (1 + 0.5 × cross_genre_fraction + 0.5 × cross_period_fraction). High for rare chunks crossing curriculum boundaries; low for ubiquitous colophon-formulae."
+          }
+        }
+      }
+    },
+    "source_coverage_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Percentage of source trigram positions covered by ≥1 returned chunk."
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "total_tablets_indexed",
+        "query_trigram_count",
+        "candidates_examined",
+        "candidates_with_runs",
+        "distinct_chunks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets_indexed": { "type": "integer" },
+        "query_trigram_count": { "type": "integer" },
+        "candidates_examined": { "type": "integer" },
+        "candidates_with_runs": { "type": "integer" },
+        "distinct_chunks": {
+          "type": "integer",
+          "description": "Total chunks surviving filters before topK truncation."
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -40,6 +40,9 @@ import {
   fuzzyIndexStats,
 } from "./fuzzyParallels.js";
 import {
+  findChunkParallels,
+} from "./chunkParallels.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -246,7 +249,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.18.19";
+const VERSION = "0.19.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -3781,6 +3784,108 @@ server.registerTool(
   },
 );
 
+// ─── v0.19.0 — Sub-tablet chunk-parallel detection ────────────────────────
+
+server.registerTool(
+  "find_chunk_parallels",
+  {
+    description:
+      "Surface contiguous shared-sign chunks (≥ min_chunk_len trigram positions) between a source tablet and every host tablet in the corpus, as a PRIMARY OBJECT — chunk_start + chunk_length + host_tablets[] + cross-genre/cross-period attribution + novelty score. v0.18.19's find_embedded_fragments returns the longest run as a scalar; this tool returns every qualifying run as a chunk, grouped by (start, length) → hosts. Motivating case: K.9508 ↔ K.5896 has a 142-position contiguous run reproduced verbatim across the pair — invisible to whole-tablet symmetric Jaccard (J=0.13) but obvious as a single chunk-with-host here. Defaults are precision-tight (min_chunk_len=20, calibrated 2026-05-24 against the methods-paper §3.6 bi-orphans IM.49220 + K.3306). Use cross_genre_only=true to surface formulaic incipits crossing the KAR-44 curriculum boundary (e.g. *āšipūtu* formulae reproduced in Sakikkû / Diri / Aa hosts). Companion to find_embedded_fragments (asymmetric containment scalar) and find_fuzzy_parallels (whole-manuscript symmetric Jaccard).",
+    inputSchema: {
+      tablet_id: z.string().describe("Museum number of the source tablet (e.g., 'K.9508'). Must be in the eBL signs cache."),
+      min_chunk_len: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Minimum contiguous-run length in TRIGRAM POSITIONS (sign count ≈ min_chunk_len + 2 for clean tablets). Default 20 — matches the v0.18.19 min_run precision-tight default that suppresses noise hosts on the methods-paper §3.6 bi-orphans (IM.49220, K.3306) to zero while preserving K.9508 ↔ K.5896 (run=142). Lower to 10–15 for exploratory recall sweeps."),
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe("Number of chunks to return. Default 20. Hard cap 100."),
+      min_hosts: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Require each chunk to be shared with at least this many other tablets. Default 1 (any host)."),
+      exclude_prefixes: z
+        .array(z.string())
+        .optional()
+        .describe("Drop hosts whose tablet ID starts with any of these prefixes (e.g. ['Asb.'] to suppress colophon prototypes that dominate the candidate set with formulaic Ashurbanipal endings)."),
+      cross_genre_only: z
+        .boolean()
+        .optional()
+        .describe("Keep only chunks with ≥1 host whose primary genre differs from the source's. Requires fragment-metadata for both source and host; chunks without metadata-confirmable cross-genre attribution are dropped. Useful for surfacing curriculum-crossing formulae."),
+      cross_period_only: z
+        .boolean()
+        .optional()
+        .describe("Keep only chunks with ≥1 host whose period differs from the source's. Same metadata requirement as cross_genre_only. Useful for reconstructing diachronic transmission of formulaic passages."),
+    },
+  },
+  async ({ tablet_id, min_chunk_len, top_k, min_hosts, exclude_prefixes, cross_genre_only, cross_period_only }) => {
+    const SCHEMA = schemaId("find_chunk_parallels");
+    try {
+      const result = findChunkParallels({
+        tabletId: tablet_id,
+        minChunkLen: min_chunk_len,
+        topK: top_k,
+        minHosts: min_hosts,
+        excludePrefixes: exclude_prefixes,
+        crossGenreOnly: cross_genre_only,
+        crossPeriodOnly: cross_period_only,
+      });
+      const lines: string[] = [
+        `Source tablet: ${tablet_id}`,
+        `Index: ${result.index_stats.total_tablets_indexed} tablets · source has ${result.index_stats.query_trigram_count} trigrams`,
+        `Candidates examined: ${result.index_stats.candidates_examined} · with ≥1 run: ${result.index_stats.candidates_with_runs} · distinct chunks before topK: ${result.index_stats.distinct_chunks}`,
+        `Source coverage by returned chunks: ${result.source_coverage_pct}%`,
+        ``,
+        `Chunks returned: ${result.chunks.length}`,
+        ``,
+      ];
+      for (const c of result.chunks) {
+        lines.push(`── chunk ${c.chunk_key}  (length ${c.chunk_length} trigram positions, ~${c.chunk_length + 2} signs)`);
+        lines.push(`   hosts: ${c.host_count}  ·  cross-genre: ${c.cross_genre_count}  ·  cross-period: ${c.cross_period_count}  ·  novelty: ${c.novelty_score}`);
+        const hostPreview = c.host_tablets.slice(0, 5).map((h) => `${h.tablet_id} (${h.host_size_ratio}×)`).join(", ");
+        const moreHosts = c.host_tablets.length > 5 ? ` … +${c.host_tablets.length - 5} more` : "";
+        lines.push(`   host preview: ${hostPreview}${moreHosts}`);
+        const signsPreview = c.chunk_signs.length > 200 ? c.chunk_signs.slice(0, 200) + "…" : c.chunk_signs;
+        lines.push(`   signs: ${signsPreview}`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:chunk-parallels-from-trigram-runs", VERSION, {
+          citation:
+            "Sub-tablet chunk parallel detection over the eBL all-signs-full.json corpus, built on the v0.18.19 fuzzy trigram intersection. v0.19.0. Surfaces every maximal matched-position run ≥ min_chunk_len as a primary object (chunk → hosts) rather than as a longest_contiguous_run scalar.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_chunk_parallels error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id,
+          chunks: [] as never[],
+          source_coverage_pct: 0,
+          index_stats: { total_tablets_indexed: 0, query_trigram_count: 0, candidates_examined: 0, candidates_with_runs: 0, distinct_chunks: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:chunk-parallels-from-trigram-runs", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7004,7 +7109,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 59 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 61 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels — sub-tablet chunk parallel detection)\n`,
     );
     process.exit(0);
   }

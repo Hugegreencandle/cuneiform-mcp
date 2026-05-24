@@ -58,7 +58,9 @@ export type FuzzyParallelsResult = {
 
 // ─── Index types ───────────────────────────────────────────────────────────
 
-type CorpusEntry = {
+// v0.19.0: exported for sibling modules (chunkParallels) that need to walk
+// the same ordered-trigram + 2-of-3 inverted-index structures.
+export type CorpusEntry = {
   trigrams: Set<string>;
   trigrams_ordered: string[]; // v0.18.2: ordered list for contiguous-run analysis
   // 2-of-3 partial keys
@@ -222,6 +224,80 @@ function fuzzyIntersection(
     }
   }
   return { exact, fuzzy, longest_run, examples };
+}
+
+// ─── v0.19.0 — All-runs variant for sub-tablet chunk discovery ──────────────
+//
+// `fuzzyIntersection` (above) condenses the match map to a single
+// `longest_run` scalar. `find_chunk_parallels` (v0.19) needs every maximal
+// run ≥ threshold as a primary object: chunk_start (position in source's
+// trigrams_ordered) + chunk_length (run length). This variant runs the same
+// alignment walk but emits all qualifying runs instead of max()-ing them.
+//
+// Same fuzziness semantics as `fuzzyIntersection`: a query trigram matches
+// the target iff its exact form is present OR any 2-of-3 prefix-pair
+// projection (ab / bc / ac) appears in the target's projections.
+
+export function fuzzyIntersectionAllRuns(
+  queryEntry: CorpusEntry,
+  target: CorpusEntry,
+  minRun: number,
+): Array<{ start: number; length: number }> {
+  const matchedPositions: boolean[] = new Array(queryEntry.trigrams_ordered.length).fill(false);
+  for (let pos = 0; pos < queryEntry.trigrams_ordered.length; pos++) {
+    const qTri = queryEntry.trigrams_ordered[pos];
+    if (target.trigrams.has(qTri)) {
+      matchedPositions[pos] = true;
+      continue;
+    }
+    const parts = qTri.split(" ");
+    const a = parts[0], b = parts[1], c = parts[2];
+    if (
+      target.ab.has(a + " " + b) ||
+      target.bc.has(b + " " + c) ||
+      target.ac.has(a + " " + c)
+    ) {
+      matchedPositions[pos] = true;
+    }
+  }
+  const runs: Array<{ start: number; length: number }> = [];
+  let runStart = -1;
+  for (let i = 0; i < matchedPositions.length; i++) {
+    if (matchedPositions[i]) {
+      if (runStart === -1) runStart = i;
+    } else if (runStart !== -1) {
+      const length = i - runStart;
+      if (length >= minRun) runs.push({ start: runStart, length });
+      runStart = -1;
+    }
+  }
+  if (runStart !== -1) {
+    const length = matchedPositions.length - runStart;
+    if (length >= minRun) runs.push({ start: runStart, length });
+  }
+  return runs;
+}
+
+/**
+ * v0.19.0: Cross-module accessor for the lazy-loaded corpus + 2-of-3
+ * inverted indexes. Returns null if the trigram cache is unavailable.
+ * Sibling modules (chunkParallels) reuse the same in-process indexes to
+ * avoid double-loading the 35K-tablet corpus.
+ */
+export function getCorpusAndIndexes(): {
+  corpus: Map<string, CorpusEntry>;
+  abIndex: Map<string, Set<string>>;
+  bcIndex: Map<string, Set<string>>;
+  acIndex: Map<string, Set<string>>;
+} | null {
+  const corpus = loadCorpus();
+  if (!corpus || !_abIndex || !_bcIndex || !_acIndex) return null;
+  return { corpus, abIndex: _abIndex, bcIndex: _bcIndex, acIndex: _acIndex };
+}
+
+/** v0.19.0: Surface the load error from the lazy corpus loader. */
+export function getFuzzyLoadError(): string | null {
+  return _loadError;
 }
 
 // ─── Public API ────────────────────────────────────────────────────────────
