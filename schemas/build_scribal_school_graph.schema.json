@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/build_scribal_school_graph.schema.json",
+  "title": "build_scribal_school_graph data payload",
+  "description": "v0.22.0 joint scribal-signature + provenance clustering. Returns connected-components of a graph whose nodes are tablets with BOTH a cached scribal LLR signature AND a known find-spot city, and whose edges connect pairs at signature cosine ≥ min_scribal_similarity AND (optionally) sharing the same provenance city. Each component above min_school_size = a scribal-school candidate — empirically reconstructed from orthographic-preference + physical co-location, awaiting downstream philological evaluation. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["schools", "index_stats", "query", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "schools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "school_id",
+          "anchor_tablet",
+          "members",
+          "shared_provenance",
+          "period_distribution",
+          "genre_distribution",
+          "internal_cohesion",
+          "edge_count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "school_id": {
+            "type": "string",
+            "description": "Arbitrary stable identifier within this response (e.g. 'school-001'). NOT a canonical scribal-school name — purely an output-stream label."
+          },
+          "anchor_tablet": {
+            "type": "string",
+            "description": "Member tablet with the highest sum of within-cluster cosine scores. Conventional 'name' of the school for downstream reference."
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["tablet_id", "sign_count", "period", "primary_genre"],
+              "additionalProperties": false,
+              "properties": {
+                "tablet_id": { "type": "string" },
+                "sign_count": { "type": ["integer", "null"] },
+                "period": {
+                  "type": ["string", "null"],
+                  "description": "From cached fragment-metadata script.period; null when metadata missing."
+                },
+                "primary_genre": {
+                  "type": ["string", "null"],
+                  "description": "From cached fragment-metadata genres[0]; null when metadata missing. May be a hierarchy string like 'Literature → Lex → Diri'."
+                }
+              }
+            }
+          },
+          "shared_provenance": {
+            "type": ["string", "null"],
+            "description": "City/site shared by all members when unique (e.g. 'Nineveh'). Null when required_shared_provenance=false produced a multi-city component."
+          },
+          "period_distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label", "count"],
+              "additionalProperties": false,
+              "properties": {
+                "label": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          },
+          "genre_distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["label", "count"],
+              "additionalProperties": false,
+              "properties": {
+                "label": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          },
+          "internal_cohesion": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Mean pairwise scribal-signature cosine across collected intra-cluster edges. Higher = the school's members share more idiosyncratic orthographic preferences."
+          },
+          "edge_count": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of distinct intra-cluster edges (pairs at ≥ min_scribal_similarity that satisfied the provenance rule)."
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "total_tablets_in_scribal_index",
+        "candidates_with_signature_and_city",
+        "candidates_without_city",
+        "candidates_without_signature",
+        "tablets_scanned_for_edges",
+        "edges_collected",
+        "components_above_size_threshold",
+        "elapsed_seconds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "total_tablets_in_scribal_index": { "type": "integer", "minimum": 0 },
+        "candidates_with_signature_and_city": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tablets that passed the sign-count filter, had a known city, AND had a cached scribal signature (the edge-construction universe)."
+        },
+        "candidates_without_city": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tablets that passed sign-count filter but had no city in cached fragment-metadata. Reported so users know how much corpus was excluded for metadata-coverage reasons; enrich via enrich_prefix_metadata to recover."
+        },
+        "candidates_without_signature": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tablets that had a city but no scribal signature (e.g. below MIN_TABLET_SIZE or all-X-token signs)."
+        },
+        "tablets_scanned_for_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Seeds for which findSameScribeCandidates was actually called (after pre-filters)."
+        },
+        "edges_collected": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "components_above_size_threshold": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Connected components with ≥ min_school_size members (before top_k_schools truncation)."
+        },
+        "elapsed_seconds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "query": {
+      "type": "object",
+      "required": [
+        "min_scribal_similarity",
+        "min_school_size",
+        "required_shared_provenance",
+        "top_k_schools",
+        "exclude_prefixes",
+        "min_sign_count",
+        "max_tablets_to_scan",
+        "top_k_per_tablet"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min_scribal_similarity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "min_school_size": { "type": "integer", "minimum": 2 },
+        "required_shared_provenance": { "type": "boolean" },
+        "top_k_schools": { "type": "integer", "minimum": 1 },
+        "exclude_prefixes": { "type": "array", "items": { "type": "string" } },
+        "min_sign_count": { "type": "integer", "minimum": 0 },
+        "max_tablets_to_scan": { "type": "integer", "minimum": 10 },
+        "top_k_per_tablet": { "type": "integer", "minimum": 2 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
