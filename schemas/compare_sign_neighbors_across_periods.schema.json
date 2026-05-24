@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compare_sign_neighbors_across_periods.schema.json",
+  "title": "compare_sign_neighbors_across_periods data payload",
+  "description": "v0.26.0 sign2vec diachronic query tool. For a single query sign, returns the top-K nearest neighbors from the Neo-Assyrian and Neo-Babylonian period sub-corpus embeddings (same WINDOW=5 / MIN_OCC=20 hyperparameters, separately trained sub-corpora). Surfaces three drift signals: signs shared by both top-K rankings (the stable distributional core), signs unique to NA's top-K, and signs unique to NB's top-K. Non-zero na_only/nb_only counts flag the query sign as a candidate diachronic substitution — its distributional behavior changed between the Neo-Assyrian and Neo-Babylonian sub-corpora. Companion to v0.23's find_similar_signs (single corpus-wide config) and v0.25's compare_sign_embedding_configs (hyperparameter axis); this tool is the diachronic axis. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query_sign",
+    "in_na",
+    "in_nb",
+    "neighbors_na",
+    "neighbors_nb",
+    "drift_signals",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_sign": {
+      "type": "string",
+      "description": "The sign code submitted by the caller, after whitespace trim."
+    },
+    "in_na": {
+      "type": "boolean",
+      "description": "True iff the query sign passes the Neo-Assyrian MIN_OCC gate and has an embedding vector there."
+    },
+    "in_nb": {
+      "type": "boolean",
+      "description": "True iff the query sign passes the Neo-Babylonian MIN_OCC gate and has an embedding vector there."
+    },
+    "neighbors_na": {
+      "type": "array",
+      "description": "Top-K nearest neighbors in the Neo-Assyrian embedding space (empty when in_na=false).",
+      "items": {
+        "type": "object",
+        "required": ["sign", "cosine", "occurrences"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Neighbor sign code (e.g. an ABZ identifier)."
+          },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity between query and neighbor in the NA embedding. Vectors are L2-normalized at build time so cosine == dot product."
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Occurrence count of this neighbor in the Neo-Assyrian filtered sub-corpus."
+          }
+        }
+      }
+    },
+    "neighbors_nb": {
+      "type": "array",
+      "description": "Top-K nearest neighbors in the Neo-Babylonian embedding space (empty when in_nb=false).",
+      "items": {
+        "type": "object",
+        "required": ["sign", "cosine", "occurrences"],
+        "additionalProperties": false,
+        "properties": {
+          "sign": {
+            "type": "string",
+            "description": "Neighbor sign code (e.g. an ABZ identifier)."
+          },
+          "cosine": {
+            "type": "number",
+            "minimum": -1,
+            "maximum": 1,
+            "description": "Cosine similarity between query and neighbor in the NB embedding."
+          },
+          "occurrences": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Occurrence count of this neighbor in the Neo-Babylonian filtered sub-corpus."
+          }
+        }
+      }
+    },
+    "drift_signals": {
+      "type": "object",
+      "required": [
+        "common_neighbors",
+        "na_only_neighbors",
+        "nb_only_neighbors",
+        "na_only_count",
+        "nb_only_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "common_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes appearing in BOTH NA's top-K and NB's top-K. The stable distributional core for this query sign — neighbors that survive the diachronic crossing."
+        },
+        "na_only_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes in NA's top-K but not in NB's top-K. Strong candidates for Neo-Assyrian-specific co-occurrence partners that fell out of distributional reach by the Neo-Babylonian period."
+        },
+        "nb_only_neighbors": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Sign codes in NB's top-K but not in NA's top-K. Strong candidates for Neo-Babylonian-specific co-occurrence partners — distributional successors picked up between periods."
+        },
+        "na_only_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of NA-only neighbors. Higher values signal stronger diachronic drift for this query sign."
+        },
+        "nb_only_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of NB-only neighbors. Higher values signal stronger diachronic drift for this query sign."
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "na_signs_indexed",
+        "nb_signs_indexed",
+        "na_tablets_in_period",
+        "nb_tablets_in_period"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "na_signs_indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of signs above MIN_OCC in the Neo-Assyrian sub-corpus embedding (0 if the NA cache failed to load)."
+        },
+        "nb_signs_indexed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of signs above MIN_OCC in the Neo-Babylonian sub-corpus embedding (0 if the NB cache failed to load)."
+        },
+        "na_tablets_in_period": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of tablets whose script.period == 'Neo-Assyrian' that contributed to the NA sub-corpus."
+        },
+        "nb_tablets_in_period": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of tablets whose script.period == 'Neo-Babylonian' that contributed to the NB sub-corpus."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
