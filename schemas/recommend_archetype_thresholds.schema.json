@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/recommend_archetype_thresholds.schema.json",
+  "title": "recommend_archetype_thresholds data payload",
+  "description": "v0.26.0 per-archetype threshold matrix. Surfaces the recommended precision/recall threshold profile for each of the seven methods-paper §3.8 cluster archetypes (compositional_curriculum, verbatim_manuscript_chain, refrain_bound_liturgical, single_collection_school, embedded_fragment, cross_period_bridge, commentary_quotation). Three usage modes: (1) `archetype=<name>` returns one profile; (2) `list_all=true` returns all seven; (3) `seed_tablet_id=ID` runs the documented best-effort classification heuristic and returns the inferred archetype's profile + signals_fired evidence. Closes Round-3 Lever 5 of the v0.18.19 calibration audit. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["profiles", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "profiles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/ArchetypeThresholdProfile" }
+    },
+    "classified_archetype": {
+      "$ref": "#/$defs/Archetype",
+      "description": "Present only when seed_tablet_id was supplied. The archetype the heuristic classified the seed as. Best-effort, not authoritative — verify by inspecting classification_evidence.signals_fired."
+    },
+    "classification_evidence": {
+      "type": "object",
+      "required": [
+        "seed_tablet_id",
+        "seed_sign_count",
+        "seed_genre",
+        "seed_period",
+        "top_parallel_id",
+        "top_parallel_fuzzy_jaccard",
+        "top_parallel_longest_contiguous_run",
+        "top_parallel_genre",
+        "top_parallel_period",
+        "top5_prefix_spread",
+        "top5_dominant_prefix",
+        "thematic_top_score",
+        "signals_fired"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "seed_tablet_id": { "type": "string" },
+        "seed_sign_count": { "type": ["integer", "null"], "minimum": 0 },
+        "seed_genre": { "type": ["string", "null"] },
+        "seed_period": { "type": ["string", "null"] },
+        "top_parallel_id": { "type": ["string", "null"] },
+        "top_parallel_fuzzy_jaccard": { "type": ["number", "null"] },
+        "top_parallel_longest_contiguous_run": { "type": ["integer", "null"] },
+        "top_parallel_genre": { "type": ["string", "null"] },
+        "top_parallel_period": { "type": ["string", "null"] },
+        "top5_prefix_spread": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct prefixes among the seed's top-5 fuzzy parallels."
+        },
+        "top5_dominant_prefix": { "type": ["string", "null"] },
+        "thematic_top_score": { "type": ["number", "null"] },
+        "signals_fired": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Human-readable trace of which decision-tree branch fired during classification."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "Archetype": {
+      "type": "string",
+      "enum": [
+        "compositional_curriculum",
+        "verbatim_manuscript_chain",
+        "refrain_bound_liturgical",
+        "single_collection_school",
+        "embedded_fragment",
+        "cross_period_bridge",
+        "commentary_quotation"
+      ]
+    },
+    "ArchetypeThresholdProfile": {
+      "type": "object",
+      "required": [
+        "archetype",
+        "exemplar",
+        "description",
+        "find_fuzzy_parallels",
+        "find_embedded_fragments",
+        "find_chunk_parallels",
+        "find_thematic_parallel",
+        "find_same_scribe_candidates",
+        "reconstruct_cluster",
+        "rationale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "archetype": { "$ref": "#/$defs/Archetype" },
+        "exemplar": {
+          "type": "string",
+          "description": "Canonical methods-paper §3.8 exemplar for this archetype (e.g. 'K.5896', 'BM.77056')."
+        },
+        "description": {
+          "type": "string",
+          "description": "One-line summary of the archetype shape."
+        },
+        "find_fuzzy_parallels": {
+          "type": "object",
+          "required": ["min_fuzzy_jaccard"],
+          "additionalProperties": false,
+          "properties": {
+            "min_fuzzy_jaccard": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "find_embedded_fragments": {
+          "type": "object",
+          "required": ["min_containment", "min_run", "host_size_multiplier"],
+          "additionalProperties": false,
+          "properties": {
+            "min_containment": { "type": "number", "minimum": 0, "maximum": 1 },
+            "min_run": { "type": "integer", "minimum": 0 },
+            "host_size_multiplier": { "type": "number", "minimum": 1 }
+          }
+        },
+        "find_chunk_parallels": {
+          "type": "object",
+          "required": ["min_chunk_len"],
+          "additionalProperties": false,
+          "properties": {
+            "min_chunk_len": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "find_thematic_parallel": {
+          "type": "object",
+          "required": ["min_cosine"],
+          "additionalProperties": false,
+          "properties": {
+            "min_cosine": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "find_same_scribe_candidates": {
+          "type": "object",
+          "required": ["min_signature_overlap"],
+          "additionalProperties": false,
+          "properties": {
+            "min_signature_overlap": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "reconstruct_cluster": {
+          "type": "object",
+          "required": ["min_fuzzy_jaccard", "max_depth"],
+          "additionalProperties": false,
+          "properties": {
+            "min_fuzzy_jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+            "max_depth": { "type": "integer", "minimum": 1, "maximum": 10 }
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Calibration-history justification anchoring each threshold to a specific audit finding."
+        }
+      }
+    }
+  }
+}
