@@ -26,5 +26,9 @@ jobs:
       - name: Smoke test (all tools register + envelope contract)
         run: npm run smoke
 
-      - name: Cache-independent unit audits
+      - name: Cache-independent unit audit (round 17 — validation-resolutions)
         run: node scripts/round17-validation-resolutions-audit.mjs
+
+      # Round-18 (identify_composition) is cache-dependent (signs +
+      # chunk index + sign embeddings). Skipped in CI until the
+      # cache-bootstrap orchestration lands in v0.33+.

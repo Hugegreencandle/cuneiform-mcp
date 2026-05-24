@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/identify_composition.schema.json",
+  "title": "identify_composition data payload",
+  "description": "v0.32.0 composition-assignment tool. Given a query tablet, returns ranked candidate compositions (Mīs pî, Šurpu, Udug-ḫul, etc.) from the methods-paper-anchored registry. Joint score across (a) chunk-overlap with exemplars and (b) sign2vec sign-centroid cosine. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "candidates", "compositions_considered", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["tablet_id", "sign_count", "period", "primary_genre"],
+      "additionalProperties": false,
+      "properties": {
+        "tablet_id": { "type": "string" },
+        "sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+        "period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "primary_genre": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "description": "Ranked candidate compositions, highest confidence first.",
+      "items": { "$ref": "#/$defs/candidate" }
+    },
+    "compositions_considered": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total compositions in registry (currently 5, expanding)."
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["chunk_index_loaded", "sign_embeddings_loaded", "signs_cache_loaded", "query_signs_with_embedding"],
+      "additionalProperties": false,
+      "properties": {
+        "chunk_index_loaded": { "type": "boolean" },
+        "sign_embeddings_loaded": { "type": "boolean" },
+        "signs_cache_loaded": { "type": "boolean" },
+        "query_signs_with_embedding": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "axisScore": {
+      "type": "object",
+      "required": ["raw", "normalized", "applicable", "note"],
+      "additionalProperties": false,
+      "properties": {
+        "raw": { "type": "number" },
+        "normalized": { "type": "number", "minimum": 0, "maximum": 1 },
+        "applicable": { "type": "boolean", "description": "If false, this axis was excluded from joint score (missing cache, insufficient signal, etc.)." },
+        "note": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "composition_id",
+        "composition_name",
+        "composition_type",
+        "paper_sections",
+        "confidence",
+        "axis_scores",
+        "evidence",
+        "rationale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "composition_id": { "type": "string" },
+        "composition_name": { "type": "string" },
+        "composition_type": {
+          "type": "string",
+          "enum": ["specific_composition", "curriculum"]
+        },
+        "paper_sections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Methods-paper sections anchoring this composition (e.g. '§3.7.3')."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Weighted joint score across applicable axes. Weights are normalized over APPLICABLE axes only, so an axis being unloaded does not penalize the score."
+        },
+        "axis_scores": {
+          "type": "object",
+          "required": ["chunk_overlap", "sign2vec_centroid"],
+          "additionalProperties": false,
+          "properties": {
+            "chunk_overlap": { "$ref": "#/$defs/axisScore" },
+            "sign2vec_centroid": { "$ref": "#/$defs/axisScore" }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "required": [
+            "n_exemplars_considered",
+            "n_exemplars_with_chunks",
+            "top_exemplar_id",
+            "top_exemplar_shared_chunks",
+            "query_in_exemplar_list"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "n_exemplars_considered": { "type": "integer", "minimum": 0 },
+            "n_exemplars_with_chunks": { "type": "integer", "minimum": 0 },
+            "top_exemplar_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+            "top_exemplar_shared_chunks": { "type": "integer", "minimum": 0 },
+            "query_in_exemplar_list": {
+              "type": "boolean",
+              "description": "True if the query is itself a known exemplar of this composition (it is filtered from the scoring pool so the score reflects true sibling overlap)."
+            }
+          }
+        },
+        "rationale": {
+          "type": "string",
+          "description": "Human-readable summary of which scoring terms contributed."
+        }
+      }
+    }
+  }
+}

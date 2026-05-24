@@ -67,6 +67,9 @@ import {
   type ResolutionSource,
 } from "./validationResolutions.js";
 import {
+  identifyComposition,
+} from "./identifyComposition.js";
+import {
   buildCanonicalRecensionTree,
 } from "./recensionTree.js";
 import {
@@ -318,7 +321,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.31.0";
+const VERSION = "0.32.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5473,6 +5476,76 @@ server.registerTool(
   },
 );
 
+// ─── v0.32.0 — identify_composition (composition assignment) ─────────────
+
+server.registerTool(
+  "identify_composition",
+  {
+    description:
+      "Composition assignment for a query tablet. Returns ranked candidate compositions (Mīs pî, Šurpu, Udug-ḫul, Bīt salāʾ mê, āšipūtu curriculum, ...) from the methods-paper-anchored registry, scored on a joint of (a) chunk-overlap with each composition's exemplar pool (length-20 chunk-hash index, §3.10) and (b) sign2vec sign-centroid cosine (§3.12). The query is filtered out of its own exemplar pool so the score reflects sibling overlap rather than degenerate self-match. Compositions tagged composition_type='curriculum' (e.g. KAR-44 āšipūtu) are EXPECTED to fire alongside specific-composition hits — a tablet is both a Mīs pî manuscript AND a member of the āšipūtu curriculum. Confidence weighting normalizes over APPLICABLE axes only, so a missing cache penalizes coverage rather than the score. Methods §3.19, claim 39.",
+    inputSchema: {
+      tablet_id: z.string().min(1).describe("Museum number to identify (must exist in the signs cache)."),
+      top_k: z.number().int().min(1).max(20).optional().describe("Number of candidate compositions to return (default 5)."),
+      min_confidence: z.number().min(0).max(1).optional().describe("Confidence floor. Default 0 (return all)."),
+      chunk_overlap_weight: z.number().min(0).max(1).optional().describe("Weight on chunk-overlap axis. Default 0.6."),
+      sign2vec_centroid_weight: z.number().min(0).max(1).optional().describe("Weight on sign2vec-centroid axis. Default 0.4."),
+    },
+  },
+  async ({ tablet_id, top_k, min_confidence, chunk_overlap_weight, sign2vec_centroid_weight }) => {
+    const SCHEMA = schemaId("identify_composition");
+    try {
+      const result = identifyComposition({
+        tabletId: tablet_id,
+        topK: top_k,
+        minConfidence: min_confidence,
+        axisWeights: {
+          chunk_overlap: chunk_overlap_weight,
+          sign2vec_centroid: sign2vec_centroid_weight,
+        },
+      });
+      const lines: string[] = [
+        `Query: ${result.query.tablet_id}  ·  sign_count=${result.query.sign_count ?? "n/a"}  ·  period=${result.query.period ?? "n/a"}  ·  genre=${result.query.primary_genre ?? "n/a"}`,
+        `Axes: chunk_overlap=${result.index_stats.chunk_index_loaded ? "on" : "off"}  ·  sign2vec_centroid=${result.index_stats.sign_embeddings_loaded ? "on" : "off"}  ·  query_embedded_signs=${result.index_stats.query_signs_with_embedding}`,
+        `Compositions considered: ${result.compositions_considered}`,
+        ``,
+        `Candidates (top ${result.candidates.length}):`,
+        ``,
+      ];
+      for (const [i, c] of result.candidates.entries()) {
+        lines.push(`${i + 1}. ${c.composition_name} [${c.composition_type}]  ·  confidence=${c.confidence.toFixed(3)}`);
+        lines.push(`     chunk: raw=${c.axis_scores.chunk_overlap.raw} norm=${c.axis_scores.chunk_overlap.normalized.toFixed(3)}  ·  sign2vec: raw=${c.axis_scores.sign2vec_centroid.raw.toFixed(3)} norm=${c.axis_scores.sign2vec_centroid.normalized.toFixed(3)}`);
+        lines.push(`     ${c.rationale}`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:identify-composition-from-registry", VERSION, {
+          citation:
+            "Composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper-anchored exemplar registry. v0.32.0, §3.19.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`identify_composition error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { tablet_id, sign_count: null, period: null, primary_genre: null },
+          candidates: [] as never[],
+          compositions_considered: 0,
+          index_stats: { chunk_index_loaded: false, sign_embeddings_loaded: false, signs_cache_loaded: false, query_signs_with_embedding: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:identify-composition-from-registry", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -8696,7 +8769,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 83 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 84 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19))\n`,
     );
     process.exit(0);
   }

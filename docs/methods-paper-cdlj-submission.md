@@ -540,6 +540,24 @@ The v0.29 Bayesian fusion model (§3.16) trains on n=12 hardcoded positives draw
 
 ---
 
+### 3.19 Composition Assignment (v0.32)
+
+The §§3.7 and 3.11 manuscript-sibling and stemma findings establish that the corpus contains identifiable compositions (Mīs pî, Šurpu, Udug-ḫul, Bīt salāʾ mê) instantiated across multiple witnesses. v0.32 operationalizes this as a tool: given a query tablet, return the most-probable composition assignments via joint scoring against a methods-paper-anchored exemplar registry.
+
+**The registry.** Five compositions, thirteen unique exemplar tablets, drawn from §3.1 (āšipūtu / KAR-44 curriculum), §3.4 (Bīt salāʾ mê), §3.7.1 (Šurpu), §3.7.2 (Udug-ḫul), §3.7.3 + §3.11 (Mīs pî). The registry is the methodological constraint: it prevents the tool from labeling every tablet as the highest-density composition by anchoring the score to a published-evidence inventory.
+
+**Joint score.** Two axes, weighted 0.6/0.4. (a) `chunk_overlap`: the maximum number of length-20 shared chunks between the query and any of the composition's exemplars (excluding the query itself), normalized over the candidate set. (b) `sign2vec_centroid`: cosine between the query's mean sign-vector (over signs with v0.23 embeddings) and the composition's pooled-exemplar mean sign-vector. The weights are normalized over APPLICABLE axes only, so the joint score remains well-defined when a cache is unloaded.
+
+**Self-filter.** When the query is itself a registered exemplar of composition C, its tablet ID is filtered from C's scoring pool. K.5896's score against Mīs pî thus reflects how well K.5896 matches the OTHER Mīs pî exemplars, not a degenerate self-match. The `query_in_exemplar_list` flag preserves the membership information for downstream consumers.
+
+**Curriculum tie-break.** The āšipūtu (KAR-44) registry entry is tagged `composition_type='curriculum'` and shares exemplars with the specific compositions inside it. For a small fragment like K.9508 — embedded in K.5896, a Mīs pî manuscript that itself appears in the āšipūtu pool — chunk-overlap is structurally symmetric across both candidates because K.5896 is the dominant exemplar in both pools. When two candidates' confidence differs by less than 0.02, the tool prefers `specific_composition` over `curriculum`. A curriculum is a meta-category; it should surface ALONGSIDE the specific composition that better fits the query, never INSTEAD of it.
+
+**Calibration evidence (Round 18).** K.5896 → Mīs pî at confidence 0.995 (top-1) with āšipūtu surfacing at top-2; K.9508 → Mīs pî at 0.992 (curriculum tie-break active); BM.47463 → Šurpu at 0.999; Sm.1055 → Udug-ḫul at 0.998. All confidence scores in [0,1]; unknown tablets degrade gracefully to zero-score candidates plus warnings rather than throwing. 10/10 audit tests pass.
+
+**Claim 39.** *Composition assignment operationalizes the §3.7 manuscript-sibling and §3.11 stemma findings as a tool: given a query tablet, the joint of §3.10 chunk-overlap with published-exemplar pools and §3.12 sign-vector centroid cosine produces a confidence-ranked composition assignment with self-filter and curriculum tie-break, anchored by a methods-paper-grounded registry that prevents degenerate "highest-density-composition" labels.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
