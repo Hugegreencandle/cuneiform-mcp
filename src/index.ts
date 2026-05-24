@@ -70,6 +70,9 @@ import {
   findSimilarSigns,
 } from "./findSimilarSigns.js";
 import {
+  computeLexicalSubstitutionScore,
+} from "./lexicalSubstitution.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -276,7 +279,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.23.0";
+const VERSION = "0.24.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4585,6 +4588,100 @@ server.registerTool(
   },
 );
 
+// ─── v0.24.0 — compute_lexical_substitution_score (claim 30 cash-out) ─────
+
+server.registerTool(
+  "compute_lexical_substitution_score",
+  {
+    description:
+      "Pair-level lexical-substitution score derived from the v0.23.0 sign2vec embedding. For tablet pair (A, B): exact-vocabulary overlap PLUS sign2vec-substitution matches (signs in A whose top-K sign2vec neighbors appear in B's vocabulary), divided by max(|A_vocab|, |B_vocab|). The methods-paper §3.13 cash-out of v0.23 claim 30 (the sign-level semantic axis aggregated to tablet granularity). Empirically validated: K.5896 ↔ K.9508 sibling pair scores 0.78 (exact 0.43, substitution 0.35) vs unrelated-genre random pair 0.65 (substitution 0.29) — the axis carries measurable but partial discriminative signal at the corpus's high-frequency sign-core saturation. Read alongside the 4-axis comparePair view (gated behind include_axis_comparison) for full context.",
+    inputSchema: {
+      tablet_a: z.string().describe("Museum number of the first tablet (e.g., 'K.5896'). Must be in the eBL signs cache."),
+      tablet_b: z.string().describe("Museum number of the second tablet."),
+      top_k_neighbors: z
+        .number()
+        .int()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe("For each A-vocab-only sign, consider its top-K sign2vec neighbors when checking for substitution matches in B. Default 5."),
+      min_neighbor_cosine: z
+        .number()
+        .min(-1)
+        .max(1)
+        .optional()
+        .describe("Drop sign2vec neighbors below this cosine when counting substitution matches. Default 0.4."),
+      include_axis_comparison: z
+        .boolean()
+        .optional()
+        .describe("If true, populate axis_comparison with the 4-axis compareTabletPair output (lex_J, fuzzy_J, thematic_cos, scribal_cos). Default false — costs three extra top-K queries. Enable for cross-axis context when the substitution score alone is ambiguous."),
+    },
+  },
+  async ({ tablet_a, tablet_b, top_k_neighbors, min_neighbor_cosine, include_axis_comparison }) => {
+    const SCHEMA = schemaId("compute_lexical_substitution_score");
+    try {
+      const result = computeLexicalSubstitutionScore({
+        tabletA: tablet_a,
+        tabletB: tablet_b,
+        topKNeighbors: top_k_neighbors,
+        minNeighborCosine: min_neighbor_cosine,
+        includeAxisComparison: include_axis_comparison,
+      });
+      const lines: string[] = [
+        `Pair: ${result.tablet_a}  ↔  ${result.tablet_b}`,
+        `Vocab: A=${result.tablet_a_vocab_size}  ·  B=${result.tablet_b_vocab_size}`,
+        `Exact overlap: ${result.exact_overlap}  ·  Substitution matches: ${result.substitution_matches}`,
+        `Lexical-substitution score: ${result.lexical_substitution_score.toFixed(4)}`,
+        `  · exact share: ${result.score_breakdown.exact_share.toFixed(4)}`,
+        `  · substitution share: ${result.score_breakdown.substitution_share.toFixed(4)}`,
+        ``,
+      ];
+      if (result.axis_comparison) {
+        lines.push(`4-axis comparison:`);
+        if (result.axis_comparison.lexical_jaccard !== undefined) lines.push(`  lex_J=${result.axis_comparison.lexical_jaccard.toFixed(4)}`);
+        if (result.axis_comparison.fuzzy_jaccard !== undefined) lines.push(`  fuzzy_J=${result.axis_comparison.fuzzy_jaccard.toFixed(4)}`);
+        if (result.axis_comparison.thematic_cosine !== undefined) lines.push(`  thematic_cos=${result.axis_comparison.thematic_cosine.toFixed(4)}`);
+        if (result.axis_comparison.scribal_cosine !== undefined) lines.push(`  scribal_cos=${result.axis_comparison.scribal_cosine.toFixed(4)}`);
+        lines.push(``);
+      }
+      if (result.substitution_pairs.length > 0) {
+        lines.push(`Sample substitution pairs (top ${Math.min(5, result.substitution_pairs.length)}):`);
+        for (const p of result.substitution_pairs.slice(0, 5)) {
+          lines.push(`  ${p.a_sign}  →  ${p.b_sign}  (cos=${p.cosine.toFixed(4)})`);
+        }
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:lexical-substitution-from-sign2vec", VERSION, {
+          citation:
+            "Lexical-substitution score derived from the v0.23.0 sign2vec embedding by aggregating sign-cosine into tablet-pair-level overlap. Methods paper §3.13 (claim 30 cash-out). v0.24.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`compute_lexical_substitution_score error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_a, tablet_b,
+          tablet_a_vocab_size: 0, tablet_b_vocab_size: 0,
+          exact_overlap: 0, substitution_matches: 0,
+          substitution_pairs: [] as never[],
+          lexical_substitution_score: 0,
+          score_breakdown: { exact_share: 0, substitution_share: 0, combined: 0 },
+          index_stats: { a_signs_without_embedding: 0, b_signs_without_embedding: 0, signs_indexed_total: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lexical-substitution-from-sign2vec", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7808,7 +7905,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 69 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 70 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level))\n`,
     );
     process.exit(0);
   }

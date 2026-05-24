@@ -415,6 +415,32 @@ Three claims surface:
 
 ---
 
+### 3.13 Lexical-Substitution Axis at Pair Level (v0.24.0) — claim 30 cash-out
+
+§3.12 claim 30 stated that aggregating sign2vec sign-cosine into a tablet-pair-level "lexical-substitution score" would complement the existing lexical/fuzzy/thematic axes. v0.24 ships the aggregation as `compute_lexical_substitution_score` and validates the claim empirically — with a productive nuance.
+
+**Formula:** `score = (exact_overlap + substitution_matches) / max(|A_vocab|, |B_vocab|)`, where `substitution_matches` counts signs in tablet A whose top-K (default 5) sign2vec neighbors at cosine ≥ 0.4 appear in B's vocabulary. The max-denominator (rather than sum) mirrors the v0.22 stemma distance choice — less harsh on asymmetric witness sizes.
+
+**Round-9 audit (2026-05-24, 4/4 PASS):**
+
+| Pair | Score | exact_share | substitution_share |
+|---|---|---|---|
+| K.5896 ↔ K.9508 (Mīs pî siblings, §3.7.3) | **0.7772** | 0.4293 | **0.3478** |
+| K.5896 ↔ K.5896 (self-pair sanity) | 1.0 | 1.0 | 0 |
+| U.21017 ↔ K.9653 (unrelated-genre control) | 0.6531 | 0.3673 | 0.2857 |
+
+The 4-axis comparison for K.5896 ↔ K.9508 (`compareTabletPair`): `lex_J=0.1214 · fuzzy_J=0.4048 · thematic_cos=0.7964 · scribal_cos=0.5011`. Fuzzy + thematic already discriminate the sibling relationship strongly; the lexical-substitution axis adds *complementary* information rather than *decisive* information.
+
+**Refined claim 30 (cashes out partially):**
+
+The lexical-substitution score's substitution component is non-trivial on the canonical sibling case (0.3478) — confirming that sign2vec aggregation is empirically detectable beyond exact-vocabulary overlap. However, the unrelated-pair baseline substitution_share is 0.2857 (Δ ≈ 0.06), leaving only a ~22% relative lift for known-sibling discrimination. Root cause: cuneiform corpora are dominated by a small high-frequency sign core (determinatives, common syllabograms, ABZ480 numerals) whose sign2vec neighborhoods saturate across nearly all tablet pairs at typical fragment sizes.
+
+The methodologically-honest framing: the lexical-substitution axis is *conceptually orthogonal* to the existing axes (it can detect distributional sign equivalence that exact-Jaccard misses) but *not decisively discriminative* at the current corpus state. Best read in conjunction with the fuzzy / thematic axes where Δ-vs-baseline is substantially larger, rather than as a stand-alone classifier. A natural future-work refinement is **lift-over-baseline normalization** — subtract a corpus-wide expected score at matching vocab sizes — which would clean up the saturation-driven baseline compression. Recorded for v0.25.
+
+This refinement preserves claim 30's empirical content (sign2vec aggregation registers measurable signal) while honestly reporting its limited discriminative power at present. The methods-paper position is therefore: *the sign-level axis exists at pair-level, but its standalone discrimination is corpus-dependent; methodological completeness requires reporting the saturation effect explicitly rather than claiming a clean fifth axis*.
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
