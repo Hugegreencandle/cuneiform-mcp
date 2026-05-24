@@ -61,6 +61,12 @@ import {
   prioritizeValidationQueue,
 } from "./validationQueue.js";
 import {
+  buildCanonicalRecensionTree,
+} from "./recensionTree.js";
+import {
+  buildScribalSchoolGraph,
+} from "./scribalSchoolGraph.js";
+import {
   reconstructCluster,
 } from "./reconstructCluster.js";
 import {
@@ -267,7 +273,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.21.0";
+const VERSION = "0.22.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -4324,6 +4330,187 @@ server.registerTool(
   },
 );
 
+// ─── v0.22.0 — build_canonical_recension_tree (neighbor-joining stemma) ───
+
+server.registerTool(
+  "build_canonical_recension_tree",
+  {
+    description:
+      "Automated stemma (textual-family-tree) reconstruction. Given a seed manuscript of a composition (e.g. K.5896 for Mīs pî), enumerate its chunk-related witnesses from the v0.20.0 chunk-hash index, compute a pairwise distance matrix from shared-chunk overlap, and produce a phylogenetic tree via neighbor-joining (Saitou & Nei 1987) or UPGMA. Output includes the distance matrix, tree edges, and a standard Newick string for downstream visualization. The classic Assyriological problem (manuscript family reconstruction) automated at corpus scale, with no scholar curation required. Methods-paper §3.11 target. Distance metric: 1 - shared_chunks(A,B) / max(|chunk_hosts(A)|, |chunk_hosts(B)|) — the max-denominator (vs Jaccard sum-denominator) is less harsh on asymmetric witness-length pairs (common in cuneiform corpora).",
+    inputSchema: {
+      seed_tablet_id: z.string().describe("Museum number of a known manuscript of the composition. The witness set is BFS-expanded from this seed via shared-chunk overlap."),
+      max_witnesses: z
+        .number()
+        .int()
+        .min(2)
+        .max(200)
+        .optional()
+        .describe("Cap on cluster size. Default 50. Witnesses are sorted by shared-chunks-with-seed desc before truncation."),
+      min_pairwise_chunks: z
+        .number()
+        .int()
+        .min(1)
+        .optional()
+        .describe("Require at least this many shared chunks with the seed to qualify as a witness. Default 3. Raise for high-confidence-only family reconstruction; lower for exploratory broad-sweep."),
+      algorithm: z
+        .enum(["neighbor_joining", "upgma"])
+        .optional()
+        .describe("Phylogenetic algorithm. Default 'neighbor_joining' (Saitou & Nei 1987 — unrooted binary tree, standard in textual phylogenetics). 'upgma' produces a rooted binary tree with equal branch lengths (assumes molecular-clock evolution)."),
+    },
+  },
+  async ({ seed_tablet_id, max_witnesses, min_pairwise_chunks, algorithm }) => {
+    const SCHEMA = schemaId("build_canonical_recension_tree");
+    try {
+      const result = buildCanonicalRecensionTree({
+        seedTabletId: seed_tablet_id,
+        maxWitnesses: max_witnesses,
+        minPairwiseChunks: min_pairwise_chunks,
+        algorithm,
+      });
+      const lines: string[] = [
+        `Composition seed: ${result.composition_seed}  ·  algorithm: ${result.algorithm}`,
+        `Witnesses: ${result.witnesses.length}  ·  internal nodes: ${result.internal_nodes}`,
+        `Distance matrix: ${result.distance_matrix.length}×${result.distance_matrix.length}`,
+        ``,
+        `Newick:`,
+        result.tree,
+        ``,
+        `Witnesses (closest → farthest from seed):`,
+      ];
+      for (const w of result.witnesses.slice(0, 20)) {
+        const meta = [w.period ?? "?period", w.primary_genre ?? "?genre", w.provenance ?? "?provenance"].join(" · ");
+        lines.push(`  ${w.tablet_id}  (${meta})`);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:recension-tree-from-chunk-overlap", VERSION, {
+          citation:
+            "Neighbor-joining (Saitou & Nei 1987) stemma reconstruction over the v0.20.0 chunk-hash index. Distance metric: 1 - shared_chunks/max(|HA|,|HB|). v0.22.0. Methods paper §3.11.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`build_canonical_recension_tree error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          composition_seed: seed_tablet_id,
+          algorithm: algorithm ?? "neighbor_joining",
+          witnesses: [] as never[],
+          distance_matrix: [] as never[],
+          tree: "",
+          tree_edges: [] as never[],
+          internal_nodes: 0,
+          index_stats: { chunk_index_loaded: false, seed_chunk_hosts: 0, witnesses_after_filter: 0, witnesses_after_cap: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:recension-tree-from-chunk-overlap", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.22.0 — build_scribal_school_graph (provenance + scribal cluster) ──
+
+server.registerTool(
+  "build_scribal_school_graph",
+  {
+    description:
+      "Empirically reconstruct scribal schools by joint clustering on (scribal orthographic signature + provenance / find-spot). Connected-components on a thresholded scribal-cosine graph, restricted to same-provenance edges (or same-collection as fallback when eBL provenance.site is null). Each component = a candidate scribal school. Returns top-K schools with anchor tablet, member roster, internal cohesion (mean pairwise cosine), period distribution, and genre distribution. Bridges the §3.1 BM.77056 *āšipūtu* curriculum finding (composition-level) with physical provenance to produce intellectual+physical maps of cuneiform scribal culture. Methods-paper §3.11 target. NOTE: 'scribal school' is an inferential leap from 'shared orthographic fingerprint + same find-spot' — output is a *candidate* for further philological evaluation, not a historical claim.",
+    inputSchema: {
+      min_scribal_similarity: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("Cosine threshold on LLR scribal signatures for an edge to qualify. Default 0.65. Lower for exploratory recall; raise to 0.80+ for high-confidence-only schools."),
+      min_school_size: z
+        .number()
+        .int()
+        .min(2)
+        .optional()
+        .describe("Drop connected components smaller than this. Default 3 (excludes dyads — schools are by definition multi-member)."),
+      required_shared_provenance: z
+        .boolean()
+        .optional()
+        .describe("Require cluster members to share a find-spot (city) or — as fallback when eBL provenance.site is null — the same `collection` field (Kuyunjik, Babylon, Sippar, etc.). Default true. Set false to surface scribal lineages crossing collections."),
+      top_k_schools: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on returned schools, ranked by internal cohesion × member count. Default 30, hard cap 500."),
+      exclude_prefixes: z
+        .array(z.string())
+        .optional()
+        .describe("Drop candidate members whose tablet ID starts with any of these prefixes."),
+      max_tablets_to_scan: z
+        .number()
+        .int()
+        .min(10)
+        .max(10000)
+        .optional()
+        .describe("Cap on candidate set size for pairwise scribal comparison. Default 1500. Higher = more schools surfaced but quadratic time cost; ~78s at 1500."),
+    },
+  },
+  async ({ min_scribal_similarity, min_school_size, required_shared_provenance, top_k_schools, exclude_prefixes, max_tablets_to_scan }) => {
+    const SCHEMA = schemaId("build_scribal_school_graph");
+    try {
+      const result = buildScribalSchoolGraph({
+        minScribalSimilarity: min_scribal_similarity,
+        minSchoolSize: min_school_size,
+        requiredSharedProvenance: required_shared_provenance,
+        topKSchools: top_k_schools,
+        excludePrefixes: exclude_prefixes,
+        maxTabletsToScan: max_tablets_to_scan,
+      });
+      const lines: string[] = [
+        `Tablets in scribal index: ${result.index_stats.total_tablets_in_scribal_index}  ·  with signature+city: ${result.index_stats.candidates_with_signature_and_city}`,
+        `Scanned for edges: ${result.index_stats.tablets_scanned_for_edges}  ·  edges collected: ${result.index_stats.edges_collected}  ·  components ≥ min_size: ${result.index_stats.components_above_size_threshold}  ·  schools returned: ${result.schools.length}`,
+        `Elapsed: ${result.index_stats.elapsed_seconds}s`,
+        ``,
+        `Top schools:`,
+      ];
+      for (const [i, s] of result.schools.slice(0, 10).entries()) {
+        const topPeriod = s.period_distribution[0] ? `${s.period_distribution[0].label} ×${s.period_distribution[0].count}` : "—";
+        const topGenres = s.genre_distribution.slice(0, 3).map((g) => `${g.label} ×${g.count}`).join(", ");
+        lines.push(`${i + 1}. ${s.anchor_tablet}  ·  ${s.members.length} members  ·  cohesion=${s.internal_cohesion}  ·  ${s.shared_provenance ?? "?"}`);
+        lines.push(`     period: ${topPeriod}  ·  genres: ${topGenres || "—"}`);
+        lines.push(``);
+      }
+      if (result.warnings.length > 0) lines.push(`Warnings: ${result.warnings.join("; ")}`);
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:scribal-school-graph-from-signature-provenance", VERSION, {
+          citation:
+            "Joint scribal-LLR + provenance/find-spot connected-components clustering over the cached scribal-fingerprint index + fragment-metadata cache. v0.22.0. Methods paper §3.11.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`build_scribal_school_graph error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          schools: [] as never[],
+          index_stats: { total_tablets_in_scribal_index: 0, candidates_with_signature_and_city: 0, candidates_without_city: 0, candidates_without_signature: 0, tablets_scanned_for_edges: 0, edges_collected: 0, components_above_size_threshold: 0, elapsed_seconds: 0 },
+          query: { min_scribal_similarity: min_scribal_similarity ?? 0.65, min_school_size: min_school_size ?? 3, required_shared_provenance: required_shared_provenance ?? true, top_k_schools: top_k_schools ?? 30, max_tablets_to_scan: max_tablets_to_scan ?? 1500 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:scribal-school-graph-from-signature-provenance", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -7547,7 +7734,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 66 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 68 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering))\n`,
     );
     process.exit(0);
   }
