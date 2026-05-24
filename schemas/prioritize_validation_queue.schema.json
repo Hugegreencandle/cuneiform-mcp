@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/prioritize_validation_queue.schema.json",
+  "title": "prioritize_validation_queue data payload",
+  "description": "v0.21.0 active-learning ranker for the manual-review backlog. Pulls candidates from three streams — find_anomalous_tablets (bi-orphans / lex-singletons / thematic-orphans), find_isolate_compositions, and corpus-wide chunk-discovery surfaces — and scores each by *information gain from human review*. Rewards chunk-relationships, anomaly-membership, and missing metadata; penalizes settled clusters, already-curated tablets, and tablets so isolated review yields nothing. Each entry carries a `reasons[]` array spelling out which scoring terms fired. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "queue", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["scope", "top_k", "min_score"],
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": ["bi_orphans", "chunk_discoveries", "all"],
+          "description": "Candidate-stream selector. 'bi_orphans' pulls from find_anomalous_tablets + find_isolate_compositions. 'chunk_discoveries' pulls from corpus-wide chunk-index hosts. 'all' unions both."
+        },
+        "top_k": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "Number of ranked entries to return."
+        },
+        "min_score": {
+          "type": ["number", "null"],
+          "description": "If set, drop entries whose score is below this floor. null means return all top_k regardless of score."
+        }
+      }
+    },
+    "queue": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tablet_id",
+          "score",
+          "reasons",
+          "chunk_host_count",
+          "anomaly_kind",
+          "metadata_status",
+          "cluster_membership",
+          "sign_count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "score": {
+            "type": "number",
+            "description": "Sum of REWARD terms (chunk-hosts, anomaly seeds, missing metadata, anomaly-kind count) minus PENALTY terms (settled cluster, curated-and-well-chunked, truly-isolated). Higher = higher review priority."
+          },
+          "reasons": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Human-readable explanations of which scoring terms fired for this entry. Transparency is the point — Dane should be able to see WHY a tablet ranks where it does."
+          },
+          "chunk_host_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Distinct length-20 chunks (corpus-wide hash-index entries) in which this tablet appears as an occurrence."
+          },
+          "anomaly_kind": {
+            "type": "string",
+            "description": "Comma-joined list of anomaly flags that fire for this tablet (e.g. 'bi_orphan,genre_misfit'). Empty string when none fire."
+          },
+          "metadata_status": {
+            "type": "string",
+            "enum": ["missing", "null", "partial", "complete"],
+            "description": "'missing' = never queried, 'null' = queried with empty/404 result, 'partial' = has metadata but missing period or genre, 'complete' = period AND genre populated."
+          },
+          "cluster_membership": {
+            "type": ["integer", "null"],
+            "description": "Size of the lexical cluster (connected component in the trigram-Jaccard graph) this tablet sits in, or null if not in the lex graph."
+          },
+          "sign_count": {
+            "type": ["integer", "null"],
+            "description": "Sign-token count from the anomaly index, or null if the tablet isn't there."
+          }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "candidates_considered",
+        "bi_orphan_seeds",
+        "isolate_seeds",
+        "chunk_discovery_seeds",
+        "anomaly_index_loaded",
+        "chunk_index_loaded"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "candidates_considered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct tablet IDs unioned across all enabled seed streams before scoring."
+        },
+        "bi_orphan_seeds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct tablets pulled from find_anomalous_tablets across bi_orphan + lex_singleton + thematic_orphan kinds."
+        },
+        "isolate_seeds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct tablets pulled from find_isolate_compositions."
+        },
+        "chunk_discovery_seeds": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct tablets with ≥1 chunk-host occurrence after the seed-enumeration sweep."
+        },
+        "anomaly_index_loaded": { "type": "boolean" },
+        "chunk_index_loaded": { "type": "boolean" }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
