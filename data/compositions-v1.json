@@ -1,0 +1,249 @@
+{
+  "$schema": "https://github.com/danebrown/cuneiform-mcp/schemas/compositions-registry.schema.json",
+  "registry_version": "1.0.0",
+  "registry_uri": "https://cuneiform-mcp.org/compositions/v1",
+  "license": "CC-BY-4.0",
+  "created": "2026-05-25",
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "date": "2026-05-25",
+      "note": "Initial versioned registry. Migrated from src/compositionRegistry.ts (v0.32 TypeScript constant) to standalone JSON artifact. Expanded from 5 to 11 compositions per panel-review §3.24 recommendation (added EAE, Maqlû, Šumma izbu, Šumma ālu, Bārûtu base, Diri/Aa lexical)."
+    }
+  ],
+  "compositions": [
+    {
+      "id": "mis_pi",
+      "name": "Mīs pî",
+      "name_akkadian": "Mīs pî",
+      "description": "Mouth-washing ritual; canonical āšipūtu composition.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.5896", "K.9508", "BM.45749", "K.2987.B", "K.163", "K.2550", "K.6683"],
+      "paper_sections": ["§3.7.3", "§3.11"],
+      "typical_genre": "magic / ritual",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": "asiputu_kar44",
+      "print_editions": [
+        { "citation": "Walker & Dick 2001", "title": "The Induction of the Cult Image in Ancient Mesopotamia: The Mesopotamian Mīs pî Ritual", "series": "SAALT 1", "publisher": "Helsinki" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2/1",
+        "ogsl": null,
+        "cad_lemma": "mīs pî"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/mis_pi"
+    },
+    {
+      "id": "surpu",
+      "name": "Šurpu",
+      "name_akkadian": "Šurpu",
+      "description": "Anti-witchcraft incantation series; commentary tradition (BM.47463 base / CBS.6060 commentary).",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["BM.47463", "CBS.6060"],
+      "paper_sections": ["§3.7.1"],
+      "typical_genre": "magic / anti-witchcraft",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": "asiputu_kar44",
+      "print_editions": [
+        { "citation": "Reiner 1958", "title": "Šurpu: A Collection of Sumerian and Akkadian Incantations", "series": "AfO Beiheft 11", "publisher": "Graz" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2/2",
+        "ogsl": null,
+        "cad_lemma": "šurpu"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/surpu"
+    },
+    {
+      "id": "udug_hul",
+      "name": "Udug-ḫul",
+      "name_akkadian": "Utukkū lemnūtu",
+      "description": "Anti-demon incantation series.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["Sm.1055", "K.7246"],
+      "paper_sections": ["§3.7.2"],
+      "typical_genre": "magic / anti-demon",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": "asiputu_kar44",
+      "print_editions": [
+        { "citation": "Geller 2016", "title": "Healing Magic and Evil Demons: Canonical Udug-ḫul Incantations", "series": "BAM 8", "publisher": "De Gruyter" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2/3",
+        "ogsl": null,
+        "cad_lemma": "utukku"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/udug_hul"
+    },
+    {
+      "id": "bit_sala_me",
+      "name": "Bīt salāʾ mê",
+      "name_akkadian": "Bīt salāʾ mê",
+      "description": "Mouth-purification ritual; āšipūtu canon. K.2761 surfaced via v0.18.3 cross-method validation.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.2761"],
+      "paper_sections": ["§3.4"],
+      "typical_genre": "magic / ritual",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": "asiputu_kar44",
+      "print_editions": [
+        { "citation": "Ambos 2013", "title": "Der König im Gefängnis", "series": "Dresden", "publisher": "ISLET" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2/5",
+        "ogsl": null,
+        "cad_lemma": "bīt salāʾ mê"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/bit_sala_me"
+    },
+    {
+      "id": "maqlu",
+      "name": "Maqlû",
+      "name_akkadian": "Maqlû",
+      "description": "Nine-tablet anti-witchcraft ritual series; canonical NA exorcist text.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.2961", "K.2467", "K.18", "K.2950"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "magic / anti-witchcraft",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": "asiputu_kar44",
+      "print_editions": [
+        { "citation": "Abusch 2016", "title": "The Magical Ceremony Maqlû", "series": "AMD 10", "publisher": "Brill" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2/4",
+        "ogsl": null,
+        "cad_lemma": "maqlû"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/maqlu"
+    },
+    {
+      "id": "enuma_anu_enlil",
+      "name": "Enūma Anu Enlil",
+      "name_akkadian": "Enūma Anu Enlil",
+      "description": "Astrological omen series (70+ tablets); celestial divination.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.3716", "Rm-II.504", "BM.42125"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "divination / astrology",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Reiner & Pingree 1975-2005", "title": "Babylonian Planetary Omens (multi-volume)", "series": "BPO 1-4", "publisher": "Brill/Styx" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "D/2",
+        "ogsl": null,
+        "cad_lemma": "enūma anu enlil"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/enuma_anu_enlil"
+    },
+    {
+      "id": "summa_izbu",
+      "name": "Šumma izbu",
+      "name_akkadian": "Šumma izbu",
+      "description": "Birth-omen series (24 tablets); teratological divination.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.3674", "K.4034", "K.6650"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "divination / teratology",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Leichty 1970", "title": "The Omen Series Šumma izbu", "series": "TCS 4", "publisher": "Locust Valley" },
+        { "citation": "De Zorzi 2014", "title": "La serie teratomantica Šumma izbu", "series": "HANE Studies 15", "publisher": "Padova" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "D/3",
+        "ogsl": null,
+        "cad_lemma": "izbu"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/summa_izbu"
+    },
+    {
+      "id": "summa_alu",
+      "name": "Šumma ālu",
+      "name_akkadian": "Šumma ālu ina mēlê šakin",
+      "description": "Terrestrial-omen series (107+ tablets); everyday-life divination.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.45", "K.10076", "K.6294"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "divination / omen",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Freedman 1998-2017", "title": "If a City Is Set on a Height (multi-volume)", "series": "OPSNKF 17-21", "publisher": "Philadelphia" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "D/4",
+        "ogsl": null,
+        "cad_lemma": "šumma ālu"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/summa_alu"
+    },
+    {
+      "id": "barutu",
+      "name": "Bārûtu",
+      "name_akkadian": "Bārûtu",
+      "description": "Extispicy-omen canonical compendium (~100 tablets); diviner's manual.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.3982", "BM.32494", "K.62"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "divination / extispicy",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Koch-Westenholz 2000", "title": "Babylonian Liver Omens: The Chapters Manzāzu, Padānu and Pān tākalti of the Babylonian Extispicy Series", "series": "CNI 25", "publisher": "Museum Tusculanum" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "D/5",
+        "ogsl": null,
+        "cad_lemma": "bārûtu"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/barutu"
+    },
+    {
+      "id": "diri_aa",
+      "name": "Diri / Aa",
+      "name_akkadian": "Diri (Sumerian sign-list) / Aa (Akkadian sign-list)",
+      "description": "Lexical series; Diri = compound-sign list, Aa = syllabary with pronunciations.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": ["K.11384", "1881,1103.2244"],
+      "paper_sections": ["§3.24"],
+      "typical_genre": "lexical",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Civil 2004", "title": "The Series DIRI = (w)atru", "series": "MSL 15", "publisher": "Rome" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/1",
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/diri_aa"
+    },
+    {
+      "id": "asiputu_kar44",
+      "name": "āšipūtu (KAR-44 curriculum)",
+      "name_akkadian": "āšipūtu",
+      "description": "Cross-composition exorcist curriculum (Mīs pî + Bīt salāʾ mê + Udug-ḫul + Šuʾila + Namburbi + Maqlû + Šurpu). Recovered empirically from BM.77056 cluster.",
+      "composition_type": "curriculum",
+      "exemplar_tablets": ["BM.77056", "BM.45749", "K.5896", "Sm.1055", "BM.74130"],
+      "paper_sections": ["§3.1", "§3.9.1"],
+      "typical_genre": "magic / ritual",
+      "typical_period": "Neo-Assyrian",
+      "parent_curriculum": null,
+      "print_editions": [
+        { "citation": "Geller 2018", "title": "The Exorcist's Manual KAR 44", "series": "AOAT (forthcoming)", "publisher": "Ugarit-Verlag" },
+        { "citation": "Lenzi 2008", "title": "Secrecy and the Gods", "series": "SAAS 19", "publisher": "Helsinki" }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": "L/2",
+        "ogsl": null,
+        "cad_lemma": "āšipūtu"
+      },
+      "uri": "https://cuneiform-mcp.org/compositions/v1/asiputu_kar44"
+    }
+  ]
+}

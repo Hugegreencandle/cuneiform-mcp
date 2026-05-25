@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/list_compositions.schema.json",
+  "title": "list_compositions data payload",
+  "description": "v0.37.0 registry introspection. Returns full versioned composition registry with registry_version, license, persistent URIs, print_editions, external_ids. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["registry_metadata", "compositions"],
+  "additionalProperties": false,
+  "properties": {
+    "registry_metadata": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["registry_version", "registry_uri", "license", "created", "n_compositions"],
+          "additionalProperties": false,
+          "properties": {
+            "registry_version": { "type": "string" },
+            "registry_uri": { "type": "string" },
+            "license": { "type": "string" },
+            "created": { "type": "string" },
+            "n_compositions": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "compositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "name_akkadian", "description", "composition_type", "typical_genre", "typical_period", "parent_curriculum", "uri", "external_ids", "paper_sections", "exemplar_tablets", "print_editions"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "name_akkadian": { "type": "string" },
+          "description": { "type": "string" },
+          "composition_type": { "type": "string", "enum": ["specific_composition", "curriculum"] },
+          "typical_genre": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "typical_period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "parent_curriculum": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "uri": { "type": "string" },
+          "external_ids": {
+            "type": "object",
+            "required": ["ebl_canonical_genre", "ogsl", "cad_lemma"],
+            "additionalProperties": false,
+            "properties": {
+              "ebl_canonical_genre": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+              "ogsl": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+              "cad_lemma": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+            }
+          },
+          "paper_sections": { "type": "array", "items": { "type": "string" } },
+          "exemplar_tablets": { "type": "array", "items": { "type": "string" } },
+          "print_editions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["citation", "title", "series", "publisher"],
+              "additionalProperties": false,
+              "properties": {
+                "citation": { "type": "string" },
+                "title": { "type": "string" },
+                "series": { "type": "string" },
+                "publisher": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

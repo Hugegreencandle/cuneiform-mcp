@@ -1,21 +1,34 @@
-// v0.32.0 — Composition registry for identify_composition.
+// v0.37.0 — Composition registry loaded from versioned JSON artifact.
 //
-// Hardcoded from methods-paper §§3.1, 3.4, 3.7.1, 3.7.2, 3.7.3, 3.9.1, 3.11.
-// Each entry maps a named composition (Mīs pî, Šurpu, etc.) to a list of
-// exemplar tablets known to be witnesses of it. Identification works by
-// scoring a query tablet against each composition's exemplar pool on
-// (a) chunk-overlap and (b) sign-vocabulary cosine.
-//
-// Curricula (e.g. āšipūtu / KAR-44) are tagged composition_type="curriculum" —
-// a query tablet that scores high on BOTH a curriculum AND a specific
-// composition within that curriculum is correctly classified as a member
-// of the specific composition, copied within the curriculum's tradition.
+// Previously a hardcoded TypeScript constant (v0.32). Per panel-review §3.24
+// (Toussaint, Mertens), the registry is now a separately-citable artifact at
+// data/compositions-v1.json with: registry_version, license, changelog, URIs,
+// print_editions[], external_ids (eBL/OGSL/CAD). 5 → 11 compositions
+// (added Maqlû, EAE, Šumma izbu, Šumma ālu, Bārûtu, Diri/Aa).
+
+import { existsSync, readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export type CompositionType = "specific_composition" | "curriculum";
+
+export type PrintEdition = {
+  citation: string;
+  title: string;
+  series: string;
+  publisher: string;
+};
+
+export type ExternalIds = {
+  ebl_canonical_genre: string | null;
+  ogsl: string | null;
+  cad_lemma: string | null;
+};
 
 export type CompositionEntry = {
   id: string;
   name: string;
+  name_akkadian: string;
   description: string;
   composition_type: CompositionType;
   exemplar_tablets: string[];
@@ -23,73 +36,60 @@ export type CompositionEntry = {
   typical_genre: string | null;
   typical_period: string | null;
   parent_curriculum: string | null;
+  print_editions: PrintEdition[];
+  external_ids: ExternalIds;
+  uri: string;
 };
 
-export const COMPOSITION_REGISTRY: CompositionEntry[] = [
-  {
-    id: "mis_pi",
-    name: "Mīs pî",
-    description: "Mouth-washing ritual; canonical āšipūtu composition.",
-    composition_type: "specific_composition",
-    exemplar_tablets: [
-      "K.5896",
-      "K.9508",
-      "BM.45749",
-      "K.2987.B",
-      "K.163",
-      "K.2550",
-      "K.6683",
-    ],
-    paper_sections: ["§3.7.3", "§3.11"],
-    typical_genre: "magic / ritual",
-    typical_period: "Neo-Assyrian",
-    parent_curriculum: "asiputu_kar44",
-  },
-  {
-    id: "surpu",
-    name: "Šurpu",
-    description: "Anti-witchcraft incantation series; commentary tradition (BM.47463 base / CBS.6060 commentary).",
-    composition_type: "specific_composition",
-    exemplar_tablets: ["BM.47463", "CBS.6060"],
-    paper_sections: ["§3.7.1"],
-    typical_genre: "magic / anti-witchcraft",
-    typical_period: "Neo-Assyrian",
-    parent_curriculum: "asiputu_kar44",
-  },
-  {
-    id: "udug_hul",
-    name: "Udug-ḫul",
-    description: "Anti-demon incantation series.",
-    composition_type: "specific_composition",
-    exemplar_tablets: ["Sm.1055", "K.7246"],
-    paper_sections: ["§3.7.2"],
-    typical_genre: "magic / anti-demon",
-    typical_period: "Neo-Assyrian",
-    parent_curriculum: "asiputu_kar44",
-  },
-  {
-    id: "bit_sala_me",
-    name: "Bīt salāʾ mê",
-    description: "Mouth-purification ritual; āšipūtu canon. K.2761 surfaced via v0.18.3 cross-method validation.",
-    composition_type: "specific_composition",
-    exemplar_tablets: ["K.2761"],
-    paper_sections: ["§3.4"],
-    typical_genre: "magic / ritual",
-    typical_period: "Neo-Assyrian",
-    parent_curriculum: "asiputu_kar44",
-  },
-  {
-    id: "asiputu_kar44",
-    name: "āšipūtu (KAR-44 curriculum)",
-    description: "Cross-composition exorcist curriculum (Mīs pî + Bīt salāʾ mê + Udug-ḫul + Šuʾila + Namburbi + ...). Recovered empirically from BM.77056 cluster.",
-    composition_type: "curriculum",
-    exemplar_tablets: ["BM.77056", "BM.45749", "K.5896", "Sm.1055", "BM.74130"],
-    paper_sections: ["§3.1", "§3.9.1"],
-    typical_genre: "magic / ritual",
-    typical_period: "Neo-Assyrian",
-    parent_curriculum: null,
-  },
-];
+export type RegistryArtifact = {
+  $schema?: string;
+  registry_version: string;
+  registry_uri: string;
+  license: string;
+  created: string;
+  changelog: Array<{ version: string; date: string; note: string }>;
+  compositions: CompositionEntry[];
+};
+
+// ─── Loader (cached) ──────────────────────────────────────────────────────
+
+function dataDir(): string {
+  if (process.env.CUNEIFORM_MCP_DATA_DIR) return process.env.CUNEIFORM_MCP_DATA_DIR;
+  // Resolve relative to compiled module location: dist/compositionRegistry.js
+  // → walk up to find data/ sibling
+  const here = dirname(fileURLToPath(import.meta.url));
+  // Try `<here>/../data` first (dist sibling), then `<here>/../../data` (src nested).
+  const candidates = [join(here, "..", "data"), join(here, "..", "..", "data")];
+  for (const c of candidates) {
+    if (existsSync(join(c, "compositions-v1.json"))) return c;
+  }
+  return join(here, "..", "data");
+}
+
+let _artifact: RegistryArtifact | null = null;
+let _loadError: string | null = null;
+
+function loadArtifact(): RegistryArtifact {
+  if (_artifact) return _artifact;
+  if (_loadError) throw new Error(_loadError);
+  const path = join(dataDir(), "compositions-v1.json");
+  if (!existsSync(path)) {
+    _loadError = `composition registry not found: ${path}`;
+    throw new Error(_loadError);
+  }
+  try {
+    const raw = readFileSync(path, "utf-8");
+    _artifact = JSON.parse(raw) as RegistryArtifact;
+    return _artifact;
+  } catch (e) {
+    _loadError = e instanceof Error ? e.message : String(e);
+    throw new Error(`composition registry load failed: ${_loadError}`);
+  }
+}
+
+// ─── Public API (backwards-compatible with v0.32 callers) ─────────────────
+
+export const COMPOSITION_REGISTRY: CompositionEntry[] = loadArtifact().compositions;
 
 export function getCompositionById(id: string): CompositionEntry | null {
   return COMPOSITION_REGISTRY.find((c) => c.id === id) ?? null;
@@ -97,4 +97,21 @@ export function getCompositionById(id: string): CompositionEntry | null {
 
 export function listCompositions(): CompositionEntry[] {
   return COMPOSITION_REGISTRY.slice();
+}
+
+export function registryMetadata(): {
+  registry_version: string;
+  registry_uri: string;
+  license: string;
+  created: string;
+  n_compositions: number;
+} {
+  const a = loadArtifact();
+  return {
+    registry_version: a.registry_version,
+    registry_uri: a.registry_uri,
+    license: a.license,
+    created: a.created,
+    n_compositions: a.compositions.length,
+  };
 }
