@@ -898,6 +898,38 @@ The v0.32 `identify_composition` tool was designed for single-query classificati
 
 ---
 
+### 3.35 Candidate-Exemplar Surface (v0.55)
+
+The v0.54 corpus-wide scan produces a cache of 4,922 composition assignments. v0.55 ships `list_candidate_exemplars` as the **review-ready handoff** between discovery (v0.54) and labeling (v0.31 `record_validation_resolution`).
+
+**Pair semantics.** Each discovered candidate gets a *suggested pair anchor*: the registry's first registered exemplar of the assigned composition. For example, K.140 was assigned to Mīs pî at p=0.995 in v0.54; v0.55 produces the suggested pair (K.140, K.5896) where K.5896 is the first registered Mīs pî exemplar. The scholar reviews the pair and records "positive" if K.140 is indeed a Mīs pî witness, "negative" if mis-classified, or "uncertain" if reviewing requires more material. The pair semantics mirror the v0.29 Bayesian fusion training format (positive/negative tablet pairs).
+
+**Sort order: confidence descending.** Top candidates by confidence are surfaced first. At the top of the queue: K.15728, K.7288, Rm-II.266, Rm-II.198 — all classified as Udug-ḫul at p ≥ 0.998, all paired with Sm.1055 (registry's first Udug-ḫul exemplar). The first few hours of validation work focus on the highest-confidence candidates where mis-classifications are rare.
+
+**Filter to one composition.** `list_candidate_exemplars(composition_id="mis_pi")` returns only Mīs pî candidates. A scholar specializing in Mīs pî can claim their composition's expansion candidates as a focused work-batch.
+
+**`exclude_already_in_store` filter.** As candidates are reviewed via `record_validation_resolution`, the store accumulates resolutions; the next `list_candidate_exemplars` call automatically filters out the already-reviewed pairs. The queue shrinks as the work progresses, with no risk of re-presenting reviewed material.
+
+**Closing the V1.0 G1 loop.** v0.55 is the final missing piece for the systematic workflow:
+
+```
+v0.54 → builds 310-candidate discovery surface (one-time, 57s)
+v0.55 → list_candidate_exemplars(composition_id=X) → top 20 to review
+scholar → confirms 14, rejects 6 via record_validation_resolution (~5-10 hours)
+v0.47 train script → reads updated store → retrains v0.29
+v0.52 recommend_validation_target → surfaces new high-info-gain pairs
+v0.51 evaluate-joint-pair-model → measures out-of-sample acc as labels accumulate
+loop continues until v1.0 G1 = 100 positives
+```
+
+Each iteration moves the labeled count forward and tightens the v0.29 decision boundary simultaneously.
+
+**Tool count milestone.** v0.55 brings the cuneiform-mcp tool count to **100**.
+
+**Claim 55.** *list_candidate_exemplars closes the discovery → review handoff for the v1.0 G1 readiness gate: filterable, sorted, pair-suggested, automatically excluded-when-already-reviewed. Combined with v0.54 discovery, v0.52 prioritization, v0.31 record_validation_resolution storage, v0.47 train-script wiring, and v0.51 held-out evaluation, the systematic active-learning workflow is operationally complete. The remaining work is scholarly review, not tooling. v1.0 G1 is mechanically and realistically reachable.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

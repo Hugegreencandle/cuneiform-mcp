@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/list_candidate_exemplars.schema.json",
+  "title": "list_candidate_exemplars data payload",
+  "description": "v0.55.0 surfaces discovered candidate exemplars from v0.54 composition-assignments cache. Filterable by composition + min_confidence. Each candidate carries a suggested pair (with registry's first exemplar of the assigned composition) ready for record_validation_resolution. Closes the discovery → review handoff. §3.35 Claim 55.",
+  "type": "object",
+  "required": ["query", "candidates", "totals_by_composition", "cache_stats", "store_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["composition_id_filter", "min_confidence", "exclude_already_in_store", "top_k"],
+      "additionalProperties": false,
+      "properties": {
+        "composition_id_filter": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "min_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "exclude_already_in_store": { "type": "boolean" },
+        "top_k": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tablet_id", "composition_id", "composition_name", "composition_type",
+          "confidence", "period", "primary_genre", "sign_count",
+          "suggested_pair_anchor", "suggested_pair_id", "is_already_in_store", "rationale"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "composition_id": { "type": "string" },
+          "composition_name": { "type": "string" },
+          "composition_type": { "type": "string", "enum": ["specific_composition", "curriculum"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "primary_genre": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+          "suggested_pair_anchor": { "type": "string" },
+          "suggested_pair_id": { "type": "string" },
+          "is_already_in_store": { "type": "boolean" },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "totals_by_composition": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["composition_id", "count"],
+        "additionalProperties": false,
+        "properties": {
+          "composition_id": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "cache_stats": {
+      "type": "object",
+      "required": ["cache_loaded", "cache_built_at", "total_assignments"],
+      "additionalProperties": false,
+      "properties": {
+        "cache_loaded": { "type": "boolean" },
+        "cache_built_at": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "total_assignments": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "store_stats": {
+      "type": "object",
+      "required": ["n_positive_in_store", "n_uncertain_in_store", "v1_target"],
+      "additionalProperties": false,
+      "properties": {
+        "n_positive_in_store": { "type": "integer", "minimum": 0 },
+        "n_uncertain_in_store": { "type": "integer", "minimum": 0 },
+        "v1_target": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
