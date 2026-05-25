@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compute_confidence_calibration.schema.json",
+  "title": "compute_confidence_calibration data payload",
+  "description": "v0.40.0 reliability-diagram computation. Takes labeled (predicted_probability, correct) pairs and emits binned calibration table + Brier score + ECE / MCE + verdict. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["n_samples", "n_bins", "bins", "brier_score", "expected_calibration_error", "max_calibration_error", "overall_accuracy", "overall_mean_probability", "calibration_verdict", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "n_samples": { "type": "integer", "minimum": 0 },
+    "n_bins": { "type": "integer", "minimum": 2 },
+    "bins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bin_idx", "bin_lo", "bin_hi", "n_samples", "mean_predicted_probability", "observed_accuracy", "gap"],
+        "additionalProperties": false,
+        "properties": {
+          "bin_idx": { "type": "integer", "minimum": 0 },
+          "bin_lo": { "type": "number" },
+          "bin_hi": { "type": "number" },
+          "n_samples": { "type": "integer", "minimum": 0 },
+          "mean_predicted_probability": { "type": "number" },
+          "observed_accuracy": { "type": "number" },
+          "gap": {
+            "type": "number",
+            "description": "observed_accuracy - mean_predicted_probability. Positive = underconfident, negative = overconfident."
+          }
+        }
+      }
+    },
+    "brier_score": { "type": "number", "minimum": 0, "maximum": 1, "description": "Mean squared error between predicted probability and 0/1 label. Lower is better; 0 = perfect." },
+    "expected_calibration_error": { "type": "number", "minimum": 0, "maximum": 1, "description": "Sample-weighted mean of |bin_gap|. ECE ≤ 0.05 is conventionally 'well calibrated'." },
+    "max_calibration_error": { "type": "number", "minimum": 0, "maximum": 1 },
+    "overall_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+    "overall_mean_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+    "calibration_verdict": {
+      "type": "string",
+      "enum": ["well_calibrated", "overconfident", "underconfident", "insufficient_data"]
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
