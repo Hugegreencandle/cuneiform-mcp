@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_sign_glyph.schema.json",
+  "title": "find_sign_glyph data payload",
+  "description": "v0.42.0 ABZ → Unicode cuneiform glyph lookup. Resolves ABZ-prefixed tokens (ABZ480, ABZ075, etc.) to Unicode codepoints + rendered glyph string. Cache populated by scripts/build-abz-glyph-map.mjs (one-time OGSL ∩ eBL enrichment). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "tokens", "rendered_glyph_string", "glyph_map_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["n_tokens", "n_resolved", "n_damage", "n_unresolved"],
+      "additionalProperties": false,
+      "properties": {
+        "n_tokens": { "type": "integer", "minimum": 0 },
+        "n_resolved": { "type": "integer", "minimum": 0 },
+        "n_damage": { "type": "integer", "minimum": 0 },
+        "n_unresolved": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["token", "is_damage", "abz_code", "sign_name", "glyph", "codepoints"],
+        "additionalProperties": false,
+        "properties": {
+          "token": { "type": "string" },
+          "is_damage": { "type": "boolean" },
+          "abz_code": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "sign_name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "glyph": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "codepoints": { "anyOf": [{ "type": "array", "items": { "type": "integer" } }, { "type": "null" }] }
+        }
+      }
+    },
+    "rendered_glyph_string": { "type": "string" },
+    "glyph_map_stats": {
+      "type": "object",
+      "required": ["cache_loaded", "cache_version", "cache_built_at", "n_entries_in_cache"],
+      "additionalProperties": false,
+      "properties": {
+        "cache_loaded": { "type": "boolean" },
+        "cache_version": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "cache_built_at": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "n_entries_in_cache": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
