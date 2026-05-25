@@ -871,6 +871,33 @@ Each iteration moves the model and the v1.0 readiness gate forward simultaneousl
 
 ---
 
+### 3.34 Corpus-Wide Composition Assignment Discovery (v0.54)
+
+The v0.32 `identify_composition` tool was designed for single-query classification (one tablet → ranked candidate compositions). v0.54 demonstrates the tool's corpus-wide application: scan the top-N chunk-host tablets, collect high-confidence assignments, surface the subset that classify confidently to a registered composition but are NOT in the registry's exemplar_tablets list. These are **discovered candidate exemplars** — registry-expansion targets AND validation-resolutions store positives.
+
+**Method.** `scripts/build-corpus-composition-assignments.mjs` iterates a target list (top-N chunk-hosts by default), runs `identify_composition(tablet_id, topK=3)` on each, and caches top-candidate composition_id + confidence + period + primary_genre to `~/.cache/cuneiform-mcp/composition-assignments.json`. The tool is fast: at 14ms/tablet, scanning 200 top-host tablets took 2.7 seconds.
+
+**Empirical results (200-tablet scan).**
+
+| Metric | Value |
+|---|---|
+| Tablets scanned | 200 (chunk-host range 2,737 → 199) |
+| High-confidence assignments (p > 0.9) | 21 |
+| Already in registry | 1 (K.5896) |
+| **Discovered candidates (not in registry)** | **20** |
+| Discovered Mīs pî candidates | 16 (K.140, K.3270, K.2866, K.155, K.44, K.4945, K.3343, K.136, K.2445, K.2290, K.2419, Rm-II.156, K.10935, 1880,0719.152, K.131, ... ) |
+| Discovered Udug-ḫul candidates | 4 (K.1284, Rm.290, Sm.1061, K.2427) |
+
+**Genre cross-check.** 11 of 16 Mīs pî candidates are explicitly Magic → Exorcistic or Literature → Hymns — consistent with Mīs pî's *āšipūtu*-canonical ancestry. 3 fall under Technical → Medicine, which corroborates the BM.77056 §3.9.1 KAR-44 finding that Mīs pî shares ritual vocabulary with the *šumma amēlu* medical corpus. 1 outlier (K.131, classified as Mīs pî but with primary genre Divination → Teratology) is a methodological false-positive candidate worth flagging in the validation queue. Of the 4 Udug-ḫul candidates, 3 are Magic → Exorcistic (consistent with the *Utukkū lemnūtu* anti-demon canon) and 1 is Literature → Hymns.
+
+**Scaling projection.** A full-corpus scan (4,922 chunk-index tablets) extrapolates to ~250 conservative candidates at p > 0.9. Even labeling ~88 of them via record_validation_resolution closes the v1.0 G1 readiness gate (≥100 positives from 12 bootstrap + 88 new = 100). The v0.52 active-learning prioritizer sequences this work optimally; the v0.54 discovery surface supplies the candidate pool. **The v1.0 G1 readiness gate is now operationally reachable**, not just methodologically.
+
+**Important methodological caveat.** A high-confidence identify_composition assignment is necessary but NOT sufficient evidence for true exemplar status. Discovered candidates must still be validated against published editions (Walker & Dick 2001 for Mīs pî, Geller 2016 for Udug-ḫul, etc.). The v0.54 output is a **discovery surface**, not a conclusion. Each candidate enters the v0.31 validation-resolutions store with verdict="uncertain" until scholarly review confirms or rejects.
+
+**Claim 54.** *Corpus-wide composition-assignment scan via v0.32 identify_composition surfaces concrete registry-expansion candidates at production speed (14ms/tablet). A 200-tablet scan of top chunk-hosts produced 20 candidate exemplars outside the current registry (16 Mīs pî + 4 Udug-ḫul), with genre cross-checks corroborating most (11 Magic/Hymns matches, 3 Technical/Medical = known KAR-44 vocabulary overlap, 1 Teratology outlier flagged). A full-corpus scan would yield ~250 candidates at p>0.9, providing enough material to close the v1.0 ≥100-positives readiness gate via systematic active-learning labeling. The v1.0 G1 gate is now operationally reachable — discovery surface, prioritizer, labeling infrastructure, evaluation methodology all in place.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
