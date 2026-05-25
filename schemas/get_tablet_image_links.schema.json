@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/get_tablet_image_links.schema.json",
+  "title": "get_tablet_image_links data payload",
+  "description": "v0.39.0 IIIF / eBL imagery links for a tablet. Returns the eBL fragmentarium landing URL + photo endpoint URL + ancient find-spot region (Patel's archaeological-provenance ask, distinct from modern museum collection). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["tablet_id", "ebl_fragment_url", "ebl_photo_url", "ancient_find_spot", "modern_collection_prefix", "metadata_loaded"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "ebl_fragment_url": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "ebl_photo_url": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "ancient_find_spot": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Ancient dig-site provenance (e.g. 'Kuyunjik', 'Sippar'). Distinct from modern museum collection prefix."
+    },
+    "modern_collection_prefix": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Museum collection prefix (e.g. 'K' for British Museum Kuyunjik, 'BM' for British Museum, 'Sm' for Smith collection)."
+    },
+    "metadata_loaded": { "type": "boolean" }
+  }
+}

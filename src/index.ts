@@ -87,6 +87,15 @@ import {
   registryMetadata,
 } from "./compositionRegistry.js";
 import {
+  renderStemmaSvg,
+} from "./renderStemmaSvg.js";
+import {
+  getAncientFindSpot,
+  getEblFragmentUrl,
+  getEblPhotoUrl,
+  getFragmentMetadata as _getFragmentMetadataForImages,
+} from "./fragmentMetadata.js";
+import {
   buildCanonicalRecensionTree,
 } from "./recensionTree.js";
 import {
@@ -338,7 +347,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.38.0";
+const VERSION = "0.39.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5947,6 +5956,123 @@ server.registerTool(
   },
 );
 
+// ─── v0.39.0 — render_stemma_svg (Newick → SVG visualization) ────────────
+
+server.registerTool(
+  "render_stemma_svg",
+  {
+    description:
+      "Render a Newick stemma string (typically from v0.33 build_stemma_with_rooting or v0.22 build_canonical_recension_tree) as a self-contained SVG suitable for direct embedding in HTML/Markdown or saving to a .svg file. Cladogram-style layout: horizontal branches, branch-length-proportional x-positions, leaf labels right-aligned. Per panel-review §3.24 / Yamamoto: bridges the gap between the Newick string output of v0.22/v0.33 and the tree-picture format scholars need for dissertation chapters.",
+    inputSchema: {
+      newick: z.string().min(1).describe("Newick string. Must end with ';'."),
+      width: z.number().int().min(200).max(4000).optional().describe("SVG canvas width in px. Default 800."),
+      height: z.number().int().min(100).max(8000).optional().describe("SVG canvas height in px. Default auto: 30*leaf_count + 80."),
+      margin: z.number().int().min(0).max(200).optional().describe("Margin around tree in px. Default 40."),
+      branch_scale: z.number().positive().optional().describe("Pixels per unit branch length. Auto-fit if omitted."),
+      font_size: z.number().int().min(8).max(48).optional().describe("Label font size in px. Default 12."),
+      show_internal_labels: z.boolean().optional().describe("Render internal-node labels (N1, N2, ...). Default false."),
+      title: z.string().optional().describe("Optional title rendered above the tree."),
+    },
+  },
+  async ({ newick, width, height, margin, branch_scale, font_size, show_internal_labels, title }) => {
+    const SCHEMA = schemaId("render_stemma_svg");
+    try {
+      const result = renderStemmaSvg({
+        newick,
+        width,
+        height,
+        margin,
+        branchScale: branch_scale,
+        fontSize: font_size,
+        showInternalLabels: show_internal_labels,
+        title,
+      });
+      const lines: string[] = [
+        `Stemma SVG: ${result.width}x${result.height}px  ·  ${result.leaf_count} leaves  ·  ${result.internal_count} internal nodes  ·  total_bl=${result.total_branch_length.toFixed(3)}`,
+      ];
+      if (result.warnings.length > 0) {
+        lines.push(``);
+        lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      } else {
+        lines.push(``);
+        lines.push(`SVG ready (${result.svg.length} chars). First 200 chars:`);
+        lines.push(result.svg.slice(0, 200) + (result.svg.length > 200 ? "..." : ""));
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:newick-to-svg-renderer", VERSION, {
+          citation:
+            "Cladogram-style Newick renderer for stemma visualization. Self-contained SVG, no external dependencies. v0.39.0, §3.24 panel response.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`render_stemma_svg error: ${msg}`, {
+        schema: SCHEMA,
+        data: { svg: "", width: 0, height: 0, leaf_count: 0, internal_count: 0, total_branch_length: 0, warnings: [msg] },
+        provenance: provenance("local", "local:newick-to-svg-renderer", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.39.0 — get_tablet_image_links (IIIF + provenance) ───────────────
+
+server.registerTool(
+  "get_tablet_image_links",
+  {
+    description:
+      "Return the eBL fragmentarium landing URL + photo endpoint URL + ancient find-spot for a tablet. Per panel-review §3.24 / Patel: ancient find-spot (e.g. 'Kuyunjik', 'Sippar') is distinct from modern museum collection prefix (K.*, BM.*, Sm.*) and surfaces archaeological provenance for downstream consumers. The eBL photo URL is best-effort — eBL has photos for ~60-70% of transliterated tablets; consumers should verify the URL resolves before embedding.",
+    inputSchema: {
+      tablet_id: z.string().min(1).describe("Museum number, e.g. 'K.5896'."),
+    },
+  },
+  async ({ tablet_id }) => {
+    const SCHEMA = schemaId("get_tablet_image_links");
+    try {
+      const meta = _getFragmentMetadataForImages(tablet_id);
+      const ancient = meta ? getAncientFindSpot(meta) : null;
+      const prefix = /^([A-Za-z]+)/.exec(tablet_id)?.[1] ?? null;
+      const fragmentUrl = getEblFragmentUrl(tablet_id);
+      const photoUrl = getEblPhotoUrl(tablet_id);
+      const data = {
+        tablet_id,
+        ebl_fragment_url: fragmentUrl,
+        ebl_photo_url: photoUrl,
+        ancient_find_spot: ancient,
+        modern_collection_prefix: prefix,
+        metadata_loaded: meta !== null,
+      };
+      const lines: string[] = [
+        `tablet: ${tablet_id}`,
+        `ancient_find_spot: ${ancient ?? "(unknown — metadata not cached or provenance.region missing)"}`,
+        `modern_collection_prefix: ${prefix ?? "(unparseable)"}`,
+        `eBL fragment: ${fragmentUrl ?? "n/a"}`,
+        `eBL photo:    ${photoUrl ?? "n/a"}`,
+      ];
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data,
+        provenance: provenance("eBL", "ebl.lmu.de/fragmentarium", VERSION, {
+          citation:
+            "IIIF / eBL imagery links + ancient find-spot. Photos hosted by Munich eBL group. v0.39.0, §3.24 panel response.",
+        }),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`get_tablet_image_links error: ${msg}`, {
+        schema: SCHEMA,
+        data: { tablet_id, ebl_fragment_url: null, ebl_photo_url: null, ancient_find_spot: null, modern_collection_prefix: null, metadata_loaded: false },
+        provenance: provenance("eBL", "ebl.lmu.de/fragmentarium", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -9170,7 +9296,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 89 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 91 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask))\n`,
     );
     process.exit(0);
   }

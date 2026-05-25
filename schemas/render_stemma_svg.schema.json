@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/render_stemma_svg.schema.json",
+  "title": "render_stemma_svg data payload",
+  "description": "v0.39.0 Newick → SVG stemma renderer. Takes a rooted Newick string (typically from v0.33 build_stemma_with_rooting) and produces a self-contained SVG suitable for direct embedding in HTML/Markdown or saving to disk. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["svg", "width", "height", "leaf_count", "internal_count", "total_branch_length", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "svg": { "type": "string", "description": "Self-contained SVG markup. Empty string if Newick parse failed." },
+    "width": { "type": "number" },
+    "height": { "type": "number" },
+    "leaf_count": { "type": "integer", "minimum": 0 },
+    "internal_count": { "type": "integer", "minimum": 0 },
+    "total_branch_length": { "type": "number", "minimum": 0 },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

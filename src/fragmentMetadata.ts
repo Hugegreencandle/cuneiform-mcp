@@ -168,6 +168,46 @@ export function getPrimaryGenre(metadata: FragmentMetadata | null): string | nul
 }
 
 /**
+ * v0.39 — Extract the ancient find-spot region from a FragmentMetadata.
+ * Patel asked for ancient (dig-site) provenance distinct from modern
+ * museum collection. eBL's provenance.region field carries this when
+ * present (e.g. "Kuyunjik", "Sippar"). Falls back to provenance.site
+ * if region is null, then to the bare-string form for older records.
+ */
+export function getAncientFindSpot(metadata: FragmentMetadata | null): string | null {
+  if (!metadata || !metadata.provenance) return null;
+  if (typeof metadata.provenance === "string") return metadata.provenance;
+  return metadata.provenance.region ?? metadata.provenance.site ?? null;
+}
+
+/**
+ * v0.39 — Construct the IIIF image URL for a tablet, if eBL hosts it.
+ * Returns null if the tablet ID can't be mapped to an eBL canonical
+ * museum-number form. The URL pattern matches eBL's photo endpoint —
+ * consumers should verify the URL resolves before using it (eBL has
+ * photos for ~60-70% of transliterated tablets).
+ *
+ * Pattern: https://www.ebl.lmu.de/fragmentarium/{MUSEUM_NUMBER}/photo
+ */
+export function getEblPhotoUrl(tabletId: string): string | null {
+  // Reject empty or obviously malformed IDs.
+  if (!tabletId || tabletId.length === 0) return null;
+  // eBL uses URL-encoded museum numbers; "K.5896" stays as-is.
+  const encoded = encodeURIComponent(tabletId);
+  return `https://www.ebl.lmu.de/fragmentarium/${encoded}/photo`;
+}
+
+/**
+ * v0.39 — Construct the eBL fragmentarium landing URL for a tablet.
+ * Distinct from the photo URL — this is the human-readable entry point.
+ */
+export function getEblFragmentUrl(tabletId: string): string | null {
+  if (!tabletId || tabletId.length === 0) return null;
+  const encoded = encodeURIComponent(tabletId);
+  return `https://www.ebl.lmu.de/fragmentarium/${encoded}`;
+}
+
+/**
  * Return overall coverage stats for the fragment-metadata cache.
  */
 export function metadataCoverage(): MetadataCoverage {
