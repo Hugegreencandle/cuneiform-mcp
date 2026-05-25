@@ -101,6 +101,42 @@ This is **a tractable path to the v1.0 ≥100-positives gate**. Combined with v0
 
 The v1.0 G1 gate is now **operationally reachable**, not just methodologically.
 
+## Full-corpus scan results (2026-05-25, 57.4s elapsed)
+
+After validating on 200 tablets, ran the scan against **all 4,922 chunk-index tablets**:
+
+```
+scanned:                  4,922
+high-confidence (>0.9):   323
+  in registry:            13
+  DISCOVERED:             310
+ultra-high-confidence (>0.95): 309
+```
+
+**Per-composition discovered candidates (full corpus):**
+
+| Composition | In registry | Discovered (p>0.9) | Total candidate exemplar pool |
+|---|---|---|---|
+| Mīs pî | 7 | **154** | 161 (23× expansion) |
+| Udug-ḫul | 2 | **135** | 137 (68× expansion) |
+| Bīt salāʾ mê | 1 | 9 | 10 (10× expansion) |
+| Enūma Anu Enlil | 3 | 5 | 8 |
+| Diri/Aa | 2 | 3 | 5 |
+| Bārûtu | 3 | 2 | 5 |
+| āšipūtu curriculum | 5 | 1 | 6 |
+| Šurpu | 2 | 1 | 3 |
+| **TOTAL DISCOVERED** | — | **310** | — |
+
+The v0.32 5-axis composition classifier surfaces 310 likely-positive candidates across the full eBL chunk-index. With even 30% positive-validation rate from scholarly review, the v1.0 G1 ≥100-positives gate is decisively passed.
+
+**Critical caveat re-stated:** These are CANDIDATES requiring scholar validation. The genre cross-check from the 200-tablet sample showed 11/16 Mīs pî candidates in Magic/Hymns/Literature (consistent with the canon) and 1 outlier in Divination/Teratology (likely false positive). Apply the same gut-check to the 310-candidate full pool: many are likely true positives, but a calibration audit on the discovered set's accuracy is the next methodological step.
+
+**Scaling the active-learning loop.** With 310 candidates, the v0.52 active-learning prioritizer can sequence labeling work by uncertainty. Estimated labor: 310 × 30 min scholarly review = ~155 hours total, or ~30 minutes/day for 300 days. For just the 88 needed to close v1.0 G1: ~44 hours.
+
+The v1.0 G1 gate is now **realistically reachable within a calendar quarter** of regular scholarly review activity.
+
+---
+
 ## Reproducibility
 
 ```bash
