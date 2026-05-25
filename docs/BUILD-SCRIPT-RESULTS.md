@@ -35,6 +35,19 @@ cache size:      222 entries (was 135; +87 new ABZ codes)
 
 Remaining 4 failures: ABZ406 (KAM), ABZ228 (KIB), ABZ372 (US), ABZ187 (ŠÁM) — both lookup paths fail. These are likely signs eBL hasn't indexed under ABZ at all, or have list-naming inconsistencies internal to eBL. Documented as known-incomplete.
 
+### v0.56 Track-C MZL-fallback recovery (2026-05-25)
+
+All 4 previously hard-fail ABZ codes recovered via eBL's MZL-list endpoint. Discovery: those signs ARE in eBL but indexed under compound canonical names (|HI×BAD|, |GIŠ%GIŠ|, |ŠE.HU|, |NINDA₂×ŠE|) rather than the Labasi short names KAM/KIB/US/ŠÁM. Looking them up via `/api/signs?listsName=MZL&listsNumber={N}` (using the MZL number from Labasi metadata) returns the full sign record with Unicode.
+
+| Labasi | ABZ | MZL | eBL canonical | Glyph |
+|---|---|---|---|---|
+| KAM | 406 | 640 | \|HI×BAD\| | 𒄰 |
+| KIB | 228 | 378 | \|GIŠ%GIŠ\| | 𒄒 |
+| US  | 372 | 583 | \|ŠE.HU\| | 𒊻 |
+| ŠÁM | 187 | 333 | \|NINDA₂×ŠE\| | 𒉚 |
+
+Cache now at **519 entries** (was 515). The 4 ABZ codes that were "known-incomplete" in v0.46 are now resolved — no hard fails remain in the Labasi subset.
+
 ### Updated K.5896 coverage
 
 ```

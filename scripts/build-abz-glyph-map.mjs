@@ -109,12 +109,51 @@ async function fetchEblSignByAbz(abzNumber) {
   return { ok: false };
 }
 
-async function fetchEblSign(name, abzNumber) {
+// v0.56 — fall back to MZL number when both name + ABZ-number lookups fail.
+// Some Labasi short names (KAM, KIB, US, ŠÁM) map to compound canonical
+// names in eBL (|HI×BAD| etc.) that the by-name path can't find, and eBL
+// has no ABZ-number entry for them under the bare ABZ id either. The MZL
+// number (from Labasi's meszl_number field) resolves them.
+async function fetchEblSignByMzl(mzlNumber) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const url = `${EBL_BASE}/signs?listsName=MZL&listsNumber=${encodeURIComponent(mzlNumber)}`;
+      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      if (!res.ok) {
+        if (attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+        return { ok: false, status: res.status };
+      }
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        return { ok: false, status: 404 };
+      }
+      return { ok: true, data: data[0], via: "by_mzl" };
+    } catch (e) {
+      if (attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
+        continue;
+      }
+      return { ok: false, error: e.message ?? String(e) };
+    }
+  }
+  return { ok: false };
+}
+
+async function fetchEblSign(name, abzNumber, mzlNumber) {
   // First try by name (fast path, works for ~140 of 237 Labasi signs).
   const r1 = await fetchEblSignByName(name);
   if (r1.ok) return { name, abz: abzNumber, ...r1 };
-  // 404 (or other failure) → fall back to ABZ-number list filter.
+  // 404 (or other failure) → fall back to ABZ-number list filter (v0.46).
   const r2 = await fetchEblSignByAbz(abzNumber);
+  if (r2.ok) return { name, abz: abzNumber, ...r2 };
+  // Last resort — try MZL number if Labasi provided one (v0.56).
+  if (mzlNumber !== null && mzlNumber !== undefined) {
+    const r3 = await fetchEblSignByMzl(mzlNumber);
+    if (r3.ok) return { name, abz: abzNumber, ...r3 };
+  }
   return { name, abz: abzNumber, ...r2 };
 }
 
@@ -141,7 +180,12 @@ for (let i = 0; i < signs.length; i += CONCURRENCY) {
   const results = await Promise.all(
     batch.map((s) =>
       paced(
-        () => fetchEblSign(s.sign_name, parseInt(s.abz_number, 10)),
+        () =>
+          fetchEblSign(
+            s.sign_name,
+            parseInt(s.abz_number, 10),
+            s.meszl_number ? parseInt(s.meszl_number, 10) : null,
+          ),
         PACING_MS,
       ),
     ),
