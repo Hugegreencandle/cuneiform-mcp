@@ -100,6 +100,9 @@ import {
   extractCitationNetwork,
 } from "./citationNetwork.js";
 import {
+  findLemmaParallel,
+} from "./lemmaParallel.js";
+import {
   getAncientFindSpot,
   getEblFragmentUrl,
   getEblPhotoUrl,
@@ -357,7 +360,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.43.0";
+const VERSION = "0.44.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -6290,6 +6293,73 @@ server.registerTool(
   },
 );
 
+// ─── v0.44.0 — find_lemma_parallel (Tier-3 #9) ────────────────────────────
+
+server.registerTool(
+  "find_lemma_parallel",
+  {
+    description:
+      "Lemma-aware textual parallel finder. Complementary to v0.18 sign-trigram retrieval: where trigrams measure orthographic reuse (same signs, same order), lemmas measure lexical reuse (same underlying Akkadian/Sumerian words, irrespective of writing variant). Uses Jaccard over lemma sets extracted from eBL's text.lines[].content[].unique_lemma[] arrays. Cache built by scripts/build-lemma-index.mjs (one-time eBL enrichment, polite-pacing). When cache absent, returns warning telling caller how to build it. Methods §3.28 (Tier-3 #9).",
+    inputSchema: {
+      tablet_id: z.string().min(1).describe("Query tablet museum number (must be in lemma index)."),
+      top_k: z.number().int().min(1).max(200).optional().describe("Max candidates returned. Default 20."),
+      min_jaccard: z.number().min(0).max(1).optional().describe("Minimum lemma-Jaccard threshold for inclusion. Default 0.05."),
+      exclude_self: z.boolean().optional().describe("Exclude the query from candidates. Default true."),
+      max_shared_sample_size: z.number().int().min(1).max(50).optional().describe("Per-candidate cap on shared_lemmas[] sample. Default 10."),
+    },
+  },
+  async ({ tablet_id, top_k, min_jaccard, exclude_self, max_shared_sample_size }) => {
+    const SCHEMA = schemaId("find_lemma_parallel");
+    try {
+      const result = findLemmaParallel({
+        tabletId: tablet_id,
+        topK: top_k,
+        minJaccard: min_jaccard,
+        excludeSelf: exclude_self,
+        maxSharedSampleSize: max_shared_sample_size,
+      });
+      const lines: string[] = [
+        `Query: ${result.query.tablet_id}  ·  query_lemmas=${result.query.n_lemmas}  ·  top_k=${result.query.top_k}  ·  min_jaccard=${result.query.min_jaccard}`,
+        `Cache: ${result.index_stats.cache_loaded ? `v${result.index_stats.cache_version} (built ${result.index_stats.cache_built_at})  ·  ${result.index_stats.n_tablets_in_index} tablets indexed` : "NOT LOADED — run scripts/build-lemma-index.mjs"}`,
+        ``,
+        `Candidates (${result.candidates.length}):`,
+      ];
+      for (const [i, c] of result.candidates.slice(0, 10).entries()) {
+        lines.push(`${i + 1}. ${c.tablet_id}  ·  jaccard=${c.jaccard.toFixed(3)}  ·  intersection=${c.intersection_size}/${c.union_size}  ·  candidate_lemmas=${c.candidate_lemma_count}`);
+        if (c.shared_lemmas.length > 0) {
+          lines.push(`     shared: ${c.shared_lemmas.slice(0, 6).join(", ")}${c.shared_lemmas.length > 6 ? ", ..." : ""}`);
+        }
+      }
+      if (result.warnings.length > 0) {
+        lines.push(``);
+        lines.push(`Warnings: ${result.warnings.join("; ")}`);
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("local", "local:lemma-index-v1 (eBL unique_lemma extraction)", VERSION, {
+          citation:
+            "Lemma-Jaccard parallel finder. Cache built from eBL /fragments/{id} text.lines[].content[].unique_lemma[]. v0.44.0, §3.28.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_lemma_parallel error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: { tablet_id, n_lemmas: 0, top_k: top_k ?? 20, min_jaccard: min_jaccard ?? 0.05 },
+          candidates: [] as never[],
+          index_stats: { cache_loaded: false, cache_version: null, cache_built_at: null, n_tablets_in_index: 0 },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:lemma-index-v1 (eBL unique_lemma extraction)", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.17.1 — Recursive manuscript-cluster reconstructor ─────────────────
 
 server.registerTool(
@@ -9513,7 +9583,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 94 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27)\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 95 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3)\n`,
     );
     process.exit(0);
   }

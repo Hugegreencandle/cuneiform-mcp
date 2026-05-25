@@ -694,6 +694,57 @@ The [0.90, 1.00) confidence bin (n=12 samples, mean predicted 0.955) yielded obs
 
 ---
 
+### 3.26 ABZ → Unicode Cuneiform Glyph Lookup (v0.42)
+
+A panel-review polish item (Tier-3 #11 from the upgrade-ideas doc) and the simplest of the three Tier-3 entries: convert ABZ-prefixed sign tokens (the dominant token format in eBL transliterations — K.5896 has 1,801 ABZ-prefixed tokens out of 1,881 total signs, 96%) into Unicode cuneiform glyphs for human-readable rendering.
+
+The data join is OGSL Labasi (ABZ → sign_name) × eBL /signs/{NAME} (sign_name → Unicode codepoints). The build script `scripts/build-abz-glyph-map.mjs` performs this join at polite-pacing (concurrency=2, 250ms between requests) and writes the cached map to `~/.cache/cuneiform-mcp/abz-glyph-map.json`. Runtime tool `find_sign_glyph` reads the cached map and degrades gracefully when absent — ABZ token parsing happens independently of cache availability, so a missing cache still produces structured per-token metadata (abz_code populated, glyph=null) plus a warning telling the caller how to build the cache.
+
+**Composite signs.** Tokens like `ABZ331e+152i` (compound sign with positional modifiers) and `LAGAB×HAL` (Sumerian-style sign cross-product) do not have single canonical Unicode codepoints and remain unresolved. This is the correct behavior — there is no Unicode codepoint for "ABZ331 with epigraphic modifier e+152i"; rendering it would require image-based representation that the tool deliberately does not synthesize.
+
+**Claim 46.** *The ABZ → Unicode glyph mapping is a pure-data infrastructure layer enabling human-readable rendering of sign sequences. Its existence as a separable tool (rather than baked into a single rendering pipeline) lets consumers — composition-classification reports, cluster-visualization outputs, dissertation footnotes — receive both the structured token data and the rendered glyph string in one call. The graceful-degradation pattern (cache present → glyphs; cache absent → bracketed tokens + warning) treats the network-dependent enrichment as an optional layer rather than a blocking dependency.*
+
+---
+
+### 3.27 Scholarly Citation Network Mining (v0.43)
+
+The biblical-parallels and Mesopotamian-internal-parallels datasets in `data/biblicalParallels.json` and `data/mesopotamianParallels.json` carry `scholarly_attribution[]` arrays — biblical entries as strings (e.g. "Smith 1872 — original public recognition of the Gen 6-9 ↔ Gilgamesh XI parallel"), Mesopotamian as `{author_year, publication}` objects (e.g. `{"author_year":"Gunkel 1895","publication":"Schöpfung und Chaos..."}`). v0.43 mines these into a citation network with two node types (scholars, parallels) and one edge type (co-citation: two scholars cited in the same parallel).
+
+**Empirical findings (Round 28).** The current network reads:
+
+| Metric | Value |
+|---|---|
+| Scholars in network | 71 unique |
+| Parallels | 32 (15 biblical + 17 Mesopotamian) |
+| Co-citation edges | 118 |
+| Bridge scholars (reach ≥ 3 parallels) | 7 |
+| Top scholar by reach | Sparks 2007 (7 parallels) |
+| Top co-citation | George 2003 ↔ Sparks 2007 (weight 3) |
+
+The 7 bridge scholars are the load-bearing authorities — those whose work appears across multiple distinct parallels. The top co-citation pair (George 2003 ↔ Sparks 2007, both Mesopotamian-Bible comparative-religion specialists) is methodologically expected: their reference works on Gilgamesh + Genesis parallels are co-cited because they cover overlapping material. The pattern surfaces concrete bibliography-completion suggestions: a paper citing Sparks 2007 on a flood-tradition parallel that does not also cite George 2003 has a real omission.
+
+**Sidestep of the externally-gated Sippar-enrichment.** The original Tier-3 #10 idea required mining eBL's `references` field on individual fragments, which would have required a network enrichment burst (blocked on rate-limit grant). v0.43 takes a different path: mine the already-cached comparative-parallel datasets in `data/`, which carry scholar references explicitly in their published form. This sidesteps the blocker entirely and produces a network grounded in the actual scholarship cited in v0.7/v0.8/v0.13 Discovery Engine outputs.
+
+**Claim 47.** *A scholarly citation network mined from comparative-parallel datasets (biblical + Mesopotamian-internal) exposes the field's load-bearing authorities (7 bridge scholars supporting ≥3 parallels each in the current 32-parallel sample) and its strongest co-citation links (George 2003 ↔ Sparks 2007 as the top edge). The network is itself a valid output of the discovery-engine + comparative-religion stack, distinct from corpus-derived findings, and is the appropriate substrate for bibliography auto-completion and methods-paper auto-citation features.*
+
+---
+
+### 3.28 Lemma-Aware Textual Parallels (v0.44)
+
+The v0.18 sign-trigram parallel finder measures **orthographic reuse** — same signs in same order. v0.44 ships the framework for measuring **lexical reuse** — same underlying Akkadian/Sumerian words, irrespective of writing variant. eBL's `/fragments/{id}` endpoint returns `text.lines[].content[].unique_lemma[]` arrays carrying canonical lemma IDs ("rabû I", "ana I", etc.) for each lemmatized token. v0.44's `find_lemma_parallel` computes Jaccard over per-tablet lemma sets, ranking parallels by lexical overlap.
+
+**Tool semantics.** Cache structure: `{tablet_id: {lemmas: string[], n_lemmas: number}}` at `~/.cache/cuneiform-mcp/lemma-index.json`, populated by `scripts/build-lemma-index.mjs` (polite eBL pacing). Query takes a tablet ID; returns top-K candidates ranked by lemma-Jaccard. Self-pair (K.5896 vs K.5896) yields Jaccard 1.0 by definition; the `exclude_self=true` default filters this. Empty/missing cache returns warning + empty candidates rather than erroring.
+
+**Methodological positioning.** Lemma-Jaccard is **complementary**, not competitive, with sign-trigram-Jaccard. The trigram axis catches manuscripts that share orthographic sequences (the K.9508 ↔ K.5896 case § 3.7.3); the lemma axis catches manuscripts that share VOCABULARY despite orthographic variation (writing differences across periods, dialects, scribal traditions). A composition's bare-context lemma overlap with another composition can be substantial even when sign-trigrams diverge — exactly the discriminative axis sign-trigram retrieval cannot surface.
+
+**Cache-state caveat.** As of v0.44, the cache is not pre-populated — the build script needs to run against eBL's `/fragments/{id}` endpoint for the target tablets, which carries a polite-pacing budget (~3 seconds per fragment, ~1 minute for 20 tablets, ~50 minutes for 1000 tablets). The graceful-fallback path means the tool is usable from day one (it returns a clear "cache not built" warning); empirical results require the enrichment burst. Audit Round 29 verifies the Jaccard semantics with a synthetic 4-tablet cache (18/18 PASS): K.5896 ↔ K.9508 jaccard = 5/7 = 0.714 on a synthetic Mīs pî-overlapping lemma set is computed correctly.
+
+**Claim 48.** *Lemma-Jaccard parallel finding is complementary to sign-trigram-Jaccard, measuring lexical (word-level) reuse rather than orthographic (sign-sequence) reuse. The two axes carry independent discriminative signal: a composition pair with high lemma-overlap but low trigram-overlap is one whose witnesses share vocabulary across orthographic-variant traditions (different period scripts, regional writing conventions, or scribal hands). v0.44 ships the tool framework + enrichment script + audit; full empirical evaluation requires the polite-pace lemma-index build (~50 minutes for the 1000-tablet target set).*
+
+**TIER-3 CLOSED.** v0.42 + v0.43 + v0.44 complete the three Tier-3 items from `docs/v0.31-plus-upgrade-ideas.md`. Of the original 18 panel + Tier 1-3 ideas, **17 have shipped** (the only outstanding item is Tier-2 #8 `bayesian_fusion_at_scale`, which is gated on validation-resolutions accumulating positives — see PANEL-RESPONSE.md G1).
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_lemma_parallel.schema.json",
+  "title": "find_lemma_parallel data payload",
+  "description": "v0.44.0 lemma-aware textual parallel finder. Complements v0.18 sign-trigram retrieval by matching on lexical (lemma) overlap rather than orthographic (sign) overlap. Cache populated by scripts/build-lemma-index.mjs (one-time eBL enrichment). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "candidates", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["tablet_id", "n_lemmas", "top_k", "min_jaccard"],
+      "additionalProperties": false,
+      "properties": {
+        "tablet_id": { "type": "string" },
+        "n_lemmas": { "type": "integer", "minimum": 0 },
+        "top_k": { "type": "integer", "minimum": 1 },
+        "min_jaccard": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "shared_lemmas", "intersection_size", "union_size", "jaccard", "candidate_lemma_count"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "shared_lemmas": { "type": "array", "items": { "type": "string" } },
+          "intersection_size": { "type": "integer", "minimum": 0 },
+          "union_size": { "type": "integer", "minimum": 0 },
+          "jaccard": { "type": "number", "minimum": 0, "maximum": 1 },
+          "candidate_lemma_count": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["cache_loaded", "cache_version", "cache_built_at", "n_tablets_in_index"],
+      "additionalProperties": false,
+      "properties": {
+        "cache_loaded": { "type": "boolean" },
+        "cache_version": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "cache_built_at": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "n_tablets_in_index": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
