@@ -961,6 +961,31 @@ The remaining gap can be closed by either (a) lemma enrichment of BM.77056 (zero
 
 ---
 
+### 3.37 Platt Calibration on v0.29: Honest Null Result (v0.57)
+
+§3.36 hypothesized that the BM.77056↔K.5896 misclassification (p=0.082) was a calibration/threshold issue rather than a model error, because the held-out AUC was 1.000 (perfect ranking). The proposed fix mirrored §3.31's lacuna Platt-calibration: fit `p_cal = sigmoid(a · logit(p_raw) + b)` to remap raw scores into well-calibrated probabilities, expecting the misclassified pair to cross the 0.5 threshold.
+
+**Empirical result on the full 42-pair labeled set (32 train + 10 test):**
+
+| Metric | Pre-Platt | Post-Platt | Δ |
+|---|---|---|---|
+| ECE | 0.0165 | 0.0140 | −0.0025 |
+| Brier | 0.0462 | 0.0443 | −0.0019 |
+| Accuracy | 0.9524 (40/42) | 0.9524 (40/42) | 0 |
+| Fitted parameters | — | a=1.2069, b=0.4323 | — |
+
+**The pre-Platt ECE of 0.0165 is already well below the 0.05 well-calibrated threshold.** The model is ALREADY well-calibrated; Platt produces only marginal improvement. More tellingly, accuracy is unchanged — no pair flipped across the 0.5 threshold. **Critically, BM.77056↔K.5896 went from p=0.082 to p=0.077** — slightly *further* from 0.5, not closer. BM.45749↔BM.77056 similarly drifted from 0.065 to 0.058.
+
+**Diagnosis: §3.36's hypothesis was wrong.** The BM.77056 misclassifications are NOT a threshold issue. The model is well-calibrated and confidently assigns low probability to those pairs. They are **genuine model errors** stemming from the v0.29 feature set's structural inability to capture the BM.77056-as-curriculum-anchor relationship to its component compositions. The §3.36 6th feature (composition_assignment_match) addressed this partially — moving BM.77056↔K.5896 from p=0.046 to p=0.082 — but the remaining gap is not a calibration artifact.
+
+**Why this matters methodologically.** The pre-Platt 0.0165 ECE is the actually-interesting finding: the v0.29 model with 6 features trained on n=12 hand-curated positives + 30 synthetic negatives is structurally well-calibrated **out of the box**, without any post-hoc calibration step. The composition_assignment_match feature added in §3.36 didn't just improve training accuracy — it also produced a calibration-friendly prediction distribution because the registry-grounded feature provides high-signal information uniformly across the prediction range. The contrast with §3.25/§3.31 (lacuna joint_score, ECE 0.6490, required Platt to reach 0.0109) is significant: lacuna restoration's joint_score was a fused ranking score from two heterogeneous axes (bigram + sign2vec), while v0.29 is a properly-trained logistic regression on five+one statistically-motivated features. Different model classes warrant different calibration assumptions.
+
+**Recommendation for the remaining BM.77056 gap.** Per §3.36's alternatives: (a) lemma-enrichment of BM.77056 itself (currently 0 lemmas at eBL per §3.28; would activate the lemma axis as a 7th feature signal), (b) labeling more curriculum-pair positives, or (c) treating curriculum-pair-membership as a categorical structural prior rather than a downstream feature. Platt scaling is NOT in the solution set — the model's calibration is fine; the issue is signal availability for those specific pairs.
+
+**Claim 57.** *Platt scaling applied to the v0.29 6-feature Bayesian fusion model produces only marginal ECE improvement (0.0165 → 0.0140) and zero accuracy change. The model is structurally well-calibrated out of the box; the §3.36-hypothesized "threshold-not-ranking" issue for the BM.77056 misclassifications was wrong. Those pairs are genuine model errors, not calibration artifacts. The honest null result demonstrates that the v0.29 logistic-regression architecture on registry-grounded features is calibration-disciplined where v0.30's heterogeneous bigram+sign2vec fusion (§3.25/§3.31) is not. Different model classes warrant different calibration assumptions; one-size-fits-all Platt scaling is not the right default. The remaining BM.77056 misclassifications require feature-set extension or labeled-set expansion, not post-hoc recalibration.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

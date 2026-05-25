@@ -265,7 +265,7 @@ writeFileSync(OUT_PATH, JSON.stringify({
   rng_seed: RNG_SEED,
   eval_fraction: EVAL_FRACTION,
   evaluated_at: new Date().toISOString(),
-  train: { n_positives: trainPositives.length, n_negatives: trainNegatives.length, accuracy: trainEval.accuracy, brier: trainEval.brier, log_loss: trainEval.log_loss, auc: trainAUC },
+  train: { n_positives: trainPositives.length, n_negatives: trainNegatives.length, accuracy: trainEval.accuracy, brier: trainEval.brier, log_loss: trainEval.log_loss, auc: trainAUC, per_pair: trainEval.records },
   test: { n_positives: testPositives.length, n_negatives: testNegatives.length, accuracy: testEval.accuracy, brier: testEval.brier, log_loss: testEval.log_loss, auc: testAUC, per_pair: testEval.records },
   model: { trained_on_n_positives: model.trained_on_n_positives, trained_on_n_negatives: model.trained_on_n_negatives, training_accuracy: model.training_accuracy },
 }, null, 2));
