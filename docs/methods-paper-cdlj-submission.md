@@ -639,6 +639,61 @@ After both fixes, K.5896 → mis_pi at probability 0.989 (entropy 0.110 bits) an
 
 ---
 
+### 3.24 Panel Review and Registry Expansion (v0.37–v0.41)
+
+A structured-perspectives review session at the v0.36 mark surfaced 15 distinct asks across six imagined-expert voices: a senior philologist (Mertens), a computational-Assyriology postdoc (Al-Sayyid), an archaeologist (Patel), a digital-humanities journal editor (Toussaint), a PhD candidate end-user (Yamamoto), and an NLP/calibration specialist (Lindqvist). The asks clustered into five themes — registry citability, downstream-tool overconfidence, archaeological provenance vs museum collection, visualization, and out-of-sample evaluation — and were executed across the v0.37–v0.41 five-version sweep.
+
+**Registry citability (Toussaint).** The composition registry, previously a TypeScript constant, was migrated to a separately-versioned JSON artifact (`data/compositions-v1.json`) carrying registry_version (1.0.0), CC-BY-4.0 license, persistent URIs per composition (`https://cuneiform-mcp.org/compositions/v1/{id}`), and `external_ids` mapping to eBL canonical genres, OGSL, and CAD lemmas. Each entry now carries print_editions[] referencing the published editions (Reiner 1958 for Šurpu, Geller 2016 for Udug-ḫul, Walker & Dick 2001 for Mīs pî, etc.). Two papers citing "cuneiform-mcp v0.37 registry v1.0.0" share a verifiable registry state.
+
+**Registry expansion (Mertens).** The original 5 compositions were heavily *āšipūtu*-weighted, biasing classification toward magical-ritual texts. v0.37 expanded the registry to 11 compositions: Maqlû (anti-witchcraft), Enūma Anu Enlil (astrological omens), Šumma izbu (birth omens), Šumma ālu (terrestrial omens), Bārûtu (extispicy), and Diri/Aa (lexical) joined the original five. The āšipūtu curriculum entry was retained as `composition_type='curriculum'` distinguishing it from specific compositions inside the curriculum.
+
+**Bootstrap-warning propagation (Mertens, Lindqvist).** The v0.29 Bayesian fusion model's `bootstrap_warning` ("trained on n=12 positives") was previously visible only at the source tool. v0.38 introduces `src/provenanceTags.ts` exporting `REGISTRY_BOOTSTRAP_NOTE_V1` and surfaces it in `warnings[]` for all four registry-dependent tools (`identify_composition`, `score_tablet_completeness`, `find_composition_lineage`, `damaged_passage_composition_probability`). Downstream consumers can no longer silently inherit bootstrap quality through a composition assignment without seeing the registry's 11-composition hand-curated nature.
+
+**Cross-tool consistency (Lindqvist).** Round-24 audit verifies all four registry-dependent tools agree on shared inputs: K.5896 → mis_pi across `identify_composition`, `score_tablet_completeness`, `find_composition_lineage` (inferred), and `damaged_passage_composition_probability`; BM.47463 → surpu across the same set.
+
+**Archaeological provenance (Patel).** Two new fragment-metadata accessors expose the ancient find-spot distinct from modern museum collection prefix: `getAncientFindSpot` reads `provenance.region` (Kuyunjik, Sippar, Nineveh) with fallbacks, and `getEblPhotoUrl` / `getEblFragmentUrl` construct the eBL IIIF imagery URLs. A new `get_tablet_image_links` tool surfaces all three (modern_collection_prefix vs ancient_find_spot vs photo URL) in one call.
+
+**Visualization (Yamamoto).** `render_stemma_svg` parses a rooted Newick string and emits a self-contained cladogram SVG suitable for direct dissertation embedding — closing the gap between v0.22/v0.33 Newick output and the tree-picture format scholars need. The parser correctly handles quoted museum-number labels (Sm.1055), branch-length-proportional x-positions, and optional title rendering.
+
+**API stability tiering (Al-Sayyid).** `docs/API-STABILITY-v1.0.md` classifies the (now 92) tools into four tiers: **canonical** (10 — the 80%-of-work API), **stable** (50 — v1.0 signature freeze), **experimental** (24 — may change), and **specialized** (16 — stable but niche). The canonical ten are `find_parallel_text`, `find_fuzzy_parallels`, `find_chunk_parallels`, `find_formulaic_passages`, `identify_composition`, `build_canonical_recension_tree`, `build_stemma_with_rooting`, `find_composition_lineage`, `restore_lacuna_passage`, and `prioritize_validation_queue`.
+
+**Claim 44.** *Structured panel review — six imagined expert voices systematically cataloguing likes/wants/concerns — is a productive discipline for surfacing the asks a tool's actual user-base would make if convened. Of 15 asks identified, 12 were autonomously shipping-actionable (registry refactor, bootstrap-warning propagation, IIIF + ancient find-spot, SVG visualization, calibration tooling, API stability tiering) and 3 are externally gated with documented blockers (held-out test set requires labeled-pair accumulation through scholarly use, hosted web UI requires methods-paper acceptance, Sippar enrichment requires eBL rate-limit grant). The pattern is reusable: panel-review at major milestones produces a concrete agenda that ad-hoc development tends to miss.*
+
+---
+
+### 3.25 Calibration of Single-Sign Restoration on Bare Context (v0.40 finding)
+
+The §3.5 finding reported 92% top-1 precision on lacuna restoration. That figure was on multi-position parallel-template-aligned positions — single-sign restoration of a position whose context-window has corresponding aligned signs in published parallel manuscripts. The structural context (alignment of multiple signs across multiple witnesses) supplies disambiguating signal that single-position bare-context restoration lacks. v0.40 ships an explicit BLEU benchmark on synthetic single-sign gaps to surface this distinction empirically.
+
+**Method.** 50 random single-sign gaps were synthesized from corpus tablets (≥30 tokens, position uniformly drawn from positions ≥5 from either end, ground-truth sign preserved before masking). For each gap, v0.30 `restore_lacuna_semantic` was run with top_k=10, alpha=0.5; top-1 prediction was compared to the held-out ground truth.
+
+**Results.**
+
+| Metric | Value |
+|---|---|
+| Top-1 accuracy | 16.0% |
+| Top-3 accuracy | 28.0% |
+| Top-5 accuracy | 36.0% |
+| Mean Reciprocal Rank | 0.244 |
+| Mean top-1 confidence (joint_score) | 80.9% |
+| Calibration gap (acc − conf) | −64.9 pp |
+| Expected Calibration Error | 0.6490 |
+| Maximum Calibration Error | 0.7886 |
+| Brier score | 0.5575 |
+| Calibration verdict | OVERCONFIDENT |
+
+The [0.90, 1.00) confidence bin (n=12 samples, mean predicted 0.955) yielded observed accuracy 16.7% — a 78.8 pp calibration gap at the most-confident bucket.
+
+**Interpretation.** The `joint_score` output of `restore_lacuna_semantic` is a ranking score in [0,1] computed from a 0.5/0.5 mix of bigram-likelihood and sign2vec-centroid signal. It is NOT a calibrated probability. Consumers reading "joint_score=0.95" as P(prediction correct) are systematically misled by a factor of ~5×. The mismatch is the predicted consequence of mixing two independent ranking axes (§3.17 reported 90% disagreement between α=0 and α=1 top-1 predictions) and then renormalizing — independent rankers' mixed score reflects "which sign is most rank-consistent across axes," not "what fraction of the time this prediction is correct."
+
+**Relationship to §3.5's 92%.** §3.5's 92% number is on parallel-template-aligned positions — positions whose surrounding context is mirrored in published parallel manuscripts that supply structural-alignment signal beyond local context. §3.25's 16% is on positions whose surrounding context is the only available signal. The two numbers measure different tasks. The cuneiform-restoration literature historically conflates these, partly because parallel-template alignment is the philologically interesting case while bare-context restoration is the structurally tractable case for ML evaluation.
+
+**Recommendation for v1.0.** Either (a) rename `joint_score` to `ranking_score` in the tool API (removes probability connotation), (b) recalibrate via isotonic regression once a held-out calibration set exists, or (c) prominently document in the tool description that joint_score is a ranking signal not P(correct). v0.40 ships option (c) as a stopgap via the API-stability classification doc; (b) is the v1.0 fix.
+
+**Claim 45.** *The joint_score returned by single-position lacuna restoration on bare context is a ranking signal, NOT a calibrated probability. Synthetic single-sign-gap evaluation yields top-1 accuracy 16% at mean confidence 80.9% — a 64.9 percentage-point calibration gap, ECE 0.6490 (13× the well-calibrated threshold). The §3.5 92% number applies specifically to parallel-template-aligned positions where structural-alignment context supplies disambiguating signal; it does not generalize to bare-context restoration. Methods that compose joint_score as a probability must recalibrate first (Platt scaling or isotonic regression on a held-out set), or treat it as a ranking signal only.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
