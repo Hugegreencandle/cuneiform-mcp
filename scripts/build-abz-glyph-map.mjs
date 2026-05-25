@@ -49,31 +49,73 @@ console.log(``);
 
 // ─── Step 2: fetch eBL /signs/{NAME} per sign ──────────────────────────────
 
-async function fetchEblSign(name) {
+async function fetchEblSignByName(name) {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       const res = await fetch(`${EBL_BASE}/signs/${encodeURIComponent(name)}`, {
         headers: { "User-Agent": USER_AGENT },
       });
-      if (res.status === 404) return { name, ok: false, status: 404 };
+      if (res.status === 404) return { ok: false, status: 404 };
       if (!res.ok) {
         if (attempt < MAX_RETRIES) {
           await new Promise((r) => setTimeout(r, 1000 * attempt));
           continue;
         }
-        return { name, ok: false, status: res.status };
+        return { ok: false, status: res.status };
       }
-      const data = await res.json();
-      return { name, ok: true, data };
+      return { ok: true, data: await res.json(), via: "by_name" };
     } catch (e) {
       if (attempt < MAX_RETRIES) {
         await new Promise((r) => setTimeout(r, 1000 * attempt));
         continue;
       }
-      return { name, ok: false, error: e.message ?? String(e) };
+      return { ok: false, error: e.message ?? String(e) };
     }
   }
-  return { name, ok: false };
+  return { ok: false };
+}
+
+// Fallback: lookup by ABZ number when /signs/{name} returns 404. Labasi's
+// sign_name field doesn't always match eBL's canonical sign name (e.g.
+// Labasi names ABZ97 "AG" but eBL canonicalizes it as "AK"). The
+// list-filter endpoint resolves by ABZ number directly.
+async function fetchEblSignByAbz(abzNumber) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const url = `${EBL_BASE}/signs?listsName=ABZ&listsNumber=${encodeURIComponent(abzNumber)}`;
+      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      if (!res.ok) {
+        if (attempt < MAX_RETRIES) {
+          await new Promise((r) => setTimeout(r, 1000 * attempt));
+          continue;
+        }
+        return { ok: false, status: res.status };
+      }
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        return { ok: false, status: 404 };
+      }
+      // Multiple ABZ-matched signs occasionally exist (cross-list collisions).
+      // Take the first record — same convention used by eBL's own UI.
+      return { ok: true, data: data[0], via: "by_abz" };
+    } catch (e) {
+      if (attempt < MAX_RETRIES) {
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
+        continue;
+      }
+      return { ok: false, error: e.message ?? String(e) };
+    }
+  }
+  return { ok: false };
+}
+
+async function fetchEblSign(name, abzNumber) {
+  // First try by name (fast path, works for ~140 of 237 Labasi signs).
+  const r1 = await fetchEblSignByName(name);
+  if (r1.ok) return { name, abz: abzNumber, ...r1 };
+  // 404 (or other failure) → fall back to ABZ-number list filter.
+  const r2 = await fetchEblSignByAbz(abzNumber);
+  return { name, abz: abzNumber, ...r2 };
 }
 
 async function paced(fn, ms) {
@@ -97,7 +139,12 @@ for (let i = 0; i < signs.length; i += CONCURRENCY) {
     process.stderr.write(`  progress: ${i}/${signs.length} (${elapsed}s, ${okCount} ok, ${failCount} fail)\n`);
   }
   const results = await Promise.all(
-    batch.map((s) => paced(() => fetchEblSign(s.sign_name), PACING_MS)),
+    batch.map((s) =>
+      paced(
+        () => fetchEblSign(s.sign_name, parseInt(s.abz_number, 10)),
+        PACING_MS,
+      ),
+    ),
   );
   for (let j = 0; j < batch.length; j++) {
     const sign = batch[j];
@@ -113,8 +160,13 @@ for (let i = 0; i < signs.length; i += CONCURRENCY) {
       .filter((cp) => typeof cp === "number" && cp > 0)
       .map((cp) => String.fromCodePoint(cp))
       .join("");
+    // Use eBL's canonical sign name when available (may differ from Labasi).
+    const canonicalName = res.data.name ?? sign.sign_name;
     entries[abz] = {
-      sign_name: sign.sign_name,
+      sign_name: canonicalName,
+      labasi_name: sign.sign_name,
+      ebl_canonical_name: res.data.name ?? null,
+      via: res.via,
       codepoints,
       glyph,
     };

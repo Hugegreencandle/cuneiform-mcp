@@ -15,6 +15,38 @@ cache size:      135 entries at ~/.cache/cuneiform-mcp/abz-glyph-map.json
 
 **Failure mode identified:** the 97 failures are 404s on sign names with characters that interact badly with eBL URL routing. Examples: `A'` (apostrophe), `AG`, `AH`, `AM`, `AMA` (these appear to need a specific URL-encoding the script's `encodeURIComponent` doesn't produce, or eBL has multiple sign-name aliases not all of which resolve). Documented as a Round-30 calibration follow-up; current 140-entry cache covers the most-frequent ABZ codes.
 
+### Round-30 follow-up — ABZ-number fallback (re-run 2026-05-25)
+
+Diagnosed: Labasi's `sign_name` field doesn't always match eBL's canonical sign name. Concrete example: **Labasi names ABZ97 "AG" but eBL canonicalizes it as "AK"** (Unicode 73757 = 𒀝). The `/api/signs/AG` endpoint returns 404; `/api/signs?listsName=ABZ&listsNumber=97` returns the sign.
+
+Build script now does a two-step lookup:
+1. Try `/api/signs/{name}` (fast path, ~140 hits)
+2. On 404, fall back to `/api/signs?listsName=ABZ&listsNumber={N}` (catches the canonical-name mismatch)
+
+Results after re-run with fallback:
+
+```
+signs processed: 237
+ok:              233    (was 140; +93 recovered)
+failed:          4      (was 97; -93)
+with glyph:      233
+cache size:      222 entries (was 135; +87 new ABZ codes)
+```
+
+Remaining 4 failures: ABZ406 (KAM), ABZ228 (KIB), ABZ372 (US), ABZ187 (ŠÁM) — both lookup paths fail. These are likely signs eBL hasn't indexed under ABZ at all, or have list-naming inconsistencies internal to eBL. Documented as known-incomplete.
+
+### Updated K.5896 coverage
+
+```
+K.5896 first 27 tokens — resolved: 26/27 = 96.3%  (was 81.5%)
+
+Rendered: 𒂊 𒉡 𒈠 𒅗 𒀭 𒈛 𒋾 𒀸 𒌓 𒊺 𒂵 𒀸 𒊺 𒆸 𒁹 [ABZ168] 𒁹 𒄑 𒃻 𒄘 𒀀 𒁺 𒈠 𒀭 𒌓 𒅆 𒈠
+```
+
+Only ABZ168 remains unresolved (likely outside the Labasi 239-sign subset entirely — Labasi covers a focused study set, not the full Borger sign list). The 4 failed ABZ codes in the cache (406, 228, 372, 187) are now documented as eBL-side gaps rather than tool bugs.
+
+Round 27 audit re-runs cleanly with the expanded 222-entry cache (20/20 PASS).
+
 ### Live verification — K.5896 first 27 tokens
 
 ```
