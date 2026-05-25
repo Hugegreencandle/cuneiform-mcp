@@ -175,9 +175,32 @@ export function getPrimaryGenre(metadata: FragmentMetadata | null): string | nul
  * if region is null, then to the bare-string form for older records.
  */
 export function getAncientFindSpot(metadata: FragmentMetadata | null): string | null {
-  if (!metadata || !metadata.provenance) return null;
-  if (typeof metadata.provenance === "string") return metadata.provenance;
-  return metadata.provenance.region ?? metadata.provenance.site ?? null;
+  if (!metadata) return null;
+  // Try provenance.region → provenance.site → bare-string provenance, then
+  // fall back to metadata.collection. v0.45 finding: eBL's
+  // provenance.region is null for the vast majority of cached fragments,
+  // but collection ("Kuyunjik", "British Museum", etc.) IS populated and
+  // is a reasonable proxy for ancient find-spot since collections cluster
+  // archaeologically (K.* + Sm.* prefixes both = Kuyunjik). Note this is
+  // an approximation: "British Museum" as collection is not strictly an
+  // ancient find-spot, but it's the best signal available pending
+  // provenance.region enrichment from eBL.
+  if (metadata.provenance) {
+    if (typeof metadata.provenance === "string" && metadata.provenance.length > 0) {
+      return metadata.provenance;
+    }
+    if (typeof metadata.provenance === "object") {
+      const region = metadata.provenance.region;
+      if (region && region.length > 0) return region;
+      const site = metadata.provenance.site;
+      if (site && site.length > 0) return site;
+    }
+  }
+  // v0.45 fallback to collection.
+  if (metadata.collection && metadata.collection.length > 0) {
+    return metadata.collection;
+  }
+  return null;
 }
 
 /**

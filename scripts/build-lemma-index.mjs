@@ -112,7 +112,23 @@ async function paced(fn, ms) {
 
 // ─── Main loop ─────────────────────────────────────────────────────────────
 
-const entries = {};
+// v0.45: MERGE with existing cache rather than overwrite. New targets add
+// or overwrite their own entries; existing entries for tablets NOT in the
+// current target list are preserved. This lets repeat runs extend the
+// index incrementally without re-fetching what's already known.
+let entries = {};
+if (existsSync(OUT_PATH)) {
+  try {
+    const prior = JSON.parse(readFileSync(OUT_PATH, "utf-8"));
+    if (prior?.entries && typeof prior.entries === "object") {
+      entries = { ...prior.entries };
+      console.log(`Merging with existing cache: ${Object.keys(entries).length} entries already present`);
+    }
+  } catch (e) {
+    console.warn(`Could not load existing cache for merge: ${e.message ?? e}`);
+  }
+}
+const priorEntryCount = Object.keys(entries).length;
 let okCount = 0;
 let failCount = 0;
 let withLemmas = 0;
@@ -170,6 +186,8 @@ const out = {
     failed: failCount,
     with_lemmas: withLemmas,
     elapsed_seconds: parseFloat(elapsed),
+    prior_entries_merged: priorEntryCount,
+    total_entries_after_merge: Object.keys(entries).length,
   },
   entries,
 };
