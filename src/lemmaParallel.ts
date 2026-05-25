@@ -11,7 +11,7 @@
 //   {
 //     "version": "1.0.0",
 //     "built_at": "...",
-//     "source": "eBL /fragments/{id} → lemmas[] extraction",
+//     "source": "eBL /fragments/{id} → text.lines[].content[].uniqueLemma[]",
 //     "entries": {
 //       "K.5896": { lemmas: ["ana", "bīt", "salāʾ", ...], n_lemmas: 1234 },
 //       "K.9508": { lemmas: ["ana", "mīs", "pî", ...], n_lemmas: 152 },

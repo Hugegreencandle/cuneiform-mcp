@@ -84,19 +84,20 @@ async function fetchFragment(id) {
 }
 
 // eBL /fragments/{id} returns a `text` object with `lines[]`. Each line has
-// `content[]` of tokens, some of which carry `unique_lemma[]` arrays
-// (canonical lemma IDs like "rabû I" or "ana I"). Extract all unique
-// lemmas across all lines.
+// `content[]` of tokens, some of which carry `uniqueLemma[]` arrays (camelCase
+// in the eBL response — canonical lemma IDs like "rabû I" or "ana I").
+// Extract all unique lemmas across all lines. (~80%+ of Word-type tokens
+// carry uniqueLemma populated on lemmatized fragments.)
 function extractLemmas(fragmentData) {
   const lemmas = new Set();
   const lines = fragmentData?.text?.lines ?? [];
   for (const line of lines) {
     const content = line?.content ?? [];
     for (const token of content) {
-      if (Array.isArray(token?.unique_lemma)) {
-        for (const lem of token.unique_lemma) {
-          if (typeof lem === "string" && lem.length > 0) lemmas.add(lem);
-        }
+      const lemArr = token?.uniqueLemma ?? token?.unique_lemma;
+      if (!Array.isArray(lemArr)) continue;
+      for (const lem of lemArr) {
+        if (typeof lem === "string" && lem.length > 0) lemmas.add(lem);
       }
     }
   }
