@@ -35,7 +35,8 @@ export type FeatureName =
   | "fuzzy_jaccard"
   | "thematic_cosine"
   | "scribal_cosine"
-  | "substitution_lift_z";
+  | "substitution_lift_z"
+  | "composition_assignment_match";
 
 export const FEATURE_ORDER: FeatureName[] = [
   "lex_jaccard",
@@ -43,6 +44,7 @@ export const FEATURE_ORDER: FeatureName[] = [
   "thematic_cosine",
   "scribal_cosine",
   "substitution_lift_z",
+  "composition_assignment_match",
 ];
 
 export type FeatureVector = Record<FeatureName, number>;
@@ -166,6 +168,7 @@ export function extractPairFeatures(
     thematic_cosine: 0,
     scribal_cosine: 0,
     substitution_lift_z: 0,
+    composition_assignment_match: 0,
   };
   const status: Record<FeatureName, "ok" | "below_threshold" | "missing"> = {
     lex_jaccard: "missing",
@@ -173,6 +176,7 @@ export function extractPairFeatures(
     thematic_cosine: "missing",
     scribal_cosine: "missing",
     substitution_lift_z: "missing",
+    composition_assignment_match: "missing",
   };
 
   // ── compareTabletPair: lexical / fuzzy / thematic / scribal ──────────────
@@ -235,7 +239,98 @@ export function extractPairFeatures(
     );
   }
 
+  // ── v0.56 composition_assignment_match ──────────────────────────────────
+  // Reads from the v0.54 composition-assignments cache. For pair (A, B):
+  //   1.0 → same composition_id at p ≥ 0.5
+  //   0.7 → comp(A) === parent_curriculum(comp(B)), or vice versa
+  //   0.5 → comp(A).parent_curriculum === comp(B).parent_curriculum (both
+  //         in same curriculum family, e.g. Mīs pî + Šurpu both → āšipūtu)
+  //   0.0 → no relationship
+  // Cache loaded lazily; absent cache yields 0 and "missing" status.
+  try {
+    const compMatch = composeCompositionAssignmentMatch(tabletA, tabletB);
+    if (compMatch !== null) {
+      features.composition_assignment_match = compMatch;
+      status.composition_assignment_match = "ok";
+    }
+  } catch (e) {
+    warnings.push(
+      `composition_assignment_match failed for ${tabletA} ↔ ${tabletB}: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
+
   return { features, per_axis_status: status, warnings };
+}
+
+// ─── v0.56 composition-assignment-match helper ─────────────────────────────
+
+const ASSIGNMENTS_FILE = "composition-assignments.json";
+let _assignCache: Record<string, { top_composition_id: string; confidence: number }> | null = null;
+let _assignAttempted = false;
+
+function loadAssignCache(): Record<string, { top_composition_id: string; confidence: number }> | null {
+  if (_assignCache) return _assignCache;
+  if (_assignAttempted) return null;
+  _assignAttempted = true;
+  const path = join(cacheDir(), ASSIGNMENTS_FILE);
+  if (!existsSync(path)) return null;
+  try {
+    const data = JSON.parse(readFileSync(path, "utf-8"));
+    _assignCache = data?.assignments ?? null;
+    return _assignCache;
+  } catch {
+    return null;
+  }
+}
+
+// Registry parent_curriculum lookup, lazy.
+let _registryCurriculum: Map<string, string | null> | null = null;
+function loadRegistryCurriculum(): Map<string, string | null> {
+  if (_registryCurriculum) return _registryCurriculum;
+  _registryCurriculum = new Map();
+  try {
+    // The composition registry lives at data/compositions-v1.json relative
+    // to the cuneiform-mcp repo root. Resolution mirrors the data-dir logic
+    // in src/compositionRegistry.ts.
+    const candidates = [
+      join(dirname(cacheDir()), "..", "..", "Desktop", "cuneiform-mcp", "data", "compositions-v1.json"),
+      // Common fallback: process.cwd-relative
+      join(process.cwd(), "data", "compositions-v1.json"),
+      // ESM-relative: ../data/compositions-v1.json
+      join(dirname(new URL(import.meta.url).pathname), "..", "..", "data", "compositions-v1.json"),
+      join(dirname(new URL(import.meta.url).pathname), "..", "data", "compositions-v1.json"),
+    ];
+    for (const p of candidates) {
+      if (existsSync(p)) {
+        const reg = JSON.parse(readFileSync(p, "utf-8"));
+        for (const c of reg.compositions ?? []) {
+          _registryCurriculum.set(c.id, c.parent_curriculum ?? null);
+        }
+        break;
+      }
+    }
+  } catch {
+    // empty map fallback
+  }
+  return _registryCurriculum;
+}
+
+function composeCompositionAssignmentMatch(a: string, b: string): number | null {
+  const assignments = loadAssignCache();
+  if (!assignments) return null;
+  const a1 = assignments[a];
+  const b1 = assignments[b];
+  if (!a1 || !b1) return 0; // both must have assignments for a non-null comparison
+  if (a1.confidence < 0.5 || b1.confidence < 0.5) return 0;
+  if (a1.top_composition_id === b1.top_composition_id) return 1.0;
+  const curric = loadRegistryCurriculum();
+  const parentA = curric.get(a1.top_composition_id) ?? null;
+  const parentB = curric.get(b1.top_composition_id) ?? null;
+  // One is parent of the other?
+  if (a1.top_composition_id === parentB || b1.top_composition_id === parentA) return 0.7;
+  // Both in same curriculum family?
+  if (parentA && parentA === parentB) return 0.5;
+  return 0;
 }
 
 // ─── Numerical helpers ─────────────────────────────────────────────────────
@@ -280,6 +375,7 @@ export function standardize(
     thematic_cosine: 0,
     scribal_cosine: 0,
     substitution_lift_z: 0,
+    composition_assignment_match: 0,
   };
   for (const f of FEATURE_ORDER) {
     const s = stds[f];
@@ -345,6 +441,7 @@ export function trainJointPairModel(
     thematic_cosine: 0,
     scribal_cosine: 0,
     substitution_lift_z: 0,
+    composition_assignment_match: 0,
   };
   const featureStds: Record<FeatureName, number> = {
     lex_jaccard: 0,
@@ -352,6 +449,7 @@ export function trainJointPairModel(
     thematic_cosine: 0,
     scribal_cosine: 0,
     substitution_lift_z: 0,
+    composition_assignment_match: 0,
   };
   for (const f of FEATURE_ORDER) {
     const xs = examples.map((e) => e.features[f]);
@@ -438,6 +536,7 @@ export function trainJointPairModel(
     thematic_cosine: weights[2],
     scribal_cosine: weights[3],
     substitution_lift_z: weights[4],
+    composition_assignment_match: weights[5],
   };
 
   const model: JointPairModel = {

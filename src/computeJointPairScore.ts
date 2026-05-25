@@ -119,6 +119,7 @@ function emptyResult(
     thematic_cosine: 0,
     scribal_cosine: 0,
     substitution_lift_z: 0,
+    composition_assignment_match: 0,
   };
   const status: Record<FeatureName, "ok" | "below_threshold" | "missing"> = {
     lex_jaccard: "missing",
@@ -126,6 +127,7 @@ function emptyResult(
     thematic_cosine: "missing",
     scribal_cosine: "missing",
     substitution_lift_z: "missing",
+    composition_assignment_match: "missing",
   };
   return {
     tablet_a: a,

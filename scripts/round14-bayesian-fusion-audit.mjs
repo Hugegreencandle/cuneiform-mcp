@@ -219,9 +219,11 @@ if (!focus) {
   const top = sorted[0];
   console.log(`\n  Dominant feature: ${top.feature} (|contrib|=${Math.abs(top.contribution_to_log_odds).toFixed(4)}, weight=${top.weight.toFixed(4)})`);
 
-  t4pass = drift < 1e-3 && r.per_feature_contribution.length === 5;
+  // v0.56: 5-feature bootstrap was extended to 6 features via composition_assignment_match.
+  // Accept either count.
+  t4pass = drift < 1e-3 && (r.per_feature_contribution.length === 5 || r.per_feature_contribution.length === 6);
   report(
-    "T4 — additive decomposition (drift < 1e-3, 5 features)",
+    "T4 — additive decomposition (drift < 1e-3, 5 or 6 features)",
     t4pass,
     `drift=${drift.toExponential(2)} · features=${r.per_feature_contribution.length} · top=${top.feature}`,
   );
