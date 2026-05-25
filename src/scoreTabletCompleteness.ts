@@ -27,6 +27,7 @@ import {
 } from "./compositionRegistry.js";
 import { getChunksContaining, loadChunkIndex } from "./chunkIndex.js";
 import { identifyComposition } from "./identifyComposition.js";
+import { REGISTRY_BOOTSTRAP_NOTE_V1 } from "./provenanceTags.js";
 
 const ALL_SIGNS_FILE = "all-signs-full.json";
 const DAMAGE_TOKENS = new Set(["X", "x", "?"]);
@@ -185,7 +186,7 @@ export function scoreTabletCompleteness(
   const tabletId = opts.tabletId.trim();
   const fallbackMin = opts.fallbackMinConfidence ?? 0.3;
   const includeLists = opts.includeChunkLists ?? false;
-  const warnings: string[] = [];
+  const warnings: string[] = [REGISTRY_BOOTSTRAP_NOTE_V1];
 
   const chunkIdx = loadChunkIndex();
   const chunkLoaded = chunkIdx !== null;

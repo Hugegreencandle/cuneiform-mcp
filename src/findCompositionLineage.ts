@@ -27,6 +27,7 @@ import {
 } from "./recensionTree.js";
 import { getChunksContaining, loadChunkIndex } from "./chunkIndex.js";
 import { identifyComposition } from "./identifyComposition.js";
+import { REGISTRY_BOOTSTRAP_NOTE_V1 } from "./provenanceTags.js";
 
 // ─── Period ordering ───────────────────────────────────────────────────────
 
@@ -145,7 +146,7 @@ function chunkHashSetFor(tabletId: string): Set<string> {
 export function findCompositionLineage(
   opts: FindCompositionLineageOptions,
 ): FindCompositionLineageResult {
-  const warnings: string[] = [];
+  const warnings: string[] = [REGISTRY_BOOTSTRAP_NOTE_V1];
   const maxWitnesses = Math.max(2, Math.min(200, opts.maxWitnesses ?? 50));
   const minPairwiseChunks = Math.max(1, opts.minPairwiseChunks ?? 3);
   const minEdgeChunks = Math.max(1, opts.minEdgeChunks ?? 5);

@@ -38,6 +38,7 @@ import {
   signEmbeddingStats,
 } from "./signEmbeddings.js";
 import { restoreLacunaSemantic } from "./restoreLacunaSemantic.js";
+import { REGISTRY_BOOTSTRAP_NOTE_V1 } from "./provenanceTags.js";
 
 const ALL_SIGNS_FILE = "all-signs-full.json";
 const DAMAGE_TOKENS = new Set(["X", "x", "?"]);
@@ -280,7 +281,7 @@ function canonicalChunksFor(entry: CompositionEntry): Set<string> {
 export function damagedPassageCompositionProbability(
   opts: DamagedPassageCompositionOptions,
 ): DamagedPassageCompositionResult {
-  const warnings: string[] = [];
+  const warnings: string[] = [REGISTRY_BOOTSTRAP_NOTE_V1];
   const topK = opts.topK ?? COMPOSITION_REGISTRY.length;
   const marginalize = opts.marginalizeRestorations ?? false;
   const restorationTopK = opts.restorationTopK ?? 5;

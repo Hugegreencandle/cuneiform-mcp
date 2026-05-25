@@ -22,6 +22,7 @@ import {
 import { getChunksContaining, loadChunkIndex } from "./chunkIndex.js";
 import { getSignVector, hasSignEmbedding, signEmbeddingStats } from "./signEmbeddings.js";
 import { getFragmentMetadata, getPeriod, getPrimaryGenre } from "./fragmentMetadata.js";
+import { REGISTRY_BOOTSTRAP_NOTE_V1 } from "./provenanceTags.js";
 
 const ALL_SIGNS_FILE = "all-signs-full.json";
 const DAMAGE_TOKENS = new Set(["X", "x", "?"]);
@@ -181,7 +182,7 @@ export function identifyComposition(opts: IdentifyCompositionOptions): IdentifyC
   const wS2v = opts.axisWeights?.sign2vec_centroid ?? 0.4;
   const minConfidence = opts.minConfidence ?? 0;
 
-  const warnings: string[] = [];
+  const warnings: string[] = [REGISTRY_BOOTSTRAP_NOTE_V1];
 
   const chunkIndex = loadChunkIndex();
   const chunkLoaded = chunkIndex !== null;
