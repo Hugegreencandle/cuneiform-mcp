@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/extract_citation_network.schema.json",
+  "title": "extract_citation_network data payload",
+  "description": "v0.43.0 scholarly citation network mined from data/biblicalParallels.json + data/mesopotamianParallels.json. Nodes: scholars (parsed from scholarly_attribution[]) + parallels. Edges: co-citation (two scholars cited in same parallel). Returns ranked scholars/parallels/pairs + bridge scholars (those reaching ≥ min_bridge_reach parallels). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["scholars", "parallels", "co_citation_edges", "top_scholars_by_parallels", "top_co_citation_pairs", "bridge_scholars", "network_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "scholars": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scholar" }
+    },
+    "parallels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/parallel" }
+    },
+    "co_citation_edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coCitationEdge" }
+    },
+    "top_scholars_by_parallels": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scholar" }
+    },
+    "top_co_citation_pairs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/coCitationEdge" }
+    },
+    "bridge_scholars": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/scholar" }
+    },
+    "network_stats": {
+      "type": "object",
+      "required": ["n_scholars", "n_parallels", "n_co_citation_edges", "n_bridge_scholars", "max_scholars_per_parallel", "max_parallels_per_scholar"],
+      "additionalProperties": false,
+      "properties": {
+        "n_scholars": { "type": "integer", "minimum": 0 },
+        "n_parallels": { "type": "integer", "minimum": 0 },
+        "n_co_citation_edges": { "type": "integer", "minimum": 0 },
+        "n_bridge_scholars": { "type": "integer", "minimum": 0 },
+        "max_scholars_per_parallel": { "type": "integer", "minimum": 0 },
+        "max_parallels_per_scholar": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "scholar": {
+      "type": "object",
+      "required": ["id", "author_year", "parallels_supported", "n_parallels"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "author_year": { "type": "string" },
+        "parallels_supported": { "type": "array", "items": { "type": "string" } },
+        "n_parallels": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "parallel": {
+      "type": "object",
+      "required": ["id", "source_dataset", "title", "scholars", "n_scholars"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "source_dataset": { "type": "string", "enum": ["biblical", "mesopotamian"] },
+        "title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "scholars": { "type": "array", "items": { "type": "string" } },
+        "n_scholars": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "coCitationEdge": {
+      "type": "object",
+      "required": ["scholar_a", "scholar_b", "shared_parallels", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "scholar_a": { "type": "string" },
+        "scholar_b": { "type": "string" },
+        "shared_parallels": { "type": "array", "items": { "type": "string" } },
+        "weight": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}
