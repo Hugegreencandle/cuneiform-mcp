@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_composition_lineage.schema.json",
+  "title": "find_composition_lineage data payload",
+  "description": "v0.35.0 composition transmission tracer. Enumerates witnesses of a composition (BFS-expanded via v0.20 chunk-hash overlap from registry exemplars or a seed tablet), buckets them by (period × provenance) into transmission nodes, and emits chunk-sharing edges + bridge witnesses that link periods. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query",
+    "composition",
+    "witnesses",
+    "transmission_nodes",
+    "transmission_edges",
+    "bridge_witnesses",
+    "diffusion_summary",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["composition_id", "seed_tablet_id", "max_witnesses"],
+      "additionalProperties": false,
+      "properties": {
+        "composition_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "seed_tablet_id": { "type": "string" },
+        "max_witnesses": { "type": "integer", "minimum": 2 }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "required": ["source", "composition_id", "composition_name", "inferred_confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "type": "string", "enum": ["explicit", "inferred", "unresolved"] },
+        "composition_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "composition_name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "inferred_confidence": { "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }] }
+      }
+    },
+    "witnesses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tablet_id",
+          "period",
+          "period_rank",
+          "provenance",
+          "sign_count",
+          "shared_chunks_with_seed",
+          "host_chunks_total",
+          "is_registry_exemplar"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "period_rank": { "type": "integer", "description": "1=OB → 6=LB → 7=Hellenistic; 999=unknown" },
+          "provenance": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+          "shared_chunks_with_seed": { "type": "integer", "minimum": 0 },
+          "host_chunks_total": { "type": "integer", "minimum": 0 },
+          "is_registry_exemplar": { "type": "boolean" }
+        }
+      }
+    },
+    "transmission_nodes": {
+      "type": "array",
+      "description": "Witnesses grouped by (period, provenance). Sorted by period_rank, then provenance.",
+      "items": {
+        "type": "object",
+        "required": [
+          "node_id",
+          "period",
+          "period_rank",
+          "provenance",
+          "member_tablets",
+          "total_sign_count",
+          "total_host_chunks"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "node_id": { "type": "string", "description": "'{period}|{provenance}' canonical key." },
+          "period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "period_rank": { "type": "integer" },
+          "provenance": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "member_tablets": { "type": "array", "items": { "type": "string" } },
+          "total_sign_count": { "type": "integer", "minimum": 0 },
+          "total_host_chunks": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "transmission_edges": {
+      "type": "array",
+      "description": "Pairs of (period, provenance) nodes that share ≥ min_edge_chunks length-20 chunks. Bridge witnesses listed per edge.",
+      "items": {
+        "type": "object",
+        "required": ["from_node_id", "to_node_id", "shared_chunks", "bridge_witness_ids"],
+        "additionalProperties": false,
+        "properties": {
+          "from_node_id": { "type": "string" },
+          "to_node_id": { "type": "string" },
+          "shared_chunks": { "type": "integer", "minimum": 1 },
+          "bridge_witness_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "bridge_witnesses": {
+      "type": "array",
+      "description": "Tablets whose chunks appear in ≥2 OTHER transmission nodes (excluding the witness's own node).",
+      "items": {
+        "type": "object",
+        "required": ["tablet_id", "spans_n_nodes", "node_ids", "chunks_in_each_node"],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "spans_n_nodes": { "type": "integer", "minimum": 2 },
+          "node_ids": { "type": "array", "items": { "type": "string" } },
+          "chunks_in_each_node": { "type": "array", "items": { "type": "integer", "minimum": 1 } }
+        }
+      }
+    },
+    "diffusion_summary": {
+      "type": "object",
+      "required": [
+        "n_witnesses",
+        "n_distinct_periods",
+        "n_distinct_provenances",
+        "n_nodes",
+        "n_edges",
+        "n_cross_period_edges",
+        "n_cross_provenance_edges",
+        "n_bridge_witnesses",
+        "earliest_period",
+        "latest_period"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "n_witnesses": { "type": "integer", "minimum": 0 },
+        "n_distinct_periods": { "type": "integer", "minimum": 0 },
+        "n_distinct_provenances": { "type": "integer", "minimum": 0 },
+        "n_nodes": { "type": "integer", "minimum": 0 },
+        "n_edges": { "type": "integer", "minimum": 0 },
+        "n_cross_period_edges": { "type": "integer", "minimum": 0 },
+        "n_cross_provenance_edges": { "type": "integer", "minimum": 0 },
+        "n_bridge_witnesses": { "type": "integer", "minimum": 0 },
+        "earliest_period": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "latest_period": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

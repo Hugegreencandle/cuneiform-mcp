@@ -594,6 +594,29 @@ The corpus's heavily-fragmentary witness inventory (∼45% of transliterated tab
 
 ---
 
+### 3.22 Composition Transmission Lineage (v0.35)
+
+The §3.7 manuscript-sibling, §3.11 stemma, and §3.21 completeness sections operate within a single composition's witness set. §3.22 adds the temporal-geographic dimension: WHERE was the composition copied, WHEN, and which witnesses chained transmission across atelier or period boundaries? v0.35 `find_composition_lineage` composes the v0.20 chunk-hash index, the v0.22 BFS witness expansion, and the v0.18 fragment metadata (period + provenance) into a transmission graph.
+
+**Method.** Resolve the target composition (explicit composition_id or identify_composition's top candidate above fallback threshold). BFS-expand the witness cluster from registry exemplars or a caller-specified seed, using the same v0.22 machinery used by build_canonical_recension_tree. For each witness, extract (period, provenance) from the metadata cache. Bucket witnesses by (period × provenance) into "transmission nodes." For each pair of nodes, count length-20 chunk hashes whose hosts include members of both nodes; emit a transmission_edge if the count exceeds `min_edge_chunks` (default 5). Identify "bridge witnesses" — tablets whose chunks appear in ≥2 nodes OTHER than the witness's own, indicating that the individual witness's surface text carries content that travels across the boundary.
+
+**Empirical surface — Mīs pî transmission is geographically concentrated.** Running on `composition_id="mis_pi"` with max_witnesses=30 produces:
+
+- 16 witnesses in the BFS-expanded cluster
+- 2 distinct periods: Neo-Assyrian → Neo-Babylonian
+- **1 distinct provenance** (the K.* + Sm.* Kuyunjik / British Museum cluster)
+- 2 transmission nodes (period-only differentiation, since provenance is uniform)
+- 1 cross-period edge (NA ↔ NB) with shared chunks
+- 0 bridge witnesses
+
+The single-provenance result is the substantive finding. Either there is a coverage gap (other-provenance Mīs pî witnesses exist but fall below the BFS chunk-overlap threshold), or there is a real geographic concentration in the surviving record (the Nineveh redaction dominates). §3.20's "no pre-NA witness in this cluster" finding combined with §3.22's "no non-Kuyunjik provenance" finding triangulates a methodological observation: the Mīs pî tradition as we have it through eBL is structurally Neo-Assyrian-Nineveh-anchored, with one cross-period continuation into the Neo-Babylonian record. The §3.7.3 framing of K.5896 as "centerpiece" is now refined: K.5896 is the centerpiece of an NA-Nineveh witness cluster, not of a multi-atelier multi-period tradition (which would require non-Kuyunjik witnesses + OB/MB-period exemplars to appear).
+
+**Bridge-witness zero is correct.** When all witnesses share one provenance, no individual tablet can "span" multiple ateliers — the cross-period chunks bridge IN TIME within a single geographic node. The zero count is structurally accurate, not a missing-data artifact, and the tool exposes the structural absence rather than fabricating diffusion.
+
+**Claim 42.** *Composition transmission tracing — bucketing chunk-cluster witnesses by (period × provenance) — exposes both the temporal trajectory and the geographic concentration of a composition's surviving record. The Mīs pî cluster in the eBL chunk-index reduces to 16 witnesses across 2 periods (NA → NB) and 1 provenance, with one cross-period transmission edge and zero bridge witnesses. The single-provenance finding is itself substantive: it identifies either a coverage gap (other-provenance Mīs pî witnesses below BFS threshold) or a real geographic concentration (Nineveh-redaction dominance). The tool exposes the structural absence rather than fabricating diffusion.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
