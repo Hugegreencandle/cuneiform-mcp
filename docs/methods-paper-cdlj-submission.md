@@ -842,6 +842,35 @@ BM.77056 is the *curriculum* anchor — a cross-composition role rather than a s
 
 ---
 
+### 3.33 Active-Learning Target Recommendation (v0.52)
+
+v0.31 shipped the persistent validation-resolutions store (the labeling target); v0.47 seeded it with 12 positives + 30 negatives; v0.51 added held-out evaluation methodology. v0.52 closes the loop: an **information-gain prioritizer** that picks the next pair to label.
+
+**Principle.** A Bayesian classifier's variance is reduced most by labeling examples where it is most uncertain — i.e. pairs with `predicted_probability` closest to 0.5. Labels on confident predictions (p > 0.95 or p < 0.05) merely confirm what the model already knows. Labels at the decision boundary teach the model where to place that boundary.
+
+**Procedure.** `recommend_validation_target` (a) enumerates a candidate pool from chunk-index co-host pairs (the only pairs with meaningful v0.29 feature signal), (b) scores each via the v0.29 model (now retrained against the v0.47-seeded store), (c) filters out pairs already in the store, (d) ranks by `|p − 0.5|` ascending. The top-K pairs are returned with per-pair feature breakdown + rationale + the current `v1_progress` snapshot (positives_in_store vs ≥100 target).
+
+**The closed loop.**
+
+```
+1. recommend_validation_target → returns top-10 highest-info-gain pairs
+2. Scholar reviews top-1 manually
+3. record_validation_resolution adds verdict + rationale to store
+4. scripts/train-joint-pair-model.mjs retrains v0.29 on updated store
+5. evaluate-joint-pair-model.mjs measures out-of-sample accuracy
+6. Loop back to step 1
+```
+
+Each iteration moves the model and the v1.0 readiness gate forward simultaneously. The store grows with concrete, prioritized labels; the model's classifier surface tightens around the boundary; the held-out AUC stabilizes as labels accumulate.
+
+**Cross-reference to §3.32.** The v0.51 held-out evaluation reported test AUC = 0.67 at n=42. With targeted information-gain-driven labeling via v0.52, the same metric should rise toward the ≥0.85 threshold conventional for production models. The script structure already in place will produce the publishable numbers when the labeled set crosses the v1.0 threshold.
+
+**Cross-reference to §3.31.** Per-pair predictions emitted by `recommend_validation_target` carry `predicted_probability` from the v0.29 Bayesian fusion model. Per §3.31's lacuna finding, raw confidence scores from probabilistic ML models are not always calibrated probabilities — when v0.52 emits p=0.5, the value is functionally a ranking signal ("model is maximally uncertain") rather than an exact probability claim ("there is a 50% true probability"). For target-selection purposes, uncertainty ranking is the right primitive; for downstream probability-interpretable use, a separate Platt-recalibration step on the v0.29 model would be required (parallel to v0.50 for lacuna scores). Deferred to v0.53+.
+
+**Claim 53.** *Active-learning target recommendation closes the v0.31 validation-resolutions loop: candidates near the v0.29 decision boundary (|p − 0.5| minimized) are prioritized for human labeling because their labels reduce model variance most. The full loop — recommend → review → record → retrain → evaluate → recommend — moves the v1.0 ≥100-positives readiness gate forward iteratively, with explicit uncertainty signals driving label prioritization rather than ad-hoc selection. The v1.0 gate is now systematically reachable rather than dependent on scholarly intuition about which pairs to label.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

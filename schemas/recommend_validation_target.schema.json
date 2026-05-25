@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/recommend_validation_target.schema.json",
+  "title": "recommend_validation_target data payload",
+  "description": "v0.52.0 active-learning prioritizer (chunk-overlap proxy version). Returns pairs with mid-percentile chunk-overlap as the highest-information-gain candidates for labeling. Closes the v0.31 validation-resolutions loop. §3.33 Claim 53.",
+  "type": "object",
+  "required": ["query", "candidates", "pool_stats", "v1_progress", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["top_k", "n_anchor_tablets", "pairs_per_anchor", "exclude_already_resolved"],
+      "additionalProperties": false,
+      "properties": {
+        "top_k": { "type": "integer", "minimum": 1 },
+        "n_anchor_tablets": { "type": "integer", "minimum": 1 },
+        "pairs_per_anchor": { "type": "integer", "minimum": 1 },
+        "exclude_already_resolved": { "type": "boolean" }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["pair_id", "tablet_a", "tablet_b", "chunk_overlap", "overlap_percentile", "uncertainty_proxy", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "pair_id": { "type": "string" },
+          "tablet_a": { "type": "string" },
+          "tablet_b": { "type": "string" },
+          "chunk_overlap": { "type": "integer", "minimum": 0 },
+          "overlap_percentile": { "type": "number", "minimum": 0, "maximum": 1 },
+          "uncertainty_proxy": { "type": "number", "minimum": 0, "maximum": 1 },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "pool_stats": {
+      "type": "object",
+      "required": ["candidate_pairs_considered", "already_resolved_skipped", "in_pool_after_filter", "overlap_min", "overlap_median", "overlap_max"],
+      "additionalProperties": false,
+      "properties": {
+        "candidate_pairs_considered": { "type": "integer", "minimum": 0 },
+        "already_resolved_skipped": { "type": "integer", "minimum": 0 },
+        "in_pool_after_filter": { "type": "integer", "minimum": 0 },
+        "overlap_min": { "type": "integer", "minimum": 0 },
+        "overlap_median": { "type": "integer", "minimum": 0 },
+        "overlap_max": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "v1_progress": {
+      "type": "object",
+      "required": ["n_positives_in_store", "v1_target", "pairs_needed_to_reach_target"],
+      "additionalProperties": false,
+      "properties": {
+        "n_positives_in_store": { "type": "integer", "minimum": 0 },
+        "v1_target": { "type": "integer", "minimum": 1 },
+        "pairs_needed_to_reach_target": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
