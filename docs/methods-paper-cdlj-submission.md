@@ -617,6 +617,28 @@ The single-provenance result is the substantive finding. Either there is a cover
 
 ---
 
+### 3.23 Probabilistic Composition Classification of Damaged Passages (v0.36)
+
+§3.19 (identify_composition) returns a confidence-ranked composition assignment for a corpus-resident tablet. §3.23 extends this to **damaged passages** with two practical needs: (a) accept hand-transliterated signs strings directly (so a scholar can paste a fresh reading without first registering the tablet in the corpus), and (b) marginalize over plausible sign restorations at damage positions rather than dropping them from the centroid.
+
+**Two scoring axes.** sign2vec_centroid against each composition's exemplar pool (mirroring §3.19), and chunk_overlap from the §3.10 length-20 chunk index (active only when a tablet_id is provided so chunk hashes are precomputed). Both axes self-filter the query from its own exemplar pool when applicable.
+
+**Restoration marginalization.** When enabled, each damage position is replaced by a weighted mixture of v0.30 lacuna-restorer top-K predictions: `fuzzy_vec = sum_p (joint_score[p] / sum_weights) * embedding[p]`. The mixture contributes one "fuzzy sign" to the centroid, recovering partial mass that would otherwise be discarded. K.5896 with 51 damage positions, marginalized over top-5 restorations each, classifies at p(mis_pi)=0.985 vs the plain-skip-damage path's p(mis_pi)=0.989 — minimal divergence on a 1.4%-damaged tablet, but the path is structurally relevant for higher-damage fragments where dropping positions would erode the centroid.
+
+**Calibration insight from initial audit failures (recorded as methodological note).** The first implementation failed Tests T1 and T3 — K.5896 classified as `asiputu_kar44` (curriculum) rather than `mis_pi`. Two algorithmic bugs were traced and corrected:
+
+1. *Self-filter omission.* K.5896 appears in both the Mīs pî and the āšipūtu-curriculum exemplar pools. Without filtering K.5896 from its own pools before computing centroid + chunk-overlap, both compositions got K.5896's own signal as a contribution; the curriculum's broader pool then dominated. §3.19's self-filter is necessary, not optional.
+
+2. *Wrong chunk-overlap normalization.* Using "fraction of canonical chunks covered" (denominator = canonical_chunks_count per composition) gave smaller-pool compositions inflated scores — Šurpu with 31 canonical chunks vs Mīs pî with 152 made it trivially easier for the Šurpu denominator to hit high ratios. §3.19's cross-candidate normalization (`chunk_norm = chunk_raw / max(chunk_raw across candidates)`) is the load-bearing choice; "within-composition fraction" is the wrong metric when candidate pools differ in size.
+
+After both fixes, K.5896 → mis_pi at probability 0.989 (entropy 0.110 bits) and K.9508 → mis_pi correctly.
+
+**Shannon entropy as uncertainty.** The softmax probability distribution is summarized by its entropy: 0 = certain, log2(N_compositions) = uniform. Combined with `max_probability`, this gives consumers a calibrated handle on classification confidence that's directly comparable across compositions.
+
+**Claim 43.** *Probabilistic composition classification for damaged passages must (a) accept raw signs strings to support hand-transliterations, (b) self-filter the query from registered exemplar pools when it appears there, (c) normalize chunk-overlap across candidates not within a candidate's pool, and (d) optionally marginalize damage positions over lacuna-restorer top-K predictions to recover partial centroid mass. Shannon entropy of the softmax distribution provides a calibrated uncertainty metric. The cross-candidate normalization is non-negotiable: within-pool ratios mis-classify by inflating small compositions; the self-filter is non-negotiable: without it, overlapping-exemplar curricula beat the specific compositions they contain.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

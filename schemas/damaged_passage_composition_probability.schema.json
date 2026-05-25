@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/damaged_passage_composition_probability.schema.json",
+  "title": "damaged_passage_composition_probability data payload",
+  "description": "v0.36.0 probabilistic composition classifier for damaged passages. Accepts raw signs string OR tablet_id; computes joint sign2vec centroid + chunk-overlap score against v0.32 composition registry; emits softmax probability distribution + Shannon entropy. Optional restoration-marginalization replaces each X with a weighted mixture of v0.30 lacuna-restorer top-K candidates rather than dropping the position. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "candidates", "uncertainty", "index_stats", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["source", "tablet_id", "n_signs_total", "n_signs_visible", "n_signs_damaged", "lacuna_density"],
+      "additionalProperties": false,
+      "properties": {
+        "source": { "type": "string", "enum": ["tablet_id", "signs"] },
+        "tablet_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "n_signs_total": { "type": "integer", "minimum": 0 },
+        "n_signs_visible": { "type": "integer", "minimum": 0 },
+        "n_signs_damaged": { "type": "integer", "minimum": 0 },
+        "lacuna_density": { "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }] }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["composition_id", "composition_name", "composition_type", "raw_score", "probability", "axis_scores"],
+        "additionalProperties": false,
+        "properties": {
+          "composition_id": { "type": "string" },
+          "composition_name": { "type": "string" },
+          "composition_type": { "type": "string", "enum": ["specific_composition", "curriculum"] },
+          "raw_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "probability": { "type": "number", "minimum": 0, "maximum": 1 },
+          "axis_scores": {
+            "type": "object",
+            "required": ["sign2vec_centroid", "chunk_overlap"],
+            "additionalProperties": false,
+            "properties": {
+              "sign2vec_centroid": {
+                "type": "object",
+                "required": ["cosine", "applicable"],
+                "additionalProperties": false,
+                "properties": {
+                  "cosine": { "type": "number" },
+                  "applicable": { "type": "boolean" }
+                }
+              },
+              "chunk_overlap": {
+                "type": "object",
+                "required": ["shared_canonical_chunks", "canonical_chunks_count", "ratio", "applicable"],
+                "additionalProperties": false,
+                "properties": {
+                  "shared_canonical_chunks": { "type": "integer", "minimum": 0 },
+                  "canonical_chunks_count": { "type": "integer", "minimum": 0 },
+                  "ratio": { "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }] },
+                  "applicable": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "uncertainty": {
+      "type": "object",
+      "required": ["composition_entropy", "restoration_marginalization_applied", "restored_positions_used", "n_signs_with_embedding", "max_probability"],
+      "additionalProperties": false,
+      "properties": {
+        "composition_entropy": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Shannon entropy (bits) of the probability distribution. 0 = certain, log2(n_compositions) = uniform."
+        },
+        "restoration_marginalization_applied": { "type": "boolean" },
+        "restored_positions_used": { "type": "integer", "minimum": 0 },
+        "n_signs_with_embedding": { "type": "integer", "minimum": 0 },
+        "max_probability": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["chunk_index_loaded", "sign_embeddings_loaded", "signs_cache_loaded"],
+      "additionalProperties": false,
+      "properties": {
+        "chunk_index_loaded": { "type": "boolean" },
+        "sign_embeddings_loaded": { "type": "boolean" },
+        "signs_cache_loaded": { "type": "boolean" }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
