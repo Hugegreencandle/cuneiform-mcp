@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/score_tablet_completeness.schema.json",
+  "title": "score_tablet_completeness data payload",
+  "description": "v0.34.0 fragment-vs-composition completeness estimator. Given a query fragment and a composition (explicit or inferred via identify_composition), returns sign_count_ratio + chunk_coverage_ratio against the composition's canonical-chunk backbone (length-20 hashes appearing in ≥2 exemplars). Useful for prioritizing reconstruction effort. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "query_tablet_id",
+    "composition",
+    "metrics",
+    "preserved_chunk_hashes",
+    "missing_chunk_hashes",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "query_tablet_id": { "type": "string" },
+    "composition": {
+      "type": "object",
+      "required": [
+        "source",
+        "composition_id",
+        "composition_name",
+        "inferred_confidence",
+        "inferred_rationale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["explicit", "inferred", "unresolved"],
+          "description": "'explicit' = caller-supplied composition_id. 'inferred' = identify_composition's top candidate (with confidence ≥ fallback_min). 'unresolved' = neither path succeeded — metrics will be null."
+        },
+        "composition_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "composition_name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "inferred_confidence": { "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }] },
+        "inferred_rationale": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "sign_count_ratio",
+        "chunk_coverage_ratio",
+        "chunks_hosted_count",
+        "canonical_chunks_count",
+        "query_sign_count",
+        "largest_exemplar_id",
+        "largest_exemplar_sign_count",
+        "lacuna_density"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sign_count_ratio": {
+          "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }],
+          "description": "query.sign_count / largest_exemplar.sign_count, clamped to [0,1]. null if signs cache unavailable or composition unresolved."
+        },
+        "chunk_coverage_ratio": {
+          "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }],
+          "description": "Fraction of the composition's canonical-chunk backbone (length-20 hashes in ≥2 exemplars) that the query hosts. null if chunk index unavailable or composition has no canonical chunks."
+        },
+        "chunks_hosted_count": { "type": "integer", "minimum": 0 },
+        "canonical_chunks_count": { "type": "integer", "minimum": 0 },
+        "query_sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+        "largest_exemplar_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "largest_exemplar_sign_count": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "type": "null" }] },
+        "lacuna_density": {
+          "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }],
+          "description": "Fraction of query tokens that are X/x/? (damage markers). High value indicates a partially-readable fragment."
+        }
+      }
+    },
+    "preserved_chunk_hashes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Canonical chunks the query hosts. Empty unless include_chunk_lists=true."
+    },
+    "missing_chunk_hashes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Canonical chunks the query does NOT host. Empty unless include_chunk_lists=true."
+    },
+    "index_stats": {
+      "type": "object",
+      "required": ["chunk_index_loaded", "signs_cache_loaded", "exemplars_with_chunks", "exemplars_with_signs"],
+      "additionalProperties": false,
+      "properties": {
+        "chunk_index_loaded": { "type": "boolean" },
+        "signs_cache_loaded": { "type": "boolean" },
+        "exemplars_with_chunks": { "type": "integer", "minimum": 0 },
+        "exemplars_with_signs": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

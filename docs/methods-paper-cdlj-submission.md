@@ -574,6 +574,26 @@ The §3.11 NJ stemma plus the §3.20 rooting layer together produce the standard
 
 ---
 
+### 3.21 Fragment-vs-Composition Completeness (v0.34)
+
+The corpus's heavily-fragmentary witness inventory (∼45% of transliterated tablets are partial fragments by tablet-count) creates a recurring practical question: given a fragment, what fraction of the original composition does it preserve? v0.34 operationalizes this with `score_tablet_completeness`, returning two metrics that DO NOT measure the same thing and must not be conflated.
+
+**Two metrics, two semantics.**
+
+*sign_count_ratio* = query.sign_count / largest_exemplar.sign_count, clamped to [0,1]. This is a **physical-size proxy** — how big is this fragment relative to the largest known witness? It ceilings out at 1.0 when the query is larger than the target composition's largest exemplar, which can happen when an explicit composition_id override mis-routes a large fragment to a small-exemplar composition (see below).
+
+*chunk_coverage_ratio* = |query_chunks ∩ canonical_chunks| / |canonical_chunks|, where `canonical_chunks` is the set of length-20 chunk hashes appearing in ≥2 of the composition's registry exemplars. This is the **structural-fit metric** — what fraction of the composition's structural backbone does this fragment host? The ≥2 threshold strips single-witness noise.
+
+**The dissociation matters.** K.5896 vs Mīs pî produces sign_count_ratio=0.488 and chunk_coverage=0.974 (148/152 canonical chunks hosted). K.5896 vs Šurpu — an unrelated composition — produces sign_count_ratio=1.000 (K.5896 dwarfs both Šurpu exemplars) and chunk_coverage=0.000 (zero of Šurpu's 31 canonical chunks). Reporting only sign_count_ratio would misrepresent K.5896 as a complete Šurpu witness; chunk_coverage exposes the misclassification immediately.
+
+**Empirical correction to §3.7.3 framing.** The audit's T1 originally asserted K.5896 → sign_count_ratio=1.0 because the methods paper centers Mīs pî discussion on K.5896. The test failed: K.5896 has 1,881 signs but **K.2987.B has 3,853 signs** — twice as large. K.5896 is the most-cited Mīs pî manuscript, not the largest. Several §3.7.3 and §3.11 framings of K.5896 as the "dominant" or "centerpiece" Mīs pî witness should be qualified as "dominant by chunk-overlap network centrality, not by physical size."
+
+**Composition resolution.** The tool resolves the target composition either explicitly (caller-supplied `composition_id`) or via identify_composition's top candidate when confidence ≥ fallback_min_confidence (default 0.3). Below the threshold, the tool returns `composition.source='unresolved'` and null metrics — preventing the "every fragment is 0% complete because we picked the wrong composition" failure mode.
+
+**Claim 41.** *Fragment-vs-composition completeness must be reported on two axes — physical-size proxy (sign_count_ratio) and structural-fit (chunk_coverage_ratio against the canonical-chunk backbone of length-20 hashes appearing in ≥2 exemplars) — because they dissociate strongly. K.5896 vs Šurpu produces sign_count_ratio=1.0 alongside chunk_coverage=0.0; conflating them would mis-classify K.5896 as a complete Šurpu witness. The canonical-chunk backbone is the structural invariant; the sign-count comparison is a physical-size proxy that ceilings out for large fragments. K.5896 is the most-cited but NOT the largest Mīs pî exemplar; K.2987.B (3,853 signs) is.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.
