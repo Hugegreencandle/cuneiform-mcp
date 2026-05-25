@@ -44,7 +44,7 @@ const L2 = 0.01;
 
 // ─── Labeled positives (methods paper) ─────────────────────────────────────
 
-const POSITIVE_PAIRS = [
+const METHODS_PAPER_POSITIVES = [
   { a: "K.5896", b: "K.9508", note: "Mīs pî sibling, §3.7.3" },
   { a: "K.5896", b: "K.6683", note: "v0.22 stemma sister, §3.11" },
   { a: "K.5896", b: "BM.45749", note: "Mīs pî sibling, §3.7.3" },
@@ -58,6 +58,57 @@ const POSITIVE_PAIRS = [
   { a: "BM.77056", b: "BM.45749", note: "āšipūtu curriculum" },
   { a: "Sm.1055", b: "K.7246", note: "Udug-ḫul chain, §3.7.2" },
 ];
+
+// v0.47 — Merge with persistent validation-resolutions store.
+// Reads ~/.cache/cuneiform-mcp/validation-resolutions.json (populated by
+// scripts/seed-validation-resolutions.mjs + record_validation_resolution MCP
+// tool). Union: methods-paper positives + store-positives, deduped by
+// canonical pair_id. Negatives are similarly merged with synthetic negatives
+// generated below (the synthetic-negative sampling step now SKIPS pairs
+// already in the store as negatives, to avoid sampling them twice).
+
+import { existsSync as _existsForStore, readFileSync as _readForStore } from "node:fs";
+import { join as _joinForStore } from "node:path";
+import { homedir as _homedirForStore } from "node:os";
+
+function canonicalPairKey(a, b) {
+  const [x, y] = [a, b].sort();
+  return `${x}↔${y}`;
+}
+
+function loadValidationStorePositives() {
+  const path = _joinForStore(
+    process.env.CUNEIFORM_MCP_CACHE_DIR || _joinForStore(_homedirForStore(), ".cache", "cuneiform-mcp"),
+    "validation-resolutions.json",
+  );
+  if (!_existsForStore(path)) return { positives: [], negatives: [] };
+  try {
+    const store = JSON.parse(_readForStore(path, "utf-8"));
+    const positives = (store.resolutions ?? [])
+      .filter((r) => r.verdict === "positive")
+      .map((r) => ({ a: r.tablet_a, b: r.tablet_b, note: r.rationale, source: r.source }));
+    const negatives = (store.resolutions ?? [])
+      .filter((r) => r.verdict === "negative")
+      .map((r) => ({ a: r.tablet_a, b: r.tablet_b, note: r.rationale, source: r.source }));
+    return { positives, negatives };
+  } catch {
+    return { positives: [], negatives: [] };
+  }
+}
+
+const _storeData = loadValidationStorePositives();
+const _seenPairKeys = new Set(METHODS_PAPER_POSITIVES.map((p) => canonicalPairKey(p.a, p.b)));
+const _storeOnlyPositives = _storeData.positives.filter((p) => {
+  const k = canonicalPairKey(p.a, p.b);
+  if (_seenPairKeys.has(k)) return false;
+  _seenPairKeys.add(k);
+  return true;
+});
+const POSITIVE_PAIRS = [...METHODS_PAPER_POSITIVES, ..._storeOnlyPositives];
+const _labeledNegativesFromStore = _storeData.negatives;
+console.error(`  positives from methods_paper: ${METHODS_PAPER_POSITIVES.length}`);
+console.error(`  positives from store (new):   ${_storeOnlyPositives.length}`);
+console.error(`  negatives from store:         ${_labeledNegativesFromStore.length}`);
 
 // ─── Mulberry32 (deterministic RNG) ────────────────────────────────────────
 
@@ -121,6 +172,17 @@ function chunkHostSet(tabletId) {
 const rng = mulberry32(RNG_SEED);
 const negativePairs = [];
 const seen = new Set();
+// v0.47 — Pre-populate negatives from the validation-resolutions store.
+// These are hand-labeled or audit-resolution negatives and skip the
+// synthetic-sampling step entirely. Synthetic sampling tops up to
+// N_NEGATIVES_TARGET from there.
+for (const n of _labeledNegativesFromStore) {
+  const key = n.a < n.b ? `${n.a}|${n.b}` : `${n.b}|${n.a}`;
+  if (seen.has(key)) continue;
+  seen.add(key);
+  negativePairs.push({ a: n.a, b: n.b, source: n.source ?? "store" });
+}
+console.error(`  Pre-loaded ${negativePairs.length} negatives from validation-resolutions store.`);
 let attempts = 0;
 const t0 = Date.now();
 

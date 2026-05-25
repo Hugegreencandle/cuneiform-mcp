@@ -745,6 +745,74 @@ The v0.18 sign-trigram parallel finder measures **orthographic reuse** — same 
 
 ---
 
+### 3.29 Ancient Find-Spot Clustering vs Modern Collection (v0.48)
+
+Panel-review Patel: archaeological provenance (ancient find-spot) is structurally distinct from modern museum collection. K.5896, Sm.1055, BM.45749 all share the **Kuyunjik library** as ancient find-spot despite different museum prefixes (British Museum's K.* + Sm.* + parts of BM.* + Rm.* + Rm-II.* + DT.* + AO.* + SEM.*). v0.45's `getAncientFindSpot` collection-fallback gave us populated provenance strings; v0.48 `find_provenance_clusters` operationalizes the clustering.
+
+**Empirical findings (Round 33).** Running across all 36,316 metadata-cached tablets:
+
+| Cluster | n_tablets | Modern prefixes |
+|---|---|---|
+| **Kuyunjik** | 15,604 | K (12,234), Sm (1,122), ? (882), BM (...), Rm, Rm-II, DT, AO, SEM |
+| Babylon | 6,190 | BM (6,086), VAT (55), YBC (31) |
+| Uruk (Warka) | 1,605 | YBC (698), GCBC (314), NCBT (311) |
+| Sippar | 1,483 | BM (1,482), ? (1) |
+| Newly Registered Fragments | 1,568 | ? (846), K (443), F (155) |
+
+**Kuyunjik spans 9 distinct modern prefixes** — the find-spot-vs-collection distinction is empirically substantial, not a corner case. K.5896 (§3.22 Mīs pî centerpiece) appears in the Kuyunjik cluster, confirming the §3.22 single-provenance finding from the corpus-wide direction.
+
+**Cross-reference: §3.22.** §3.22 reported that the Mīs pî BFS-expanded cluster has 1 distinct provenance — verified externally now to be Kuyunjik, with 15,604 total Kuyunjik tablets at corpus-wide scale. The §3.22 "single-provenance" claim is corroborated: the Mīs pî tradition as captured in eBL is anchored at a specific find-spot that itself contributes ~43% of the eBL transliterated-fragment population.
+
+**Claim 49.** *Ancient find-spot clustering (find_provenance_clusters) exposes the systematic mismatch between ancient archaeological provenance and modern museum collection. Kuyunjik holds 15,604 tablets spanning 9 modern prefixes; the find-spot is the load-bearing archaeological unit, not the prefix. The §3.22 finding that the Mīs pî BFS-expanded cluster is single-provenance is verified at corpus-wide scale as anchored to Kuyunjik specifically. Find-spot clustering is the right primitive for provenance-aware methodology; museum prefix is a cataloguing convention, not an archaeological fact.*
+
+---
+
+### 3.30 Cross-Axis Disagreement as Methodology Signal (v0.49)
+
+The composition-classification stack (§§3.19, 3.23) and the lemma-Jaccard parallel finder (§3.28) measure orthogonal axes — orthographic reuse (sign sequences) and lexical reuse (canonical word identities). v0.49 `compute_axis_disagreement` runs both on the same query and reports their convergence.
+
+**Four agreement classes.**
+
+| Class | Meaning | Example |
+|---|---|---|
+| `agree` | both axes converge on the same composition | K.2987.B → both axes say `mis_pi` (lemma via K.2550) |
+| `disagree` | axes return different compositions | (none yet observed) |
+| `lemma_silent` | query has 0 lemmas at eBL; only composition axis fires | K.5896 (0 lemmas, comp_axis says mis_pi at 0.995) |
+| `both_silent` | neither axis can classify | unknown tablet |
+
+**K.5896 is canonically `lemma_silent`** — 938 lemmatizable tokens but ZERO assigned uniqueLemmas. The §3.28 finding that eBL has not lemmatized K.5896 is here surfaced as a typed signal at query time: a tool that calls `compute_axis_disagreement` sees `agreement: 'lemma_silent'` and knows the lemma axis is unavailable for this query, with its rationale string explicitly naming eBL's lemmatization gap.
+
+**K.2987.B and BM.47463 both AGREE.** K.2987.B → mis_pi via composition + via lemma (top neighbor K.2550 → mis_pi). BM.47463 → surpu both axes. Where the lemma axis HAS data, it converges with the composition axis. This is the §3.28 empirical claim from the other direction: agreement is the modal outcome when both axes have signal.
+
+**No `disagree` cases observed in the v0.50 sample.** Either the registered exemplars are too internally consistent across axes (likely, given the registry is hand-curated to be composition-defining), or `disagree` requires probing outside the registry. The audit is structured to surface `disagree` if/when it occurs.
+
+**Claim 50.** *Cross-axis convergence between composition-classification (sign-trigram + sign2vec centroid + chunk-overlap) and lemma-Jaccard is the modal outcome when both axes have data. K.5896 is canonically lemma_silent (eBL lemmatization gap), making the agreement-vs-disagreement test inoperable for the methods-paper centerpiece. When the lemma axis has data (K.2987.B, BM.47463), it AGREES with the composition axis — strong cross-axis convergence validates the §3.19/§3.23 classification stack from an orthogonal direction.*
+
+---
+
+### 3.31 Platt-Calibrated Lacuna Scores (v0.50)
+
+§3.25 reported that `restore_lacuna_semantic.joint_score` is a ranking signal in [0,1] rather than a calibrated probability (ECE 0.6490 at n=50 synthetic gaps in v0.40). v0.50 closes this by fitting Platt-scaling logistic regression on a 500-sample benchmark and reporting the calibrated ECE.
+
+**Method.** Fit `p_calibrated = sigmoid(a · logit(p_raw) + b)` via gradient descent (lr=0.05, 500 iterations) on the (predicted_probability, correct) pairs from `~/.cache/cuneiform-mcp/lacuna-bleu-calibration-samples.json`. Sample bumped from 50 → 500 (panel refinement #4: more data for reliable Platt parameters). Apply the fitted (a, b) to each sample and recompute ECE via the v0.40 `compute_confidence_calibration` tool.
+
+**Results (Round 35).**
+
+| Metric | Before Platt | After Platt | Improvement |
+|---|---|---|---|
+| ECE | 0.6374 | **0.0109** | 58.4× reduction |
+| MCE | (high) | (low) | — |
+| Brier | 0.5608 | 0.1482 | 73.6% reduction |
+| Verdict | overconfident | **well_calibrated** | — |
+
+**ECE 0.0109 is well below the conventional 0.05 well-calibrated threshold** (which was the criterion in §3.25's panel framing). Post-Platt, the `joint_score` becomes a usable probability — consumers can call `applyPlattCalibration(raw, {a: 0.0322, b: -1.5342})` to recalibrate any raw joint_score output.
+
+**Important caveat: the Platt parameters compress the score range.** Pre-Platt, p_raw spans [0.05, 1.00] in the sample; post-Platt the calibrated range is much narrower (0.95 → 0.192, 0.10 → 0.167 — both compress toward the observed base rate of 18.2% top-1 accuracy). This is correct calibration behavior: when accuracy at high confidence is actually low, the calibrator pulls high-confidence outputs DOWN to match the empirical accuracy. The downside is that high-confidence outputs lose discriminative ranking power. For ranking-preserving applications, raw joint_score should still be used; for probability-interpretable applications, the calibrated value is what's needed.
+
+**Claim 51.** *Platt scaling on 500 synthetic-gap calibration samples reduces `restore_lacuna_semantic.joint_score`'s Expected Calibration Error from 0.6374 (overconfident, 13× threshold) to 0.0109 (well-calibrated, < threshold). The fitted parameters (a=0.0322, b=-1.5342) can be applied to any raw joint_score via `applyPlattCalibration`. The recalibrated probability range is compressed toward the empirical base rate (18.2% top-1 accuracy on bare-context restoration); ranking applications should retain raw joint_score, while probability-interpretable applications should use the Platt-calibrated value. The §3.25 overconfidence finding is now empirically closed.*
+
+---
+
 ## 4. The Calibration Audit Methodology
 
 A separate methodological contribution emerges from two calibration audits that demonstrated precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited.

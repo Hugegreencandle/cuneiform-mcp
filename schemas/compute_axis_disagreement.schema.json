@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/compute_axis_disagreement.schema.json",
+  "title": "compute_axis_disagreement data payload",
+  "description": "v0.49.0 cross-axis agreement audit. Compares identify_composition (sign-trigram + sign2vec centroid + chunk-overlap) against find_lemma_parallel (lemma-Jaccard, second-hop composition inference via top neighbor). Methods §3.30, Claim 50.",
+  "type": "object",
+  "required": ["query", "composition_axis", "lemma_axis", "agreement", "rationale", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["tablet_id", "top_k"],
+      "additionalProperties": false,
+      "properties": {
+        "tablet_id": { "type": "string" },
+        "top_k": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "composition_axis": {
+      "type": "object",
+      "required": ["top_composition_id", "top_composition_name", "confidence", "candidates"],
+      "additionalProperties": false,
+      "properties": {
+        "top_composition_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "top_composition_name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "confidence": { "anyOf": [{ "type": "number", "minimum": 0, "maximum": 1 }, { "type": "null" }] },
+        "candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["composition_id", "confidence"],
+            "additionalProperties": false,
+            "properties": {
+              "composition_id": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "lemma_axis": {
+      "type": "object",
+      "required": ["n_lemmas", "cache_loaded", "top_neighbors", "inferred_composition_id", "inferred_composition_name", "inferred_via_neighbor"],
+      "additionalProperties": false,
+      "properties": {
+        "n_lemmas": { "type": "integer", "minimum": 0 },
+        "cache_loaded": { "type": "boolean" },
+        "top_neighbors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tablet_id", "jaccard"],
+            "additionalProperties": false,
+            "properties": {
+              "tablet_id": { "type": "string" },
+              "jaccard": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "inferred_composition_id": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "inferred_composition_name": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "inferred_via_neighbor": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+      }
+    },
+    "agreement": {
+      "type": "string",
+      "enum": ["agree", "lemma_silent", "disagree", "both_silent"]
+    },
+    "rationale": { "type": "string" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

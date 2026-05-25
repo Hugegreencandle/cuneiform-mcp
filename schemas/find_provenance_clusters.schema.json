@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/find_provenance_clusters.schema.json",
+  "title": "find_provenance_clusters data payload",
+  "description": "v0.48.0 ancient find-spot clustering (panel-ask Patel + §3.29). Groups tablets by ancient_find_spot (which falls back to museum collection via v0.45 fix) and surfaces clusters with their period + collection-prefix distributions. spans_multiple_prefixes flag exposes find-spots whose tablets are split across multiple modern museum prefixes — the panel's empirical 'find-spot ≠ collection' thesis. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["query", "clusters", "n_clusters", "n_tablets_total", "n_tablets_with_provenance", "n_tablets_null_provenance", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["site_filter", "min_tablets", "include_null_provenance", "top_k_per_cluster"],
+      "additionalProperties": false,
+      "properties": {
+        "site_filter": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "min_tablets": { "type": "integer", "minimum": 1 },
+        "include_null_provenance": { "type": "boolean" },
+        "top_k_per_cluster": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "clusters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cluster_id", "n_tablets", "top_tablets", "period_distribution", "collection_prefix_distribution", "spans_multiple_prefixes"],
+        "additionalProperties": false,
+        "properties": {
+          "cluster_id": { "type": "string" },
+          "n_tablets": { "type": "integer", "minimum": 1 },
+          "top_tablets": { "type": "array", "items": { "type": "string" } },
+          "period_distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["period", "count"],
+              "additionalProperties": false,
+              "properties": {
+                "period": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          },
+          "collection_prefix_distribution": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["prefix", "count"],
+              "additionalProperties": false,
+              "properties": {
+                "prefix": { "type": "string" },
+                "count": { "type": "integer", "minimum": 1 }
+              }
+            }
+          },
+          "spans_multiple_prefixes": { "type": "boolean" }
+        }
+      }
+    },
+    "n_clusters": { "type": "integer", "minimum": 0 },
+    "n_tablets_total": { "type": "integer", "minimum": 0 },
+    "n_tablets_with_provenance": { "type": "integer", "minimum": 0 },
+    "n_tablets_null_provenance": { "type": "integer", "minimum": 0 },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

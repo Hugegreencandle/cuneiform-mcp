@@ -123,6 +123,15 @@ function persistCache(cache: MetadataCache): void {
  *
  * Use isInCache() to distinguish "never queried" from "queried, no data".
  */
+/**
+ * v0.48 — Return the full cache as a plain object. Used by tools that
+ * iterate all tablets (find_provenance_clusters etc.). Returns an empty
+ * object when the cache file is missing.
+ */
+export function loadAllMetadata(): Record<string, FragmentMetadata | null> {
+  return loadCache();
+}
+
 export function getFragmentMetadata(tabletId: string): FragmentMetadata | null {
   const cache = loadCache();
   const v = cache[tabletId];

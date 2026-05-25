@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/recalibrate_lacuna_scores.schema.json",
+  "title": "recalibrate_lacuna_scores data payload",
+  "description": "v0.50.0 Platt scaling on restore_lacuna_semantic joint_score. Closes §3.25 overconfidence finding (ECE 0.6490 from v0.40 benchmark). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["source_file", "n_samples", "before", "after", "improvement", "recommendation", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "source_file": { "type": "string" },
+    "n_samples": { "type": "integer", "minimum": 0 },
+    "before": { "$ref": "#/$defs/calibState" },
+    "after": {
+      "allOf": [
+        { "$ref": "#/$defs/calibState" },
+        {
+          "type": "object",
+          "required": ["platt_a", "platt_b"],
+          "properties": {
+            "platt_a": { "type": "number" },
+            "platt_b": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "improvement": {
+      "type": "object",
+      "required": ["ece_reduction", "ece_reduction_factor"],
+      "additionalProperties": false,
+      "properties": {
+        "ece_reduction": { "type": "number" },
+        "ece_reduction_factor": { "type": "number" }
+      }
+    },
+    "recommendation": { "type": "string" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "calibState": {
+      "type": "object",
+      "required": ["expected_calibration_error", "max_calibration_error", "brier_score", "mean_predicted", "observed_accuracy", "verdict"],
+      "properties": {
+        "expected_calibration_error": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_calibration_error": { "type": "number", "minimum": 0, "maximum": 1 },
+        "brier_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "mean_predicted": { "type": "number", "minimum": 0, "maximum": 1 },
+        "observed_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "verdict": { "type": "string" },
+        "platt_a": { "type": "number" },
+        "platt_b": { "type": "number" }
+      }
+    }
+  }
+}
