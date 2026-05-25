@@ -1,0 +1,188 @@
+/* Print-friendly CSS for JOHD submission PDF generation via browser print */
+
+@page {
+  size: A4;
+  margin: 2.5cm 2cm 2.5cm 2cm;
+}
+
+body {
+  font-family: "Charter", "Georgia", "Cambria", serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  max-width: 720px;
+  margin: 2em auto;
+  padding: 0 1em;
+  color: #1a1a1a;
+  background: #fff;
+  text-rendering: optimizeLegibility;
+}
+
+h1 {
+  font-size: 18pt;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+  line-height: 1.25;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-size: 14pt;
+  font-weight: 700;
+  margin-top: 1.6em;
+  margin-bottom: 0.5em;
+  page-break-after: avoid;
+  border-bottom: 1.5pt solid #888;
+  padding-bottom: 0.15em;
+}
+
+h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  margin-top: 1.3em;
+  margin-bottom: 0.4em;
+  page-break-after: avoid;
+  color: #222;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 700;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+  page-break-after: avoid;
+}
+
+p {
+  margin: 0.6em 0;
+  text-align: justify;
+  orphans: 3;
+  widows: 3;
+  hyphens: auto;
+}
+
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+code {
+  font-family: "SF Mono", "Monaco", "Consolas", "Liberation Mono", monospace;
+  font-size: 0.9em;
+  background: #f4f4f4;
+  padding: 0.05em 0.3em;
+  border-radius: 2pt;
+}
+
+pre {
+  background: #f6f6f6;
+  border: 0.5pt solid #ddd;
+  padding: 0.7em 0.9em;
+  border-radius: 3pt;
+  overflow-x: auto;
+  font-size: 9pt;
+  line-height: 1.35;
+  page-break-inside: avoid;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+blockquote {
+  margin: 1em 0 1em 1.5em;
+  padding-left: 1em;
+  border-left: 2.5pt solid #aaa;
+  color: #444;
+  font-style: italic;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 0.8em 0;
+  font-size: 10pt;
+  width: 100%;
+  page-break-inside: avoid;
+}
+
+th, td {
+  border: 0.5pt solid #aaa;
+  padding: 4pt 8pt;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: #eaeaea;
+  font-weight: 700;
+}
+
+tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+hr {
+  border: none;
+  border-top: 0.5pt solid #ccc;
+  margin: 1.5em 0;
+}
+
+ul, ol {
+  margin: 0.5em 0;
+  padding-left: 1.4em;
+}
+
+li {
+  margin: 0.25em 0;
+}
+
+a {
+  color: #003366;
+  text-decoration: none;
+  border-bottom: 0.4pt dotted #999;
+}
+
+a:hover {
+  border-bottom-style: solid;
+}
+
+/* Inline citations stand out */
+em + em {
+  margin-left: 0.2em;
+}
+
+/* Claim callouts */
+p:has(> strong:first-child) strong {
+  color: #1a3556;
+}
+
+/* Page-break utility for major sections */
+h2 {
+  page-break-before: auto;
+}
+
+/* "Findings" section is large; allow page-breaks */
+.cuneiform-glyph {
+  font-family: "Noto Sans Cuneiform", "Cuneiform Composite", serif;
+}
+
+/* Footnote / superscript styling */
+sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+/* Print-only adjustments */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    font-size: 10pt;
+  }
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+  }
+  pre, table, blockquote {
+    page-break-inside: avoid;
+  }
+}
