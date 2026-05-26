@@ -2296,12 +2296,19 @@ server.registerTool(
         .describe(
           "When true, drop candidates that don't share at least one genre category with the target (CANONICAL is excluded since it leaks to every pair). Helpful for separating same-composition parallels from coincidentally text-similar fragments. Default false.",
         ),
+      metric: z
+        .enum(["jaccard", "overlap"])
+        .optional()
+        .describe(
+          "Similarity metric. 'jaccard' (default) = |∩|/|∪| — the original v0.4 method, validated at 22% recall@15. 'overlap' = |∩|/min(|F|,|C|) — Szymkiewicz-Simpson overlap coefficient, the metric used in Simonjetz et al. 2024 (LREC-COLING). Overlap handles fragment-vs-chapter size asymmetry better than Jaccard; useful when comparing short fragments against large compositions. Default 'jaccard' for compatibility with prior calibration audits.",
+        ),
     },
   },
-  async ({ museum_number, top_k, filter_known_joins, require_genre_overlap }) => {
+  async ({ museum_number, top_k, filter_known_joins, require_genre_overlap, metric }) => {
     const k = top_k ?? 15;
     const filterJoins = filter_known_joins === true;
     const requireGenre = require_genre_overlap === true;
+    const chosenMetric: "jaccard" | "overlap" = metric ?? "jaccard";
     const SCHEMA = schemaId("find_parallel_text");
     const normalize = (s: string): string => {
       const m = s.match(/^([A-Za-z]+)\.(\d+[\d\-,]*)([A-Za-z]+)$/);
@@ -2309,7 +2316,7 @@ server.registerTool(
     };
     const targetId = normalize(museum_number.trim());
 
-    const { loadSignsIndex, trigramsFromSigns, trigramsOrderedFromSigns, jaccard } = await import(
+    const { loadSignsIndex, trigramsFromSigns, trigramsOrderedFromSigns, jaccard, similarityScore } = await import(
       "./signsIndex.js"
     );
     const idx = await loadSignsIndex();
@@ -2405,7 +2412,10 @@ server.registerTool(
     const hits: Hit[] = [];
     for (const [mn, candSet] of idx.fragments) {
       if (mn === targetEnriched.museumNumber) continue;
-      const j = jaccard(targetTrigrams, candSet);
+      // v0.60: route through similarityScore so --metric=overlap can swap the
+      // numerator/denominator without rewriting the loop. Jaccard remains the
+      // default to preserve compatibility with prior calibration audits.
+      const j = similarityScore(targetTrigrams, candSet, chosenMetric);
       if (j === 0) continue;
       // Manually compute intersection + sample. Iterate the smaller set
       // for performance (same trick as the jaccard helper).

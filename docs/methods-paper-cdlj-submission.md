@@ -1092,7 +1092,29 @@ Supplementary validation documents in the repository:
 
 ---
 
-## 7. Conclusion
+## 7. Related Work
+
+The methodologically closest published work is Simonjetz et al. (2024), the eBL team's own n-gram-based fragment-matching system, which establishes the baseline approach for sign-token matching on this corpus. That system applies a binary bag-of-n-grams representation over ABZ-numbered sign sequences with overlap-coefficient similarity (Szymkiewicz–Simpson), optionally weighted by n-gram length and TF-IDF; the best configuration ([1,3]-grams with TF-IDF and length weighting) achieves Precision@3 of 0.94 on a synthetic 965-fragment test set drawn from 100 eBL manuscripts, and surfaced three previously unidentified Maqlû manuscripts (K.18050, Sm.1215, Sm.1852) when applied to the 27,000-fragment Fragmentarium.
+
+The present work extends that foundation along five orthogonal axes, each producing a separable contribution that the n-gram baseline does not address:
+
+1. **From supervised classification to unsupervised discovery.** Simonjetz et al. frame the task as chapter classification — given a known set of 159 chapters, assign each fragment to one. The present pipeline operates without a-priori chapter membership: `find_parallel_text` (§2) returns top-K candidate parallels for any input fragment whether or not its true chapter is in the registry, and `find_chunk_parallels` / `reconstruct_cluster` (§3) build manuscript-witness clusters bottom-up from sign-level similarity alone. This is the discovery case proper, complementary to but distinct from the classification case.
+
+2. **Orthographic-variant tolerance.** The 1-substitution fuzzy trigram axis (§3.4) handles the Akkadian orthographic variation pattern (e.g., `lemutta` written four ways in the manuscripts of Enūma Eliš I 44) that exact n-gram matching cannot capture. Simonjetz et al. explicitly leave systematic orthographic variation to future work; the fuzzy axis closes this gap with empirically validated 55% sibling rescue on the K.2798↔Si.776 case study and analogous cases.
+
+3. **Sub-tablet primary objects.** Where the n-gram baseline treats whole tablets as the unit of comparison, `find_chunk_parallels` (§3.9) surfaces maximal matched-position runs as first-class objects with `host_genres_spanned` and `chunk_start` metadata. This recovered the BM.77056 *āšipūtu* curriculum via 12 distinct sub-genres on a single seed — a finding that whole-tablet matching cannot reach.
+
+4. **Multi-axis Bayesian fusion with held-out calibration.** The five-axis architecture (lexical, fuzzy, thematic, structural, scribal) plus logistic-regression fusion (§3.15) provides per-feature contribution decomposition (`scribal=+1.46 log-odds, thematic=+0.94, ...`) and calibrated P(parallel) outputs. Calibration is validated via held-out k-fold (mean ECE 0.0014–0.0039 across axes), distinguishing genuine generalization from in-sample memorization — a discipline that single-method approaches cannot apply.
+
+5. **Calibration as a first-class methodological contribution.** The honest-null framing (§3.37) — applying Platt scaling to v0.29's logistic regression yielded only marginal improvement (ECE 0.0165 → 0.0140), confirming the model class was already calibration-disciplined — establishes a documented decision rule for when recalibration is appropriate and when it is not. The methodologically-agnostic run-bonus calibration (§3.5) demonstrates that the same calibration pattern lifts both exact and fuzzy trigram methods on the same K.5896 + K.2761 cross-subseries discovery, providing evidence that calibration discipline transfers across method families.
+
+One specific improvement the Simonjetz baseline suggests we adopt: their choice of overlap coefficient (|F ∩ C| / min(|F|, |C|)) over Jaccard (|F ∩ C| / |F ∪ C|) handles the fragment-vs-chapter size asymmetry that motivates this paper's run-bonus calibration in §3.5. Beginning with v0.60, `find_parallel_text` exposes overlap coefficient as an opt-in scorer alongside the default Jaccard, enabling direct head-to-head comparison at the same metric on subsequent calibration audits.
+
+The two systems are complementary rather than competitive: Simonjetz et al. (2024) is the right tool for high-precision classification against a known chapter set; the present pipeline is the right tool for unsupervised discovery, manuscript-witness clustering, sub-tablet parallel detection, and calibrated-probability fusion when the chapter set itself is being expanded or revised.
+
+---
+
+## 8. Conclusion
 
 This paper documents a four-axis computational discovery pipeline operating on the eBL cuneiform corpus. The pipeline's primary substantive contribution is the empirical reconstruction of the late-Mesopotamian *āšipūtu* (exorcist) library — long recognized from textual evidence — as a 100+ tablet manuscript-witness cluster recoverable from pure-orthographic clustering at the sign-trigram level. The paper's primary methodological contribution is the demonstration that exact lexical methods at conventional thresholds systematically under-recover wide-transmission compositions, and that this under-recovery is calibration-limited rather than signal-limited: a one-line length-factor change lifted lacuna-restoration top-1 precision from 22.9% to 91.7%, and a threshold audit converged the bi-orphan discovery surface from 167 candidates to 2. A third contribution demonstrates that the run-bonus calibration pattern is methodology-agnostic, applying equivalently to fuzzy and exact methodologies and surfacing the same K.5896 + K.2761 cross-subseries discovery from both.
 
@@ -1121,6 +1143,8 @@ Mu, J., Bhat, S., and Viswanath, P. 2018. "All-but-the-Top: Simple and Effective
 Reiner, E., and Pingree, D. 1998–2005. *Babylonian Planetary Omens* 1–4. Leiden: Brill. (Cuneiform Monographs.)
 
 Sahlgren, M. 2005. "An Introduction to Random Indexing." Paper presented at the Methods and Applications of Semantic Indexing Workshop at the 7th International Conference on Terminology and Knowledge Engineering (TKE).
+
+Simonjetz, F., Laasonen, J., Cobanoglu, Y., Fraser, A., and Jiménez, E. 2024. "Reconstruction of Cuneiform Literary Texts as Text Matching." In *Proceedings of LREC-COLING 2024*, pp. 13712–13721. ELRA Language Resource Association.
 
 Walker, C., and Dick, M. 2001. *The Induction of the Cult Image in Ancient Mesopotamia: The Mesopotamian Mīs Pî Ritual*. Helsinki: Neo-Assyrian Text Corpus Project. (State Archives of Assyria Literary Texts 1.)
 

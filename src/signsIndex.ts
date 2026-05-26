@@ -78,6 +78,37 @@ export function jaccard(a: Set<string>, b: Set<string>): number {
   return intersect / (a.size + b.size - intersect);
 }
 
+// v0.60 alternative similarity metric: overlap coefficient (Szymkiewicz-
+// Simpson). Normalizes by the size of the smaller set rather than the
+// union. Simonjetz et al. 2024 demonstrated this handles fragment-vs-
+// chapter size asymmetry better than Jaccard on cuneiform classification;
+// exposed here as an opt-in scorer for direct head-to-head calibration
+// against their published baseline.
+//
+// overlap(a, b) = |a ∩ b| / min(|a|, |b|)
+//
+// Returns 0 if either set is empty or they share no elements; returns
+// 1 if the smaller set is fully contained in the larger.
+export function overlapCoefficient(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 || b.size === 0) return 0;
+  const [small, big] = a.size <= b.size ? [a, b] : [b, a];
+  let intersect = 0;
+  for (const x of small) if (big.has(x)) intersect++;
+  if (intersect === 0) return 0;
+  return intersect / small.size;
+}
+
+// Dispatcher used by tools that want to switch metrics via a parameter.
+// New code should prefer calling jaccard / overlapCoefficient directly;
+// this helper exists so the MCP tool layer can accept a "metric" arg.
+export function similarityScore(
+  a: Set<string>,
+  b: Set<string>,
+  metric: "jaccard" | "overlap" = "jaccard",
+): number {
+  return metric === "overlap" ? overlapCoefficient(a, b) : jaccard(a, b);
+}
+
 export type SignsRecord = { _id: string; signs: string };
 export type SignsIndex = {
   fragments: Map<string, Set<string>>; // museum_number -> trigram set
