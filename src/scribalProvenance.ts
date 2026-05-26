@@ -32,6 +32,7 @@
 // the `any` type with the real interface and tighten the accessors.
 
 import { comparePeriods } from "./periodChronology.js";
+import type { TabletProvenanceInput } from "./scribalProvenanceAdapter.js";
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -108,12 +109,12 @@ function extractPeriod(entry: unknown): string | null {
  * defensive — missing arrays, malformed entries, and stringly-typed
  * fields are tolerated.
  *
- * @param tablet The tablet metadata record. Typed `any` pending
- *               confirmation of the canonical TabletMetadata interface
- *               (see TODO at top of file).
+ * @param tablet The tablet provenance input record (adapter-built from
+ *               chunkIndex co-occurrence + inverted citation graph).
+ *               See scribalProvenanceAdapter.ts for construction.
  */
 export function extractScribalProvenance(
-  tablet: any /* TabletMetadata — see TODO */,
+  tablet: TabletProvenanceInput | null | undefined,
 ): TabletProvenance {
   if (tablet == null || typeof tablet !== "object") {
     return {
@@ -154,10 +155,14 @@ export function extractScribalProvenance(
   //    first_citation_target = the earliest citing tablet's ID.
   let first_citation_target: string | null = null;
   let first_citation_period: string | null = null;
+  // tablet.commentary[] is a legacy field name still tolerated for callers
+  // that haven't migrated to TabletProvenanceInput (.citations[]). Access
+  // defensively via index signature.
+  const legacyCommentary = (tablet as unknown as Record<string, unknown>).commentary;
   const citations = Array.isArray(tablet.citations)
     ? tablet.citations
-    : Array.isArray(tablet.commentary)
-      ? tablet.commentary
+    : Array.isArray(legacyCommentary)
+      ? legacyCommentary
       : null;
   if (citations && citations.length > 0) {
     const sorted = [...citations].sort((a, b) => {
@@ -195,7 +200,7 @@ export function extractScribalProvenance(
  * they cannot be keyed.
  */
 export function buildScribalProvenanceIndex(
-  tablets: any[] /* TabletMetadata[] — see TODO */,
+  tablets: TabletProvenanceInput[],
 ): Map<string, TabletProvenance> {
   const out = new Map<string, TabletProvenance>();
   if (!Array.isArray(tablets)) return out;

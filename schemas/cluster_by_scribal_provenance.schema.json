@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/cluster_by_scribal_provenance.schema.json",
+  "title": "cluster_by_scribal_provenance data payload",
+  "description": "v0.58 two-tier scribal provenance clustering — port of wallet-fingerprint v0.7's funded_by / first_out_to separation back to cuneiform. Buckets tablets by shared first_copy_event (earliest manuscript witness, the 'scribal find-spot of the text') and/or shared first_citation_target (first commentary citing the tablet, the 'purpose-of-creation' signal). Optionally classifies a specific pair via tablet_id_a + tablet_id_b. Complements v0.48's find_provenance_clusters, which buckets by ancient geographic find-spot — this tool buckets by textual lineage event.",
+  "type": "object",
+  "required": [
+    "clusters_first_copy",
+    "clusters_first_citation",
+    "pair_classification",
+    "index_stats",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "clusters_first_copy": {
+      "type": "array",
+      "description": "Tablets bucketed by shared first_copy_event (earliest manuscript witness). Singletons dropped via min_members. Sorted by member-count desc.",
+      "items": {
+        "type": "object",
+        "required": ["key", "members"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The shared first_copy_event tablet ID."
+          },
+          "members": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tablet IDs whose earliest manuscript witness is `key`."
+          }
+        }
+      }
+    },
+    "clusters_first_citation": {
+      "type": "array",
+      "description": "Tablets bucketed by shared first_citation_target (first commentary citing them). Singletons dropped via min_members. Sorted by member-count desc.",
+      "items": {
+        "type": "object",
+        "required": ["key", "members"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "The shared first_citation_target commentary tablet ID."
+          },
+          "members": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Tablet IDs whose first citation lands on `key`."
+          }
+        }
+      }
+    },
+    "pair_classification": {
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["relationship", "a", "b"],
+          "additionalProperties": false,
+          "properties": {
+            "relationship": {
+              "type": "string",
+              "enum": [
+                "shared-copy-event",
+                "shared-citation-target",
+                "shared-both",
+                "different",
+                "unknown"
+              ],
+              "description": "Wallet-fingerprint v0.7 enum: shared-copy-event ≈ shared-funder; shared-citation-target ≈ shared-first-out; shared-both = strongest signal; different = both sides known but disjoint; unknown = at least one side missing data."
+            },
+            "a": {
+              "type": "string",
+              "description": "Tablet A (as passed in tablet_id_a)."
+            },
+            "b": {
+              "type": "string",
+              "description": "Tablet B (as passed in tablet_id_b)."
+            }
+          }
+        }
+      ],
+      "description": "Null unless both tablet_id_a and tablet_id_b were provided. When provided, classifies the pair's provenance relationship."
+    },
+    "index_stats": {
+      "type": "object",
+      "required": [
+        "tablets_examined",
+        "witnesses_present",
+        "citations_present",
+        "metadata_coverage_pct"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tablets_examined": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total tablets in the per-tablet provenance index."
+        },
+        "witnesses_present": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tablets whose first_copy_event resolved to a non-null ID."
+        },
+        "citations_present": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Tablets whose first_citation_target resolved to a non-null ID."
+        },
+        "metadata_coverage_pct": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percent of examined tablets with at least one provenance signal (witness OR citation). Low coverage → low cluster yield; surface a warning."
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -106,6 +106,16 @@ import {
   findProvenanceClusters,
 } from "./findProvenanceClusters.js";
 import {
+  buildFirstCopyClusters,
+  buildFirstCitationClusters,
+  classifyTabletProvenance,
+  extractScribalProvenance,
+  type TabletProvenance,
+} from "./scribalProvenance.js";
+import {
+  buildTabletProvenanceContext,
+} from "./scribalProvenanceAdapter.js";
+import {
   computeAxisDisagreement,
 } from "./computeAxisDisagreement.js";
 import {
@@ -6440,6 +6450,189 @@ server.registerTool(
   },
 );
 
+// ─── v0.58 — cluster_by_scribal_provenance (two-tier wallet-fingerprint port) ─
+
+server.registerTool(
+  "cluster_by_scribal_provenance",
+  {
+    description:
+      "Cluster tablets by shared first_copy_event (earliest manuscript witness) or first_citation_target (first commentary citing the tablet). Optionally classify a specific pair via tablet_id_a + tablet_id_b. Port of wallet-fingerprint v0.7's funded_by / first_out_to two-tier methodology back to cuneiform: where v0.48 find_provenance_clusters buckets by ANCIENT GEOGRAPHIC find-spot (Kuyunjik / Sippar / Nineveh), this tool buckets by TEXTUAL-LINEAGE event — first_copy_event = the 'scribal find-spot of the text-as-text' (earliest manuscript witness via chunkIndex co-occurrence + period chronology), first_citation_target = the 'purpose-of-creation' signal (first commentary or derivative quoting this tablet, inverted from buildCitationGraph). Pair classification mirrors wallet-fingerprint's enum: shared-copy-event / shared-citation-target / shared-both / different / unknown.",
+    inputSchema: {
+      min_members: z
+        .number()
+        .int()
+        .min(2)
+        .max(100)
+        .optional()
+        .describe("Drop clusters with fewer than this many members. Default 2 (the wallet-fingerprint default — drops singletons but keeps every shared-event pair)."),
+      mode: z
+        .enum(["first_copy", "first_citation", "both"])
+        .optional()
+        .describe("Which cluster space to compute. 'first_copy' = earliest-manuscript-witness clusters only; 'first_citation' = first-commentary clusters only; 'both' = compute both (default)."),
+      tablet_id_a: z
+        .string()
+        .optional()
+        .describe("First tablet ID for pair classification. Pair classification runs only if BOTH tablet_id_a AND tablet_id_b are provided."),
+      tablet_id_b: z
+        .string()
+        .optional()
+        .describe("Second tablet ID for pair classification."),
+      top_k_clusters: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .optional()
+        .describe("Cap on returned clusters per cluster space, sorted by member-count desc. Default 50, hard cap 500."),
+    },
+  },
+  async ({ min_members, mode, tablet_id_a, tablet_id_b, top_k_clusters }) => {
+    const SCHEMA = schemaId("cluster_by_scribal_provenance");
+    const warnings: string[] = [];
+    try {
+      const minMembers = Math.max(2, Math.min(100, min_members ?? 2));
+      const topK = Math.max(1, Math.min(500, top_k_clusters ?? 50));
+      const runMode = mode ?? "both";
+
+      const inputs = buildTabletProvenanceContext();
+      // Extract per-tablet TabletProvenance via scribalProvenance.extractScribalProvenance.
+      const index = new Map<string, TabletProvenance>();
+      let witnessesPresent = 0;
+      let citationsPresent = 0;
+      for (const [id, input] of inputs) {
+        const prov = extractScribalProvenance(input);
+        index.set(id, prov);
+        if (prov.first_copy_event) witnessesPresent++;
+        if (prov.first_citation_target) citationsPresent++;
+      }
+
+      const tabletsExamined = inputs.size;
+      const tabletsWithAnySignal = (() => {
+        let n = 0;
+        for (const prov of index.values()) {
+          if (prov.first_copy_event || prov.first_citation_target) n++;
+        }
+        return n;
+      })();
+      const coveragePct =
+        tabletsExamined > 0
+          ? +((100 * tabletsWithAnySignal) / tabletsExamined).toFixed(2)
+          : 0;
+
+      if (tabletsExamined === 0) {
+        warnings.push(
+          "No tablets in the per-tablet provenance index — anomaly tablet records and/or chunk-index unavailable. Build via scripts/build-chunk-index.mjs and verify the anomaly cache.",
+        );
+      } else if (coveragePct < 5) {
+        warnings.push(
+          `Provenance coverage is ${coveragePct}% of examined tablets — clusters will be sparse. Enrich fragment metadata via enrich_prefix_metadata and rebuild the chunk-index for better witness attribution.`,
+        );
+      }
+
+      const clustersFirstCopy: Array<{ key: string; members: string[] }> = [];
+      const clustersFirstCitation: Array<{ key: string; members: string[] }> = [];
+
+      if (runMode === "first_copy" || runMode === "both") {
+        const fc = buildFirstCopyClusters(index, { minMembers });
+        for (const [key, members] of fc) {
+          clustersFirstCopy.push({ key, members });
+          if (clustersFirstCopy.length >= topK) break;
+        }
+      }
+
+      if (runMode === "first_citation" || runMode === "both") {
+        const fcit = buildFirstCitationClusters(index, { minMembers });
+        for (const [key, members] of fcit) {
+          clustersFirstCitation.push({ key, members });
+          if (clustersFirstCitation.length >= topK) break;
+        }
+      }
+
+      let pairClassification:
+        | { relationship: string; a: string; b: string }
+        | null = null;
+      if (tablet_id_a && tablet_id_b) {
+        const rel = classifyTabletProvenance(index, tablet_id_a, tablet_id_b);
+        pairClassification = { relationship: rel, a: tablet_id_a, b: tablet_id_b };
+      }
+
+      const data = {
+        clusters_first_copy: clustersFirstCopy,
+        clusters_first_citation: clustersFirstCitation,
+        pair_classification: pairClassification,
+        index_stats: {
+          tablets_examined: tabletsExamined,
+          witnesses_present: witnessesPresent,
+          citations_present: citationsPresent,
+          metadata_coverage_pct: coveragePct,
+        },
+        warnings,
+      };
+
+      const lines: string[] = [
+        `Tablets examined: ${tabletsExamined}  ·  with-witness: ${witnessesPresent}  ·  with-citation: ${citationsPresent}  ·  coverage: ${coveragePct}%`,
+        `first_copy clusters (≥${minMembers} members): ${clustersFirstCopy.length}  ·  first_citation clusters: ${clustersFirstCitation.length}`,
+        ``,
+      ];
+      if (clustersFirstCopy.length > 0) {
+        lines.push(`Top first_copy clusters:`);
+        for (const c of clustersFirstCopy.slice(0, 8)) {
+          lines.push(`  ${c.key.padEnd(28)} n=${String(c.members.length).padStart(4)}  members: ${c.members.slice(0, 4).join(", ")}${c.members.length > 4 ? ", …" : ""}`);
+        }
+        lines.push(``);
+      }
+      if (clustersFirstCitation.length > 0) {
+        lines.push(`Top first_citation clusters:`);
+        for (const c of clustersFirstCitation.slice(0, 8)) {
+          lines.push(`  ${c.key.padEnd(28)} n=${String(c.members.length).padStart(4)}  members: ${c.members.slice(0, 4).join(", ")}${c.members.length > 4 ? ", …" : ""}`);
+        }
+        lines.push(``);
+      }
+      if (pairClassification) {
+        lines.push(`Pair classification: ${pairClassification.a} ↔ ${pairClassification.b} → ${pairClassification.relationship}`);
+      }
+      if (warnings.length > 0) {
+        lines.push(``);
+        lines.push(`Warnings: ${warnings.join("; ")}`);
+      }
+
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data,
+        provenance: provenance(
+          "local",
+          "local:scribal-provenance-two-tier",
+          VERSION,
+          {
+            citation:
+              "Two-tier scribal provenance clustering — port of wallet-fingerprint v0.7's funded_by / first_out_to separation. first_copy_event from chunkIndex co-occurrence; first_citation_target from buildCitationGraph commentary→base edges, inverted.",
+          },
+        ),
+        warnings: warnings.length > 0 ? warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`cluster_by_scribal_provenance error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          clusters_first_copy: [] as Array<{ key: string; members: string[] }>,
+          clusters_first_citation: [] as Array<{ key: string; members: string[] }>,
+          pair_classification: null,
+          index_stats: {
+            tablets_examined: 0,
+            witnesses_present: 0,
+            citations_present: 0,
+            metadata_coverage_pct: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:scribal-provenance-two-tier", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.49.0 — compute_axis_disagreement (panel §3.30) ───────────────────
 
 server.registerTool(
@@ -9931,7 +10124,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 100 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 101 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56) + v0.58 cluster_by_scribal_provenance (two-tier port of wallet-fingerprint v0.7 funded_by/first_out_to back to cuneiform — first_copy_event from chunkIndex co-occurrence, first_citation_target from inverted buildCitationGraph, complements v0.48 geographic find-spot clustering with textual-lineage clustering))\n`,
     );
     process.exit(0);
   }
