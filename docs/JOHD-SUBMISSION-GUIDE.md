@@ -52,7 +52,13 @@ JOHD homepage → "Make a Submission".
 
 **Title**: cuneiform-mcp v0.57 — Four-Axis Computational Discovery in the eBL Cuneiform Corpus
 
-**Abstract**: copy from the markdown paper §Abstract. JOHD has a 250-word limit; the current abstract is ~620 words — needs trimming for the submission form. Suggested trim: drop the per-section enumeration in the abstract and keep the four contribution paragraphs.
+**Abstract** (246-word trim, ready to paste — the paper's full 620-word abstract stays in the PDF for reviewers):
+
+> This data paper documents cuneiform-mcp v0.57.0, a 100-tool computational discovery pipeline for the electronic Babylonian Library (eBL) transliteration corpus of approximately 36,500 cuneiform tablets. The pipeline operates on raw sign-token sequences and extends through orthographic, lexical, semantic, structural, and calibration axes, culminating in a probabilistic composition classifier, an active-learning labeling loop, and a held-out evaluation methodology.
+>
+> The paper documents 57 numbered claims across 37 sections, each backed by a reproducible calibration audit (49/49 PASS on the published cache state). Key empirical findings: (a) 55% manuscript-sibling rescue rate on candidates the strict 0.30 trigram-Jaccard methodology surfaces as isolated; (b) a 100+ tablet *āšipūtu* (exorcist) canon spanning 20 museum prefixes recovered from a single seed tablet, BM.77056; (c) 92% top-1 precision on parallel-template lacuna restoration; (d) cross-axis Bayesian fusion across six features with held-out test AUC=1.000 on n=42 labeled pairs; (e) 310 discovered candidate exemplars at p>0.9 surfaced from a 57-second corpus-wide composition-classification scan.
+>
+> The primary methodological contribution is demonstrating that precision in cuneiform-discovery tooling is often calibration-limited rather than signal-limited: a one-line scoring change lifted lacuna-restoration top-1 precision from 22.9% to 91.7% without altering the underlying recovery algorithm. A second contribution separates calibration discipline from ranking: Platt scaling improved one model class by 58× and the other not at all, demonstrating that different model classes warrant different calibration assumptions. All software, derived data, and audits are reproducible under CC-BY-4.0.
 
 **Keywords**: from the markdown — cuneiform; computational philology; manuscript-witness reconstruction; sign-trigram methods; sign2vec; Bayesian fusion; calibration audit; active learning; eBL.
 
