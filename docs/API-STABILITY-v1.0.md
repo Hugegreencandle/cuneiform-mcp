@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-26 at v0.57.0 (added 10 tools from v0.42-v0.55). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 92 tools (as of v0.40.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 100 tools (as of v0.57.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -31,38 +31,45 @@ These ten cover: lexical retrieval, fuzzy retrieval, sub-tablet discovery, compo
 
 These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 
-### Discovery & retrieval (8)
-`find_parallel_text` · `find_fuzzy_parallels` · `find_chunk_parallels` · `find_formulaic_passages` · `find_incipits` · `trace_chunk_diffusion` · `find_join_candidates` · `find_join_candidates_in_prefix`
+### Discovery & retrieval (9)
+`find_parallel_text` · `find_fuzzy_parallels` · `find_chunk_parallels` · `find_formulaic_passages` · `find_incipits` · `trace_chunk_diffusion` · `find_join_candidates` · `find_join_candidates_in_prefix` · `find_lemma_parallel` *(v0.44, Tier-3 #9)*
 
-### Composition assignment (6)
-`identify_composition` · `damaged_passage_composition_probability` · `score_tablet_completeness` · `find_composition_lineage` · `list_compositions` · `build_citation_graph`
+### Composition assignment (7)
+`identify_composition` · `damaged_passage_composition_probability` · `score_tablet_completeness` · `find_composition_lineage` · `list_compositions` · `build_citation_graph` · `extract_citation_network` *(v0.43, Tier-3 #10)*
 
-### Manuscript structure (7)
-`build_canonical_recension_tree` · `build_stemma_with_rooting` · `build_scribal_school_graph` · `reconstruct_cluster` · `find_scribal_groups` · `find_high_join_count_tablets` · `analyze_joins_graph`
+### Manuscript structure (8)
+`build_canonical_recension_tree` · `build_stemma_with_rooting` · `build_scribal_school_graph` · `reconstruct_cluster` · `find_scribal_groups` · `find_high_join_count_tablets` · `analyze_joins_graph` · `find_provenance_clusters` *(v0.45/v0.48, ancient find-spot clustering)*
 
 ### Damage & restoration (4)
 `restore_lacuna_passage` · `infer_damaged_sign` · `find_lacuna_restoration_candidates` · `find_embedded_fragments`
 
-### Anomaly & validation (5)
-`find_anomalous_tablets` · `describe_anomaly` · `discovery_surface_stats` · `prioritize_validation_queue` · `record_validation_resolution`
+### Anomaly & validation (6)
+`find_anomalous_tablets` · `describe_anomaly` · `discovery_surface_stats` · `prioritize_validation_queue` · `record_validation_resolution` · `recommend_validation_target` *(v0.52, active-learning prioritizer)*
 
 ### Read companions (3)
 `list_validation_resolutions` · `get_tablet_image_links` · `render_stemma_svg`
 
-### Sign-level (4)
-`find_similar_signs` · `find_numerical_chunks` · `compute_lexical_substitution_lift` · `cluster_signs_by_embedding`
+### Sign-level (6)
+`find_similar_signs` · `find_numerical_chunks` · `compute_lexical_substitution_lift` · `cluster_signs_by_embedding` · `find_sign_glyph` *(v0.42, ABZ→Unicode glyph)* · `get_scribal_signature` *(v0.18, scribal fingerprint — formalizing tier)*
 
 ### Corpus retrieval (8)
 `search_fragments` · `get_fragment` · `search_tablets` · `get_tablet` · `lookup_sign` · `get_oracc_text` · `search_oracc` · `find_tablets_by_genre`
 
-### Cross-axis (5)
-`compute_joint_pair_score` · `compute_confidence_calibration` · `compare_tablet_pair` · `compare_clusters` · `cluster_pair_similarity_matrix`
+### Cross-axis (6)
+`compute_joint_pair_score` · `compute_confidence_calibration` · `compare_tablet_pair` · `compare_clusters` · `cluster_pair_similarity_matrix` · `compute_axis_disagreement` *(v0.49, cross-axis disagreement)*
 
 ---
 
-## Experimental — v1.0 marks as "may change" (24 tools)
+## Experimental — v1.0 marks as "may change" (26 tools)
 
 Recent additions whose API may evolve before v1.0. Bug fixes + signature changes both possible.
+
+### Calibration utilities (1, v0.50)
+- `recalibrate_lacuna_scores` (v0.50 — Platt scaling for lacuna_semantic; output format may consolidate with `compute_confidence_calibration`)
+
+### Candidate-exemplar discovery (1, v0.55)
+- `list_candidate_exemplars` (v0.55 — 310 discovered at p>0.9 in corpus-wide composition-classification scan; output schema fresh, may stabilize)
+
 
 ### Sign2vec variants (4)
 - `compare_sign_neighbors_across_periods` (v0.26 — per-period; may consolidate)
@@ -97,11 +104,11 @@ Recent additions whose API may evolve before v1.0. Bug fixes + signature changes
 
 ---
 
-## Specialized / advanced (12 tools)
+## Specialized / advanced (13 tools)
 
 Stable but specialized — these aren't part of the "first 10 to learn" path.
 
-`enrich_prefix_metadata` · `fragment_metadata_coverage` · `find_unpublished_in_publication` · `find_tablets_by_provenance` · `find_genre_anchor_tablets_in_prefix` · `extend_dataset_to_motif` · `find_short_fragments` · `list_collection_prefixes` · `coverage_stats_for_collection` · `find_thematic_parallel` · `find_biblical_parallel` · `find_antediluvian_parallel` · `find_mesopotamian_parallel`
+`enrich_prefix_metadata` · `fragment_metadata_coverage` · `find_unpublished_in_publication` · `find_tablets_by_provenance` · `find_genre_anchor_tablets_in_prefix` · `extend_dataset_to_motif` · `find_short_fragments` · `list_collection_prefixes` · `coverage_stats_for_collection` · `find_thematic_parallel` · `find_biblical_parallel` · `find_antediluvian_parallel` · `find_mesopotamian_parallel` · `compare_flood_narratives` *(v0.6, comparative religion — formalizing tier)*
 
 ---
 
@@ -126,12 +133,14 @@ Specialized; stable.
 | Tier | Count | v1.0 status |
 |---|---|---|
 | Canonical (top 10) | 10 | Stable + featured |
-| Stable | 50 | Signature locked |
-| Experimental | 24 | May change |
-| Specialized | 16 | Stable, niche |
-| Total | 92 | — |
+| Stable | 57 | Signature locked |
+| Experimental | 26 | May change |
+| Specialized | 13 | Stable, niche |
+| RAG vault | 4 | Stable |
+| Apkallu / dataset extension | 2 | Stable |
+| **Total unique** | **100** | as of v0.57.0 |
 
-Note: numbers add to 100 because `find_parallel_text` etc appear in both "Canonical" and "Stable" counts (canonical is a featured-subset of stable). Without double-counting, total is 92 tools as of v0.40.0.
+Note: Canonical is a featured-subset of Stable (the same tools listed twice for visibility). Without double-counting, total is 100 unique tools as of v0.57.0.
 
 ---
 
@@ -143,7 +152,11 @@ The v0.40 BLEU benchmark exposed that `restore_lacuna_semantic`'s `joint_score` 
 2. **Recalibrate** via isotonic regression on a held-out calibration set, **OR**
 3. **Document** prominently in tool description that joint_score is a ranking signal, not P(correct)
 
-Recommendation: option (3) as a stopgap (one-line README update), option (2) as the v1.0 fix once the held-out test set exists.
+**Status (v0.50 + v0.57):** option (2) shipped via `recalibrate_lacuna_scores` Platt scaling on v0.30 lacuna fusion — ECE 0.6374 → 0.0109 (58× lift). The v0.57 follow-up applying Platt to v0.29 logistic regression was a **HONEST NULL RESULT**: pre-Platt ECE 0.0165 (already well-calibrated), post-Platt 0.0140 (marginal); accuracy unchanged at 0.9524. v0.29's calibration discipline is built into the model class. Different model classes warrant different calibration assumptions — Platt is appropriate for lacuna fusion, not for v0.29 logistic regression.
+
+## v0.57 calibration finding — model-class-aware calibration
+
+The Platt scaling tool (`recalibrate_lacuna_scores`) is appropriate for: (a) joint-score fusions where the input is a heuristic ensemble (e.g. lacuna semantic), (b) any output rank-ordered but not probability-calibrated. It is **not** appropriate for outputs of a calibration-disciplined model class (logistic regression with proper loss). Pre-flight check: compute ECE before applying Platt; if ECE < 0.05, the model is already calibrated and Platt provides no value.
 
 ---
 

@@ -2,6 +2,10 @@
 
 Generated 2026-05-26 alongside the v0.57 release. Step-by-step for submitting the methods paper to the **Journal of Open Humanities Data** (https://openhumanitiesdata.metajnl.com).
 
+## Submission status
+
+**SUBMITTED 2026-05-26** — Data Paper section. Title: *cuneiform-mcp v0.57 — Four-Axis Computational Discovery in the eBL Cuneiform Corpus*. Author ORCID `0009-0001-3874-3729`. Four reviewers suggested (Jiménez, Pagé-Perron, Johnson, Gordin). Awaiting editor desk-check (1-2 weeks).
+
 ## Why JOHD
 
 CDLJ rejected the prior submission (2026-05-17) on the grounds that they require raw data on CDLI infrastructure — eBL transliterations don't qualify. JOHD has no such requirement and **published the eBL platform paper itself** in 2024, so eBL-derived work is structurally welcome.
