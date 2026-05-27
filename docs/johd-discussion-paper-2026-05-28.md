@@ -22,7 +22,7 @@ This paper discusses the methodological choices, calibration challenges, and val
 
 ## Data Accessibility Statement
 
-All code, indices, and validation artifacts described in this paper are openly available. The cuneiform-mcp source repository is hosted at [github.com/Hugegreencandle/cuneiform-mcp](https://github.com/Hugegreencandle/cuneiform-mcp) under CC-BY 4.0. A versioned snapshot is archived at Zenodo (DOI `10.5281/zenodo.20250520`). The pipeline operates on the eBL `/api/fragments/all-signs` endpoint, which is itself openly licensed by the eBL project (Jiménez et al. 2019). Derived caches — including thematic embeddings, scribal signatures, chunk indices, and the composition registry (`data/compositions-v1.json`) — are reproducible via the build scripts in `scripts/` and can be regenerated deterministically (Random Indexing seed=42, BFS frontier order sorted by score within each depth). All worked-example results in §3 reproduce identically from the archived commit.
+All code, indices, and validation artifacts described in this paper are openly available. The cuneiform-mcp source repository is hosted at [github.com/Hugegreencandle/cuneiform-mcp](https://github.com/Hugegreencandle/cuneiform-mcp) under CC-BY 4.0. A versioned snapshot is archived at Zenodo (DOI `10.5281/zenodo.20250520`). The pipeline operates on the eBL `/api/fragments/all-signs` endpoint, which is itself openly licensed by the eBL project (Cobanoglu et al. 2024a). Derived caches — including thematic embeddings, scribal signatures, chunk indices, and the composition registry (`data/compositions-v1.json`) — are reproducible via the build scripts in `scripts/` and can be regenerated deterministically (Random Indexing seed=42, BFS frontier order sorted by score within each depth). All worked-example results in §3 reproduce identically from the archived commit.
 
 ## Reuse Considerations
 
@@ -110,7 +110,7 @@ First, the labeled-positive count is bootstrap-quality. Twenty-nine confirmed po
 
 Second, the corpus is eBL-only. Cross-corpus comparative tooling for Hebrew Bible, Ugaritic, or Hittite parallels would require a different sign-tokenization layer and a different metadata schema; the four-axis decomposition is corpus-agnostic in principle but corpus-specific in current implementation.
 
-Third, the eBL transliteration substrate normalizes paleographic variation. Handwriting paleography in the strict sense is invisible to the scribal-signature method; what the method captures is orthographic-preference fingerprint. Researchers interested in true paleography should consult image-based methods (e.g., Simonjetz et al. 2024).
+Third, the eBL transliteration substrate normalizes paleographic variation. Handwriting paleography in the strict sense is invisible to the scribal-signature method; what the method captures is orthographic-preference fingerprint. Researchers interested in true paleography should consult image-based methods (e.g., Cobanoglu et al. 2024b).
 
 Fourth, the bigram beam-search fallback for lacuna restoration collapses to repetitive high-frequency-sign output when no parallel templates exist. The method has 91.7% top-1 precision on tablets with parallel templates and degrades sharply on truly-novel passages. The fallback is documented in the tool output to prevent silent degradation.
 
@@ -142,7 +142,9 @@ Geller, M. J. 2010. *Ancient Babylonian Medicine: Theory and Practice*. Chichest
 
 Hunger, H. 1968. *Babylonische und assyrische Kolophone*. Kevelaer / Neukirchen-Vluyn. (Alter Orient und Altes Testament 2.)
 
-Jiménez, E., Cohen, Y., Steinert, U., et al. 2019. "The electronic Babylonian Library Project." *Hilprecht Archive*. eBL project documentation.
+Cobanoglu, Y., Laasonen, J., Simonjetz, F., Khait, I., Cohen, S., Földi, Z., Hätinen, A., Heinrich, A., Mitto, T., Rozzi, G., Sáenz, L., and Jiménez, E. 2024a. "Transliterated Cuneiform Tablets of the Electronic Babylonian Library Platform." *Journal of Open Humanities Data* 10: 19. DOI: [10.5334/johd.148](https://doi.org/10.5334/johd.148). Dataset archive: [10.5281/zenodo.10018951](https://doi.org/10.5281/zenodo.10018951).
+
+Cobanoglu, Y., Sáenz, L., Khait, I., and Jiménez, E. 2024b. "Sign detection for cuneiform tablets." *it — Information Technology* 66(1): 28–38. DOI: [10.1515/itit-2024-0028](https://doi.org/10.1515/itit-2024-0028).
 
 Lenzi, A. 2008. *Secrecy and the Gods: Secret Knowledge in Ancient Mesopotamia and Biblical Israel*. Helsinki: Neo-Assyrian Text Corpus Project. (State Archives of Assyria Studies XIX.)
 
@@ -152,6 +154,6 @@ Mu, J., Bhat, S., and Viswanath, P. 2018. "All-but-the-Top: Simple and Effective
 
 Sahlgren, M. 2005. "An Introduction to Random Indexing." Paper presented at the Methods and Applications of Semantic Indexing Workshop at the 7th International Conference on Terminology and Knowledge Engineering (TKE).
 
-Simonjetz, F., Cohen, Y., Jiménez, E., Fraser, A., et al. 2024. "Reconstruction of Cuneiform Literary Texts as Text Matching." In *Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING)*, 13712–13721.
+Simonjetz, F., Laasonen, J., Cobanoglu, Y., Fraser, A., and Jiménez, E. 2024. "Reconstruction of Cuneiform Literary Texts as Text Matching." In *Proceedings of the 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation (LREC-COLING)*, 13712–13721. [ACL Anthology](https://aclanthology.org/2024.lrec-main.1197/).
 
 Walker, C., and Dick, M. 2001. *The Induction of the Cult Image in Ancient Mesopotamia: The Mesopotamian Mīs Pî Ritual*. Helsinki: Neo-Assyrian Text Corpus Project. (State Archives of Assyria Literary Texts 1.)
