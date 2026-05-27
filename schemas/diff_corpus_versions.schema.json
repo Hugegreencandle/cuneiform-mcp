@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/diff_corpus_versions.schema.json",
+  "title": "diff_corpus_versions data payload",
+  "description": "v0.63.0 (T2-A from post-JOHD upgrade plan). Read-only delta between two content-hash manifests of ~/.cache/cuneiform-mcp/. Manifests are produced by scripts/snapshot-cache.mjs. The diff tool itself never writes anything under the cache dir. Use for reproducibility audits (pin methods-paper claims to a specific manifest hash) and enrichment-burst impact assessments. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["files_added", "files_removed", "files_changed", "summary"],
+  "additionalProperties": false,
+  "properties": {
+    "files_added": {
+      "type": "array",
+      "description": "Files present in the new manifest but not in the old.",
+      "items": { "$ref": "#/$defs/manifest_file_entry" }
+    },
+    "files_removed": {
+      "type": "array",
+      "description": "Files present in the old manifest but not in the new.",
+      "items": { "$ref": "#/$defs/manifest_file_entry" }
+    },
+    "files_changed": {
+      "type": "array",
+      "description": "Files present in both manifests but with different content_hash_sha256.",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "old_hash",
+          "new_hash",
+          "old_size",
+          "new_size",
+          "old_mtime",
+          "new_mtime"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string" },
+          "old_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "new_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "old_size": { "type": "integer", "minimum": 0 },
+          "new_size": { "type": "integer", "minimum": 0 },
+          "old_mtime": { "type": "string" },
+          "new_mtime": { "type": "string" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "old_manifest_at",
+        "new_manifest_at",
+        "files_in_old",
+        "files_in_new",
+        "added_count",
+        "removed_count",
+        "changed_count",
+        "bytes_delta"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "old_manifest_at": { "type": "string" },
+        "new_manifest_at": { "type": "string" },
+        "files_in_old": { "type": "integer", "minimum": 0 },
+        "files_in_new": { "type": "integer", "minimum": 0 },
+        "added_count": { "type": "integer", "minimum": 0 },
+        "removed_count": { "type": "integer", "minimum": 0 },
+        "changed_count": { "type": "integer", "minimum": 0 },
+        "bytes_delta": {
+          "type": "integer",
+          "description": "Signed byte delta: bytes added by new files + bytes added by changed files - bytes removed by removed files."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "manifest_file_entry": {
+      "type": "object",
+      "required": ["path", "content_hash_sha256", "size_bytes", "mtime"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path relative to the manifest's cache_dir."
+        },
+        "content_hash_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "size_bytes": { "type": "integer", "minimum": 0 },
+        "mtime": { "type": "string" }
+      }
+    }
+  }
+}
