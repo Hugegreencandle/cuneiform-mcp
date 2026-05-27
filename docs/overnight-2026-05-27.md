@@ -4,7 +4,7 @@ Handoff note for the autonomous loop run + the parallel JOHD developments.
 
 ## TL;DR
 
-Two of three queued items shipped (T1-C + T2-A from the post-JOHD upgrade plan). T1-B was halted manually by the operator on the morning train, before it ran. JOHD desk-rejected the methods paper on scope/format the previous day; the resubmission path (Discussion paper, ~5K words) is open and recommended. Jiménez referred us to Shai Gordin for the still-pending arXiv endorsement; the request email went out the morning of 2026-05-28.
+All three queued Tier-1 items shipped (T1-C + T2-A + T1-B). T1-B was deferred initially on the morning train, then re-launched and shipped at `dc17821`. JOHD desk-rejected the methods paper on scope/format the previous day; the resubmission path (Discussion paper, ~5K words) is open and recommended. Jiménez referred us to Shai Gordin for the still-pending arXiv endorsement; the request email went out the morning of 2026-05-28.
 
 ## What shipped (origin/main)
 
@@ -13,20 +13,21 @@ Two of three queued items shipped (T1-C + T2-A from the post-JOHD upgrade plan).
 | `59fb6da` | 0.61.0 | explain_pair_score — full provenance trace for pairwise verdicts (T1-A) | 84 | 102 |
 | `d48cdf5` | 0.62.0 | export_session — session ring buffer + snapshot tool (T1-C) | 90 (+6) | 103 |
 | `1d65bb9` | 0.63.0 | diff_corpus_versions — cache-snapshot delta tool (T2-A) | 99 (+9) | 104 |
+| `dc17821` | 0.64.0 | auto_validate_from_resolutions — proposal-only diff against v1.0 gate store (T1-B) | 107 (+8) | 105 |
 
-All three came from the post-JOHD upgrade plan T-items. T1-A landed before the overnight loop started; T1-C landed during the brief overnight window before the laptop went to sleep; T2-A landed the next morning during a manually-driven iteration.
+All four came from the post-JOHD upgrade plan T-items. T1-A landed before the overnight loop started; T1-C landed during the brief overnight window before the laptop went to sleep; T2-A landed the next morning during a manually-driven iteration; T1-B landed in the second loop re-launch after the manual handoff note.
 
-Net delta from the start of the cycle: +15 tests, +3 tools, three new modules (`src/explainPair.ts`, `src/sessionExport.ts`, `src/corpusDiff.ts`), one new module of calibration provenance (`src/calibrationHistory.ts`), one new snapshot CLI (`scripts/snapshot-cache.mjs`), four new schemas.
+Net delta from the start of the cycle: +23 tests, +4 tools, four new modules (`src/explainPair.ts`, `src/sessionExport.ts`, `src/corpusDiff.ts`, `src/autoValidateFromResolutions.ts`), one new module of calibration provenance (`src/calibrationHistory.ts`), two new CLIs (`scripts/snapshot-cache.mjs`, `scripts/auto-validate-from-rules.mjs`), five new schemas.
 
 ## What did NOT ship
 
-**T1-B `auto_validate_from_resolutions` (v0.64, proposal-only).** Queue item remains unchecked under `## Now`. The implementation was deliberately deferred because:
+Nothing pending from the original queue. T1-B was initially deferred on the morning train (loop stopped after T2-A landed) but was re-launched in a follow-up loop and shipped clean at `dc17821` with its full safety contract intact:
 
-1. The operator was on a moving train when iteration #3 was about to fire — flaky wifi makes the post-flight gates (build + test + smoke + remote `git push`) risky.
-2. T1-B is the queue's highest-risk item (operates near the v1.0-gate `validation-resolutions.json` store). It benefits from real-time attention even though the proposal-only mode + mtime assertion would prevent any silent corruption.
-3. The loop was stopped manually after T2-A landed clean. No code changes were attempted on T1-B.
+- Mode assertion (`mode === "propose"` only, throws otherwise)
+- Validation-store `mtime_unchanged` invariant (captured before and after each run; tests assert it)
+- Rules sourced only from methods-paper external anchors, never current-model output
 
-Resume conditions: a stable workstation, the operator at the keyboard, fresh context. Queue item body documents the safety contract (proposal-only, mtime check, rules from external anchors only).
+T2-B (cost-aware memoization wrapper) and T2-C (`ingest_external_tablet`) remain deferred per the original plan — not safe for autonomous overnight work and need conversation.
 
 ## What halted
 
@@ -49,20 +50,20 @@ Enrique Jiménez emailed referring us to **Shai Gordin** (`shygordin@gmail.com`)
 ## Current state
 
 ```
-Branch:        origin/main @ 1d65bb9
-Version:       0.63.0
-Tools:         104 registered
-Tests:         99 / 99 passing
+Branch:        origin/main @ dc17821
+Version:       0.64.0
+Tools:         105 registered
+Tests:         107 / 107 passing
 Build:         clean (tsc)
 Smoke:         clean
 Untracked:     .claude/, .playwright-mcp/ (session-state, not for commit)
 Blocked:       none
-Queue:         T1-B + this handoff note unchecked
+Queue:         drained (all Tier-1 items shipped)
 ```
 
 ## Outstanding items (next session)
 
-1. **T1-B `auto_validate_from_resolutions` (v0.64)** — proposal-only mode against the v1.0-gate store, methods-paper-anchor rules only, mtime-asserted, ~3-4h
-2. **JOHD discussion-paper rework** — read 1 JOHD discussion paper from their archive, sketch the 5K-word cut, hard-cut to fit, resubmit while editor invitation is fresh. Working baseline: `docs/methods-paper-johd-submission.html`. **Frozen file** — work from a copy, never the original.
-3. **Wait on Gordin reply** — academic email norm = 1-2 weeks. If silent past 3 weeks, do not follow up unprompted; fall back to Fraser or the arXiv endorser-finder.
+1. **JOHD discussion-paper rework** — read 1 JOHD discussion paper from their archive, sketch the 5K-word cut, hard-cut to fit, resubmit while editor invitation is fresh. Working baseline: `docs/methods-paper-johd-submission.html`. **Frozen file** — work from a copy, never the original.
+2. **Wait on Gordin reply** — academic email norm = 1-2 weeks. If silent past 3 weeks, do not follow up unprompted; fall back to Fraser or the arXiv endorser-finder.
+3. **Run `auto_validate_from_resolutions` end-to-end** — the tool is shipped but no one has invoked it yet against a live prioritize_validation_queue. First invocation will produce a real `docs/auto-validation-proposals-<ts>.md` to review. After review, accepted proposals get hand-fed into `record_validation_resolution` to actually move the v1.0 labeled-pair gate (currently 12/100).
 4. **Tier-2 upgrade items still on the plan** — T2-B cost-aware memoization wrapper (needs conversation, judgment calls on cache keys), T2-C ingest_external_tablet (deferred per memory: sign-normalization is brittle).
