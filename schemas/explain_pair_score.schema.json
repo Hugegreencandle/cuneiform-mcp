@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/explain_pair_score.schema.json",
+  "title": "explain_pair_score data payload",
+  "description": "v0.61.0 — Full provenance trace for any pairwise verdict. Returns the per-axis raw signals (from compareTabletPair), the joint-pair model's per-feature additive decomposition, the cross-axis methods-paper §3.4 verdict, AND the full calibration history per axis (version + date + threshold + source-doc path + rationale per milestone). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "tablet_a",
+    "tablet_b",
+    "pair_score",
+    "per_axis_explanation",
+    "verdict",
+    "model_metadata",
+    "model_calibration_history",
+    "decision_summary",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_a": { "type": "string" },
+    "tablet_b": { "type": "string" },
+    "pair_score": {
+      "type": "object",
+      "required": ["probability_positive", "log_odds", "intercept", "classification"],
+      "additionalProperties": false,
+      "properties": {
+        "probability_positive": { "type": "number", "minimum": 0, "maximum": 1 },
+        "log_odds": { "type": "number" },
+        "intercept": { "type": "number" },
+        "classification": { "type": "string", "enum": ["positive", "negative", "uncertain"] }
+      }
+    },
+    "per_axis_explanation": {
+      "type": "array",
+      "description": "One entry per feature in FEATURE_ORDER (6 axes as of v0.56).",
+      "items": {
+        "type": "object",
+        "required": [
+          "axis",
+          "measures",
+          "source",
+          "status",
+          "direction",
+          "raw_signals",
+          "threshold_note",
+          "feature_value",
+          "standardized_value",
+          "weight",
+          "contribution_to_log_odds",
+          "contribution_direction",
+          "calibration_history"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "axis": {
+            "type": "string",
+            "enum": [
+              "lex_jaccard",
+              "fuzzy_jaccard",
+              "thematic_cosine",
+              "scribal_cosine",
+              "substitution_lift_z",
+              "composition_assignment_match"
+            ]
+          },
+          "measures": { "type": "string" },
+          "source": { "type": "string" },
+          "status": { "type": "string", "enum": ["ok", "below_threshold", "missing"] },
+          "direction": {
+            "type": ["string", "null"],
+            "enum": ["a_to_b", "b_to_a", null]
+          },
+          "raw_signals": {
+            "type": "object",
+            "description": "Source-tool raw signals: fuzzy carries fuzzy_jaccard / exact_jaccard / longest_contiguous_run / exact_intersect / fuzzy_intersect / final_score / contiguous_run_bonus / query_trigrams / target_trigrams; scribal carries signature_cosine / signature_jaccard / signature_overlap_count; thematic carries thematic_cosine; lex carries exact_jaccard / exact_intersect; substitution_lift_z and composition_assignment_match return {} (model-internal).",
+            "additionalProperties": { "type": "number" }
+          },
+          "threshold_note": { "type": ["string", "null"] },
+          "feature_value": { "type": "number" },
+          "standardized_value": { "type": "number" },
+          "weight": { "type": "number" },
+          "contribution_to_log_odds": { "type": "number" },
+          "contribution_direction": {
+            "type": "string",
+            "enum": ["positive", "negative", "neutral"]
+          },
+          "calibration_history": {
+            "type": "object",
+            "required": ["axis", "measures", "source", "milestones"],
+            "additionalProperties": false,
+            "properties": {
+              "axis": { "type": "string" },
+              "measures": { "type": "string" },
+              "source": { "type": "string" },
+              "milestones": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/calibration_milestone" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "required": ["primary_relationship", "confidence", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "primary_relationship": { "type": "string" },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+        "evidence": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "model_metadata": {
+      "type": "object",
+      "required": [
+        "version",
+        "build_timestamp",
+        "trained_on_n_positives",
+        "trained_on_n_negatives",
+        "training_accuracy",
+        "warning"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "build_timestamp": { "type": "string" },
+        "trained_on_n_positives": { "type": "integer", "minimum": 0 },
+        "trained_on_n_negatives": { "type": "integer", "minimum": 0 },
+        "training_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "warning": { "type": "string" }
+      }
+    },
+    "model_calibration_history": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/calibration_milestone" }
+    },
+    "decision_summary": { "type": "array", "items": { "type": "string" } },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "calibration_milestone": {
+      "type": "object",
+      "required": ["version", "date", "thresholds", "source_doc", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "date": { "type": "string" },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [{ "type": "number" }, { "type": "string" }]
+          }
+        },
+        "source_doc": { "type": "string" },
+        "rationale": { "type": "string" }
+      }
+    }
+  }
+}
