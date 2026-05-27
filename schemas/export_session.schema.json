@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/export_session.schema.json",
+  "title": "export_session data payload",
+  "description": "v0.62.0 — Snapshot the in-process session ring buffer to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md}. Every prior tool call's structuredContent envelope was captured by the ring buffer (capacity configurable via CUNEIFORM_MCP_SESSION_BUFFER, default 200). Returns the snapshot paths + envelope count + oldest/newest timestamps. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "path_json",
+    "path_md",
+    "envelope_count",
+    "buffer_capacity",
+    "oldest_timestamp",
+    "newest_timestamp"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "path_json": {
+      "type": "string",
+      "description": "Absolute filesystem path to the JSON snapshot. Preserves the full typed envelope (data + provenance + warnings) for every recorded tool call in chronological order."
+    },
+    "path_md": {
+      "type": "string",
+      "description": "Absolute filesystem path to the Markdown snapshot. One section per envelope with the rendered text block — human-readable handoff."
+    },
+    "envelope_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of envelopes in the snapshot."
+    },
+    "buffer_capacity": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Configured ring-buffer capacity (default 200, override via CUNEIFORM_MCP_SESSION_BUFFER)."
+    },
+    "oldest_timestamp": {
+      "type": ["string", "null"],
+      "description": "ISO 8601 timestamp of the oldest envelope in the snapshot. Null if buffer is empty."
+    },
+    "newest_timestamp": {
+      "type": ["string", "null"],
+      "description": "ISO 8601 timestamp of the newest envelope in the snapshot. Null if buffer is empty."
+    }
+  }
+}
