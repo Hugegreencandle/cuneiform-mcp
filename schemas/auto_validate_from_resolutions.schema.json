@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/auto_validate_from_resolutions.schema.json",
+  "title": "auto_validate_from_resolutions data payload",
+  "description": "v0.64.0 (T1-B from post-JOHD upgrade plan). PROPOSAL-ONLY MODE — replays prioritize_validation_queue candidates against external-anchor rules (methods paper §3.6 / §3.7.3 / §3.11), writes proposals to docs/auto-validation-proposals-<iso-ts>.md, and NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json. The store mtime is captured before and after the run; tests assert it is unchanged. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "mode",
+    "proposal_file_path",
+    "proposals",
+    "proposed_positives",
+    "proposed_negatives",
+    "rules_applied",
+    "validation_store_path",
+    "validation_store_mtime_before",
+    "validation_store_mtime_after",
+    "validation_store_mtime_unchanged",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "mode": { "const": "propose" },
+    "proposal_file_path": { "type": "string" },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "pair_id",
+          "tablet_a",
+          "tablet_b",
+          "verdict",
+          "rule_id",
+          "source_doc",
+          "anchor_text"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "pair_id": { "type": "string" },
+          "tablet_a": { "type": "string" },
+          "tablet_b": { "type": "string" },
+          "verdict": { "enum": ["positive", "negative"] },
+          "rule_id": { "type": "string" },
+          "source_doc": { "type": "string" },
+          "anchor_text": { "type": "string" }
+        }
+      }
+    },
+    "proposed_positives": { "type": "integer", "minimum": 0 },
+    "proposed_negatives": { "type": "integer", "minimum": 0 },
+    "rules_applied": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "source_doc", "anchor", "proposals_generated"],
+        "additionalProperties": false,
+        "properties": {
+          "rule_id": { "type": "string" },
+          "source_doc": { "type": "string" },
+          "anchor": { "type": "string" },
+          "proposals_generated": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "validation_store_path": { "type": "string" },
+    "validation_store_mtime_before": { "type": ["string", "null"] },
+    "validation_store_mtime_after": { "type": ["string", "null"] },
+    "validation_store_mtime_unchanged": { "type": "boolean" },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}
