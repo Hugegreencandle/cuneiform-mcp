@@ -1,44 +1,34 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora — plus two Discovery Engines, an indexed scholarly-research vault, a damaged-sign inference engine, a curated Mesopotamian ↔ Hebrew Bible parallel database, a Random-Indexing semantic-embeddings layer, a bi-orphan **Anomaly Surface** for discovering previously-unknown compositions, a fuzzy trigram-Jaccard parallel finder for catching missed manuscript siblings, and a recursive cluster reconstructor — to LLM agents. **27 tools**, all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **110 tools** (v0.71.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
 
-## What's new — v0.18.3
+> **Status:** approaching a v1.0 tag. The API surface is frozen (see [`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)); the remaining gate is the labeled-positives validation set (see [v1.0 readiness](#v10-readiness) below). Methods paper resubmitted to JOHD as a Discussion Paper (2026-05-28).
 
-**Calibration-audit train complete.** Two rounds of calibration audit produced six fixes shipped and two no-ops confirmed across the toolchain. Key results:
+## What's new — v0.71.0
 
-- **v0.18.1 lacuna restorer length-factor**: top-1 precision lifted from 22.9% → **91.7%** on the same 48-test synthetic-gap benchmark, from one line of scoring code. Top-10 recall preserved at 100%.
-- **v0.18.2 three-fix audit train**: bi-orphan thematic threshold tightened (0.60 → 0.50), bi-orphan scoring rebalanced (sign_count was dominating 78%), fuzzy_parallels run-bonus added. Bi-orphan discovery surface converged **167 → 2 candidates** (IM.49220 + K.3306).
-- **v0.18.3 methodology-agnostic run-bonus**: ported the v0.18.2 fuzzy run-bonus to `find_parallel_text`. Independently surfaces the SAME K.5896 + K.2761 cross-subseries discovery (both Mīs pî manuscripts with shared continuous text passages to K.2798 / Bīt salāʾ mê) from both fuzzy AND exact methodologies. The calibration pattern itself transfers across underlying algorithms.
+The work since v0.18 moved from corpus retrieval into a full **discovery + validation pipeline**, oriented around closing the v1.0 labeled-positives gate.
 
-`docs/methods-paper-cdlj-submission.md` consolidates v0.16-v0.18.3 into a ~3,800-word camera-ready Cuneiform Digital Library Journal submission. `docs/methods-paper-draft.md` keeps the working version with 13 `[my synthesis]` claims labeled.
+- **v0.71 — `RULE_D` composition-sibling proposals** (opt-in, propose-only). `auto_validate_from_resolutions` can now surface NEW positive candidates at scale, justified by an *independent* signal — eBL editorial genre leaf-match **or** chunk-overlap ≥ threshold with a confirmed anchor — with `identify_composition` used only as a pre-filter (its confidence never justifies the label). Threshold calibrated against the store (all known negatives share 0 chunks; strong positives 29–76). Live run: 13 defensible positive proposals.
+- **v0.70 — §3.4 decision-tree boundary calibration.** Two `compare_tablet_pair` soft-spots fixed (widened `same_composition_different_scribe` band with confidence tapering; `thematic_only` now yields to a strong scribal signal), with both threshold moves recorded in the per-axis `CALIBRATION_REGISTRY` that `explain_pair_score` surfaces.
+- **v0.61 — `explain_pair_score`**: full provenance trace for any pairwise verdict — per-axis raw signals + the joint-pair model's additive decomposition + the §3.4 cross-axis verdict + calibration history.
+- **v0.54–v0.56 — composition-assignment cache + 6th model feature.** Corpus-wide `identify_composition` assignments feed `list_candidate_exemplars` and a `composition_assignment_match` feature on the joint-pair model.
+- **Other recent tools:** `discover_compositions` (unsupervised cluster discovery, v0.69), `compute_quotation_network` (composition-level directed multigraph, v0.68), `detect_bilingual_tablet` / `find_bilingual_tablets` (Sumerian/Akkadian classifier, v0.66), `cdli_ebl_crosswalk` (bidirectional ID mapping, v0.65), `compute_joint_pair_score` (Bayesian fusion, v0.29), and the stemma/lineage/lacuna family (v0.22–v0.36).
 
-## What's new — v0.18.0
-
-**`restore_lacuna_passage`** — multi-sign damaged-passage predictor via parallel-template alignment + bigram beam-search fallback. **`find_same_scribe_candidates`** + **`get_scribal_signature`** — orthographic-preference clustering via per-tablet log-likelihood-ratio signature. Tools: 27 → 30.
-
-## What's new — v0.17.1
-
-**`reconstruct_cluster`** — recursive BFS expansion from a seed tablet via fuzzy parallels to reconstruct full manuscript-witness clusters. Validation: seeded at `BM.77056`, reconstructs a **100+ tablet manuscript-witness cluster spanning 20 museum prefixes** (BM, K, Sm, CBS, ND, N, IM, VAT, SU, UM, Rm-IV, Rm-II, Ni, W, + multiple BM accession ranges 1880–2023). 34 fuzzy calls reach 100 members; the actual underlying composition is wider. **The BM.77056 cluster is the late-Mesopotamian *āšipūtu* (exorcist) library** — confirmed via eBL genre metadata pulls.
-
-## What's new — v0.17.0
-
-**Anomaly Surface refinement + fuzzy parallels.** Four quality filters (`formulaic`, `refrain_heavy`, `heavily_damaged`, `provenance_cluster`) cut bi-orphan candidates 42 → 28 by removing false-positive classes identified in the 2026-05-16 inspection. Plus a new tool `find_fuzzy_parallels` for catching manuscript siblings that exact trigram-Jaccard misses because of localized sign-form variants. Validation: `K.2798 ↔ Si.776` (the publishable test case from the v0.16 inspection) ranks **#1 with fuzzy_J=0.41 vs exact_J=0.15 — 2.67× lift**, 129 of 311 query trigrams match fuzzily. Several candidates with 17× and 32× lifts also surface (BM.35512, BM.34795) as new investigation targets.
-
-- **v0.16.0** — Anomaly Surface: three tools (`find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`) that join the corpus-viz lexical graph with the v0.15 thematic-embedding index + tabletMetadata. Surfaces bi-orphans (167 corpus-wide).
-
-- **v0.15.0** — `find_thematic_parallel` — Random-Indexing distributional embeddings (Sahlgren 2005) over the 28,665-tablet eBL sign corpus. Surfaces siblings sharing zero trigrams but with similar distributional sign contexts. 300-dim, ±3 window, mean-centered (fixes mean-pooling collapse).
-
-**Recent v0.14 train:**
-- **v0.14.4** — Corpus-exclusion pre-filter (`data/corpus-exclusions.json`) closes the colophon-template false-positive class identified in v0.13.4 calibration.
-- **v0.14.3** — `find_biblical_parallel`: 15 canonical Mesopotamian ↔ Hebrew Bible parallels (Flood, Creation, Eden/Adapa, Babel, Job/Theodicy, Eccl/Šiduri, Daniel 7 beasts, Ezekiel 1 chariot, Leviathan, Song of Songs, Isaiah 14 hubris, Proverbs, plant of life, sacrifice-flies, healing serpent) with named-Assyriologist attribution + transmission hypothesis + brief-in-vault pointer.
-- **v0.14.2** — `infer_damaged_sign`: bigram-context inference engine over the 36,498-tablet eBL corpus (4.69 M bigram pairs). Suggests ranked sign-candidates for each `X` damaged-position token with optional period/genre conditioning.
-- **v0.14.1** — Apsû Explorer backend integration: hard-coded entity panels now pull full brief content from the research vault via `get_brief`.
-- **v0.14.0** — RAG over cuneiform-research vault: 4 tools (`query_research`, `get_brief`, `list_briefs`, `find_synthesis_claims`) indexing 58 briefs · 2,364 chunks · 2.1 M chars · 82 synthesis claims.
+Methods paper resubmitted to the Journal of Open Humanities Data as a Discussion Paper (`docs/johd-discussion-paper-2026-05-28.md`).
 
 ## Release lineage
 
 | Version | Headline |
 |---|---|
+| **v0.71** | `RULE_D` composition-sibling proposals — propose-only, genre-leaf-match OR chunk-overlap≥T, model used as pre-filter only. |
+| **v0.70** | §3.4 decision-tree boundary calibration (two `compare_tablet_pair` soft-spots; CALIBRATION_REGISTRY milestones). |
+| v0.61–v0.64 | `explain_pair_score` (verdict provenance) · `export_session` · `diff_corpus_versions` · `auto_validate_from_resolutions` (propose-only). |
+| v0.65–v0.69 | `cdli_ebl_crosswalk` · `detect_bilingual_tablet` · `compute_quotation_network` · `discover_compositions`. |
+| v0.52–v0.58 | `recommend_validation_target` · composition-assignment cache + 6th model feature · `list_candidate_exemplars` (100-tool milestone) · `cluster_by_scribal_provenance`. |
+| v0.40–v0.51 | calibration tooling (`compute_confidence_calibration`, `recalibrate_lacuna_scores`, held-out eval) + `find_sign_glyph`/`extract_citation_network`/`find_lemma_parallel` (Tier-3). |
+| v0.29–v0.36 | `compute_joint_pair_score` (Bayesian fusion) · `identify_composition` · stemma rooting · `find_composition_lineage` · damaged-passage classifier. |
+| v0.20–v0.28 | corpus-wide chunk discovery · recension trees · scribal-school graphs · sign2vec sign embeddings + lexical-substitution lift. |
+| v0.19 | `find_chunk_parallels` — sub-tablet contiguous-chunk discovery. |
 | **v0.18.3** | `find_parallel_text` run-bonus calibration. Methodology-agnostic. K.5896 + K.2761 Mīs pî discoveries surface from BOTH fuzzy AND exact methods. |
 | **v0.18.2** | Three-fix calibration audit. Bi-orphan surface 167 → 2. Bi-orphan threshold tightening + score rebalance + fuzzy run-bonus. |
 | **v0.18.1** | Lacuna restorer length-factor calibration. Top-1 precision 22.9% → 91.7% from one line of code. |
@@ -61,94 +51,53 @@ MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora �
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 30 tools live
+## 110 tools
 
-### Corpus retrieval (v0.1–v0.5)
+The toolchain has grown well past the point where a flat list is useful. The authoritative references:
 
-| Tool | Source |
-|---|---|
-| `lookup_sign` | OGSL `labasi-signs.json` warm cache → eBL `/api/signs/{NAME}` fallback. Glyph + 8 sign-list refs + sound values. |
-| `search_tablets` | CDLI `/search` (simple-field/value/op triplet, closed-enum validation). |
-| `get_tablet` | CDLI `/artifacts/{int-id}` with P/Q-number → integer id shim. |
-| `search_oracc` | ORACC `pager?q=…` HTML scrape (translation + transliteration result shapes). |
-| `get_oracc_text` | ORACC TEI XML at `/<project>/tei/<text_id>.xml` (UPenn mirror). |
-| `search_fragments` | eBL `/api/fragments/query` with museum-number / transliteration auto-detection. |
-| `get_fragment` | eBL `/api/fragments/{id}` (`BM.41255C` → `BM.41255.C` normalized). |
+- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 110 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
+- **[`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)** — tools tiered by stability (canonical / stable / experimental / specialized) for the v1.0 freeze.
 
-### Parallel detection (v0.3, v0.4)
+### The canonical ten (the 80%-of-work API)
 
-| Tool | Method · Validated recall@15 |
-|---|---|
-| `find_join_candidates` | Local lineToVec scorer, faithful port of eBL's `LineToVecRanker`. **3.4%** (seed=42, N=50). |
-| `find_parallel_text` | Local sign-trigram Jaccard with X-filter. **22%** combined (N=151, 267 siblings, 95% CI [17%, 28%]). Primary parallel/join discovery tool. |
+A researcher learns these first; everything else composes from or specializes them.
 
-### Mesopotamian-internal corpus tools (v0.8–v0.12)
+| # | Tool | Capability |
+|---|---|---|
+| 1 | `find_parallel_text` | Sign-trigram Jaccard parallel/join discovery — primary lexical retrieval (22% recall@15, validated). |
+| 2 | `find_fuzzy_parallels` | 1-substitution trigram tolerance for whole-manuscript siblings. |
+| 3 | `find_chunk_parallels` | Sub-tablet contiguous-chunk discovery. |
+| 4 | `find_formulaic_passages` | Corpus-wide most-shared length-20 chunks (formulaic-incipit atlas). |
+| 5 | `identify_composition` | Composition assignment (Mīs pî / Šurpu / Udug-ḫul / …). |
+| 6 | `build_canonical_recension_tree` | Neighbor-joining stemma from chunk overlap. |
+| 7 | `build_stemma_with_rooting` | Rooted Newick stemma (three rooting heuristics). |
+| 8 | `find_composition_lineage` | (period × provenance) transmission graph for a composition. |
+| 9 | `restore_lacuna_passage` | Multi-position parallel-template lacuna restoration. |
+| 10 | `prioritize_validation_queue` | Active-learning ranker for the manual-review backlog. |
 
-| Tool | What it does |
-|---|---|
-| `compare_flood_narratives` | Side-by-side alignment of Atra-ḫasīs, Sumerian Flood Story, Gilgamesh XI, Berossus. |
-| `find_antediluvian_parallel` | Parallels across pre-flood texts (Sumerian King List, Adapa, Etana, apkallū lists). |
-| `apkallu_attestations` | Indexed attestations of named apkallū sages across the corpus. |
-| `find_mesopotamian_parallel` | General Mesopotamian-internal parallel search with named-scholar validation. |
-| `discover_parallel_candidates` | Secondary-literature Discovery Engine v1.0 — surfaces candidate parallels with novelty scoring. |
+### By capability area
 
-### Primary-source Discovery Engine v2.0 (v0.13)
-
-| Tool | What it does |
-|---|---|
-| `discover_primary_source_parallels` | Pairwise sign-trigram Jaccard over the eBL 36,498-tablet sign corpus, with cross-boundary scoring (genre/period/city) and validation-status filtering. Calibrated 9/11 true-positive rate on top-tier candidates (2026-05-15). |
-
-### RAG over the cuneiform-research vault (v0.14.0)
-
-| Tool | What it does |
-|---|---|
-| `query_research` | BM25 retrieval over ~50 markdown briefs. Returns ranked chunks with brief name, section heading, scholarly citations, synthesis flag. |
-| `get_brief` | Retrieve a specific brief by name (case-insensitive, .md tolerated), paginated 5 chunks per page. |
-| `list_briefs` | Enumerate briefs by cluster (cosmology / theology / royal_myth / divination_science / reception_comparative / monuments / infrastructure). |
-| `find_synthesis_claims` | Surface all paragraphs flagged `[my synthesis]` / `[unverified]` / `[Cluster synthesis]` — the author's explicitly-novel interpretive claims (vs. scholarly consensus). 82 currently indexed. |
-
-### Sign-inference engine (v0.14.2)
-
-| Tool | What it does |
-|---|---|
-| `infer_damaged_sign` | For each `X` damaged-position token in an eBL transliteration, suggest the most-probable sign via bigram context (`P(sign\|prev) × P(sign\|next)`) with Laplace smoothing + optional period/genre conditioning. Bigram index: 36,498 tablets, 4.69 M pairs, 8,757 distinct signs. Built lazily on first call (~5 sec). Real assyriological tool. |
-
-### Biblical-parallel finder (v0.14.3)
-
-| Tool | What it does |
-|---|---|
-| `find_biblical_parallel` | 15 canonical Mesopotamian ↔ Hebrew Bible parallels with named-Assyriologist attribution + transmission hypothesis + `brief_in_vault` pointer. Look up by biblical reference (`Gen 6:9`, `Job 3`), theme (`flood`, `wisdom`, `throne-chariot`), or Mesopotamian source (`Atrahasis`, `Gilgamesh`, `Enuma Elish`). Strong-consensus (12) + moderate-consensus (3) parallels. Composes with `get_brief` for drill-down. |
-
-### Semantic embeddings — Mode C (v0.15.0)
-
-| Tool | What it does |
-|---|---|
-| `find_thematic_parallel` | Random-Indexing distributional embeddings (Sahlgren 2005) over the eBL sign corpus. Returns top-30 cosine-similar tablets per seed. Unlike the lexical/trigram methods, surfaces siblings that share zero exact trigrams but use signs with similar distributional contexts. 300-dim, ±3 window, k=8 nonzeros, mean-centered (fixes mean-pooling collapse). 28,665 tablets in index after MIN_TABLET_SIGNS=20 + v0.14.4 exclusion filter. Build with `node scripts/build-embeddings.mjs` (~4 min). Pair with `discover_primary_source_parallels` for compound lexical+thematic discovery. |
-
-### Anomaly Surface — discovery joiner (v0.16.0, refined v0.17.0)
-
-| Tool | What it does |
-|---|---|
-| `find_anomalous_tablets` | Surfaces tablets that don't fit anywhere — candidates for previously-unknown compositions. Joins corpus-viz lexical graph with v0.15 embedding index + metadata. 7 anomaly criteria: `bi_orphan` (no lex AND no thematic — highest priority, **167 corpus-wide**), `lexical_singleton`, `thematic_orphan`, `cluster_genre_misfit`, `cluster_period_misfit`, `low_lexical_high_thematic`, `low_thematic_high_lexical`. **v0.17 quality filters** (default ON for bi_orphan/lex_singleton/thematic_orphan): excludes formulaic tablets (top1 sign-share > 12%), refrain-heavy tablets (3-gram repeats > 3× in head), heavily-damaged tablets (x_ratio > 50%), and provenance-cluster members (top neighbors > 80% same prefix). Returns ranked list with interpretation + follow-up + eBL URL. Build with `node scripts/build-anomaly-index.mjs`. |
-| `describe_anomaly` | Per-tablet drill-down: lex + thematic neighbor counts, cluster membership + dominants, anomaly-flag evaluation, **v0.17 quality flags** + metrics, reasons, follow-up steps. |
-| `discovery_surface_stats` | Top-level stats: how many tablets in each index, lexical singletons, thematic orphans, bi-orphans by sign-length bucket. |
-
-### Fuzzy parallel finder + cluster reconstructor (v0.17.0–v0.17.1)
-
-| Tool | What it does |
-|---|---|
-| `find_fuzzy_parallels` | Finds manuscript siblings exact trigram-Jaccard misses. Two trigrams match fuzzily iff exactly 2 of 3 positions are equal (1-substitution neighbors). Validation: `K.2798 ↔ Si.776` ranks #1 at fuzzy_J=0.41 vs exact_J=0.15 — **2.67× lift**. Returns up to 5 concrete fuzzy-match examples per candidate. ~7 sec first call; <1 sec thereafter. |
-| `reconstruct_cluster` | Given a seed tablet, recursively expand via fuzzy parallels until the cluster closes. BFS with configurable depth + size caps. Output: per-member topology (depth, parent, fuzzy_j_to_parent) + full edge set + prefix/depth distributions. Validated on BM.77056 → **100+ tablet cluster spanning 20 museum prefixes** at depth 4. Use to reconstruct full manuscript-witness clusters from any seed point. |
-
-### Lacuna restoration + scribal fingerprint (v0.18.0)
-
-| Tool | What it does |
-|---|---|
-| `restore_lacuna_passage` | Predicts the most-probable sign sequence for a multi-sign damaged passage. Strategy: build a context fingerprint (prefix + suffix trigrams) from known signs around the lacuna, scan 36K-tablet eBL corpus for templates whose local sign sequence contains BOTH a prefix-trigram and a suffix-trigram within distance k ± tolerance, extract intervening signs as candidate fills. Falls back to bigram beam-search when no parallel templates exist (lower confidence). |
-| `find_same_scribe_candidates` | Surfaces tablets with similar orthographic preferences — candidate same-scribe pairs. Per-tablet signature = top-30 signs by log-likelihood ratio of in-tablet vs. corpus-baseline frequency. Two tablets with overlapping signatures share unusual orthographic preferences (variant-sign choices, logogram-vs-syllabic habits, sign-compound preferences). NB: eBL transliterations normalize paleographic variation, so this measures spelling-preference fingerprint rather than handwriting paleography in the strict sense. Validation: K.2798 and Si.776 (confirmed manuscript siblings) do NOT appear in each other's same-scribe candidates — correctly distinguishing "same composition, different scribes" from "same scribe." |
-| `get_scribal_signature` | Retrieves the scribal-signature profile for a specific tablet (top-30 signs by LLR with corpus-share comparison). |
+- **Corpus retrieval** — CDLI / ORACC / OGSL / eBL wrappers (`lookup_sign`, `get_tablet`, `get_fragment`, `search_*`, `get_oracc_text`).
+- **Parallel & join detection** — lexical (`find_parallel_text`), fuzzy (`find_fuzzy_parallels`), sub-tablet (`find_chunk_parallels`, `find_embedded_fragments`), lemma (`find_lemma_parallel`), thematic (`find_thematic_parallel`).
+- **Composition & transmission** — `identify_composition`, `find_composition_lineage`, recension/stemma builders, `compute_quotation_network`, `discover_compositions`.
+- **Scribal & provenance** — `find_same_scribe_candidates`, `get_scribal_signature`, `build_scribal_school_graph`, `find_provenance_clusters`, `cluster_by_scribal_provenance`.
+- **Damaged-text restoration** — `infer_damaged_sign`, `restore_lacuna_passage`, `restore_lacuna_semantic`, `recalibrate_lacuna_scores`.
+- **Sign embeddings** — `find_similar_signs`, `cluster_signs_by_embedding`, `compute_lexical_substitution_lift`, period/register comparators.
+- **Pairwise scoring & calibration** — `compare_tablet_pair`, `compute_joint_pair_score`, `explain_pair_score`, `compute_confidence_calibration`, `compute_axis_disagreement`.
+- **Active-learning / v1.0 gate** — `prioritize_validation_queue`, `recommend_validation_target`, `record_validation_resolution`, `list_validation_resolutions`, `auto_validate_from_resolutions`, `list_candidate_exemplars`.
+- **Anomaly & discovery surface** — `find_anomalous_tablets`, `describe_anomaly`, `discovery_surface_stats`, `reconstruct_cluster`.
+- **Research vault & cross-corpus** — RAG over the cuneiform-research vault (`query_research`, `get_brief`, …), `find_biblical_parallel`, `find_mesopotamian_parallel`, `detect_bilingual_tablet`, `cdli_ebl_crosswalk`.
+- **Reproducibility** — `export_session`, `diff_corpus_versions`.
 
 See [PROTOCOL.md](PROTOCOL.md) for the full interface — per-tool input schemas, output envelope shapes, and example requests. Live JSON Schemas in [schemas/](schemas/).
+
+## v1.0 readiness
+
+Three gates remain before a v1.0 tag:
+
+- **G1 — methods paper** (external): resubmitted to JOHD as a Discussion Paper 2026-05-28; awaiting review.
+- **G2 — ≥100 labeled positive pairs**: the long pole. The active-learning loop (`prioritize_validation_queue` → `auto_validate_from_resolutions` → operator review → `record_validation_resolution`) feeds it without tainting the labeled set with model output. `RULE_D` (v0.71) proposes defensible candidates from independent evidence; an Assyriologist confirms before recording.
+- **G3 — API freeze**: done. The stable surface is documented in [`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md).
 
 ## Install
 
@@ -171,12 +120,12 @@ Add to `~/.claude.json` (or the equivalent MCP-config path for your client) unde
 }
 ```
 
-Restart Claude Code. The 21 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 110 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "21 tools registered" and exits
+npm run smoke   # prints "v0.71.0 smoke OK — 110 tools registered" and exits
 ```
 
 ## Environment variables

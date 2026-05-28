@@ -2,7 +2,7 @@
 
 Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-05-24 against v0.26.0.
 
-**Total tools: 81**
+**Total tools: 110**
 
 ## `lookup_sign`
 
@@ -184,6 +184,34 @@ v0.20 find_formulaic_passages partitioned by script.period. Trains separate leng
 
 v1.0-readiness bootstrap: logistic regression on the 5-axis feature vector (lex_jaccard, fuzzy_jaccard, thematic_cosine, scribal_cosine, substitution_lift_z) trained on 12 labeled positives + 40 synthetic negatives from the methods paper. Training accuracy 98.1% (51/52). Returns P(positive) + per-fe…
 
+## `explain_pair_score`
+
+Full provenance trace for any pairwise verdict. Returns the per-axis raw signals (lex_jaccard / fuzzy_jaccard / thematic_cosine / scribal_cosine / substitution_lift_z / composition_assignment_match) from compareTabletPair, the joint-pair model's per-feature additive decomposition (raw → z-standardiz…
+
+## `auto_validate_from_resolutions`
+
+PROPOSAL-ONLY MODE. Replays prioritize_validation_queue candidates against external-anchor rules sourced ONLY from the methods paper (§3.6 final-1 bi-orphan IM.49220 → negatives; §3.7.3 K.5896 ↔ K.6683 → positive; §3.11 BM.47463 ↔ CBS.6060 → positive). v0.71 adds opt-in RULE_D (composition-sibling p…
+
+## `cdli_ebl_crosswalk`
+
+Bidirectional CDLI ↔ eBL ID crosswalk. Accepts a CDLI P-number ('P396240'), bare CDLI integer id ('396240'), or eBL museum number ('K.5896', 'BM 47463', 'Ki.1904-10-9.78'). Auto-detects the input type, normalizes museum numbers (space → dot; leading zeros stripped; internal dashes preserved for date…
+
+## `detect_bilingual_tablet`
+
+Live single-tablet Sumerian/Akkadian bilingual classifier. Hits eBL /fragments/{museum_number} directly (no cache dependency) and walks text.lines[].content[] per-Word language tags. The load-bearing discriminator is per-Word .language: eBL's lemmatizer correctly tags a sumerogram (EN₂ → šiptu, MUŠE…
+
+## `find_bilingual_tablets`
+
+Cache-backed corpus-wide bilingual tablet surface. Reads ~/.cache/cuneiform-mcp/bilingual-index.json (built by scripts/build-bilingual-index.mjs) and returns ranked Sumerian/Akkadian bilingual candidates by composite confidence (threshold-gap × token-share-balance). The cache builder pre-filters the…
+
+## `diff_corpus_versions`
+
+Read-only delta between two content-hash manifests of ~/.cache/cuneiform-mcp/. Manifests are produced by scripts/snapshot-cache.mjs (walks the cache dir, computes SHA-256 per file). Returns added/removed/changed file lists + summary (file counts, signed bytes_delta). The diff tool itself NEVER write…
+
+## `export_session`
+
+Snapshot the in-process session ring buffer to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md}. Every tool call's structuredContent envelope is captured automatically (capped at 200 envelopes per session by default, configurable via CUNEIFORM_MCP_SESSION_BUFFER). Returns the snapshot paths + enve…
+
 ## `analyze_joins_graph`
 
 Corpus-wide manuscript-join graph analysis. Two modes: (a) per-tablet — given a tablet, return its direct-join neighborhood resolved to tablet IDs + period + genre; (b) top-hosts — return top-K join-rich tablets corpus-wide. EMPIRICAL: 4,361 fragments have ≥1 join, 17,203 total join edges, top join-…
@@ -195,6 +223,94 @@ Data-driven numerical-context chunk detection using the v0.28 sign2vec k-means c
 ## `restore_lacuna_semantic`
 
 Single-position lacuna restoration using a joint score combining (a) the v0.18.0 bigram-context heuristic and (b) the v0.23 sign2vec semantic prior derived from the surrounding visible signs. α∈[0,1] interpolates: α=1 = pure bigram (v0.18.0 baseline), α=0 = pure sign2vec semantic, α=0.5 = balanced (…
+
+## `record_validation_resolution`
+
+Persist a human-confirmed verdict (positive / negative / uncertain) on a tablet pair. Closes one of the v1.0 readiness gates: grows the labeled-pair set from n=12 (methods-paper hardcoded positives in scripts/train-joint-pair-model.mjs) toward the ≥100-positive production threshold for v0.29 Bayesia…
+
+## `list_validation_resolutions`
+
+Read companion to record_validation_resolution. Returns persisted verdicts from ~/.cache/cuneiform-mcp/validation-resolutions.json sorted most-recent first, with optional filtering by verdict / source / tablet / since. Use this to audit the feedback loop, generate a positives list for the next Bayes…
+
+## `identify_composition`
+
+Composition assignment for a query tablet. Returns ranked candidate compositions (Mīs pî, Šurpu, Udug-ḫul, Bīt salāʾ mê, āšipūtu curriculum, ...) from the methods-paper-anchored registry, scored on a joint of (a) chunk-overlap with each composition's exemplar pool (length-20 chunk-hash index, §3.10)…
+
+## `build_stemma_with_rooting`
+
+Extends v0.22 `build_canonical_recension_tree` (which produces UNROOTED neighbor-joining trees with a trifurcation at the algorithmic root) by re-rooting the stemma at a witness chosen via one of three heuristics: 'earliest_period' (Mesopotamian-canonical OB→MB→MA→NA→NB→LB ordering — earlier periods…
+
+## `score_tablet_completeness`
+
+Given a fragment, estimate what fraction of the original composition is preserved. Two complementary metrics: (1) sign_count_ratio = query.sign_count / largest_exemplar.sign_count, capped at 1.0 — a size-proxy for how much physical text survives; (2) chunk_coverage_ratio = |query_chunks ∩ compositio…
+
+## `find_composition_lineage`
+
+Trace a composition's transmission across periods and ateliers. Composes v0.20 chunk index + v0.22 stemma-BFS + v0.32 composition registry + fragment metadata (period + provenance). Given a composition (composition_id or seed_tablet_id), expand the witness cluster, bucket witnesses by (period × prov…
+
+## `damaged_passage_composition_probability`
+
+Probabilistic composition classifier for damaged passages. Accepts a raw signs string (e.g. paste a hand-transliteration) OR a corpus-resident tablet_id; computes joint sign2vec-centroid (v0.23) + canonical-chunk-overlap (v0.20) score against the v0.32 composition registry; emits softmax probability…
+
+## `list_compositions`
+
+Return the full v0.32+ composition registry as a structured payload, including registry version, license, persistent URIs, print_editions, external_ids (eBL/OGSL/CAD), and exemplar_tablets per composition. Per panel-review §3.24, the registry is now a separately-citable artifact (data/compositions-v…
+
+## `render_stemma_svg`
+
+Render a Newick stemma string (typically from v0.33 build_stemma_with_rooting or v0.22 build_canonical_recension_tree) as a self-contained SVG suitable for direct embedding in HTML/Markdown or saving to a .svg file. Cladogram-style layout: horizontal branches, branch-length-proportional x-positions,…
+
+## `get_tablet_image_links`
+
+Return the eBL fragmentarium landing URL + photo endpoint URL + ancient find-spot for a tablet. Per panel-review §3.24 / Patel: ancient find-spot (e.g. 'Kuyunjik', 'Sippar') is distinct from modern museum collection prefix (K.*, BM.*, Sm.*) and surfaces archaeological provenance for downstream consu…
+
+## `compute_confidence_calibration`
+
+Compute a reliability-diagram + Brier score + Expected Calibration Error (ECE) + Maximum Calibration Error (MCE) from labeled (predicted_probability, correct) pairs. Per panel-review §3.24 / Lindqvist: when a tool says p=0.989, is the true accuracy at that confidence bin actually ~99%? This tool mea…
+
+## `find_sign_glyph`
+
+Convert ABZ codes (e.g. ABZ480) to Unicode cuneiform glyphs (e.g. 𒋮). Accepts either a signs string (space-separated tokens; X/x/? treated as damage) or an array of bare ABZ codes. Resolves ABZ-prefixed tokens via a cached OGSL Labasi ∩ eBL /signs join (cache at ~/.cache/cuneiform-mcp/abz-glyph-map…
+
+## `extract_citation_network`
+
+Mine the scholarly-citation network from data/biblicalParallels.json + data/mesopotamianParallels.json. Builds nodes (scholars parsed from scholarly_attribution[]; parallels) and co-citation edges (two scholars cited in same parallel). Returns ranked scholars by parallels-supported, top co-citation …
+
+## `compute_quotation_network`
+
+Builds a corpus-wide DIRECTED MULTIGRAPH at the COMPOSITION level (Mīs pî / Šurpu / Maqlû / Udug-ḫul / Bīt salāʾ mê / EAE / Šumma ālu / Šumma izbu / Bārûtu / Diri-Aa / āšipūtu curriculum) by aggregating two evidence streams: (1) build_citation_graph commentary→base tablet edges (v0.20), each tablet …
+
+## `discover_compositions`
+
+Unsupervised cluster discovery over the v0.15 Random-Indexing tablet embeddings (~28K tablets × 300-dim, unit-normalized). Deliberately avoids using any genre labels or exemplar registries as a prior — every OTHER composition-surfacing tool in cuneiform-mcp uses the registry as a prior, this one ask…
+
+## `find_lemma_parallel`
+
+Lemma-aware textual parallel finder. Complementary to v0.18 sign-trigram retrieval: where trigrams measure orthographic reuse (same signs, same order), lemmas measure lexical reuse (same underlying Akkadian/Sumerian words, irrespective of writing variant). Uses Jaccard over lemma sets extracted from…
+
+## `find_provenance_clusters`
+
+Cluster tablets by ANCIENT find-spot rather than modern museum collection. With v0.45's collection-fallback, getAncientFindSpot returns a populated string for every metadata-present tablet (Kuyunjik / British Museum / Sippar / Nineveh / ...). This tool groups them and reports per-cluster (a) tablet …
+
+## `cluster_by_scribal_provenance`
+
+Cluster tablets by shared first_copy_event (earliest manuscript witness) or first_citation_target (first commentary citing the tablet). Optionally classify a specific pair via tablet_id_a + tablet_id_b. Port of wallet-fingerprint v0.7's funded_by / first_out_to two-tier methodology back to cuneiform…
+
+## `compute_axis_disagreement`
+
+Cross-axis composition-classification audit. Runs identify_composition (sign-trigram + sign2vec centroid + chunk-overlap) AND find_lemma_parallel (lemma-Jaccard, second-hop composition inference via the top neighbor) on the same tablet and reports agreement. Output classes: 'agree' = both axes retur…
+
+## `recalibrate_lacuna_scores`
+
+Fit Platt-scaling logistic regression on ~/.cache/cuneiform-mcp/lacuna-bleu-calibration-samples.json (produced by scripts/benchmark-lacuna-bleu.mjs) and report ECE before/after recalibration. Closes the §3.25 overconfidence finding (joint_score is a ranking signal, not P(correct)): the v0.40 benchma…
+
+## `recommend_validation_target`
+
+Active-learning prioritizer: closes the v0.31 validation-resolutions loop. Builds a candidate pool from chunk-index co-host pairs, ranks by chunk-overlap percentile, returns pairs in the MID-band (~50th percentile) as the highest-information-gain labeling targets. Theory: pairs with very high chunk-…
+
+## `list_candidate_exemplars`
+
+Surface discovered candidate exemplars from the v0.54 composition-assignments cache (~/.cache/cuneiform-mcp/composition-assignments.json, built by scripts/build-corpus-composition-assignments.mjs). Each candidate is a tablet that v0.32 identify_composition classified at p ≥ min_confidence to a regis…
 
 ## `reconstruct_cluster`
 
