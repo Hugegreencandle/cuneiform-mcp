@@ -15,6 +15,32 @@ import {
   eblIdsFromCdliMuseumNo,
 } from "../src/cdliEblCrosswalk.js";
 
+// CDLI's server (cdli.earth → 141.5.123.37 at LMU München) goes through
+// periodic outages. When it's unreachable, the CDLI-dependent tests can't
+// exercise their contract — skip them rather than fail the suite. The eBL
+// side is the same hosting (LMU) but tends to be more reliably up.
+async function probeCdliReachable(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5_000);
+    const res = await fetch("https://cdli.earth/artifacts/396240", {
+      method: "HEAD",
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    return res.status < 500;
+  } catch {
+    return false;
+  }
+}
+const CDLI_REACHABLE = await probeCdliReachable();
+if (!CDLI_REACHABLE) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[cdliEblCrosswalk.test] cdli.earth is unreachable; CDLI-dependent live tests will be skipped.",
+  );
+}
+
 describe("detectInputType", () => {
   it("recognizes P-numbers (case-insensitive)", () => {
     expect(detectInputType("P396240")).toBe("cdli_p_number");
@@ -92,7 +118,7 @@ describe("cdliEblCrosswalk — live", () => {
     );
   });
 
-  it("eBL → CDLI native path: K.5896 → P396240", async () => {
+  it.skipIf(!CDLI_REACHABLE)("eBL → CDLI native path: K.5896 → P396240", async () => {
     const r = await cdliEblCrosswalk({ id: "K.5896" });
     expect(r.query.detected_type).toBe("ebl_museum_number");
     expect(r.matches).toHaveLength(1);
@@ -105,7 +131,7 @@ describe("cdliEblCrosswalk — live", () => {
     expect(m.ebl_fragment_url).toMatch(/fragmentarium\/K\.5896/);
   }, 30_000);
 
-  it("CDLI P-number → eBL native path: P396240 → K.5896", async () => {
+  it.skipIf(!CDLI_REACHABLE)("CDLI P-number → eBL native path: P396240 → K.5896", async () => {
     const r = await cdliEblCrosswalk({ id: "P396240" });
     expect(r.query.detected_type).toBe("cdli_p_number");
     expect(r.matches).toHaveLength(1);
@@ -116,7 +142,7 @@ describe("cdliEblCrosswalk — live", () => {
     expect(m.confidence).toBe("native");
   }, 30_000);
 
-  it("CDLI integer id → eBL: 396240 detected as cdli_integer_id", async () => {
+  it.skipIf(!CDLI_REACHABLE)("CDLI integer id → eBL: 396240 detected as cdli_integer_id", async () => {
     const r = await cdliEblCrosswalk({ id: "396240" });
     expect(r.query.detected_type).toBe("cdli_integer_id");
     expect(r.matches).toHaveLength(1);
@@ -129,7 +155,7 @@ describe("cdliEblCrosswalk — live", () => {
     expect(m.confidence).toBe("native");
   }, 30_000);
 
-  it("museum-number normalization: 'BM 47463' resolves correctly", async () => {
+  it.skipIf(!CDLI_REACHABLE)("museum-number normalization: 'BM 47463' resolves correctly", async () => {
     const r = await cdliEblCrosswalk({ id: "BM 47463" });
     expect(r.query.detected_type).toBe("ebl_museum_number");
     expect(r.matches).toHaveLength(1);
@@ -139,7 +165,7 @@ describe("cdliEblCrosswalk — live", () => {
     expect(m.confidence).toBe("native");
   }, 30_000);
 
-  it(
+  it.skipIf(!CDLI_REACHABLE)(
     "asymmetric-reliability fallback: P572493 → BM.47463 via museum_no parse",
     async () => {
       // P572493's CDLI record has museum_no="BM 047463 + BM 049124" but
@@ -159,7 +185,7 @@ describe("cdliEblCrosswalk — live", () => {
     45_000,
   );
 
-  it(
+  it.skipIf(!CDLI_REACHABLE)(
     "join expansion: P572493 surfaces at least one match per ' + '-separated part",
     async () => {
       // This shares an HTTP path with the previous test but asserts the
@@ -174,7 +200,7 @@ describe("cdliEblCrosswalk — live", () => {
     45_000,
   );
 
-  it("404 / not-found: nonsense P-number returns empty matches + warning", async () => {
+  it.skipIf(!CDLI_REACHABLE)("404 / not-found: nonsense P-number returns empty matches + warning", async () => {
     const r = await cdliEblCrosswalk({ id: "P9999999" });
     expect(r.matches).toEqual([]);
     expect(r.warnings.length).toBeGreaterThan(0);
