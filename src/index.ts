@@ -404,7 +404,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.69.0";
+const VERSION = "0.70.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",

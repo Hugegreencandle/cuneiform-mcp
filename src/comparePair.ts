@@ -241,7 +241,36 @@ function classify(
     }
   }
 
-  // Decision tree mirrors the methods paper §3.4 + §3.4.1 framing
+  // Score-axis decision tree extracted to classifyFromAxes for unit testing.
+  return classifyFromAxes({ fuzzyJ, exactJ, themCos, scribCos, longRun });
+}
+
+/**
+ * Pure score-axis classifier (methods paper §3.4 + §3.4.1). Takes the four
+ * cross-axis scores (+ longest contiguous run) and returns the relationship,
+ * confidence, and evidence. Extracted from classify() so the decision-tree
+ * boundaries can be unit-tested with raw values, independent of corpus data.
+ * The commentary-quotes-base branch stays in classify() (it needs tablet IDs).
+ *
+ * v0.70 §3.4 boundary calibration (two soft-spots from live labeling):
+ *  - Soft-spot 1: same_composition_different_scribe widened from scribCos<0.5
+ *    to scribCos<0.7, confidence tapered to "medium" in the 0.5–0.7 band.
+ *    Recovers BM.38552↔K.9270 (scribCos=0.503, fuzzy_J=0.404, run=102), which
+ *    fell through the 0.5–0.7 gap to weak_relationship while P(joint)=0.94.
+ *  - Soft-spot 2: thematic_only now yields to a strong scribal signal — when
+ *    scribCos≥0.6 it prefers same_scribe_different_composition. Recovers
+ *    K.17494↔K.47 (scribal=0.697, 3‰ under the line-259 ≥0.7 high cut).
+ */
+export function classifyFromAxes(scores: {
+  fuzzyJ: number;
+  exactJ: number;
+  themCos: number;
+  scribCos: number;
+  longRun: number;
+}): { primary_relationship: PairRelationship; confidence: "high" | "medium" | "low"; evidence: string[] } {
+  const { fuzzyJ, exactJ, themCos, scribCos, longRun } = scores;
+  const evidence: string[] = [];
+
   if (fuzzyJ >= 0.5 && scribCos >= 0.7) {
     evidence.push(`fuzzy_J=${fuzzyJ} (≥0.5: very-high lexical) + scribal_cos=${scribCos} (≥0.7: same scribe)`);
     if (fuzzyJ >= 0.7) evidence.push(`fuzzy_J ≥ 0.7 suggests possible physical-join candidate; check find_join_candidates`);
@@ -251,16 +280,27 @@ function classify(
     evidence.push(`fuzzy_J=${fuzzyJ} (moderate lexical) + scribal_cos=${scribCos} (≥0.7: same scribe)`);
     return { primary_relationship: "same_scribe_different_composition", confidence: "medium", evidence };
   }
-  if (fuzzyJ >= 0.3 && scribCos < 0.5) {
-    evidence.push(`fuzzy_J=${fuzzyJ} (≥0.3: composition-level match) + scribal_cos=${scribCos} (low: different scribes)`);
+  // Soft-spot 1 (v0.70): widened scribCos<0.5 → <0.7 with confidence tapering.
+  // scribCos≥0.7 is already captured above as same_scribe_different_composition.
+  if (fuzzyJ >= 0.3 && scribCos < 0.7) {
+    const lowScribe = scribCos < 0.5;
+    evidence.push(
+      `fuzzy_J=${fuzzyJ} (≥0.3: composition-level match) + scribal_cos=${scribCos} (${lowScribe ? "low: different scribes" : "0.5–0.7: likely different scribes — tapered confidence"})`,
+    );
     if (longRun >= 15) evidence.push(`longest_contiguous_run=${longRun} (≥15: continuous-text manuscript-section sibling — methods paper §3.3 pattern)`);
-    return { primary_relationship: "same_composition_different_scribe", confidence: "high", evidence };
+    return { primary_relationship: "same_composition_different_scribe", confidence: lowScribe ? "high" : "medium", evidence };
   }
   if (scribCos >= 0.7 && fuzzyJ < 0.2) {
     evidence.push(`scribal_cos=${scribCos} (≥0.7: same scribe) + fuzzy_J=${fuzzyJ} (low: different composition)`);
     return { primary_relationship: "same_scribe_different_composition", confidence: "high", evidence };
   }
   if (themCos >= 0.7 && fuzzyJ < 0.15 && exactJ < 0.05) {
+    // Soft-spot 2 (v0.70): a strong scribal signal in the 0.6–0.7 band is more
+    // informative than thematic_only — line 259 reserves ≥0.7 for high confidence.
+    if (scribCos >= 0.6) {
+      evidence.push(`scribal_cos=${scribCos} (0.6–0.7: strong same-scribe signal) overrides thematic_only; thematic_cos=${themCos}, fuzzy_J=${fuzzyJ}`);
+      return { primary_relationship: "same_scribe_different_composition", confidence: "medium", evidence };
+    }
     evidence.push(`thematic_cos=${themCos} (≥0.7: thematic match) + low lexical (exact_J=${exactJ}, fuzzy_J=${fuzzyJ}) — paraphrase/bilingual/alt-spelling candidate`);
     return { primary_relationship: "thematic_only", confidence: "medium", evidence };
   }

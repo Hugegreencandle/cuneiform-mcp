@@ -126,6 +126,14 @@ export const CALIBRATION_REGISTRY: Record<FeatureName, AxisCalibration> = {
         rationale:
           "thematic≥0.7 with low fuzzy/lexical signals classified as 'thematic_only' (paraphrase / bilingual / alt-spelling candidate). thematic≥0.5 alone counts as weak cross-axis signal.",
       },
+      {
+        version: "v0.70.0",
+        date: "2026-05-29",
+        thresholds: { thematic_only_scribal_override_min: 0.6 },
+        source_doc: "docs/upgrade-plan-post-v0.69.md",
+        rationale:
+          "§3.4 soft-spot 2: thematic_only now yields to a strong scribal signal — when scribal_cos≥0.6 the verdict becomes same_scribe_different_composition instead. Recovers K.17494 ↔ K.47 (scribal=0.697, 3‰ under the ≥0.7 high-confidence cut, substitution_lift_z=−8.76) previously discarded as thematic_only.",
+      },
     ],
   },
 
@@ -149,6 +157,14 @@ export const CALIBRATION_REGISTRY: Record<FeatureName, AxisCalibration> = {
         source_doc: "docs/v0.18.19-calibration-round3-signature-evolution.md",
         rationale:
           "scribal_cos≥0.7 gates 'same scribe' verdicts. Below 0.5 + high fuzzy → 'same_composition_different_scribe'. Calibrated against the methods-paper §3.7.3 K.5896 ↔ K.2761 (same scribe, different subseries) anchor.",
+      },
+      {
+        version: "v0.70.0",
+        date: "2026-05-29",
+        thresholds: { same_composition_different_scribe_max: 0.7, taper_band: "0.5–0.7 → medium confidence" },
+        source_doc: "docs/upgrade-plan-post-v0.69.md",
+        rationale:
+          "§3.4 soft-spot 1: same_composition_different_scribe widened from scribal_cos<0.5 to <0.7 with confidence tapering (high <0.5, medium in 0.5–0.7). Recovers BM.38552 ↔ K.9270 (scribal_cos=0.503, fuzzy_J=0.404, 102-sign contiguous run) which fell through the 0.5–0.7 gap to weak_relationship while the joint-pair model gave P=0.94.",
       },
     ],
   },
