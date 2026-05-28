@@ -164,6 +164,23 @@ export function getChunksContaining(tabletId: string): ChunkIndexEntry[] {
   return _byTablet.get(tabletId) ?? [];
 }
 
+/**
+ * Count length-20 chunks co-hosted by BOTH tablets — the direct textual-overlap
+ * signal used to detect manuscript siblings. Calibration (2026-05-29) over the
+ * validation store: all 30 known negatives share 0; the strong positive band
+ * shares 29–76 (the §3.7.3 anchor K.5896↔K.6683 = 76). Clean separation.
+ */
+export function countSharedChunks(a: string, b: string): number {
+  if (a === b) return 0;
+  const ca = getChunksContaining(a);
+  if (ca.length === 0) return 0;
+  let n = 0;
+  for (const e of ca) {
+    if (e.occurrences.some((o) => o.tablet_id === b)) n++;
+  }
+  return n;
+}
+
 export function getChunkByHash(hash: string): ChunkIndexEntry | null {
   loadChunkIndex();
   if (!_byHash) return null;

@@ -18,7 +18,7 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { autoValidateFromResolutions } from "../src/autoValidateFromResolutions.js";
+import { autoValidateFromResolutions, compositionSiblingProposal } from "../src/autoValidateFromResolutions.js";
 import { resolutionsCachePath } from "../src/validationResolutions.js";
 
 describe("auto_validate_from_resolutions", () => {
@@ -180,5 +180,54 @@ describe("auto_validate_from_resolutions", () => {
       expect(rule.rule_id).toMatch(/^RULE_[A-C]_/);
       expect(rule.source_doc).toMatch(/methods paper §/);
     }
+  });
+
+  // ── RULE D opt-in: never present unless explicitly requested ──────────────
+  it("does NOT add RULE_D by default (preserves v0.64 anchor-only contract)", () => {
+    const r = autoValidateFromResolutions({ mode: "propose", candidate_tablets: [], output_dir: tmpOut });
+    expect(r.rules_applied.find((x) => x.rule_id === "RULE_D_COMPOSITION_SIBLING")).toBeUndefined();
+    expect(r.rules_applied).toHaveLength(3);
+  });
+});
+
+// ── RULE D pure decision function (hermetic — no caches needed) ─────────────
+describe("compositionSiblingProposal (RULE_D label logic)", () => {
+  const base = { candidate: "K.999", anchor: "K.2550", composition: "mis_pi", threshold: 15 };
+
+  it("proposes on genre-leaf match alone (chunks below threshold)", () => {
+    const r = compositionSiblingProposal({ ...base, genreLeafMatch: true, sharedChunks: 0 });
+    expect(r?.verdict).toBe("positive");
+    expect(r?.anchor_text).toMatch(/genre leaf/);
+  });
+
+  it("proposes on chunk-overlap alone (no genre match)", () => {
+    const r = compositionSiblingProposal({ ...base, genreLeafMatch: false, sharedChunks: 30 });
+    expect(r?.verdict).toBe("positive");
+    expect(r?.anchor_text).toMatch(/30 length-20 chunks/);
+  });
+
+  it("cites both signals when both fire", () => {
+    const r = compositionSiblingProposal({ ...base, genreLeafMatch: true, sharedChunks: 40 });
+    expect(r?.anchor_text).toMatch(/genre leaf/);
+    expect(r?.anchor_text).toMatch(/40 length-20 chunks/);
+  });
+
+  it("returns null when neither signal fires", () => {
+    expect(compositionSiblingProposal({ ...base, genreLeafMatch: false, sharedChunks: 5 })).toBeNull();
+  });
+
+  it("returns null at exactly threshold-1 (boundary)", () => {
+    expect(compositionSiblingProposal({ ...base, genreLeafMatch: false, sharedChunks: 14 })).toBeNull();
+    expect(compositionSiblingProposal({ ...base, genreLeafMatch: false, sharedChunks: 15 })?.verdict).toBe("positive");
+  });
+
+  it("never puts model confidence in the justification (label rests on independent evidence)", () => {
+    const r = compositionSiblingProposal({ ...base, genreLeafMatch: true, sharedChunks: 30 });
+    expect(r?.anchor_text).toMatch(/pre-filter only/);
+    expect(r?.anchor_text).not.toMatch(/confidence/i);
+  });
+
+  it("refuses to pair a tablet with itself", () => {
+    expect(compositionSiblingProposal({ ...base, candidate: "K.2550", genreLeafMatch: true, sharedChunks: 99 })).toBeNull();
   });
 });

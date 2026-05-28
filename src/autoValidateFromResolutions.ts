@@ -24,12 +24,14 @@
 // The proposals file is for the operator to review; if accepted, they hand-
 // invoke record_validation_resolution per pair to actually mutate the store.
 
-import { existsSync, mkdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { prioritizeValidationQueue } from "./validationQueue.js";
-import { resolutionsCachePath, canonicalPairId } from "./validationResolutions.js";
+import { resolutionsCachePath, canonicalPairId, loadResolutionsStore } from "./validationResolutions.js";
+import { countSharedChunks } from "./chunkIndex.js";
 
 // ─── Public types ──────────────────────────────────────────────────────────
 
@@ -67,6 +69,18 @@ export type AutoValidateOptions = {
    * to <repo>/docs. Used by tests to redirect into a tmpdir.
    */
   output_dir?: string;
+  /**
+   * Opt-in: run RULE_D (composition-sibling proposals). Default false to
+   * preserve the v0.64 anchor-only contract exactly. When true, proposes
+   * candidate↔anchor positives justified by an INDEPENDENT signal (eBL genre
+   * leaf-match OR chunk-overlap ≥ threshold), with identify_composition used
+   * only as a candidate pre-filter. v0.71.
+   */
+  include_composition_siblings?: boolean;
+  /** Min shared length-20 chunks with the anchor for RULE_D chunk-evidence. Default 15. */
+  composition_sibling_threshold?: number;
+  /** Min identify_composition confidence for a RULE_D candidate pre-filter. Default 0.95. */
+  composition_sibling_min_conf?: number;
 };
 
 export type AutoValidateResult = {
@@ -107,6 +121,83 @@ const NEVER_PAIR_WITH_BIORPHAN = new Set<string>([
   RULE_C_PAIR[0],
   RULE_C_PAIR[1],
 ]);
+
+// ─── RULE D — composition-sibling proposals (v0.71, opt-in) ────────────────
+//
+// PROVENANCE / safety: identify_composition is a model, so it is used ONLY as a
+// candidate pre-filter (conf ≥ min_conf). The LABEL rests on an INDEPENDENT
+// signal, never on model confidence:
+//   (1) eBL editorial genre leaf names the same composition — editorial ground
+//       truth, external to every KV model; OR
+//   (2) the candidate shares ≥ threshold length-20 chunks with a confirmed
+//       same-composition anchor — direct textual evidence, the same evidence
+//       class as the §3.7.3 anchor (K.5896↔K.6683 = 76 shared chunks).
+// Threshold calibrated 2026-05-29 against the store: all 30 known negatives
+// share 0 chunks; strong positives share 29–76 → any T in 12–28 separates
+// cleanly; 15 chosen (high-precision midpoint). Still PROPOSE-ONLY — the
+// operator confirms each pair before record_validation_resolution mutates the
+// store, so a stray formulaic-chunk false positive dies at review.
+
+const RULE_D_ID = "RULE_D_COMPOSITION_SIBLING";
+const RULE_D_SOURCE = "docs/upgrade-plan-post-v0.69.md (A2 step 2); calibration vs validation store 2026-05-29";
+
+// Per-composition eBL genre-leaf matchers (does the editorial genre name THIS composition?).
+const COMPOSITION_LEAF: Record<string, RegExp> = {
+  mis_pi: /m[iī]s ?p[iî]|mouth.?(wash|open)/i,
+  udug_hul: /udug.?[hḫ]ul|utukk/i,
+  surpu: /šurpu|surpu/i,
+  bit_sala_me: /b[iī]t sal[aā]|sal[aā].?m[eê]/i,
+  enuma_anu_enlil: /en[uū]ma anu|EAE/i,
+};
+
+type CachedAssignment = {
+  top_composition_id?: string;
+  confidence?: number;
+  is_in_exemplar_list?: boolean;
+  primary_genre?: string;
+};
+
+function cacheDir(): string {
+  return process.env.CUNEIFORM_MCP_CACHE_DIR || join(homedir(), ".cache/cuneiform-mcp");
+}
+
+function loadCompositionAssignments(): Record<string, CachedAssignment> | null {
+  const path = join(cacheDir(), "composition-assignments.json");
+  if (!existsSync(path)) return null;
+  try {
+    const j = JSON.parse(readFileSync(path, "utf-8"));
+    return (j.assignments ?? null) as Record<string, CachedAssignment> | null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Pure RULE_D decision: should this candidate be proposed as a positive sibling
+ * of `anchor`? Returns the justification text when an independent signal fires,
+ * else null. Model confidence is the pre-filter only — it never appears in the
+ * justification. Exported for hermetic unit testing.
+ */
+export function compositionSiblingProposal(args: {
+  candidate: string;
+  anchor: string;
+  composition: string;
+  genreLeafMatch: boolean;
+  sharedChunks: number;
+  threshold: number;
+}): { verdict: "positive"; anchor_text: string } | null {
+  const { candidate, anchor, composition, genreLeafMatch, sharedChunks, threshold } = args;
+  if (candidate === anchor) return null;
+  const chunkEvidence = sharedChunks >= threshold;
+  if (!genreLeafMatch && !chunkEvidence) return null;
+  const signals: string[] = [];
+  if (genreLeafMatch) signals.push(`eBL genre leaf names ${composition} (editorial ground truth)`);
+  if (chunkEvidence) signals.push(`shares ${sharedChunks} length-20 chunks with anchor ${anchor} (≥${threshold} threshold; cf. §3.7.3 K.5896↔K.6683=76)`);
+  return {
+    verdict: "positive",
+    anchor_text: `Composition-sibling of ${anchor} (${composition}). Independent evidence: ${signals.join("; ")}. identify_composition used as pre-filter only.`,
+  };
+}
 
 // ─── Repo-relative paths ───────────────────────────────────────────────────
 
@@ -222,6 +313,56 @@ export function autoValidateFromResolutions(
     ruleCHits++;
   }
 
+  // Rule D (opt-in): composition-sibling positives from independent evidence.
+  let ruleDHits = 0;
+  const threshold = opts.composition_sibling_threshold ?? 15;
+  const minConf = opts.composition_sibling_min_conf ?? 0.95;
+  if (opts.include_composition_siblings) {
+    const assignments = loadCompositionAssignments();
+    if (!assignments) {
+      warnings.push("RULE_D: composition-assignments.json not found — skipped. Run scripts/build-corpus-composition-assignments.mjs.");
+    } else {
+      const store = loadResolutionsStore();
+      const posTablets = new Set<string>();
+      for (const r of store.resolutions) if (r.verdict === "positive") { posTablets.add(r.tablet_a); posTablets.add(r.tablet_b); }
+      const inStore = new Set<string>();
+      for (const r of store.resolutions) { inStore.add(r.tablet_a); inStore.add(r.tablet_b); }
+      // Per-composition anchor = highest-conf store-positive tablet of that comp (conf ≥ 0.7), comp must have a leaf matcher.
+      const anchors: Record<string, { tablet: string; conf: number }> = {};
+      for (const t of posTablets) {
+        const a = assignments[t];
+        if (!a || !a.top_composition_id || !COMPOSITION_LEAF[a.top_composition_id]) continue;
+        const c = a.top_composition_id;
+        const conf = a.confidence ?? 0;
+        if (conf >= 0.7 && (!anchors[c] || conf > anchors[c].conf)) anchors[c] = { tablet: t, conf };
+      }
+      // Candidates: high-conf, not in registry, not already in store.
+      for (const [t, a] of Object.entries(assignments)) {
+        const comp = a.top_composition_id;
+        if (!comp || !anchors[comp]) continue;
+        if ((a.confidence ?? 0) < minConf || a.is_in_exemplar_list || inStore.has(t)) continue;
+        const anchor = anchors[comp].tablet;
+        const genreLeafMatch = COMPOSITION_LEAF[comp].test(a.primary_genre ?? "");
+        const sharedChunks = countSharedChunks(t, anchor);
+        const decision = compositionSiblingProposal({ candidate: t, anchor, composition: comp, genreLeafMatch, sharedChunks, threshold });
+        if (!decision) continue;
+        const pairId = canonicalPairId(t, anchor);
+        if (seenPairIds.has(pairId)) continue;
+        seenPairIds.add(pairId);
+        proposals.push({
+          pair_id: pairId,
+          tablet_a: t,
+          tablet_b: anchor,
+          verdict: "positive",
+          rule_id: RULE_D_ID,
+          source_doc: RULE_D_SOURCE,
+          anchor_text: decision.anchor_text,
+        });
+        ruleDHits++;
+      }
+    }
+  }
+
   const rulesApplied: RuleSummary[] = [
     {
       rule_id: "RULE_A_FINAL1_BIOPRHAN",
@@ -241,6 +382,14 @@ export function autoValidateFromResolutions(
       anchor: `${RULE_C_PAIR[0]} ↔ ${RULE_C_PAIR[1]}`,
       proposals_generated: ruleCHits,
     },
+    ...(opts.include_composition_siblings
+      ? [{
+          rule_id: RULE_D_ID,
+          source_doc: RULE_D_SOURCE,
+          anchor: `genre-leaf-match OR shared-chunks≥${threshold} (min_conf ${minConf})`,
+          proposals_generated: ruleDHits,
+        }]
+      : []),
   ];
 
   // ── Write proposal file ──────────────────────────────────────────────────

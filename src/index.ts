@@ -404,7 +404,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.70.0";
+const VERSION = "0.71.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5372,15 +5372,32 @@ server.registerTool(
   "auto_validate_from_resolutions",
   {
     description:
-      "PROPOSAL-ONLY MODE. Replays prioritize_validation_queue candidates against external-anchor rules sourced ONLY from the methods paper (§3.6 final-1 bi-orphan IM.49220 → negatives; §3.7.3 K.5896 ↔ K.6683 → positive; §3.11 BM.47463 ↔ CBS.6060 → positive). Writes proposals to docs/auto-validation-proposals-<iso-ts>.md. NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — the store's mtime is captured before and after the run and surfaced for audit. The mode parameter MUST be exactly 'propose'; any other value throws (safety contract). The operator reviews proposals manually, then hand-invokes record_validation_resolution for any they accept. Moves the v1.0 ≥100-positives gate forward without tainting the labeled set with current-model output. v0.64.0. T1-B from post-JOHD upgrade plan.",
+      "PROPOSAL-ONLY MODE. Replays prioritize_validation_queue candidates against external-anchor rules sourced ONLY from the methods paper (§3.6 final-1 bi-orphan IM.49220 → negatives; §3.7.3 K.5896 ↔ K.6683 → positive; §3.11 BM.47463 ↔ CBS.6060 → positive). v0.71 adds opt-in RULE_D (composition-sibling positives): set include_composition_siblings=true to propose candidate↔anchor positives justified by an INDEPENDENT signal — eBL editorial genre leaf-match OR shared length-20 chunks ≥ threshold with a confirmed same-composition anchor. identify_composition is used only as a candidate pre-filter (its confidence never justifies the label), so the labeled set is not tainted by model output. Threshold calibrated vs the store (all 30 known negatives share 0 chunks; strong positives 29–76). Writes proposals to docs/auto-validation-proposals-<iso-ts>.md. NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — the store's mtime is captured before and after the run and surfaced for audit. mode MUST be exactly 'propose'; any other value throws (safety contract). The operator reviews proposals, then hand-invokes record_validation_resolution for any they accept. v0.71.0.",
     inputSchema: {
       mode: z.literal("propose").describe("MUST be 'propose'. Safety contract — any other value throws."),
+      include_composition_siblings: z
+        .boolean()
+        .optional()
+        .describe("Opt-in RULE_D. Default false (preserves the v0.64 anchor-only contract). When true, proposes composition-sibling positives from independent evidence (genre-leaf-match OR chunk-overlap)."),
+      composition_sibling_threshold: z
+        .number()
+        .optional()
+        .describe("RULE_D: min shared length-20 chunks with the anchor for chunk-evidence. Default 15 (calibrated: negatives=0, strong positives 29–76)."),
+      composition_sibling_min_conf: z
+        .number()
+        .optional()
+        .describe("RULE_D: min identify_composition confidence for the candidate pre-filter. Default 0.95."),
     },
   },
-  async ({ mode }) => {
+  async ({ mode, include_composition_siblings, composition_sibling_threshold, composition_sibling_min_conf }) => {
     const SCHEMA = schemaId("auto_validate_from_resolutions");
     try {
-      const result = autoValidateFromResolutions({ mode });
+      const result = autoValidateFromResolutions({
+        mode,
+        include_composition_siblings,
+        composition_sibling_threshold,
+        composition_sibling_min_conf,
+      });
       const lines: string[] = [
         `auto_validate_from_resolutions — PROPOSAL-ONLY`,
         ``,
