@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/cdli_ebl_crosswalk.schema.json",
+  "title": "cdli_ebl_crosswalk data payload",
+  "description": "v0.65.0 — bidirectional CDLI ↔ eBL ID crosswalk. Accepts a CDLI P-number, bare CDLI integer id, or eBL museum number; returns matching pairs with confidence tagged 'native' (typed field on either upstream) or 'inferred_via_museum_number' (parsed from CDLI's museum_no when CDLI's external_resources lacks the eBL row). A CDLI join expression in museum_no (e.g. 'BM 047463 + BM 049124') expands into multiple match entries.",
+  "type": "object",
+  "required": ["query", "matches", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "type": "object",
+      "required": ["input_id", "detected_type"],
+      "additionalProperties": false,
+      "properties": {
+        "input_id": { "type": "string" },
+        "detected_type": {
+          "enum": ["cdli_p_number", "ebl_museum_number", "cdli_integer_id"]
+        }
+      }
+    },
+    "matches": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ebl_id",
+          "cdli_p_number",
+          "cdli_integer_id",
+          "museum_number_normalized",
+          "cdli_artifact_url",
+          "ebl_fragment_url",
+          "confidence"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "ebl_id": {
+            "type": "string",
+            "description": "Canonical eBL museum_number form (e.g. 'K.5896' or 'BM.47463')."
+          },
+          "cdli_p_number": {
+            "type": ["string", "null"],
+            "description": "CDLI P-number (e.g. 'P396240') or null if no CDLI link exists."
+          },
+          "cdli_integer_id": {
+            "type": ["integer", "null"],
+            "minimum": 0,
+            "description": "CDLI integer DB id (e.g. 396240) or null if no CDLI link exists."
+          },
+          "museum_number_normalized": {
+            "type": "string",
+            "description": "Dotted eBL form derived from input or from CDLI museum_no."
+          },
+          "cdli_artifact_url": {
+            "type": ["string", "null"],
+            "description": "URL to the CDLI artifact landing page, or null if no CDLI link."
+          },
+          "ebl_fragment_url": {
+            "type": "string",
+            "description": "URL to the eBL fragmentarium landing page."
+          },
+          "confidence": {
+            "enum": ["native", "inferred_via_museum_number"],
+            "description": "'native' = link came from a typed field on either upstream API. 'inferred_via_museum_number' = CDLI lacked the eBL row, fallback parsed museum_no and the resulting candidate was verified live against eBL."
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
