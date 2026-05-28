@@ -180,6 +180,8 @@ import {
 import { diffCorpusVersions } from "./corpusDiff.js";
 import { autoValidateFromResolutions } from "./autoValidateFromResolutions.js";
 import { cdliEblCrosswalk } from "./cdliEblCrosswalk.js";
+import { detectBilingualTablet, resolveGenrePrior } from "./bilingualDetect.js";
+import { findBilingualTablets } from "./findBilingualTablets.js";
 import {
   analyzeJoinsGraph,
 } from "./analyzeJoinsGraph.js";
@@ -396,7 +398,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.65.0";
+const VERSION = "0.66.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -5507,6 +5509,209 @@ server.registerTool(
   },
 );
 
+// ─── v0.66.0 — detect_bilingual_tablet (Sumerian/Akkadian classifier) ────
+
+server.registerTool(
+  "detect_bilingual_tablet",
+  {
+    description:
+      "Live single-tablet Sumerian/Akkadian bilingual classifier. Hits eBL /fragments/{museum_number} directly (no cache dependency) and walks text.lines[].content[] per-Word language tags. The load-bearing discriminator is per-Word .language: eBL's lemmatizer correctly tags a sumerogram (EN₂ → šiptu, MUŠEN → iṣṣūru, etc.) with language=AKKADIAN even when the surface looks Sumerian, which separates a true bilingual line (some Words tagged SUMERIAN, others AKKADIAN) from 'Akkadian written with sumerograms' (every Word tagged AKKADIAN despite Sumerian-looking surface). Returns one of seven classifications: interlinear_bilingual, alternating_line_bilingual, akkadian_with_sumerograms, monolingual_sumerian, monolingual_akkadian, insufficient_data, uncertain. The classifier is intentionally conservative — when the signal is ambiguous it returns 'uncertain'/'insufficient_data' rather than a false-positive bilingual call. Optional genre prior is stamped from the local fragment-metadata cache for reporting but never gates the decision. v0.66.0.",
+    inputSchema: {
+      tablet_id: z
+        .string()
+        .min(1)
+        .describe(
+          "eBL museum number (dotted form, e.g. 'K.4178', 'K.133', 'K.2798').",
+        ),
+    },
+  },
+  async ({ tablet_id }) => {
+    const SCHEMA = schemaId("detect_bilingual_tablet");
+    try {
+      // Genre prior is informational — pulled from the local fragment-metadata
+      // cache when available, never gates the live classification.
+      const md = _getFragmentMetadataForImages(tablet_id);
+      const { genre_prior, genre_path } = resolveGenrePrior(md?.genres ?? null);
+      const result = await detectBilingualTablet({
+        tabletId: tablet_id,
+        userAgent: USER_AGENT,
+        genreHint: genre_prior,
+        genrePath: genre_path,
+      });
+      const lines: string[] = [];
+      lines.push(
+        `detect_bilingual_tablet("${result.tablet_id}") — classification=${result.classification} (is_bilingual=${result.is_bilingual})`,
+      );
+      lines.push("");
+      lines.push(
+        `Signal: text_lines=${result.signal.text_line_count} | sum_only=${result.signal.sumerian_only_line_count} akk_only=${result.signal.akkadian_only_line_count} mixed=${result.signal.mixed_token_line_count}`,
+      );
+      lines.push(
+        `        sum_tokens=${result.signal.sumerian_token_count} (${(result.signal.sumerian_token_share * 100).toFixed(1)}%) | akk_tokens=${result.signal.akkadian_token_count} (${(result.signal.akkadian_token_share * 100).toFixed(1)}%)`,
+      );
+      lines.push(
+        `        alternation_pattern=${result.signal.alternation_pattern} | language_shifts=${result.signal.language_shift_count}`,
+      );
+      lines.push(
+        `        genre_prior=${result.signal.genre_prior}${result.signal.genre_path ? ` (${result.signal.genre_path})` : ""}`,
+      );
+      if (result.reasoning.length > 0) {
+        lines.push("");
+        lines.push("Reasoning:");
+        for (const r of result.reasoning) lines.push(`  - ${r}`);
+      }
+      if (result.warnings.length > 0) {
+        lines.push("");
+        lines.push("Warnings:");
+        for (const w of result.warnings) lines.push(`  - ${w}`);
+      }
+      const endpoint = `${URLS.EBL_BASE}/fragments/${encodeURIComponent(tablet_id)}`;
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance("eBL", endpoint, VERSION, {
+          citation:
+            "Per-Word language tags from eBL fragment lemmatizer — distinguishes true Sumerian/Akkadian bilinguals from Akkadian-with-sumerograms. v0.66.0.",
+        }),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`detect_bilingual_tablet error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          tablet_id,
+          is_bilingual: false,
+          classification: "insufficient_data" as const,
+          signal: {
+            text_line_count: 0,
+            sumerian_only_line_count: 0,
+            akkadian_only_line_count: 0,
+            mixed_token_line_count: 0,
+            sumerian_token_count: 0,
+            akkadian_token_count: 0,
+            sumerian_token_share: 0,
+            akkadian_token_share: 0,
+            language_shift_count: 0,
+            alternation_pattern: "none" as const,
+            genre_prior: "unknown" as const,
+            genre_path: null,
+          },
+          reasoning: [`error: ${msg}`],
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:detect-bilingual-tablet-error", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
+// ─── v0.66.0 — find_bilingual_tablets (cache-backed corpus surface) ──────
+
+server.registerTool(
+  "find_bilingual_tablets",
+  {
+    description:
+      "Cache-backed corpus-wide bilingual tablet surface. Reads ~/.cache/cuneiform-mcp/bilingual-index.json (built by scripts/build-bilingual-index.mjs) and returns ranked Sumerian/Akkadian bilingual candidates by composite confidence (threshold-gap × token-share-balance). The cache builder pre-filters the corpus by a 12-entry bilingual-genre prior (Lugal-e, Angim, Udugḫul, Mīs pî, Šurpu, Diri, Ura, An=Anum, Izi, Lamentations, Šuʾila, Marduk's Address to the Demons) cutting the API budget from ~36K → ~4,370 tablets (~88% reduction). If the cache is absent or empty the tool returns tablets=[] with a clear build-instruction warning rather than crashing. Filter by classification_filter (e.g. ['interlinear_bilingual']) or min_confidence to narrow the surface. v0.66.0.",
+    inputSchema: {
+      top_k: z
+        .number()
+        .int()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe("Maximum results to return (default 50, max 1000)."),
+      classification_filter: z
+        .array(z.string())
+        .optional()
+        .describe(
+          "Restrict results to these classifications. Default: ['interlinear_bilingual','alternating_line_bilingual'] (both true-bilingual sub-types).",
+        ),
+      min_confidence: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe(
+          "Minimum composite confidence in [0,1]. Default 0 (return all matches in the cache).",
+        ),
+    },
+  },
+  async ({ top_k, classification_filter, min_confidence }) => {
+    const SCHEMA = schemaId("find_bilingual_tablets");
+    try {
+      const result = findBilingualTablets({
+        topK: top_k,
+        classificationFilter: classification_filter,
+        minConfidence: min_confidence,
+      });
+      const lines: string[] = [];
+      lines.push(
+        `find_bilingual_tablets — ${result.tablets.length} match(es) over ${result.cache_stats.tablets_in_cache} cached tablets (${result.cache_stats.tablets_classified_bilingual} classified bilingual)`,
+      );
+      if (result.cache_stats.cache_built_at) {
+        lines.push(`  cache built_at: ${result.cache_stats.cache_built_at}`);
+      }
+      lines.push("");
+      if (result.tablets.length === 0) {
+        lines.push("No matches.");
+      } else {
+        lines.push(
+          `Top ${Math.min(result.tablets.length, 20)} (ranked by composite confidence):`,
+        );
+        for (const t of result.tablets.slice(0, 20)) {
+          lines.push(
+            `  ${t.tablet_id}  [${t.classification}]  conf=${t.confidence.toFixed(3)}  sum_share=${(t.sumerian_token_share * 100).toFixed(0)}% akk_share=${(t.akkadian_token_share * 100).toFixed(0)}%  lines=${t.text_line_count}  ${t.genre_path ?? "(no genre)"}`,
+          );
+        }
+      }
+      if (result.warnings.length > 0) {
+        lines.push("");
+        lines.push("Warnings:");
+        for (const w of result.warnings) lines.push(`  - ${w}`);
+      }
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: result,
+        provenance: provenance(
+          "local",
+          `local:bilingual-index:${result.cache_stats.cache_path}`,
+          VERSION,
+          {
+            citation:
+              "Bilingual classifications sourced from eBL /fragments/{id} per-Word language tags, cached via scripts/build-bilingual-index.mjs. v0.66.0.",
+          },
+        ),
+        warnings: result.warnings.length > 0 ? result.warnings : undefined,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return structuredResult(`find_bilingual_tablets error: ${msg}`, {
+        schema: SCHEMA,
+        data: {
+          query: {
+            top_k: top_k ?? 50,
+            classification_filter: classification_filter ?? null,
+            min_confidence: min_confidence ?? 0,
+          },
+          tablets: [] as never[],
+          cache_stats: {
+            cache_path: "",
+            cache_exists: false,
+            cache_built_at: null,
+            tablets_in_cache: 0,
+            tablets_classified_bilingual: 0,
+          },
+          warnings: [msg],
+        },
+        provenance: provenance("local", "local:find-bilingual-tablets-error", VERSION),
+        warnings: [msg],
+      });
+    }
+  },
+);
+
 // ─── v0.63.0 — diff_corpus_versions (cache-snapshot delta) ────────────────
 
 server.registerTool(
@@ -10515,7 +10720,7 @@ async function runPrefetch(): Promise<void> {
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 106 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56) + v0.58 cluster_by_scribal_provenance (two-tier port of wallet-fingerprint v0.7 funded_by/first_out_to back to cuneiform — first_copy_event from chunkIndex co-occurrence, first_citation_target from inverted buildCitationGraph, complements v0.48 geographic find-spot clustering with textual-lineage clustering) + v0.61.0 explain_pair_score (T1-A: full provenance trace for any pairwise verdict — per-axis raw signals from compare_tablet_pair + Bayesian fusion per-feature additive decomposition + cross-axis methods-paper §3.4 verdict + full calibration history per axis with version/date/threshold/source-doc/rationale per milestone; closes the "WHY did the model say X?" loop for reviewers/collaborators without forcing them to read v0.18.x-v0.60 release notes) + v0.62.0 export_session (T1-C: session ring buffer + snapshot tool — every structuredContent envelope is captured automatically into a ring buffer, snapshot to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md} bundles a research session for reproducible handoffs without re-running every tool) + v0.63.0 diff_corpus_versions (T2-A: cache-snapshot delta tool — content-hash manifests + read-only diff for reproducibility audits, enrichment-burst impact assessments, and pinning methods-paper claims to specific cache states; no mutation of cache contents) + v0.64.0 auto_validate_from_resolutions (T1-B PROPOSAL-ONLY: replays prioritize_validation_queue candidates against external-anchor rules from methods paper §3.6 / §3.7.3 / §3.11, writes proposals to docs/auto-validation-proposals-<iso-ts>.md, NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — mtime captured before/after for audit; safety contract throws if mode !== "propose") + v0.65.0 cdli_ebl_crosswalk (bidirectional CDLI ↔ eBL ID mapping: accepts P-number / bare integer id / eBL museum number, auto-detects input type, normalizes museum-number forms preserving date-style internal dashes, surfaces matches with confidence tagged 'native' from typed cross-references on either upstream or 'inferred_via_museum_number' from CDLI museum_no parse when external_resources lacks the eBL row — closes the asymmetric-reliability gap demonstrated by P572493 ↔ BM.47463; CDLI ' + '-separated join expressions expand into multiple matches))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 108 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56) + v0.58 cluster_by_scribal_provenance (two-tier port of wallet-fingerprint v0.7 funded_by/first_out_to back to cuneiform — first_copy_event from chunkIndex co-occurrence, first_citation_target from inverted buildCitationGraph, complements v0.48 geographic find-spot clustering with textual-lineage clustering) + v0.61.0 explain_pair_score (T1-A: full provenance trace for any pairwise verdict — per-axis raw signals from compare_tablet_pair + Bayesian fusion per-feature additive decomposition + cross-axis methods-paper §3.4 verdict + full calibration history per axis with version/date/threshold/source-doc/rationale per milestone; closes the "WHY did the model say X?" loop for reviewers/collaborators without forcing them to read v0.18.x-v0.60 release notes) + v0.62.0 export_session (T1-C: session ring buffer + snapshot tool — every structuredContent envelope is captured automatically into a ring buffer, snapshot to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md} bundles a research session for reproducible handoffs without re-running every tool) + v0.63.0 diff_corpus_versions (T2-A: cache-snapshot delta tool — content-hash manifests + read-only diff for reproducibility audits, enrichment-burst impact assessments, and pinning methods-paper claims to specific cache states; no mutation of cache contents) + v0.64.0 auto_validate_from_resolutions (T1-B PROPOSAL-ONLY: replays prioritize_validation_queue candidates against external-anchor rules from methods paper §3.6 / §3.7.3 / §3.11, writes proposals to docs/auto-validation-proposals-<iso-ts>.md, NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — mtime captured before/after for audit; safety contract throws if mode !== "propose") + v0.65.0 cdli_ebl_crosswalk (bidirectional CDLI ↔ eBL ID mapping: accepts P-number / bare integer id / eBL museum number, auto-detects input type, normalizes museum-number forms preserving date-style internal dashes, surfaces matches with confidence tagged 'native' from typed cross-references on either upstream or 'inferred_via_museum_number' from CDLI museum_no parse when external_resources lacks the eBL row — closes the asymmetric-reliability gap demonstrated by P572493 ↔ BM.47463; CDLI ' + '-separated join expressions expand into multiple matches) + v0.66.0 detect_bilingual_tablet + find_bilingual_tablets (Sumerian/Akkadian classifier — live per-Word language-tag walk over eBL /fragments/{id} discriminates true bilinguals from Akkadian-with-sumerograms via the lemmatizer's correct tagging of EN₂/MUŠEN/etc. as language=AKKADIAN; cache-backed corpus surface reads ~/.cache/cuneiform-mcp/bilingual-index.json built by scripts/build-bilingual-index.mjs which pre-filters the corpus via a 12-entry bilingual-genre prior (Lugal-e / Angim / Udugḫul / Mīs pî / Šurpu / Diri / Ura / An=Anum / Izi / Lamentations / Šuʾila / Marduk's Address) cutting API budget from ~36K → ~4,370 tablets; validation anchors K.4178=interlinear_bilingual, K.133=alternating_line_bilingual, K.2798=akkadian_with_sumerograms, K.4928=insufficient_data; classifier is conservative — prefers uncertain/insufficient_data over false-positive bilingual call))\n`,
     );
     process.exit(0);
   }

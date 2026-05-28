@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/detect_bilingual_tablet.schema.json",
+  "title": "detect_bilingual_tablet data payload",
+  "description": "v0.66.0 — single-tablet Sumerian/Akkadian bilingual classifier. Hits eBL /fragments/{id} live and walks text.lines[].content[] per-Word language tags. The load-bearing discrimination is per-Word .language (SUMERIAN vs AKKADIAN); eBL's lemmatizer correctly tags a sumerogram (EN₂ / MUŠEN etc.) as language=AKKADIAN even when the surface looks Sumerian, which lets the classifier separate true bilinguals from Akkadian-with-sumerograms.",
+  "type": "object",
+  "required": ["tablet_id", "is_bilingual", "classification", "signal", "reasoning", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "is_bilingual": { "type": "boolean" },
+    "classification": {
+      "enum": [
+        "interlinear_bilingual",
+        "alternating_line_bilingual",
+        "akkadian_with_sumerograms",
+        "monolingual_sumerian",
+        "monolingual_akkadian",
+        "insufficient_data",
+        "uncertain"
+      ]
+    },
+    "signal": {
+      "type": "object",
+      "required": [
+        "text_line_count",
+        "sumerian_only_line_count",
+        "akkadian_only_line_count",
+        "mixed_token_line_count",
+        "sumerian_token_count",
+        "akkadian_token_count",
+        "sumerian_token_share",
+        "akkadian_token_share",
+        "language_shift_count",
+        "alternation_pattern",
+        "genre_prior",
+        "genre_path"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text_line_count": { "type": "integer", "minimum": 0 },
+        "sumerian_only_line_count": { "type": "integer", "minimum": 0 },
+        "akkadian_only_line_count": { "type": "integer", "minimum": 0 },
+        "mixed_token_line_count": { "type": "integer", "minimum": 0 },
+        "sumerian_token_count": { "type": "integer", "minimum": 0 },
+        "akkadian_token_count": { "type": "integer", "minimum": 0 },
+        "sumerian_token_share": { "type": "number", "minimum": 0, "maximum": 1 },
+        "akkadian_token_share": { "type": "number", "minimum": 0, "maximum": 1 },
+        "language_shift_count": { "type": "integer", "minimum": 0 },
+        "alternation_pattern": {
+          "enum": ["alternating", "interlinear", "sequential", "none"]
+        },
+        "genre_prior": {
+          "enum": ["bilingual_genre", "monolingual_genre", "unknown"]
+        },
+        "genre_path": { "type": ["string", "null"] }
+      }
+    },
+    "reasoning": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
