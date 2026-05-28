@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/discover_compositions.schema.json",
+  "title": "discover_compositions data payload",
+  "description": "v0.69.0 unsupervised composition discovery. Runs k-means, hierarchical Ward, or a DBSCAN-like density partition over the v0.15 Random-Indexing tablet embeddings (28K tablets × 300-dim, unit-normalized) and explicitly avoids using any genre labels or exemplar registries as a prior. Compares emergent clusters against centroids built from the 11-composition methods-paper registry; clusters with novelty > threshold (1 − max cosine to any registered centroid) are surfaced as candidate new compositions for scholar review. Every other composition-surfacing tool in cuneiform-mcp uses the registry as a prior; this one is the methodological negative-control that asks what the embedding space produces unaided. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": [
+    "algorithm_used",
+    "clusters_found",
+    "registered_compositions_recovered",
+    "candidate_new_compositions",
+    "registered_recovery_detail",
+    "metrics",
+    "parameters",
+    "output_paths",
+    "warnings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "algorithm_used": {
+      "type": "string",
+      "enum": ["kmeans", "hierarchical_ward", "dbscan_like"],
+      "description": "Clustering algorithm actually executed. `hierarchical_ward` is the default — Ward linkage on cluster centroids with Lance-Williams O(n²) memory, capped at max_tablets=5000 for tractability. `kmeans` is the cheap option; `dbscan_like` is the density variant that exposes outlier-shape clusters Ward and k-means would absorb."
+    },
+    "clusters_found": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of emergent clusters with at least min_cluster_size members. Clusters smaller than the threshold are dropped from the partition before novelty scoring (a 2-tablet cluster is noise, not a candidate composition)."
+    },
+    "registered_compositions_recovered": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Count of the 11 (or fewer, if some lack embedded exemplars) registered compositions whose centroid was within cosine ≥ 0.5 of some emergent cluster's centroid. This is the sanity check that the unsupervised partition is recovering known structure: if recovery is 0, the clustering is broken; if it is ~all of them, the partition is well-formed and the novelty surface is trustworthy."
+    },
+    "candidate_new_compositions": {
+      "type": "array",
+      "description": "Emergent clusters above novelty_threshold, sorted by novelty_score desc then tablet_count desc. These are the load-bearing output of the tool — the clusters that look like 'something that is not in the existing 11-composition registry'.",
+      "items": { "$ref": "#/$defs/Candidate" }
+    },
+    "registered_recovery_detail": {
+      "type": "array",
+      "description": "Per-registered-composition recovery report. For each registered composition, the best-matching emergent cluster's centroid cosine. Used by reviewers to verify the partition has the registered structure it should have before trusting novel candidates.",
+      "items": { "$ref": "#/$defs/Recovery" }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "silhouette_score",
+        "total_tablets_clustered",
+        "tablets_in_candidate_new_compositions",
+        "embedding_dim",
+        "iterations",
+        "converged"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "silhouette_score": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Mean silhouette coefficient on a 500-point random subsample. Range [-1, 1]; > 0 indicates the clustering produces real separation. Bounded subsample to keep O(n²) tractable on 5K-tablet runs."
+        },
+        "total_tablets_clustered": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of the random subsample actually partitioned. Equals max_tablets when the full corpus is larger."
+        },
+        "tablets_in_candidate_new_compositions": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of tablet_count across all candidate clusters. Doubles as a 'how much of the subsample is novel' figure."
+        },
+        "embedding_dim": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Dimensionality of the tablet embeddings used (300 for v0.15)."
+        },
+        "iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Algorithm-specific iteration count. kmeans → Lloyd's iterations; ward → merge count (n − k); dbscan_like → 0 (region-grow is not iterative in the same sense)."
+        },
+        "converged": {
+          "type": "boolean",
+          "description": "True iff the algorithm hit its convergence criterion rather than its max-iterations cap. For ward, true iff the merge count equals n − k. For dbscan_like, always true (region-grow terminates by construction)."
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Echo of the parameters that drove this run, including any caps the tool applied. Reproducibility anchor for the markdown summary.",
+      "required": [
+        "min_cluster_size",
+        "novelty_threshold",
+        "algorithm",
+        "k",
+        "max_tablets",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "min_cluster_size": { "type": "integer", "minimum": 2 },
+        "novelty_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "algorithm": { "type": "string", "enum": ["kmeans", "hierarchical_ward", "dbscan_like"] },
+        "k": { "type": "integer", "minimum": 2 },
+        "max_tablets": { "type": "integer", "minimum": 50 },
+        "seed": { "type": "integer" }
+      }
+    },
+    "output_paths": {
+      "type": "object",
+      "required": ["json", "summary_md"],
+      "additionalProperties": false,
+      "properties": {
+        "json": {
+          "type": "string",
+          "description": "Absolute path to the JSON dump of this result, under ~/.cache/cuneiform-mcp/composition-discovery/<iso-ts>/result.json."
+        },
+        "summary_md": {
+          "type": "string",
+          "description": "Absolute path to the human-readable markdown summary at <iso-ts>/summary.md. Use this directly for methods-paper appendices."
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "Candidate": {
+      "type": "object",
+      "required": [
+        "cluster_id",
+        "tablet_count",
+        "representative_tablets",
+        "centroid_thematic_neighbors",
+        "nearest_registered_composition",
+        "novelty_score",
+        "suggested_label",
+        "dominant_metadata"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "cluster_id": {
+          "type": "string",
+          "description": "Stable identifier `cluster_<int>` referencing the algorithm's internal cluster id. Useful for cross-referencing with the raw JSON dump."
+        },
+        "tablet_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Members assigned to this cluster (after min_cluster_size filtering)."
+        },
+        "representative_tablets": {
+          "type": "array",
+          "description": "Top-5 cluster members ranked by cosine to centroid. The 'most central' exemplars of this candidate composition; start here when investigating.",
+          "items": { "type": "string" }
+        },
+        "centroid_thematic_neighbors": {
+          "type": "array",
+          "description": "Up to top-10 nearest cluster members to the centroid by cosine. Overlaps with representative_tablets at the head; the tail is included so reviewers can sample below the immediate peak.",
+          "items": { "type": "string" }
+        },
+        "nearest_registered_composition": {
+          "type": "object",
+          "required": ["id", "cosine_distance"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Registered composition id (e.g. `mis_pi`, `maqlu`, `enuma_anu_enlil`) whose centroid is closest to this cluster's centroid. The tool's claim 'this might be new' is exactly the claim that this cosine_distance is large."
+            },
+            "cosine_distance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2,
+              "description": "1 − cosine_similarity between this cluster's centroid and the nearest registered composition's centroid. Range [0, 2]; > 0.5 corresponds to novelty_score > 0.5 (the default threshold)."
+            }
+          }
+        },
+        "novelty_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "1 − max cosine similarity to any registered composition centroid (clamped to [0, 1]). Higher = more dissimilar from anything in the existing registry."
+        },
+        "suggested_label": {
+          "type": "string",
+          "description": "Best-effort human label built from the cluster's dominant metadata: period (if ≥ 40% share) + genre + find-spot. Treat as literature-facing shorthand, not a typological claim. Falls back to `mixed_emergent_cluster_n<size>` when no metadata axis dominates."
+        },
+        "dominant_metadata": {
+          "type": "object",
+          "required": ["period", "city", "genre"],
+          "additionalProperties": false,
+          "properties": {
+            "period": { "$ref": "#/$defs/DomSlice" },
+            "city": { "$ref": "#/$defs/DomSlice" },
+            "genre": { "$ref": "#/$defs/DomSlice" }
+          }
+        }
+      }
+    },
+    "Recovery": {
+      "type": "object",
+      "required": [
+        "composition_id",
+        "composition_name",
+        "matched_cluster_id",
+        "max_cosine_to_cluster_centroid",
+        "exemplar_count",
+        "exemplars_with_embeddings"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "composition_id": { "type": "string" },
+        "composition_name": { "type": "string" },
+        "matched_cluster_id": {
+          "type": ["string", "null"],
+          "description": "Id of the best-matching emergent cluster, or null if no cluster cleared the partition (e.g. registered composition had no embedded exemplars)."
+        },
+        "max_cosine_to_cluster_centroid": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Cosine similarity between the registered composition's centroid (built from its exemplars' embeddings) and the best-matching emergent cluster's centroid. Recovery threshold is 0.5."
+        },
+        "exemplar_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many exemplar_tablets the composition has in the registry."
+        },
+        "exemplars_with_embeddings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Of those exemplars, how many actually have a v0.15 embedding (some short exemplars are below the MIN_TABLET_SIGNS=20 threshold and are absent from the embedding index)."
+        }
+      }
+    },
+    "DomSlice": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["value", "share"],
+          "additionalProperties": false,
+          "properties": {
+            "value": { "type": "string" },
+            "share": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        { "type": "null" }
+      ],
+      "description": "Most-frequent metadata value across cluster members for this axis, with its proportional share. Null when no member has the axis populated."
+    }
+  }
+}
