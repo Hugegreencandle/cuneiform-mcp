@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-26 at v0.57.0 (added 10 tools from v0.42-v0.55). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-29 at v0.71.0 (re-tiered the +10 tools from v0.58–v0.69; prior update v0.57.0). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 100 tools (as of v0.57.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 110 tools (as of v0.71.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -27,7 +27,7 @@ These ten cover: lexical retrieval, fuzzy retrieval, sub-tablet discovery, compo
 
 ---
 
-## Stable surface — v1.0 freezes signature (50 tools)
+## Stable surface — v1.0 freezes signature (64 tools)
 
 These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 
@@ -37,8 +37,8 @@ These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 ### Composition assignment (7)
 `identify_composition` · `damaged_passage_composition_probability` · `score_tablet_completeness` · `find_composition_lineage` · `list_compositions` · `build_citation_graph` · `extract_citation_network` *(v0.43, Tier-3 #10)*
 
-### Manuscript structure (8)
-`build_canonical_recension_tree` · `build_stemma_with_rooting` · `build_scribal_school_graph` · `reconstruct_cluster` · `find_scribal_groups` · `find_high_join_count_tablets` · `analyze_joins_graph` · `find_provenance_clusters` *(v0.45/v0.48, ancient find-spot clustering)*
+### Manuscript structure (9)
+`build_canonical_recension_tree` · `build_stemma_with_rooting` · `build_scribal_school_graph` · `reconstruct_cluster` · `find_scribal_groups` · `find_high_join_count_tablets` · `analyze_joins_graph` · `find_provenance_clusters` *(v0.45/v0.48, ancient find-spot clustering)* · `cluster_by_scribal_provenance` *(v0.58 — textual-lineage clustering: first-copy-event + first-citation-target, complements geographic find-spot clustering)*
 
 ### Damage & restoration (4)
 `restore_lacuna_passage` · `infer_damaged_sign` · `find_lacuna_restoration_candidates` · `find_embedded_fragments`
@@ -52,17 +52,32 @@ These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 ### Sign-level (6)
 `find_similar_signs` · `find_numerical_chunks` · `compute_lexical_substitution_lift` · `cluster_signs_by_embedding` · `find_sign_glyph` *(v0.42, ABZ→Unicode glyph)* · `get_scribal_signature` *(v0.18, scribal fingerprint — formalizing tier)*
 
-### Corpus retrieval (8)
-`search_fragments` · `get_fragment` · `search_tablets` · `get_tablet` · `lookup_sign` · `get_oracc_text` · `search_oracc` · `find_tablets_by_genre`
+### Corpus retrieval (9)
+`search_fragments` · `get_fragment` · `search_tablets` · `get_tablet` · `lookup_sign` · `get_oracc_text` · `search_oracc` · `find_tablets_by_genre` · `cdli_ebl_crosswalk` *(v0.65 — bidirectional CDLI ↔ eBL ID mapping, native + inferred-via-museum-number confidence)*
 
-### Cross-axis (6)
-`compute_joint_pair_score` · `compute_confidence_calibration` · `compare_tablet_pair` · `compare_clusters` · `cluster_pair_similarity_matrix` · `compute_axis_disagreement` *(v0.49, cross-axis disagreement)*
+### Cross-axis (7)
+`compute_joint_pair_score` · `compute_confidence_calibration` · `compare_tablet_pair` · `compare_clusters` · `cluster_pair_similarity_matrix` · `compute_axis_disagreement` *(v0.49, cross-axis disagreement)* · `explain_pair_score` *(v0.61 — read-only verdict provenance: per-axis raw signals + joint-pair additive decomposition + §3.4 cross-axis verdict + calibration history)*
+
+### Bilingual detection (2)
+`detect_bilingual_tablet` · `find_bilingual_tablets` *(v0.66 — Sumerian/Akkadian classifier; fixed verdict enum: interlinear_bilingual / alternating_line_bilingual / akkadian_with_sumerograms / insufficient_data; conservative by design)*
+
+### Reproducibility (2)
+`export_session` *(v0.62 — session ring-buffer + snapshot bundle)* · `diff_corpus_versions` *(v0.63 — read-only cache-snapshot delta with sha256 manifests)*
 
 ---
 
-## Experimental — v1.0 marks as "may change" (26 tools)
+## Experimental — v1.0 marks as "may change" (29 tools)
 
 Recent additions whose API may evolve before v1.0. Bug fixes + signature changes both possible.
+
+### Active-learning automation (1, v0.64)
+- `auto_validate_from_resolutions` (v0.64 — PROPOSE-ONLY external-anchor proposals; surface is still growing: v0.71 added the opt-in RULE_D composition-sibling rule + threshold/min-conf params, so the input schema may extend further before v1.0. Core safety contract — mode must be "propose", store never mutated — is locked.)
+
+### Network analysis (1, v0.68)
+- `compute_quotation_network` (v0.68 — composition-level directed multigraph; current edges are near-symmetric/near-complete. Track B will add asymmetric directionality + an edge-weight threshold, which WILL change the output schema.)
+
+### Unsupervised discovery (1, v0.69)
+- `discover_compositions` (v0.69 — k-means / Ward / DBSCAN over RI tablet embeddings as a registry-free negative-control; novelty-score formula + cluster-label heuristics may revise.)
 
 ### Calibration utilities (1, v0.50)
 - `recalibrate_lacuna_scores` (v0.50 — Platt scaling for lacuna_semantic; output format may consolidate with `compute_confidence_calibration`)
@@ -133,14 +148,17 @@ Specialized; stable.
 | Tier | Count | v1.0 status |
 |---|---|---|
 | Canonical (top 10) | 10 | Stable + featured |
-| Stable | 57 | Signature locked |
-| Experimental | 26 | May change |
+| Stable | 64 | Signature locked |
+| Experimental | 29 | May change |
 | Specialized | 13 | Stable, niche |
 | RAG vault | 4 | Stable |
 | Apkallu / dataset extension | 2 | Stable |
-| **Total unique** | **100** | as of v0.57.0 |
+| **Total unique** | **110** | as of v0.71.0 |
 
-Note: Canonical is a featured-subset of Stable (the same tools listed twice for visibility). Without double-counting, total is 100 unique tools as of v0.57.0.
+Notes:
+- **Canonical** is a featured re-listing of ten Stable tools (for visibility), not an additional tier — it is not added to the total.
+- The **authoritative unique total is 110** (as of v0.71.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. This re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental.
+- The per-tier row counts carry minor pre-existing drift (a few sub-section headers were off by 1–2 before this update, e.g. the Stable header read "50" while its sub-sections summed to 57). Treat the per-tier numbers as approximate; the 110 unique total is the exact figure. A full per-tier recount is deferred to the v1.0 tag.
 
 ---
 
