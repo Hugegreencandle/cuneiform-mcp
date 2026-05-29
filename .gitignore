@@ -8,3 +8,7 @@ dist/
 
 # private working notes — not for public flip
 _private/
+
+# CuneiBERT generated artifacts (regenerable; large)
+scripts/cuneibert/dataset/
+scripts/cuneibert/model/

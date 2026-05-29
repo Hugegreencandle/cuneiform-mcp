@@ -1,0 +1,6 @@
+# CuneiBERT training deps — Python 3.11 or 3.12 (torch wheels unavailable on 3.14).
+# prepare_corpus.py + export_gaps.mjs need NONE of these (stdlib / Node only);
+# train.py + evaluate.py need torch + transformers (run in Colab T4 or a 3.11 venv).
+torch>=2.2,<3
+transformers>=4.40,<5
+numpy>=1.26
