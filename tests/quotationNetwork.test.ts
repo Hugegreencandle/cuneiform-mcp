@@ -204,5 +204,43 @@ describe.skipIf(!HAS_LIVE_CACHE)("computeQuotationNetwork — live corpus (smoke
     expect(r.metrics.total_edges).toBeGreaterThanOrEqual(4);
     // Sanity: paths exist
     expect(existsSync(r.output_paths.json)).toBe(true);
+    // v0.72 directionality: metrics present + graph no longer fully symmetric.
+    expect(typeof r.metrics.directed_edge_fraction).toBe("number");
+    expect(r.metrics.recommended_min_edge_weight).toBeGreaterThan(0);
+    const allSymmetric = r.nodes.every((n) => n.in_degree === n.out_degree);
+    expect(allSymmetric).toBe(false);
   }, 120_000);
+});
+
+// ── Chronology directionality helpers (hermetic, v0.72) ─────────────────────
+describe("periodRank + chunkEdgeDirection", () => {
+  it("ranks periods in chronological order, null for undatable", async () => {
+    const { periodRank } = await importNetwork();
+    expect(periodRank("Old Babylonian")).toBeLessThan(periodRank("Neo-Assyrian")!);
+    expect(periodRank("Neo-Assyrian")).toBeLessThan(periodRank("Neo-Babylonian")!);
+    expect(periodRank("Neo-Babylonian")).toBeLessThan(periodRank("Hellenistic")!);
+    expect(periodRank("Uncertain")).toBeNull();
+    expect(periodRank(null)).toBeNull();
+    expect(periodRank("")).toBeNull();
+  });
+
+  it("tolerates modifiers via substring match", async () => {
+    const { periodRank } = await importNetwork();
+    expect(periodRank("Neo-Assyrian (Kuyunjik)")).toBe(periodRank("Neo-Assyrian"));
+  });
+
+  it("later composition quotes earlier (edge src→tgt = src quotes tgt)", async () => {
+    const { chunkEdgeDirection } = await importNetwork();
+    // rankA later (9, NB) than rankB (8, NA) → A quotes B
+    expect(chunkEdgeDirection(9, 8)).toBe("a_quotes_b");
+    expect(chunkEdgeDirection(8, 9)).toBe("b_quotes_a");
+  });
+
+  it("equal or undatable ranks → symmetric (half-weight fallback)", async () => {
+    const { chunkEdgeDirection } = await importNetwork();
+    expect(chunkEdgeDirection(8, 8)).toBe("symmetric");
+    expect(chunkEdgeDirection(null, 8)).toBe("symmetric");
+    expect(chunkEdgeDirection(8, null)).toBe("symmetric");
+    expect(chunkEdgeDirection(null, null)).toBe("symmetric");
+  });
 });

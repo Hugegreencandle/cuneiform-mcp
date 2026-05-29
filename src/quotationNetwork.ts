@@ -88,6 +88,12 @@ export type QuotationNetworkMetrics = {
   isolate_compositions: string[];
   scc_count: number;
   scc_largest_size: number;
+  /** v0.72 directionality calibration. */
+  directed_chunk_pairs: number; // chunk pairs with a chronology-resolved direction
+  symmetric_chunk_pairs: number; // chunk pairs with no period signal (split half-weight)
+  directed_edge_fraction: number; // directed / (directed + symmetric); 1.0 = fully directed
+  edges_pruned_below_threshold: number; // edges dropped by minEdgeWeight
+  recommended_min_edge_weight: number; // median surviving edge weight (sparsification knob)
 };
 
 export type QuotationNetworkOutputPaths = {
@@ -105,8 +111,18 @@ export type ComputeQuotationNetworkResult = {
 };
 
 export type ComputeQuotationNetworkOptions = {
-  /** Minimum trigram-run length for chunk-parallel edges. Default 25 (above noise floor). */
+  /**
+   * Minimum trigram-run length for chunk-parallel edges. Default 20 — the
+   * chunk-index window length (v0.72 fix: the prior default of 25 silently
+   * disabled the entire chunk_parallel stream, since every chunk is length-20).
+   */
   minChunkLength?: number;
+  /**
+   * Drop edges whose accumulated weight is below this floor (v0.72) — breaks
+   * the near-complete graph produced by formulaic chunk-sharing. Default 0
+   * (no pruning); `metrics.recommended_min_edge_weight` surfaces a knee value.
+   */
+  minEdgeWeight?: number;
   /** Minimum citation-stream `shared_chunks_count` threshold. Default 2. */
   minCitations?: number;
   /** Output rendering mode for the human-readable surface. Default "summary". */
@@ -129,6 +145,7 @@ type CachedAssignment = {
   top_composition_id: string;
   confidence: number;
   is_in_exemplar_list?: boolean;
+  period?: string; // eBL script.period — used for chronology directionality (v0.72)
 };
 type AssignmentsCache = {
   built_at?: string;
@@ -167,6 +184,53 @@ export function _resetForTests(): void {
 // ─── Composition resolution ────────────────────────────────────────────────
 
 type Resolution = { composition_id: string; confidence: number; source: "registry" | "cache" | "identify" };
+
+// ─── Chronology directionality (v0.72) ─────────────────────────────────────
+//
+// The quotation direction is a HEURISTIC PROXY: a composition whose surviving
+// witnesses are systematically LATER quotes one whose witnesses are EARLIER
+// (edge src→tgt means src quotes tgt; src = later/quoter, tgt = earlier/base).
+// This is witness-copy chronology, NOT composition-date — surfaced as a caveat
+// in the output. Ranks are coarse ordinals over eBL `script.period` strings;
+// matched by substring (longest/most-specific first) so modifiers are tolerated.
+const PERIOD_RANK_TABLE: Array<[RegExp, number]> = [
+  [/uruk/i, 1],
+  [/early dynastic|\bED\b|fara|presargonic/i, 2],
+  [/old akkadian|sargonic|akkad/i, 3],
+  [/ur iii|ur 3|lagash ii|neo-sumerian/i, 4],
+  [/old assyrian/i, 5],
+  [/old babylonian|\bOB\b|isin-larsa|isin|larsa/i, 5],
+  [/middle assyrian/i, 7],
+  [/middle babylonian|kassite|middle elamite/i, 6],
+  [/neo-assyrian|\bNA\b/i, 8],
+  [/neo-babylonian|\bNB\b|chaldean/i, 9],
+  [/achaemenid|persian/i, 10],
+  [/hellenistic|seleucid|late babylonian|\bLB\b/i, 11],
+  [/parthian|arsacid/i, 12],
+];
+
+/** Coarse chronological ordinal for an eBL period string. null = undatable. */
+export function periodRank(period: string | null | undefined): number | null {
+  if (!period) return null;
+  for (const [re, rank] of PERIOD_RANK_TABLE) {
+    if (re.test(period)) return rank;
+  }
+  return null;
+}
+
+/**
+ * Decide the quotation direction between two compositions from their
+ * representative witness-period ranks. "a_quotes_b" = A is later (higher rank)
+ * → edge A→B. "symmetric" when ranks are equal or either is undatable (the
+ * co-hosting evidence is preserved as a half-weight edge in each direction).
+ */
+export function chunkEdgeDirection(
+  rankA: number | null,
+  rankB: number | null,
+): "a_quotes_b" | "b_quotes_a" | "symmetric" {
+  if (rankA == null || rankB == null || rankA === rankB) return "symmetric";
+  return rankA > rankB ? "a_quotes_b" : "b_quotes_a";
+}
 
 function buildRegistryExemplarMap(): Map<string, string> {
   const m = new Map<string, string>();
@@ -343,6 +407,18 @@ function writeSummaryMd(
   lines.push(`- Strongly-connected components: **${m.scc_count}** (largest size: **${m.scc_largest_size}**)`);
   lines.push(`- Isolate compositions (no quotation in or out): **${m.isolate_compositions.length}**`);
   lines.push(``);
+  lines.push(`## Directionality (v0.72)`);
+  lines.push(``);
+  lines.push(`- Chunk pairs with a chronology-resolved direction: **${m.directed_chunk_pairs}**`);
+  lines.push(`- Chunk pairs left symmetric (undatable / equal-period): **${m.symmetric_chunk_pairs}**`);
+  lines.push(`- Directed-edge fraction: **${(m.directed_edge_fraction * 100).toFixed(1)}%**`);
+  lines.push(`- Recommended \`minEdgeWeight\` to sparsify (median edge weight): **${m.recommended_min_edge_weight}**`);
+  if (m.edges_pruned_below_threshold > 0) {
+    lines.push(`- Edges pruned below the applied threshold: **${m.edges_pruned_below_threshold}**`);
+  }
+  lines.push(``);
+  lines.push(`> **Directionality is a HEURISTIC PROXY.** Edge direction comes from witness-period chronology — a composition whose surviving manuscripts are *median*-later quotes one whose manuscripts are median-earlier. This is copy-date, **not composition-date**, and for this Neo-Assyrian-dominated scholarly corpus most compositions share a Neo-Assyrian median, so the signal is weak (directed fraction above). The only **hard-directed** evidence is the citation stream (commentary→base, \`evidence_type: citation\`/\`both\`); chunk-only edges with a direction should be read as tentative. Use \`minEdgeWeight\` to drop the near-complete formulaic tail.`);
+  lines.push(``);
   if (m.top_quoted_from.length > 0) {
     lines.push(`## Top Quoted-From (likely canonical base texts)`);
     lines.push(``);
@@ -404,7 +480,8 @@ export function computeQuotationNetwork(
   opts: ComputeQuotationNetworkOptions = {},
 ): ComputeQuotationNetworkResult {
   const warnings: string[] = [];
-  const minChunkLength = Math.max(1, opts.minChunkLength ?? 25);
+  const minChunkLength = Math.max(1, opts.minChunkLength ?? 20);
+  const minEdgeWeight = Math.max(0, opts.minEdgeWeight ?? 0);
   const minCitations = Math.max(1, opts.minCitations ?? 2);
   const minResolutionConfidence = Math.max(
     0,
@@ -413,6 +490,35 @@ export function computeQuotationNetwork(
 
   const resolver = new CompositionResolver(minResolutionConfidence, opts.cacheDirOverride);
   if (_cacheLoadErr) warnings.push(_cacheLoadErr);
+
+  // composition → MEDIAN witness-period rank, computed globally from the
+  // assignment cache. We use the median composition profile (not a per-chunk
+  // earliest witness, which collapses to Neo-Assyrian for every scholarly comp
+  // that has any Nineveh manuscript) as the chronology representative. NB: this
+  // corpus is NA-dominated, so the signal is weak — most comps share median
+  // rank ~8 and stay symmetric; see the proxy caveat in the summary.
+  const compositionMedianRank = (() => {
+    const cache = loadAssignments(opts.cacheDirOverride);
+    const byComp = new Map<string, number[]>();
+    if (cache) {
+      for (const a of Object.values(cache.assignments)) {
+        if (a.confidence < minResolutionConfidence) continue;
+        const rk = periodRank(a.period);
+        if (rk == null) continue;
+        let arr = byComp.get(a.top_composition_id);
+        if (!arr) { arr = []; byComp.set(a.top_composition_id, arr); }
+        arr.push(rk);
+      }
+    }
+    const out = new Map<string, number | null>();
+    for (const [c, ranks] of byComp) {
+      ranks.sort((x, y) => x - y);
+      out.set(c, ranks[Math.floor((ranks.length - 1) / 2)]);
+    }
+    return out;
+  })();
+  let directedChunkPairs = 0;
+  let symmetricChunkPairs = 0;
 
   // ─── Stream 1: chunk-parallel evidence ────────────────────────────────
   const chunkIndex = loadChunkIndex();
@@ -492,14 +598,27 @@ export function computeQuotationNetwork(
       const weight = entry.length * (1 / Math.max(1, hostCount));
 
       const compIds = Array.from(occByComposition.keys());
+      // Each unordered pair gets a chronology-directed edge (later-median-period
+      // composition quotes the earlier); undatable/equal pairs fall back to
+      // half-weight symmetric. Representative rank = composition-level median.
       for (let i = 0; i < compIds.length; i++) {
-        for (let j = 0; j < compIds.length; j++) {
-          if (i === j) continue;
+        for (let j = i + 1; j < compIds.length; j++) {
           const a = compIds[i];
           const b = compIds[j];
           const ta = occByComposition.get(a)![0];
           const tb = occByComposition.get(b)![0];
-          bumpEdge(a, b, weight, "chunk_parallel", ta, tb);
+          const dir = chunkEdgeDirection(compositionMedianRank.get(a) ?? null, compositionMedianRank.get(b) ?? null);
+          if (dir === "a_quotes_b") {
+            bumpEdge(a, b, weight, "chunk_parallel", ta, tb);
+            directedChunkPairs++;
+          } else if (dir === "b_quotes_a") {
+            bumpEdge(b, a, weight, "chunk_parallel", tb, ta);
+            directedChunkPairs++;
+          } else {
+            bumpEdge(a, b, weight / 2, "chunk_parallel", ta, tb);
+            bumpEdge(b, a, weight / 2, "chunk_parallel", tb, ta);
+            symmetricChunkPairs++;
+          }
         }
       }
     }
@@ -558,6 +677,17 @@ export function computeQuotationNetwork(
     warnings.push(
       `identifyComposition fallback used ${resolver.usedFallback} times — consider rebuilding composition-assignments cache`,
     );
+  }
+
+  // ─── Edge-weight threshold (v0.72) — break the near-complete graph ──────
+  let edgesPruned = 0;
+  if (minEdgeWeight > 0) {
+    for (const [k, acc] of edges) {
+      if (acc.weight < minEdgeWeight) {
+        edges.delete(k);
+        edgesPruned++;
+      }
+    }
   }
 
   // ─── Materialize node set + adjacency ──────────────────────────────────
@@ -632,6 +762,13 @@ export function computeQuotationNetwork(
     .slice(0, 10)
     .map((n) => ({ composition: n.composition_id, out_degree: n.out_degree }));
 
+  // Recommended sparsification knob: median surviving edge weight.
+  const sortedWeights = edgeList.map((e) => e.weight).sort((a, b) => a - b);
+  const medianWeight = sortedWeights.length
+    ? sortedWeights[Math.floor((sortedWeights.length - 1) / 2)]
+    : 0;
+  const totalChunkPairs = directedChunkPairs + symmetricChunkPairs;
+
   const metrics: QuotationNetworkMetrics = {
     total_nodes: nodes.length,
     total_edges: edgeList.length,
@@ -640,6 +777,11 @@ export function computeQuotationNetwork(
     isolate_compositions: isolateIds.sort(),
     scc_count: sccCount,
     scc_largest_size: sccLargest,
+    directed_chunk_pairs: directedChunkPairs,
+    symmetric_chunk_pairs: symmetricChunkPairs,
+    directed_edge_fraction: totalChunkPairs > 0 ? +(directedChunkPairs / totalChunkPairs).toFixed(4) : 0,
+    edges_pruned_below_threshold: edgesPruned,
+    recommended_min_edge_weight: +medianWeight.toFixed(4),
   };
 
   // ─── Write artifacts ──────────────────────────────────────────────────

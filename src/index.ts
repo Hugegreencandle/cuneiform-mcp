@@ -404,7 +404,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.71.0";
+const VERSION = "0.72.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -6943,7 +6943,7 @@ server.registerTool(
   "compute_quotation_network",
   {
     description:
-      "Builds a corpus-wide DIRECTED MULTIGRAPH at the COMPOSITION level (Mīs pî / Šurpu / Maqlû / Udug-ḫul / Bīt salāʾ mê / EAE / Šumma ālu / Šumma izbu / Bārûtu / Diri-Aa / āšipūtu curriculum) by aggregating two evidence streams: (1) build_citation_graph commentary→base tablet edges (v0.20), each tablet pair lifted to its composition pair via the v0.54 composition-assignments cache + v0.32 identifyComposition fallback, dropped if either endpoint resolves with confidence < 0.5; (2) chunk-index entries where ≥2 different compositions co-host the same shared chunk, contributing weight = chunk_length × 1/host_count to every directed cross-composition pair (Ci → Cj AND Cj → Ci). Edges from both streams are merged into a single multigraph where evidence_type flags which streams supported it: 'citation' | 'chunk_parallel' | 'both'. Surface metrics: in-degree, out-degree, sampled-source betweenness approximation, strongly-connected-components via Tarjan. Outputs three files at ~/.cache/cuneiform-mcp/quotation-network/<iso-ts>/ — graph.json (canonical data), graph.dot (Graphviz-renderable; run `dot -Tsvg graph.dot > graph.svg`), summary.md (human-readable). Validation anchors: Maqlû ↔ Šurpu (anti-witchcraft overlap) and Mīs pî → Bīt salāʾ mê (sibling subseries) appear on the live corpus when run with defaults.",
+      "Builds a corpus-wide DIRECTED MULTIGRAPH at the COMPOSITION level (Mīs pî / Šurpu / Maqlû / Udug-ḫul / Bīt salāʾ mê / EAE / Šumma ālu / Šumma izbu / Bārûtu / Diri-Aa / āšipūtu curriculum) by aggregating two evidence streams: (1) build_citation_graph commentary→base tablet edges (v0.20), each tablet pair lifted to its composition pair via the v0.54 composition-assignments cache + v0.32 identifyComposition fallback, dropped if either endpoint resolves with confidence < 0.5; (2) chunk-index entries where ≥2 different compositions co-host the same shared chunk, contributing weight = chunk_length × 1/host_count. v0.72: the chunk-pair direction is now resolved by CHRONOLOGY — the composition with the later median witness-period quotes the earlier (edge src→tgt = src quotes tgt); only undatable/equal-period pairs split half-weight symmetric. This is a HEURISTIC PROXY (copy-date, not composition-date) and for this Neo-Assyrian-dominated corpus the signal is weak (most pairs stay symmetric); the citation stream is the only hard-directed evidence. Edges from both streams merge into a single multigraph; evidence_type flags 'citation' | 'chunk_parallel' | 'both'. Surface metrics: in/out-degree, directed_edge_fraction, recommended_min_edge_weight, sampled-source betweenness, Tarjan SCC. Set min_edge_weight to drop the formulaic tail. Outputs three files at ~/.cache/cuneiform-mcp/quotation-network/<iso-ts>/ — graph.json (canonical data), graph.dot (Graphviz-renderable; run `dot -Tsvg graph.dot > graph.svg`), summary.md (human-readable). Validation anchors: Maqlû ↔ Šurpu (anti-witchcraft overlap) and Mīs pî → Bīt salāʾ mê (sibling subseries) appear on the live corpus when run with defaults.",
     inputSchema: {
       min_chunk_length: z
         .number()
@@ -6951,7 +6951,14 @@ server.registerTool(
         .min(1)
         .optional()
         .describe(
-          "Minimum trigram-run length for chunk-parallel evidence. Default 25 (above noise floor; chunk-index window length is 20 in v0.20+, so values ≤20 admit every indexed chunk).",
+          "Minimum trigram-run length for chunk-parallel evidence. Default 20 (the chunk-index window length). v0.72 fix: the prior default of 25 silently disabled the chunk_parallel stream entirely, since every indexed chunk is exactly length-20.",
+        ),
+      min_edge_weight: z
+        .number()
+        .min(0)
+        .optional()
+        .describe(
+          "v0.72: drop edges whose accumulated weight is below this floor — breaks the near-complete graph produced by formulaic chunk-sharing. Default 0 (no pruning). metrics.recommended_min_edge_weight surfaces the median edge weight as a starting knee value.",
         ),
       min_citations: z
         .number()
@@ -6975,12 +6982,13 @@ server.registerTool(
         ),
     },
   },
-  async ({ min_chunk_length, min_citations, format, min_resolution_confidence }) => {
+  async ({ min_chunk_length, min_citations, format, min_resolution_confidence, min_edge_weight }) => {
     const SCHEMA = schemaId("compute_quotation_network");
     try {
       const result = computeQuotationNetwork({
         minChunkLength: min_chunk_length,
         minCitations: min_citations,
+        minEdgeWeight: min_edge_weight,
         format,
         minResolutionConfidence: min_resolution_confidence,
       });
