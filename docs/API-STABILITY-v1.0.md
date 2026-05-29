@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-29 at v0.71.0 (re-tiered the +10 tools from v0.58–v0.69; prior update v0.57.0). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-29 at v0.73.0 (added `surface_genre_conflicts` as Experimental; re-tiered the +10 tools from v0.58–v0.69; prior update v0.57.0). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 110 tools (as of v0.71.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 111 tools (as of v0.73.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -66,7 +66,7 @@ These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 
 ---
 
-## Experimental — v1.0 marks as "may change" (29 tools)
+## Experimental — v1.0 marks as "may change" (30 tools)
 
 Recent additions whose API may evolve before v1.0. Bug fixes + signature changes both possible.
 
@@ -78,6 +78,9 @@ Recent additions whose API may evolve before v1.0. Bug fixes + signature changes
 
 ### Unsupervised discovery (1, v0.69)
 - `discover_compositions` (v0.69 — k-means / Ward / DBSCAN over RI tablet embeddings as a registry-free negative-control; novelty-score formula + cluster-label heuristics may revise.)
+
+### Observational mining (1, v0.73)
+- `surface_genre_conflicts` (v0.73 — Genre-Conflict Sentinel: identify_composition family vs eBL editorial genre-family disagreements, classified by shared-window rarity into formulaic / likely_misassignment / embedded_quotation_candidate. Observational HYPOTHESES, not labels; corroboration is model-entangled; thresholds + signal taxonomy may revise. Never feeds G2.)
 
 ### Calibration utilities (1, v0.50)
 - `recalibrate_lacuna_scores` (v0.50 — Platt scaling for lacuna_semantic; output format may consolidate with `compute_confidence_calibration`)
@@ -153,11 +156,11 @@ Specialized; stable.
 | Specialized | 13 | Stable, niche |
 | RAG vault | 4 | Stable |
 | Apkallu / dataset extension | 2 | Stable |
-| **Total unique** | **110** | as of v0.71.0 |
+| **Total unique** | **111** | as of v0.73.0 |
 
 Notes:
 - **Canonical** is a featured re-listing of ten Stable tools (for visibility), not an additional tier — it is not added to the total.
-- The **authoritative unique total is 110** (as of v0.71.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. This re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental.
+- The **authoritative unique total is 111** (as of v0.73.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental).
 - The per-tier row counts carry minor pre-existing drift (a few sub-section headers were off by 1–2 before this update, e.g. the Stable header read "50" while its sub-sections summed to 57). Treat the per-tier numbers as approximate; the 110 unique total is the exact figure. A full per-tier recount is deferred to the v1.0 tag.
 
 ---

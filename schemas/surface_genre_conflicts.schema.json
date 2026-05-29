@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/surface_genre_conflicts.schema.json",
+  "title": "surface_genre_conflicts data payload",
+  "description": "v0.73.0 Genre-Conflict Sentinel. Surfaces tablets whose identify_composition family disagrees with their eBL editorial genre-family, characterized by the rarity of the shared length-20 sign-trigram window linking them to a composition exemplar. Each hit is classified: formulaic (boilerplate hub window — weak), likely_misassignment (rare overlap dominates the tablet), or embedded_quotation_candidate (rare overlap localized in an on-genre tablet). Observational HYPOTHESES for human review; not a label source; does not feed the v1.0 G2 gate. Corroboration is NOT model-independent (identify_composition is chunk-weighted). Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["conflicts", "by_family_pair", "by_signal", "stats", "params", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tablet_id",
+          "composition_id",
+          "composition_family",
+          "ebl_genre",
+          "ebl_family",
+          "confidence",
+          "matched_exemplar",
+          "shared_window_count",
+          "rarest_window_host_count",
+          "tablet_window_count",
+          "overlap_fraction",
+          "signal"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tablet_id": { "type": "string" },
+          "composition_id": { "type": "string" },
+          "composition_family": { "type": "string" },
+          "ebl_genre": { "type": "string" },
+          "ebl_family": { "type": "string" },
+          "confidence": { "type": "number" },
+          "matched_exemplar": { "type": "string" },
+          "shared_window_count": { "type": "integer" },
+          "rarest_window_host_count": { "type": "integer" },
+          "tablet_window_count": { "type": "integer" },
+          "overlap_fraction": { "type": "number" },
+          "signal": {
+            "type": "string",
+            "enum": ["embedded_quotation_candidate", "likely_misassignment", "formulaic"]
+          }
+        }
+      }
+    },
+    "by_family_pair": {
+      "type": "object",
+      "additionalProperties": { "type": "integer" },
+      "description": "count keyed by '<composition_family>-in-<ebl_family>', e.g. 'magic-in-medicine'"
+    },
+    "by_signal": {
+      "type": "object",
+      "additionalProperties": { "type": "integer" }
+    },
+    "stats": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "assignments_scanned": { "type": "integer" },
+        "conf_above_threshold": { "type": "integer" },
+        "cross_family": { "type": "integer" },
+        "corroborated": { "type": "integer" },
+        "exemplars_excluded": { "type": "integer" }
+      }
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "min_confidence": { "type": "number" },
+        "min_shared_chunks": { "type": "integer" },
+        "discriminating_host_max": { "type": "integer" },
+        "misassignment_fraction_min": { "type": "number" },
+        "max_window_host_count": { "type": ["integer", "null"] }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  }
+}

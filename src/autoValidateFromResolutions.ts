@@ -174,9 +174,13 @@ function loadCompositionAssignments(): Record<string, CachedAssignment> | null {
 
 /**
  * Pure RULE_D decision: should this candidate be proposed as a positive sibling
- * of `anchor`? Returns the justification text when an independent signal fires,
+ * of `anchor`? Returns the justification text when a corroborating signal fires,
  * else null. Model confidence is the pre-filter only — it never appears in the
- * justification. Exported for hermetic unit testing.
+ * justification. NB (v0.73 honesty correction): genre-leaf-match IS independent
+ * of every model (eBL editorial), but chunk-overlap is PARTIALLY model-entangled
+ * (identify_composition is chunk-weighted) — so this is a propose-only generator
+ * whose hits a human must confirm, not a fully independent check. Exported for
+ * hermetic unit testing.
  */
 export function compositionSiblingProposal(args: {
   candidate: string;
@@ -313,7 +317,9 @@ export function autoValidateFromResolutions(
     ruleCHits++;
   }
 
-  // Rule D (opt-in): composition-sibling positives from independent evidence.
+  // Rule D (opt-in): composition-sibling positives from corroborating evidence
+  // (genre-leaf-match = independent eBL editorial; chunk-overlap = partially
+  // model-entangled). Propose-only; every hit is human-confirmed before G2.
   let ruleDHits = 0;
   const threshold = opts.composition_sibling_threshold ?? 15;
   const minConf = opts.composition_sibling_min_conf ?? 0.95;

@@ -1,14 +1,16 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **110 tools** (v0.71.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **111 tools** (v0.73.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
 
 > **Status:** approaching a v1.0 tag. The API surface is frozen (see [`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)); the remaining gate is the labeled-positives validation set (see [v1.0 readiness](#v10-readiness) below). Methods paper resubmitted to JOHD as a Discussion Paper (2026-05-28).
 
-## What's new — v0.71.0
+## What's new — v0.73.0
 
 The work since v0.18 moved from corpus retrieval into a full **discovery + validation pipeline**, oriented around closing the v1.0 labeled-positives gate.
 
-- **v0.71 — `RULE_D` composition-sibling proposals** (opt-in, propose-only). `auto_validate_from_resolutions` can now surface NEW positive candidates at scale, justified by an *independent* signal — eBL editorial genre leaf-match **or** chunk-overlap ≥ threshold with a confirmed anchor — with `identify_composition` used only as a pre-filter (its confidence never justifies the label). Threshold calibrated against the store (all known negatives share 0 chunks; strong positives 29–76). Live run: 13 defensible positive proposals.
+- **v0.73 — `surface_genre_conflicts` (Genre-Conflict Sentinel).** Surfaces tablets where `identify_composition`'s family disagrees with eBL's editorial genre-family, classified by **shared-window rarity** into `formulaic` (boilerplate — the majority), `likely_misassignment`, or `embedded_quotation_candidate` (a rare passage localized in an on-genre tablet — the real "incantation embedded in a medical text" phenomenon). Observational hypotheses only; corroboration is model-entangled (disclosed); never feeds G2.
+- **v0.72 — quotation-network calibration.** `compute_quotation_network` gained chronology directionality (later-median-period composition quotes earlier) + an edge-weight threshold; the symmetric near-complete graph is now directed (honestly weak for this NA-dominated corpus — surfaced as a caveat).
+- **v0.71 — `RULE_D` composition-sibling proposals** (opt-in, propose-only). `auto_validate_from_resolutions` can surface NEW positive candidates, justified by eBL editorial genre leaf-match (genuinely independent) **or** chunk-overlap ≥ threshold with a confirmed anchor (a second, *partially model-entangled* signal — useful only because the rule is propose-only and every hit is human-confirmed). `identify_composition` is the pre-filter, never the label justification.
 - **v0.70 — §3.4 decision-tree boundary calibration.** Two `compare_tablet_pair` soft-spots fixed (widened `same_composition_different_scribe` band with confidence tapering; `thematic_only` now yields to a strong scribal signal), with both threshold moves recorded in the per-axis `CALIBRATION_REGISTRY` that `explain_pair_score` surfaces.
 - **v0.61 — `explain_pair_score`**: full provenance trace for any pairwise verdict — per-axis raw signals + the joint-pair model's additive decomposition + the §3.4 cross-axis verdict + calibration history.
 - **v0.54–v0.56 — composition-assignment cache + 6th model feature.** Corpus-wide `identify_composition` assignments feed `list_candidate_exemplars` and a `composition_assignment_match` feature on the joint-pair model.
@@ -51,11 +53,11 @@ Methods paper resubmitted to the Journal of Open Humanities Data as a Discussion
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 110 tools
+## 111 tools
 
 The toolchain has grown well past the point where a flat list is useful. The authoritative references:
 
-- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 110 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
+- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 111 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
 - **[`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)** — tools tiered by stability (canonical / stable / experimental / specialized) for the v1.0 freeze.
 
 ### The canonical ten (the 80%-of-work API)
@@ -120,12 +122,12 @@ Add to `~/.claude.json` (or the equivalent MCP-config path for your client) unde
 }
 ```
 
-Restart Claude Code. The 110 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 111 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "v0.71.0 smoke OK — 110 tools registered" and exits
+npm run smoke   # prints "v0.73.0 smoke OK — 111 tools registered" and exits
 ```
 
 ## Environment variables

@@ -2,7 +2,7 @@
 
 Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-05-24 against v0.26.0.
 
-**Total tools: 110**
+**Total tools: 111**
 
 ## `lookup_sign`
 
@@ -443,4 +443,8 @@ Find tablets with similar orthographic preferences — candidate same-scribe or 
 ## `get_scribal_signature`
 
 Retrieve the scribal-signature profile for a tablet: top-30 signs whose in-tablet frequency is unusually high (log-likelihood ratio) vs. corpus baseline. Use to inspect a tablet's orthographic preferences or to cross-check shared signs flagging a find_same_scribe_candidates pair.
+
+## `surface_genre_conflicts`
+
+Genre-Conflict Sentinel. Surfaces tablets where identify_composition's high-confidence composition-FAMILY (magic / divination / lexical, from registry typical_genre) disagrees with the tablet's eBL editorial genre-FAMILY (medicine / magic / divination / literature / lexical, from primary_genre), and…
 
