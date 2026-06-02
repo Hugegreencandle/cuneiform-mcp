@@ -55,6 +55,16 @@ export type ChunkParallel = {
    * with " … " between adjacent non-overlapping trigrams.
    */
   chunk_signs: string;
+  /**
+   * Longest STRICTLY-CONTIGUOUS verbatim sign run within this chunk (sign
+   * count). chunk_length is a trigram-position SPAN that may bridge X-damage
+   * gaps via the 2-of-3 inverted index; longest_contiguous_run is the largest
+   * unbroken sign segment (no " … " discontinuity in chunk_signs). When it is
+   * much smaller than chunk_length + 2 the chunk is a SPARSE ALIGNMENT, not a
+   * single verbatim quotation — callers must not present it as one. (v0.76:
+   * added so consumers can filter gappy hub artifacts, e.g. require ≥15.)
+   */
+  longest_contiguous_run: number;
   host_tablets: ChunkParallelHost[];
   host_count: number;
   /** Hosts whose primary genre differs from the source's primary genre. */
@@ -131,6 +141,33 @@ function reconstructChunkSigns(
     prev = cur;
   }
   return signs.join(" ");
+}
+
+/**
+ * Longest strictly-contiguous verbatim sign run within a chunk. Mirrors the
+ * sliding-window walk in reconstructChunkSigns: an overlapping trigram extends
+ * the current run by one sign; a discontinuity (X-skipped positions) resets it
+ * to a fresh 3-sign segment. Returns the max segment length in SIGNS.
+ */
+export function longestContiguousRun(
+  source: Pick<CorpusEntry, "trigrams_ordered">,
+  start: number,
+  length: number,
+): number {
+  if (length === 0) return 0;
+  const trigrams = source.trigrams_ordered.slice(start, start + length);
+  if (trigrams.length === 0) return 0;
+  let prev = trigrams[0].split(" ");
+  let curRun = 3; // first trigram = 3 contiguous signs
+  let maxRun = 3;
+  for (let i = 1; i < trigrams.length; i++) {
+    const cur = trigrams[i].split(" ");
+    if (cur[0] === prev[1] && cur[1] === prev[2]) curRun += 1;
+    else curRun = 3; // discontinuity → fresh segment
+    if (curRun > maxRun) maxRun = curRun;
+    prev = cur;
+  }
+  return maxRun;
 }
 
 function hostHasExcludedPrefix(tabletId: string, prefixes: string[]): boolean {
@@ -279,6 +316,7 @@ export function findChunkParallels(opts: ChunkParallelsOptions): ChunkParallelsR
       chunk_start: entry.chunk_start,
       chunk_length: entry.chunk_length,
       chunk_signs: reconstructChunkSigns(source, entry.chunk_start, entry.chunk_length),
+      longest_contiguous_run: longestContiguousRun(source, entry.chunk_start, entry.chunk_length),
       host_tablets: entry.hosts,
       host_count: hostCount,
       cross_genre_count: entry.crossGenre,

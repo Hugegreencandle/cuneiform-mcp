@@ -17,6 +17,7 @@
           "chunk_start",
           "chunk_length",
           "chunk_signs",
+          "longest_contiguous_run",
           "host_tablets",
           "host_count",
           "cross_genre_count",
@@ -43,6 +44,11 @@
           "chunk_signs": {
             "type": "string",
             "description": "Reconstructed sign sequence. When trigrams_ordered skips X-heavy positions, discontinuities are marked with ' … '."
+          },
+          "longest_contiguous_run": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Longest STRICTLY-CONTIGUOUS verbatim sign run within the chunk (signs). chunk_length is a trigram-position span that may bridge X-damage gaps; when longest_contiguous_run is much smaller than chunk_length + 2 the chunk is a sparse alignment, not a single verbatim quotation. Filter on this (e.g. ≥15) to exclude gappy hub artifacts."
           },
           "host_tablets": {
             "type": "array",
