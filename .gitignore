@@ -8,3 +8,7 @@ dist/
 
 # private working notes — not for public flip
 _private/
+
+# ephemeral agent / tooling dirs — never commit
+.claude/
+.playwright-mcp/

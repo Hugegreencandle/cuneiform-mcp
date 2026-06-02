@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="/css/xtf2tei.css" type="text/css"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:norm="http://oracc.org/ns/norm/1.0" xmlns:xmd="http://oracc.org/ns/xmd/1.0" xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title><note xmlns:xl="http://www.w3.org/1999/xlink" type="helplink" xl:type="simple" xl:href="/doc/user/teicolours.html" xl:show="new">(A key to the colourization may be found at: 
+		/doc/user/teicolours.html.)</note><name xmlns:xl="http://www.w3.org/1999/xlink" xl:type="simple" xl:href="https://cdli.mpiwg-berlin.mpg.de/P224485" xl:show="new" type="cdlicat:id_text">P224485</name> = <name type="cdlicat:primary_publication">SAA 01 001</name></title>
+        <respStmt>
+          <resp>generated at <date/> by </resp>
+          <name type="program">xtf2tei.xsl 1.1</name>
+        </respStmt>
+      </titleStmt>
+      <publicationStmt>
+        <availability>
+          <p>Electronic manuscript</p>
+        </availability>
+      </publicationStmt>
+      <sourceDesc>
+        <bibl>
+          <name type="file">saao/saa01/P224485.xtf</name>
+        </bibl>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text xml:lang="akk-x-neoass" type="transliteration" subtype="transliteration">
+    <body>
+      <div1 type="discourse" subtype="body">
+        <p>
+          <s xml:lang="akk-x-neoass" xml:id="P224485.U2">
+<lb n="1"/>
+<w lemma="awātu[word//word]N" xml:id="P224485.l00000"><damageSpan spanTo="#d.P224485.2.1.0"/>a<anchor type="damage" xml:id="d.P224485.2.1.0"/>-bat</w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00001"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l00002">a-</w>
+<w lemma="Aššur-šarru-uṣur[1//1]PN" xml:id="P224485.l00003"><c type="num">1</c>aš-<corr cert="high">šur</corr>—<c type="sign" subtype="logo">MAN</c>—<damageSpan spanTo="#d.P224485.2.5.0"/><c type="sign" subtype="logo">PAB</c></w>
+<w lemma="šulmu[completeness//health]N" xml:id="P224485.l00004">šul<anchor type="damage" xml:id="d.P224485.2.5.0"/>-mu</w>
+<w lemma="yâšim[to me//me]IP" xml:id="P224485.l00005">ia-<damageSpan spanTo="#d.P224485.2.6.1"/>a<anchor type="damage" xml:id="d.P224485.2.6.1"/>-ši</w>
+<lb n="2"/>
+<w lemma="šulmu[completeness//health]N" xml:id="P224485.l00006"><damageSpan spanTo="#d.P224485.3.1.0"/>šul<anchor type="damage" xml:id="d.P224485.3.1.0"/>-mu</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l00007">a-</w>
+<placeName><settlement><w lemma="Mat-Aššur[Assyria//Assyria]GN" xml:id="P224485.l00008"><c type="sign" subtype="logo">KUR</c>—aš-šur<c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c></w>
+</settlement></placeName><w lemma="libbu[interior//mood]N" xml:id="P224485.l00009"><damageSpan spanTo="#d.P224485.3.4.0"/><c type="sign" subtype="logo">ŠA₃</c><anchor type="damage" xml:id="d.P224485.3.4.0"/>-<anchor type="breakStart" xml:id="P224485.3.4.1"/>ka<anchor type="breakEnd" corresp="#P224485.3.4.1"/></w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l0000a"><damageSpan spanTo="#d.P224485.3.5.0"/>lu<anchor type="damage" xml:id="d.P224485.3.5.0"/></w>
+<w lemma="ṭābu[good//good]AJ" xml:id="P224485.l0000b"><c type="sign" subtype="logo">DUG₃</c>.<c type="sign" subtype="logo">GA</c>-ka</w>
+<lb n="3"/>
+<w lemma="ša[that//what]REL" xml:id="P224485.l0000c"><damageSpan spanTo="#d.P224485.4.1.0"/>ša<anchor type="damage" xml:id="d.P224485.4.1.0"/></w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l0000d">taš-pur-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0000e">ma-a</w>
+<w lemma="māru[son//son]N" xml:id="P224485.l0000f"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—šip-<damageSpan spanTo="#d.P224485.4.4.3"/>ri<anchor type="damage" xml:id="d.P224485.4.4.3"/></w>
+<w lemma="ša[of//of]DET" xml:id="P224485.l00011"><anchor type="breakStart" xml:id="P224485.4.5.0"/>ša<anchor type="breakEnd" corresp="#P224485.4.5.0"/></w>
+<w lemma="Mita[Midas//Midas]PN" xml:id="P224485.l00012"><c type="num">1</c>me-ta-a</w>
+<lb n="4"/>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00013"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>mus-ka-a.a</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00014">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00015"><c type="sign" subtype="logo">UGU</c>-hi-ia</w>
+<w lemma="alāku[go//come]V" xml:id="P224485.l00016">it-<damageSpan spanTo="#d.P224485.5.4.1"/>tal<anchor type="damage" xml:id="d.P224485.5.4.1"/>-ka</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00017">ma-a</w>
+<w xml:id="P224485.l00018"><c type="num">14</c></w>
+<w lemma="ṣābu[people//troops]N" xml:id="P224485.l00019"><c type="sign" subtype="logo">ERIM</c>-<c type="sign" subtype="logo"/></w>
+<lb n="5"/>
+<w lemma="Quaya[of Que//of Que]EN" xml:id="P224485.l0001a"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>qu-u-a.a</w>
+<w lemma="ša[that//who]REL" xml:id="P224485.l0001b">ša<anchor type="damage" xml:id="d.P224485.6.2.0"/></w>
+<w lemma="Urik[1//1]PN" xml:id="P224485.l0001c"><c type="num">1</c><damageSpan spanTo="#d.P224485.6.3.2"/>u₂-ri<anchor type="damage" xml:id="d.P224485.6.3.2"/>-ik</w>
+<w lemma="ana[to//for]PRP" xml:id="P224485.l0001d">a-</w>
+<w lemma="šapru[envoy//envoy]N" xml:id="P224485.l0001e"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c>šap-ru-te</w>
+<lb n="6"/>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l0001f">a-</w>
+<placeName><settlement><w lemma="Urarṭu[1//1]GN" xml:id="P224485.l00020"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c><c type="sign" subtype="logo"/></w>
+</settlement></placeName><w lemma="wabālu[bring//send]V" xml:id="P224485.l00021">u₂-še-bi-lu-u-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00022">ma-a</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00023">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00024"><c type="sign" subtype="logo">UGU</c>-hi-ia</w>
+<w lemma="našû[lifted//brought]AJ" xml:id="P224485.l00025">na-ṣa</w>
+<lb n="7"/>
+<w lemma="tarṣu[correct//suitable]AJ" xml:id="P224485.l00026">ta-ri-iṣ</w>
+<w lemma="adanniš[very much//very much]AV" xml:id="P224485.l00027">a—dan-niš</w>
+<w lemma="annûri[now//now]AV" xml:id="P224485.l00028">an-nu-</w>
+<w lemma="Aššur[1//1]DN" xml:id="P224485.l00029">aš-šur</w>
+<w lemma="Šamaš[1//1]DN" xml:id="P224485.l0002a"><c type="determinative" rend="pre" subtype="semantic">d</c><corr cert="high">ša₂</corr>-<corr cert="high">maš</corr></w>
+<w lemma="Bel[1//1]DN" xml:id="P224485.l0002b"><c type="sign" subtype="logo">EN</c></w>
+<lb n="8"/>
+<w lemma="Nabu[1//1]DN" xml:id="P224485.l0002c"><c type="determinative" rend="pre" subtype="semantic">d</c><c type="sign" subtype="logo">AG</c></w>
+<w lemma="ilu[god//god]N" xml:id="P224485.l0002d"><c type="sign" subtype="logo">DINGIR</c>-<c type="sign" subtype="logo"/>-ia</w>
+<w lemma="epēšu[do//do]V" xml:id="P224485.l0002e">e-tap-<damageSpan spanTo="#d.P224485.9.4.0"/>šu₂</w>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l0002f">la<anchor type="damage" xml:id="d.P224485.9.4.0"/></w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00030">ina</w>
+<w lemma="libbu[interior//interior]N" xml:id="P224485.l00031"><c type="sign" subtype="logo">ŠA₃</c></w>
+<w lemma="qarābu[battle//battle]N" xml:id="P224485.l00032">qa-ra-<corr cert="high">bi</corr></w>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l00033"><anchor type="breakStart" xml:id="P224485.9.8.0"/>la</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00034">ina</w>
+<w lemma="libbu[interior//interior]N" xml:id="P224485.l00035"><c type="sign" subtype="logo">ŠA₃</c><anchor type="breakEnd" corresp="#P224485.9.8.0"/></w>
+<w lemma="memēni[somebody//anything]XP" xml:id="P224485.l00036"><damageSpan spanTo="#d.P224485.9.11.0"/>me<anchor type="damage" xml:id="d.P224485.9.11.0"/>-me-ni</w>
+<lb n="9"/>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00037"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>mus-ka-a.a</w>
+<w lemma="pû[mouth//word]N" xml:id="P224485.l00038">pi-i-šu₂</w>
+<w lemma="tadānu[give//give]V" xml:id="P224485.l00039">it-ta-an-na--ši</w>
+<lb n="10"/>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l0003a">a-na</w>
+<w lemma="salmu[peaceful//ally]AJ" xml:id="P224485.l0003b">sa-al-mi-ni</w>
+<w lemma="târu[turn//turn]V" xml:id="P224485.l0003c">it-tu-ar</w>
+<w lemma="ša[that//what]REL" xml:id="P224485.l0003d"/>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l0003e">taš-pur-an-ni</w>
+<lb n="11"/>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0003f">ma-a</w>
+<w lemma="balāt[without//without]PRP" xml:id="P224485.l00040">ba-lat</w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00041"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l00042">be--ia</w>
+<w lemma="māru[son//son]N" xml:id="P224485.l00043"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—šip-ri-ia</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00045">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00046"><c type="sign" subtype="logo">UGU</c></w>
+<lb n="12"/>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00047"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>mus-ka-a.a</w>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l00048">la</w>
+<w lemma="šapāru[send//send]V" xml:id="P224485.l00049">a-šap-par</w>
+<w lemma="ūma[today//now]AV" xml:id="P224485.l0004a">u₂-ma-a</w>
+<w lemma="annûri[now//now]AV" xml:id="P224485.l0004b">an-nu-rig</w>
+<lb n="13"/>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l0004c">a-sap-rak-ka</w>
+<w lemma="māru[son//son]N" xml:id="P224485.l0004d"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—šip-ri-ka</w>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l0004f"><c type="sign" subtype="logo"/></w>
+<w lemma="pānu[front//front]N" xml:id="P224485.l00050">pa-an</w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00051"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>mus-ka-a.a</w>
+<lb n="14"/>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l00052">lu</w>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l00053"><damageSpan spanTo="#d.P224485.15.3.0"/>la</w>
+<w lemma="batāqu[cut off//cut off]V" xml:id="P224485.l00054">ta<anchor type="damage" xml:id="d.P224485.15.3.0"/>-bat-taq</w>
+<w lemma="dibbu[words//words]N" xml:id="P224485.l00055">-bi</w>
+<w lemma="ṭābu[good//good]AJ" xml:id="P224485.l00056"><c type="sign" subtype="logo">DUG₃</c>.<c type="sign" subtype="logo">GA</c>-<c type="sign" subtype="logo"/></w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l00057">šup-ra-aš₂-šu₂</w>
+<lb n="15"/>
+<w lemma="kayyamānu[permanent//constantly]AJ" xml:id="P224485.l00058">ka-a.a-ma-nu</w>
+<w lemma="mīnu[what?//whatever]QP" xml:id="P224485.l00059">mi-i-nu</w>
+<w lemma="ša[that//that]REL" xml:id="P224485.l0005a"/>
+<w lemma="ṭēmu[(fore)thought//report]N" xml:id="P224485.l0005b">ṭe₃-en-šu₂-ni</w>
+<w lemma="šemû[hear//listen to]V" xml:id="P224485.l0005c">ši-<damageSpan spanTo="#d.P224485.16.5.1"/><corr cert="high">mi</corr><anchor type="damage" xml:id="d.P224485.16.5.1"/></w>
+<w lemma="adi[until//until]PRP" xml:id="P224485.l0005d">a-du</w>
+<w lemma="bītu[house//house]N" xml:id="P224485.l0005e">be₂-et</w>
+<w lemma="riāqu[be(come) empty//be(come) available]V" xml:id="P224485.l0005f">a-ri-qa-an-ni</w>
+<lb n="16"/>
+<w lemma="ša[that//what]REL" xml:id="P224485.l00060">ša</w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l00061">taš-pur-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00062">ma-a</w>
+<w lemma="kī[like//in accordance with]PRP" xml:id="P224485.l00063">ki-i</w>
+<w lemma="ša[that//that]REL" xml:id="P224485.l00064">ša</w>
+<w lemma="šū[he//he]IP" xml:id="P224485.l00065">šu-u₂</w>
+<w lemma="ardu[slave//servant]N" xml:id="P224485.l00066"><c type="sign" subtype="logo">ARAD</c>-<c type="sign" subtype="logo"/></w>
+<w lemma="ša[of//of]DET" xml:id="P224485.l00067">ša</w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00068"><damageSpan spanTo="#d.P224485.17.9.0"/><c type="sign" subtype="logo">LUGAL</c><anchor type="damage" xml:id="d.P224485.17.9.0"/></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l00069">be-li₂-ia</w>
+<lb n="17"/>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l0006a">u₂-še-bi-il-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0006b">ma-a</w>
+<w lemma="anāku[I//I]IP" xml:id="P224485.l0006c">ana-ku</w>
+<w lemma="ardu[slave//servant]N" xml:id="P224485.l0006d"><c type="sign" subtype="logo">ARAD</c>-<c type="sign" subtype="logo">MEŠ</c>-ni-šu₂</w>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l0006e">lu-še-bi-la-<damageSpan spanTo="#d.P224485.18.5.4"/>aš₂<anchor type="damage" xml:id="d.P224485.18.5.4"/>-šu₂-u₂</w>
+<lb n="18"/>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l0006f">še-bi-la-aš₂-šu₂</w>
+<w lemma="basi[soon//so that]AV" xml:id="P224485.l00070">ba-si</w>
+<w lemma="libbu[interior//mood]N" xml:id="P224485.l00071">lib-bu-šu₂</w>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l00072">is-si-ni</w>
+<w lemma="pašāru[release//relent]V" xml:id="P224485.l00073">ip-<corr cert="high">pa</corr>-</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l00074">lu</w>
+<w xml:id="P224485.l00075"><c type="num">01</c></w>
+<w lemma="meʾatu[(one) hundred//(one) hundred]NU" xml:id="P224485.l00076">me</w>
+<w lemma="ardu[slave//servant]N" xml:id="P224485.l00077"><damageSpan spanTo="#d.P224485.19.9.0"/><c type="sign" subtype="logo">ARAD</c><anchor type="damage" xml:id="d.P224485.19.9.0"/>-<c type="sign" subtype="logo"/>-<damageSpan spanTo="#d.P224485.19.9.2"/><corr cert="low">šu₂</corr><anchor type="damage" xml:id="d.P224485.19.9.2"/></w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l00078">lu</w>
+<w xml:id="P224485.l00079"><c type="num">10</c></w>
+<lb n="19"/>
+<w lemma="kī[like//like]PRP" xml:id="P224485.l0007a"><damageSpan spanTo="#d.P224485.20.1.1"/>ki-i<anchor type="damage" xml:id="d.P224485.20.1.1"/></w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l0007b">an-<damageSpan spanTo="#d.P224485.20.3.0"/><corr cert="low">ni</corr></w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l0007c">šup<anchor type="damage" xml:id="d.P224485.20.3.0"/>-ra-šu₂</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0007d">ma-a</w>
+<w lemma="ṣābu[people//troops]N" xml:id="P224485.l0007e"><c type="sign" subtype="logo">ERIM</c>-<c type="sign" subtype="logo"/></w>
+<w lemma="Quaya[of Que//of Que]EN" xml:id="P224485.l0007f"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>qu-u-a.a</w>
+<w lemma="ša[that//who]REL" xml:id="P224485.l00080"/>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l00081"><damageSpan spanTo="#d.P224485.20.8.1"/>tu-še<anchor type="damage" xml:id="d.P224485.20.8.1"/>-bil-an-ni</w>
+<lb n="20"/>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00082"><damageSpan spanTo="#d.P224485.21.1.1"/>ma-a<anchor type="damage" xml:id="d.P224485.21.1.1"/></w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00083">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00084"><damageSpan spanTo="#d.P224485.21.5.1"/><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00085"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l00086">be-li₂<anchor type="damage" xml:id="d.P224485.21.5.1"/>-ia</w>
+<w lemma="šapāru[send//send]V" xml:id="P224485.l00087">-sap-par</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00088">ma-a</w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00089"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l0008a">be-li₂</w>
+<lb n="21"/>
+<w lemma="hadû[be(come) joyful//be(come) glad]V" xml:id="P224485.l0008b">ih-tu-du</w>
+<w lemma="adanniš[very much//very much]AV" xml:id="P224485.l0008c">a—dan-niš</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0008d">ma-<damageSpan spanTo="#d.P224485.22.3.1"/>a<anchor type="damage" xml:id="d.P224485.22.3.1"/></w>
+<w lemma="sahāru[go around//return]V" xml:id="P224485.l0008e">u₂-<damageSpan spanTo="#d.P224485.22.4.3"/>sa-hi-ir<anchor type="damage" xml:id="d.P224485.22.4.3"/></w>
+<w xml:id="P224485.l0008f"><anchor type="breakStart" xml:id="P224485.22.5.0"/>x</w>
+<w xml:id="P224485.l00090">x</w>
+<w xml:id="P224485.l00091">x</w>
+<w xml:id="P224485.l00092">x<anchor type="breakEnd" corresp="#P224485.22.5.0"/></w>
+<lb n="22"/>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00093">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00094"><c type="sign" subtype="logo">UGU</c>-hi-ia</w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l00095">is-sap-ra</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00096">ma-a</w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00097"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>-<damageSpan spanTo="#d.P224485.23.5.2"/>ka<anchor type="damage" xml:id="d.P224485.23.5.2"/>-a.a</w>
+<w lemma="ammar[as much as//as many as]REL" xml:id="P224485.l00098">am—mar<anchor type="breakEnd" corresp="#P224485.23.5.3"/></w>
+<lb n="23"/>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00099">ina</w>
+<w lemma="pānu[front//front]N" xml:id="P224485.l0009a">pa-ni-ka-ni</w>
+<w lemma="ištēn[one//one]NU" xml:id="P224485.l0009b"><c type="num">01</c>-en</w>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l0009c">la</w>
+<w lemma="kalû[hold (back)//hold (back)]V" xml:id="P224485.l0009d">ta-kal-la</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l0009e">ma-a</w>
+<w lemma="arhiš[quickly//quickly]AV" xml:id="P224485.l0009f"><anchor type="breakStart" xml:id="P224485.24.7.0"/>ar-hiš</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l000a0">a<anchor type="breakEnd" corresp="#P224485.24.7.0"/>-<damageSpan spanTo="#d.P224485.24.8.1"/>na<anchor type="damage" xml:id="d.P224485.24.8.1"/></w>
+<lb n="24"/>
+<w lemma="Mita[Midas//Midas]PN" xml:id="P224485.l000a1"><c type="num">1</c>me-ta-a</w>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l000a2">še-bi-il</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000a3">ma-a</w>
+<w lemma="ṣābu[people//troops]N" xml:id="P224485.l000a4"><c type="sign" subtype="logo">ERIM</c>-<c type="sign" subtype="logo"/></w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l000a5">an-<anchor type="breakStart" xml:id="P224485.25.5.1"/>nu-te<anchor type="breakEnd" corresp="#P224485.25.5.1"/></w>
+<lb n="25"/>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l000a6">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l000a7"><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="pû[mouth//command]N" xml:id="P224485.l000a8">pe-e</w>
+<w lemma="ša[of//of]DET" xml:id="P224485.l000a9"/>
+<w lemma="šarru[king//king]N" xml:id="P224485.l000aa"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l000ab">be-li₂-ia</w>
+<w lemma="wabālu[bring//send]V" xml:id="P224485.l000ac">u₂-<damageSpan spanTo="#d.P224485.26.7.1"/>se<anchor type="damage" xml:id="d.P224485.26.7.1"/>-bi-lak-ka</w>
+<lb n="26"/>
+<w lemma="ša[that//what]REL" xml:id="P224485.l000ad">ša</w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l000ae">taš-pur-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000af">ma-a</w>
+<w lemma="māru[son//son]N" xml:id="P224485.l000b0"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—šip-ri</w>
+<w lemma="ša[of//of]DET" xml:id="P224485.l000b2"/>
+<w lemma="Urpalaʾa[1//1]PN" xml:id="P224485.l000b3"><c type="num">1</c><damageSpan spanTo="#d.P224485.27.6.1"/>ur<anchor type="damage" xml:id="d.P224485.27.6.1"/>-pala-a</w>
+<lb n="27"/>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l000b4"><c type="sign" subtype="logo"/></w>
+<w lemma="māru[son//son]N" xml:id="P224485.l000b5"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—šip-ri</w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l000b7"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>-ka-a.a</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l000b8">a-na</w>
+<w lemma="šulmu[completeness//salutation]N" xml:id="P224485.l000b9"><c type="sign" subtype="logo">DI</c>-me</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l000ba">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l000bb"><c type="sign" subtype="logo">UGU</c>-hi-ia</w>
+<lb n="28"/>
+<w lemma="alāku[go//come]V" xml:id="P224485.l000bc">it-tal-ka</w>
+<w lemma="alāku[go//come]V" xml:id="P224485.l000bd">-li-ka</w>
+<w lemma="Aššur[1//1]DN" xml:id="P224485.l000be">aš-šur</w>
+<w lemma="Šamaš[1//1]DN" xml:id="P224485.l000bf"><c type="determinative" rend="pre" subtype="semantic">d</c><c type="sign" subtype="logo">UTU</c></w>
+<w lemma="Bel[1//1]DN" xml:id="P224485.l000c0"><c type="sign" subtype="logo">EN</c></w>
+<w lemma="u[and//and]CNJ" xml:id="P224485.l000c1">u</w>
+<w lemma="Nabu[1//1]DN" xml:id="P224485.l000c2"><c type="determinative" rend="pre" subtype="semantic">d</c><c type="sign" subtype="logo">PA</c></w>
+<lb n="29"/>
+<w lemma="qabû[say//say]V" xml:id="P224485.l000c3">liq-bi-u</w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l000c4"><c type="sign" subtype="logo">LUGAL</c>-<c type="sign" subtype="logo"/>-ni</w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l000c5">ha-an-nu-</w>
+<w lemma="gabbu[totality//all]N" xml:id="P224485.l000c6">gab-bi-šu₂-nu</w>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l000c7"><c type="sign" subtype="logo"/></w>
+<w lemma="ziqnu[beard//beard]N" xml:id="P224485.l000c8">ziq-ni-šu₂-nu</w>
+<lb n="30"/>
+<w lemma="mešēnu[sandal//sandal]N" xml:id="P224485.l000c9"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUŠ</g></c><c type="sign" subtype="logo">DA</c>.<c type="sign" subtype="logo">E</c>.<c type="sign" subtype="logo">SIR</c>-ka</w>
+<w lemma="šakkulu[wipe//wipe]V" xml:id="P224485.l000ca">lu--ki-lu</w>
+<lb n="31"/>
+<w lemma="ša[that//what]REL" xml:id="P224485.l000cb"><damageSpan spanTo="#d.P224485.32.1.0"/>ša<anchor type="damage" xml:id="d.P224485.32.1.0"/></w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l000cc"><anchor type="breakStart" xml:id="P224485.32.2.0"/>taš<anchor type="breakEnd" corresp="#P224485.32.2.0"/>-<damageSpan spanTo="#d.P224485.32.2.1"/>pur<anchor type="damage" xml:id="d.P224485.32.2.1"/>-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000cd">ma-a</w>
+<w lemma="Kilar[1//1]PN" xml:id="P224485.l000ce"><c type="num">1</c>ki-la-ar</w>
+<w xml:id="P224485.l000cf"><c type="num">04</c></w>
+<w lemma="nagû[region//region]N" xml:id="P224485.l000d0">na-gi-a-ni</w>
+<lb n="32"/>
+<w lemma="erēšu[request//request]V" xml:id="P224485.l000d1"><anchor type="breakStart" xml:id="P224485.33.1.0"/>e-tar-ša₂<anchor type="breakEnd" corresp="#P224485.33.1.0"/>-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000d2">ma-a</w>
+<w lemma="tadānu[give//give]V" xml:id="P224485.l000d3">lid--nu-ni</w>
+<w lemma="kīma[like//if]PRP" xml:id="P224485.l000d4">ki-ma</w>
+<w xml:id="P224485.l000d5"><c type="num">04</c></w>
+<w lemma="nagû[region//region]N" xml:id="P224485.l000d6">na-gi-a-ni</w>
+<lb n="33"/>
+<w lemma="annû[this//this]DP" xml:id="P224485.l000d7"><anchor type="breakStart" xml:id="P224485.34.1.0"/>an-nu-te</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l000d8">a<anchor type="breakEnd" corresp="#P224485.34.1.0"/>-<damageSpan spanTo="#d.P224485.34.2.1"/>na<anchor type="damage" xml:id="d.P224485.34.2.1"/></w>
+<w lemma="Kilar[1//1]PN" xml:id="P224485.l000d9"><c type="num">1</c>ki-la-ar</w>
+<w lemma="tadānu[give//give]V" xml:id="P224485.l000da">ta-<damageSpan spanTo="#d.P224485.34.4.1"/>at<anchor type="damage" xml:id="d.P224485.34.4.1"/>--</w>
+<lb n="34"/>
+<w lemma="lā[not//not]MOD" xml:id="P224485.l000db"><damageSpan spanTo="#d.P224485.35.1.0"/>la<anchor type="damage" xml:id="d.P224485.35.1.0"/></w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l000dc">a-</w>
+<w lemma="mehru[colleague//equal]N" xml:id="P224485.l000dd">mi-ih-<damageSpan spanTo="#d.P224485.35.3.2"/>ri<anchor type="damage" xml:id="d.P224485.35.3.2"/>-ka-a</w>
+<w lemma="târu[turn//turn]V" xml:id="P224485.l000de">i-<damageSpan spanTo="#d.P224485.35.4.1"/>tu<anchor type="damage" xml:id="d.P224485.35.4.1"/>-<corr cert="high">ar</corr></w>
+<lb n="35"/>
+<w lemma="atta[you//you]IP" xml:id="P224485.l000df">at-ta-</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l000e0">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l000e1"><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="mīnu[what?//what?]QP" xml:id="P224485.l000e2">mi-i-ni</w>
+<w lemma="pīhātūtu[provincial governorship//provincial governorship]N" xml:id="P224485.l000e3"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c>pa-ha-tu-<damageSpan spanTo="#d.P224485.36.5.5"/>u₂-tu₂<anchor type="damage" xml:id="d.P224485.36.5.5"/></w>
+<w lemma="epēšu[do//do]V" xml:id="P224485.l000e4">tu-up-pa-aš₂</w>
+<lb n="36"/>
+<w lemma="kī[like//like]PRP" xml:id="P224485.l000e5">ki-i</w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l000e6">an-ni-i</w>
+<w lemma="qabû[say//say]V" xml:id="P224485.l000e7">-ba-aš₂-šu₂</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000e8">ma-a</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l000e9">ina</w>
+<w lemma="timāli[yesterday//yesterday]AV" xml:id="P224485.l000ea">ti-<damageSpan spanTo="#d.P224485.37.6.1"/>ma<anchor type="damage" xml:id="d.P224485.37.6.1"/>-li</w>
+<w lemma="šalšūmi[the day before yesterday//the day before yesterday]AV" xml:id="P224485.l000eb">šal-ši—<c type="sign" subtype="logo">UD</c>-<damageSpan spanTo="#d.P224485.37.7.3"/>me<anchor type="damage" xml:id="d.P224485.37.7.3"/></w>
+<lb n="37"/>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l000ec"><damageSpan spanTo="#d.P224485.38.1.0"/><c type="sign" subtype="logo"/><anchor type="damage" xml:id="d.P224485.38.1.0"/></w>
+<w lemma="pānu[front//front]N" xml:id="P224485.l000ed"><c type="sign" subtype="logo">IGI</c></w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l000ee"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>mus-ka-a.a</w>
+<w lemma="palhu[fearful//fearful]AJ" xml:id="P224485.l000ef">pal-ha-a-ka</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000f0">ma-a</w>
+<w lemma="ūma[today//now]AV" xml:id="P224485.l000f1">u₂-ma-a</w>
+<lb n="38"/>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l000f2"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>-ka-a.a</w>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l000f3">is-si-ni</w>
+<w lemma="salāmu[be(come) at peace//make peace]V" xml:id="P224485.l000f4">is-si-lim</w>
+<milestone type="surface" unit="page" n="Reverse"/>
+<lb n="39"/>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000f5"><damageSpan spanTo="#d.P224485.41.1.0"/>ma<anchor type="damage" xml:id="d.P224485.41.1.0"/>-a</w>
+<w lemma="atta[you//you]IP" xml:id="P224485.l000f6">at-ta</w>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l000f7"><c type="sign" subtype="logo"/></w>
+<w lemma="pānu[front//front]N" xml:id="P224485.l000f8"><c type="sign" subtype="logo">IGI</c></w>
+<w lemma="mīnu[what?//what?]QP" xml:id="P224485.l000f9">mi-i-ni</w>
+<w lemma="palhu[fearful//fearful]AJ" xml:id="P224485.l000fa"><damageSpan spanTo="#d.P224485.41.6.0"/>pal<anchor type="damage" xml:id="d.P224485.41.6.0"/>-ha-a-ka</w>
+<lb n="40"/>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l000fb"><anchor type="breakStart" xml:id="P224485.42.1.0"/>ma<anchor type="breakEnd" corresp="#P224485.42.1.0"/>-a</w>
+<w lemma="ūma[today//now]AV" xml:id="P224485.l000fc">u₂-ma-a</w>
+<w lemma="ṣillu[shade//protection]N" xml:id="P224485.l000fd"><c type="sign" subtype="logo">GIŠ</c>.<c type="sign" subtype="logo">MI</c></w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l000fe"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l000ff">be-<damageSpan spanTo="#d.P224485.42.5.2"/>li₂-ia<anchor type="damage" xml:id="d.P224485.42.5.2"/></w>
+<w lemma="kusāpu[bread//bread]N" xml:id="P224485.l00100"><c type="sign" subtype="logo">NINDA</c>-<c type="sign" subtype="logo"/>-ka</w>
+<w lemma="akālu[eat//eat]V" xml:id="P224485.l00101">a-kul</w>
+<lb n="41"/>
+<w lemma="mû[water//water]N" xml:id="P224485.l00102"><c type="sign" subtype="logo">A</c>-<c type="sign" subtype="logo">MEŠ</c>-ka</w>
+<w lemma="šatû[drink//drink]V" xml:id="P224485.l00103">ši-ti</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00104">ma-<corr cert="high">a</corr></w>
+<w lemma="libbu[interior//mood]N" xml:id="P224485.l00105"><c type="sign" subtype="logo">ŠA₃</c>-ka</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l00106"><damageSpan spanTo="#d.P224485.43.5.0"/>lu<anchor type="damage" xml:id="d.P224485.43.5.0"/></w>
+<w lemma="ṭābu[good//good]AJ" xml:id="P224485.l00107"><anchor type="breakStart" xml:id="P224485.43.6.0"/><c type="sign" subtype="logo">DUG₃</c><anchor type="breakEnd" corresp="#P224485.43.6.0"/>.<c type="sign" subtype="logo">GA</c>-ka</w>
+<lb n="42"/>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00108">ma-a</w>
+<w lemma="niqittu[anxiety//anxiety]N" xml:id="P224485.l00109">ni-kit-ta-ka</w>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l0010a"><c type="sign" subtype="logo"/></w>
+<w lemma="pānu[front//front]N" xml:id="P224485.l0010b">pa-an</w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l0010c"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c><damageSpan spanTo="#d.P224485.44.5.1"/><anchor type="damage" xml:id="d.P224485.44.5.1"/>-ka-a.a</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l0010d">lu</w>
+<w lemma="laššu[(there) is not//(there) is not]V" xml:id="P224485.l0010e">la-aš₂-šu₂</w>
+<lb n="43"/>
+<w lemma="ša[that//what]REL" xml:id="P224485.l0010f">ša</w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l00110">taš-pur-an-ni</w>
+<w lemma="mā[saying//saying]PRP" xml:id="P224485.l00111">ma-a</w>
+<w lemma="Urpalaʾa[1//1]PN" xml:id="P224485.l00112"><c type="num">1</c>ur-pala-a</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00113">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00114"><damageSpan spanTo="#d.P224485.45.7.0"/><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="ša[that//that]REL" xml:id="P224485.l00115">ša<anchor type="damage" xml:id="d.P224485.45.7.0"/></w>
+<w lemma="Atunaya[of Atuna//of Atuna]EN" xml:id="P224485.l00116"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">URU</g></c>a-tu₂-<corr cert="high">na</corr>-a.a</w>
+<lb n="44"/>
+<w lemma="Ištundaya[of Ištunda//of Ištunda]EN" xml:id="P224485.l00117"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">URU</g></c>is-tu-an-da-a.a</w>
+<w lemma="alāku[go//come]V" xml:id="P224485.l00118">il-lik--ni</w>
+<w lemma="ālu[city//town]N" xml:id="P224485.l00119"><damageSpan spanTo="#d.P224485.46.3.0"/><c type="sign" subtype="logo">URU</c><anchor type="damage" xml:id="d.P224485.46.3.0"/>-<c type="sign" subtype="logo"/>-ni</w>
+<lb n="45"/>
+<w lemma="ša[of//of]DET" xml:id="P224485.l0011a">ša</w>
+<placeName><settlement><w lemma="Bit-Purutaš[1//1]GN" xml:id="P224485.l0011b"><c type="sign" subtype="logo">E₂</c>—<c type="num">1</c>pa-ru-ta</w>
+</settlement></placeName><w lemma="puāgu[take away forcibly from//abduct]V" xml:id="P224485.l0011c">i-pu-gu-<damageSpan spanTo="#d.P224485.47.3.4"/><corr cert="high">šu₂</corr>-ni<anchor type="damage" xml:id="d.P224485.47.3.4"/></w>
+<w xml:id="P224485.l0011d">xx</w>
+<w xml:id="P224485.l0011e">xx</w>
+<w xml:id="P224485.l0011f">x</w>
+<w xml:id="P224485.l00120">x<anchor type="breakEnd" corresp="#P224485.47.5.1"/></w>
+<lb n="46"/>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l00121"><damageSpan spanTo="#d.P224485.48.2.0"/><c type="sign" subtype="logo"/></w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00122"><c type="sign" subtype="logo">UGU</c><anchor type="damage" xml:id="d.P224485.48.2.0"/></w>
+<w lemma="šarru[king//king]N" xml:id="P224485.l00123"><c type="sign" subtype="logo">LUGAL</c></w>
+<w lemma="bēlu[lord//lord]N" xml:id="P224485.l00124">be-li₂-ia</w>
+<w xml:id="P224485.l00125"><anchor type="breakStart" xml:id="P224485.48.5.0"/>x</w>
+<w xml:id="P224485.l00126">x</w>
+<w xml:id="P224485.l00127">x<anchor type="breakEnd" corresp="#P224485.48.5.0"/></w>
+<w xml:id="P224485.l00128"><damageSpan spanTo="#d.P224485.48.9.0"/>di</w>
+<w xml:id="P224485.l00129">x<anchor type="damage" xml:id="d.P224485.48.9.0"/></w>
+<w lemma="annûri[now//now]AV" xml:id="P224485.l0012a">an-nu-rig</w>
+<lb n="47"/>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l0012b"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c><damageSpan spanTo="#d.P224485.49.1.1"/><anchor type="damage" xml:id="d.P224485.49.1.1"/>-<anchor type="breakStart" xml:id="P224485.49.1.2"/>ka-a.a</w>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l0012c">is<anchor type="damage" xml:id="d.P224485.49.2.0"/>-si-ni</w>
+<w lemma="salāmu[be(come) at peace//make peace]V" xml:id="P224485.l0012d">is-si-<damageSpan spanTo="#d.P224485.49.4.0"/>lim</w>
+<w lemma="kaʾādu[(meaning unknown)//(meaning unknown)]V" xml:id="P224485.l0012e">ik<anchor type="damage" xml:id="d.P224485.49.4.0"/>-ti-ii-di</w>
+<lb n="48"/>
+<w lemma="šarru[king//king]N" xml:id="P224485.l0012f"><c type="sign" subtype="logo">MAN</c>-<c type="sign" subtype="logo">MEŠ</c>-ni</w>
+<w lemma="ša[of//of]DET" xml:id="P224485.l00130"/>
+<placeName><settlement><w lemma="Tabalu[Tabal//Tabal]GN" xml:id="P224485.l00131"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c>ta-ba-li</w>
+</settlement></placeName><w lemma="gabbu[totality//all]N" xml:id="P224485.l00132">gab-<damageSpan spanTo="#d.P224485.50.4.1"/>bu<anchor type="damage" xml:id="d.P224485.50.4.1"/></w>
+<w lemma="mīnu[what?//what?]QP" xml:id="P224485.l00133"><anchor type="breakStart" xml:id="P224485.50.5.0"/>mi₃<anchor type="breakEnd" corresp="#P224485.50.5.0"/>-i-nu</w>
+<w lemma="hurri[ever (after)//further(more)]AV" xml:id="P224485.l00134">ah—hur</w>
+<lb n="49"/>
+<w lemma="epēšu[do//do]V" xml:id="P224485.l00135">ep-pu-šu</w>
+<w lemma="atta[you//you]IP" xml:id="P224485.l00136">at-ta</w>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l00137"><c type="sign" subtype="logo"/></w>
+<w lemma="annaka[here//here]AV" xml:id="P224485.l00138">na-ka</w>
+<w lemma="Muskaya[Phrygian//Phrygian]EN" xml:id="P224485.l00139"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c><damageSpan spanTo="#d.P224485.51.5.1"/>mus<anchor type="damage" xml:id="d.P224485.51.5.1"/>-<anchor type="breakStart" xml:id="P224485.51.5.2"/>ka-a.a</w>
+<w lemma="ištu[from//from]PRP" xml:id="P224485.l0013a"><c type="sign" subtype="logo"/></w>
+<w lemma="ammaka[there//there]AV" xml:id="P224485.l0013b">ma-ka</w>
+<lb n="50"/>
+<w lemma="mazāʾu[press//press]V" xml:id="P224485.l0013c">tu-ma-za-aʾ-šu₂-nu</w>
+<w lemma="basi[soon//so that]AV" xml:id="P224485.l0013d">ba-si</w>
+<w lemma="atta[you//you]IP" xml:id="P224485.l0013e">at-ta</w>
+<w lemma="ebīhu[(a rope or girdle)//belt]N" xml:id="P224485.l0013f">e-<damageSpan spanTo="#d.P224485.52.4.2"/>bi-ih<anchor type="damage" xml:id="d.P224485.52.4.2"/>-ka</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00140">ina</w>
+<w lemma="libbu[interior//interior]N" xml:id="P224485.l00141"><c type="sign" subtype="logo">ŠA₃</c>-bi-šu₂-nu</w>
+<lb n="51"/>
+<w lemma="rakāsu[bind//attach]V" xml:id="P224485.l00142">ta-rak-kas</w>
+<w lemma="annûri[now//now]AV" xml:id="P224485.l00143">an-nu-</w>
+<w lemma="Aššur[1//1]DN" xml:id="P224485.l00144">aš-šur</w>
+<w lemma="Šamaš[1//1]DN" xml:id="P224485.l00145"><c type="determinative" rend="pre" subtype="semantic">d</c>ša₂-maš</w>
+<w lemma="Bel[1//1]DN" xml:id="P224485.l00146"><c type="sign" subtype="logo">EN</c></w>
+<w lemma="u[and//and]CNJ" xml:id="P224485.l00147">u</w>
+<w lemma="Nabu[1//1]DN" xml:id="P224485.l00148"><c type="determinative" rend="pre" subtype="semantic">d</c><c type="sign" subtype="logo">PA</c></w>
+<lb n="52"/>
+<w lemma="ilu[god//god]N" xml:id="P224485.l00149"><c type="sign" subtype="logo">DINGIR</c>-<c type="sign" subtype="logo"/>-ia</w>
+<w lemma="epēšu[do//do]V" xml:id="P224485.l0014a">e-tap-šu₂</w>
+<w lemma="mātu[land//land]N" xml:id="P224485.l0014b"><c type="sign" subtype="logo">KUR</c></w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l0014c">ha-an-ni-tu₂</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l0014d">ina</w>
+<w lemma="šaplu[underside//under]N" xml:id="P224485.l0014e"><c type="sign" subtype="logo">KI</c>.<damageSpan spanTo="#d.P224485.54.6.1"/><c type="sign" subtype="logo">TA</c><anchor type="damage" xml:id="d.P224485.54.6.1"/></w>
+<w lemma="šēpu[foot//foot]N" xml:id="P224485.l0014f"><c type="sign" subtype="logo">GIR₃</c>.<c type="num">2</c>-ka</w>
+<lb n="53"/>
+<w lemma="kabāsu[tread//tread]V" xml:id="P224485.l00150">ta-at-tak-ba-</w>
+<w lemma="kī[like//in accordance with]PRP" xml:id="P224485.l00151">ki-i</w>
+<w lemma="libbu[interior//wish]N" xml:id="P224485.l00152"><c type="sign" subtype="logo">ŠA₃</c>-bi-ka</w>
+<w lemma="dâlu[move//run about]V" xml:id="P224485.l00153">du-u₂-lu</w>
+<lb n="54"/>
+<w lemma="mīnu[what?//whatever]QP" xml:id="P224485.l00154">mi-i-nu</w>
+<w lemma="ša[that//that]REL" xml:id="P224485.l00155">ša</w>
+<w lemma="dullu[trouble//work]N" xml:id="P224485.l00156"><damageSpan spanTo="#d.P224485.56.3.1"/><corr cert="high">dul</corr>-la<anchor type="damage" xml:id="d.P224485.56.3.1"/>-ka-ni</w>
+<w lemma="epēšu[do//do]V" xml:id="P224485.l00157">e-<damageSpan spanTo="#d.P224485.56.4.1"/>pu<anchor type="damage" xml:id="d.P224485.56.4.1"/>-uš</w>
+<w lemma="arku[long//long]AJ" xml:id="P224485.l00158">ar-<damageSpan spanTo="#d.P224485.56.5.1"/>ku<anchor type="damage" xml:id="d.P224485.56.5.1"/></w>
+<w lemma="batāqu[cut off//cut off]V" xml:id="P224485.l00159">bu-tu-qu</w>
+<lb n="55"/>
+<w lemma="kurû[short//short]AJ" xml:id="P224485.l0015a"><anchor type="breakStart" xml:id="P224485.57.1.0"/>ku<anchor type="breakEnd" corresp="#P224485.57.1.0"/>-<damageSpan spanTo="#d.P224485.57.1.1"/><corr cert="high">ri</corr><anchor type="damage" xml:id="d.P224485.57.1.1"/>-u₂</w>
+<w lemma="arāku[be(come) long//extend]V" xml:id="P224485.l0015b"><damageSpan spanTo="#d.P224485.57.2.1"/><corr cert="high">le</corr>-<corr cert="high">e</corr><anchor type="damage" xml:id="d.P224485.57.2.1"/>-<anchor type="breakStart" xml:id="P224485.57.2.2"/>rik<anchor type="breakEnd" corresp="#P224485.57.2.2"/></w>
+<w lemma="adi[until//until]PRP" xml:id="P224485.l0015c">a-du</w>
+<w lemma="bītu[house//house]N" xml:id="P224485.l0015d">be₂-et</w>
+<w lemma="anāku[I//I]IP" xml:id="P224485.l0015e">ana-ku</w>
+<w lemma="alāku[go//come]V" xml:id="P224485.l0015f">al-<damageSpan spanTo="#d.P224485.57.6.1"/>lak<anchor type="damage" xml:id="d.P224485.57.6.1"/>-an-ni</w>
+<lb n="56"/>
+<w lemma="dullu[trouble//work]N" xml:id="P224485.l00160">dul-lu</w>
+<w xml:id="P224485.l00161">xx</w>
+<w xml:id="P224485.l00162">xx</w>
+<w xml:id="P224485.l00163">x</w>
+<w xml:id="P224485.l00164">x-<corr cert="high">u₂</corr>-ni<anchor type="damage" xml:id="d.P224485.58.5.2"/></w>
+<w lemma="tadānu[give//give]V" xml:id="P224485.l00165">ad-<damageSpan spanTo="#d.P224485.58.6.1"/>da<anchor type="damage" xml:id="d.P224485.58.6.1"/>-na-kan-ni</w>
+<lb n="57"/>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00166">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00167"><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="Balassu[1//1]PN" xml:id="P224485.l00168"><c type="num">1</c><damageSpan spanTo="#d.P224485.59.3.1"/><corr cert="low">ba</corr><anchor type="damage" xml:id="d.P224485.59.3.1"/>-<anchor type="breakStart" xml:id="P224485.59.3.2"/>la-<corr cert="low">su</corr><anchor type="breakEnd" corresp="#P224485.59.3.2"/></w>
+<w lemma="ša[that//who]REL" xml:id="P224485.l00169"><damageSpan spanTo="#d.P224485.59.4.0"/>ša<anchor type="damage" xml:id="d.P224485.59.4.0"/></w>
+<w lemma="šapāru[send//write]V" xml:id="P224485.l0016a"><anchor type="breakStart" xml:id="P224485.59.5.0"/>taš-pur-an-ni<anchor type="breakEnd" corresp="#P224485.59.5.0"/></w>
+<w lemma="dibbu[words//words]N" xml:id="P224485.l0016b"><corr cert="high">dib</corr>-<corr cert="high">bi</corr>-<corr cert="high">šu</corr></w>
+<w lemma="gabbu[totality//all]N" xml:id="P224485.l0016c"><corr cert="high">gab</corr>-<corr cert="high">bu</corr></w>
+<w lemma="šemû[hear//hear]V" xml:id="P224485.l0016d"><corr cert="high">a</corr>-<damageSpan spanTo="#d.P224485.59.8.2"/><corr cert="high">se</corr>-<corr cert="high">me</corr><anchor type="damage" xml:id="d.P224485.59.8.2"/></w>
+<lb n="58"/>
+<w lemma="ūmu[day//day]N" xml:id="P224485.l0016e"><c type="sign" subtype="logo">UD</c>-mu</w>
+<w lemma="ša[that//that]REL" xml:id="P224485.l0016f"/>
+<w lemma="egertu[inscribed tablet//letter]N" xml:id="P224485.l00170">e-gir₂-tu₂</w>
+<w lemma="annû[this//this]DP" xml:id="P224485.l00171">an-<damageSpan spanTo="#d.P224485.60.4.1"/>ni<anchor type="damage" xml:id="d.P224485.60.4.1"/>-<anchor type="breakStart" xml:id="P224485.60.4.2"/>tu₂</w>
+<w lemma="amāru[see//see]V" xml:id="P224485.l00172">ta-am<anchor type="breakEnd" corresp="#P224485.60.4.2"/>-<damageSpan spanTo="#d.P224485.60.5.2"/>mar<anchor type="damage" xml:id="d.P224485.60.5.2"/>-u-ni</w>
+<w lemma="māru[son//son]N" xml:id="P224485.l00173"><c type="sign" subtype="logo">DUMU</c>-šu₂</w>
+<w lemma="kūm[instead of//instead of]PRP" xml:id="P224485.l00174">ku-<damageSpan spanTo="#d.P224485.60.7.2"/>mu-šu₂<anchor type="damage" xml:id="d.P224485.60.7.2"/></w>
+<lb n="59"/>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l00175">ina</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l00176"><c type="sign" subtype="logo">UGU</c></w>
+<w lemma="ṣābu[people//troops]N" xml:id="P224485.l00177"><c type="sign" subtype="logo">ERIM</c>-<c type="sign" subtype="logo"/>-šu₂</w>
+<w lemma="paqādu[entrust//appoint]V" xml:id="P224485.l00178">pi-qid</w>
+<w lemma="nišu[people//people]N" xml:id="P224485.l00179"><damageSpan spanTo="#d.P224485.61.5.2"/><c type="sign" subtype="logo">UN</c>-<c type="sign" subtype="logo">MEŠ</c>-šu₂<anchor type="damage" xml:id="d.P224485.61.5.2"/></w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l0017a">lu</w>
+<w lemma="kunnušu[assembled//assembled]AJ" xml:id="P224485.l0017b">kan-nu-šu₂</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l0017c">lu</w>
+<w lemma="kamsu[squatting//staying]AJ" xml:id="P224485.l0017d">kam-mu-su</w>
+<lb n="60"/>
+<w lemma="šumma[if//if]MOD" xml:id="P224485.l0017e">šum-ma</w>
+<w lemma="libbu[interior//wish]N" xml:id="P224485.l0017f">lib-bu-šu₂</w>
+<w lemma="šadû[mountain//mountain]N" xml:id="P224485.l00180"><c type="sign" subtype="logo">KUR</c>-u₂</w>
+<w lemma="nabalkutu[cross over//take across]V" xml:id="P224485.l00181">lu-ša₂-bal-ki-ta</w>
+<w lemma="ašābu[sit (down)//settle]V" xml:id="P224485.l00182">lu-še-šib-šu₂-nu</w>
+<lb n="61"/>
+<w lemma="ūla[or//otherwise]AV" xml:id="P224485.l00183">u₂-la-a</w>
+<w lemma="annaka[here//here]AV" xml:id="P224485.l00184">ha--ka-ma</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l00185">lu</w>
+<w lemma="kamsu[squatting//staying]AJ" xml:id="P224485.l00186">kam-mu-su</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l00187">a-na</w>
+<w lemma="šâšu[him//him]IP" xml:id="P224485.l00188">ša₂-a-šu₂</w>
+<lb n="62"/>
+<w lemma="tašlīšu[third man on chariot//third man on chariot]N" xml:id="P224485.l00189"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="num">03</c>.<c type="sign" subtype="logo">U₅</c>-ka</w>
+<w lemma="ištēn[one//one]NU" xml:id="P224485.l0018a"><c type="num">01</c>-en</w>
+<w lemma="ana[to//to]PRP" xml:id="P224485.l0018b">a-</w>
+<w lemma="kallû[express messenger//express messenger]N" xml:id="P224485.l0018c">kal-li-e</w>
+<w lemma="matāhu[lift//pick up]V" xml:id="P224485.l0018d">li-in-tu-ha-aš₂-šu₂</w>
+<lb n="63"/>
+<w lemma="alāku[go//come]V" xml:id="P224485.l0018e">lil-li-ka</w>
+<w lemma="dibbu[words//words]N" xml:id="P224485.l0018f">dib-bi</w>
+<w lemma="ṭābu[good//good]AJ" xml:id="P224485.l00190"><c type="sign" subtype="logo">DUG₃</c>.<c type="sign" subtype="logo">GA</c>-<c type="sign" subtype="logo"/></w>
+<w lemma="išti[with//with]PRP" xml:id="P224485.l00191">is-si-šu₂</w>
+<w lemma="dabābu[speak//speak]V" xml:id="P224485.l00192">la-ad-bu-ub</w>
+<lb n="64"/>
+<w lemma="libbu[interior//mood]N" xml:id="P224485.l00193">lib-bu</w>
+<w lemma="šakānu[put//encourage]V" xml:id="P224485.l00194">la-aš₂-kun-<anchor type="breakStart" xml:id="P224485.66.2.3"/>šu₂<anchor type="breakEnd" corresp="#P224485.66.2.3"/></w>
+<w lemma="basi[soon//so that]AV" xml:id="P224485.l00195">ba-si</w>
+<w lemma="šapāru[send//send]V" xml:id="P224485.l00196">a-šap-pa-ra</w>
+<w lemma="nišu[people//people]N" xml:id="P224485.l00197"><c type="sign" subtype="logo">UN</c>-<c type="sign" subtype="logo"/>-šu₂</w>
+<lb n="65"/>
+<w lemma="ša[that//who]REL" xml:id="P224485.l00198">ša</w>
+<w lemma="annaka[here//here]AV" xml:id="P224485.l00199">ha--ka</w>
+<w lemma="sahāru[go around//return]V" xml:id="P224485.l0019a">u₂-sa-har-u₂-ni</w>
+<w lemma="alāku[go//go]V" xml:id="P224485.l0019b">il-lak</w>
+<w lemma="ina[in//in]PRP" xml:id="P224485.l0019c">ina</w>
+<w lemma="bītu[house//house]N" xml:id="P224485.l0019d"><c type="sign" subtype="logo">E₂</c>-šu₂</w>
+<lb n="66"/>
+<w lemma="erēbu[enter//enter]V" xml:id="P224485.l0019e">e-rab</w>
+<w lemma="Aplaya[1//1]PN" xml:id="P224485.l0019f"><c type="num">1</c><c type="sign" subtype="logo">DUMU</c>.<c type="sign" subtype="logo">UŠ</c>-<damageSpan spanTo="#d.P224485.68.2.3"/>ia<anchor type="damage" xml:id="d.P224485.68.2.3"/></w>
+<w lemma="šūtu[he//he]IP" xml:id="P224485.l001a0">šu-tu₂</w>
+<w lemma="adi[until//with]PRP" xml:id="P224485.l001a1">a-du</w>
+<w lemma="nišu[people//people]N" xml:id="P224485.l001a2"><c type="sign" subtype="logo">UN</c>-<c type="sign" subtype="logo">MEŠ</c>-šu₂</w>
+<lb n="67"/>
+<w lemma="māru[son//son]N" xml:id="P224485.l001a3"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo"/></c><c type="sign" subtype="logo">A</c>—<c type="sign" subtype="logo">KIN</c>-ka</w>
+<w lemma="adi[until//until]PRP" xml:id="P224485.l001a5">a-du</w>
+<w lemma="muhhu[skull//skull]N" xml:id="P224485.l001a6"><c type="sign" subtype="logo">UGU</c>-hi-ia</w>
+<w lemma="wabālu[bring//bring]V" xml:id="P224485.l001a7">lu-bi-la-šu₂-nu</w>
+<lb n="68"/>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001a8">lu</w>
+<placeName><settlement><w lemma="māru[son//son]N" xml:id="P224485.l001a9"><c type="sign" subtype="logo">DUMU</c>-<c type="sign" subtype="logo">MEŠ</c>—<c type="sign" subtype="logo">KA₂</c>.<c type="sign" subtype="logo">DINGIR</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c></w>
+</settlement></placeName><w lemma="lū[may//may]MOD" xml:id="P224485.l001ab">lu-u</w>
+<placeName><settlement><w lemma="māru[son//son]N" xml:id="P224485.l001ac"><c type="sign" subtype="logo">DUMU</c>—<c type="sign" subtype="logo">BAR₂</c>.<c type="sign" subtype="logo">SIPA</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c></w>
+</settlement></placeName><lb n="69"/>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001ae">lu-u</w>
+<w lemma="Kišaya[of Kish//of Kish]EN" xml:id="P224485.l001af"><c type="sign" subtype="logo">KIŠ</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c>-a.a</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001b0">lu</w>
+<w lemma="Nippuraya[of Nippur//of Nippur]EN" xml:id="P224485.l001b1"><c type="sign" subtype="logo">EN</c>.<c type="sign" subtype="logo">LIL₂</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c>-a.a</w>
+<lb n="70"/>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001b2">lu</w>
+<w lemma="Urukaya[of Uruk//of Uruk]EN" xml:id="P224485.l001b3"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">URU</g></c><c type="sign" subtype="logo">UNUG</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c>-a.a</w>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001b4">lu</w>
+<w lemma="Deraya[of Der//of Der]EN" xml:id="P224485.l001b5"><c type="determinative" rend="pre" subtype="semantic"><g type="sign" subtype="logo">KUR</g></c><c type="sign" subtype="logo">BAD₃</c>.<c type="sign" subtype="logo">DINGIR</c><c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c>-a.a</w>
+<lb n="71"/>
+<w lemma="lū[may//may]MOD" xml:id="P224485.l001b6">lu</w>
+<note type="inline" rend="dollar">blank</note>
+<note type="other" rend="dollar">rest uninscribed</note>
+</s>
+        </p>
+      </div1>
+      <div1 xmlns:xtr="http://oracc.org/ns/xtr/1.0" type="translation" subtype="project" xml:lang="en" xml:id="P224485_project-en">
+        <div3 type="tr" xml:id="P224485_project-en.0" n="1" xtr:lab-start-label="1" xtr:lab-start-lnum="1" xtr:se_label="SAA 01 001, 1" xtr:label="1" xtr:sref="P224485.2" xtr:eref="P224485.3" xtr:rows="2" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">The</span> <span type="w">king's</span> <span type="w">word</span> <span type="w">to</span> <span type="w">Aššur-šarru-u<span type="r">[</span>ṣur</span><span type="r">]</span>: <span type="w">I</span> <span type="w">am</span> <span type="w">well</span>, <span type="w">Assyria</span> <span type="w">is</span> <span type="w">well</span>: <span type="w">you</span> <span type="w">can</span> <span type="w">be</span> <span type="w">glad</span>.</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.1" n="3" xtr:lab-start-label="3" xtr:lab-start-lnum="3" xtr:se_label="SAA 01 001, 3" xtr:label="3" xtr:sref="P224485.4" xtr:eref="P224485.10" xtr:rows="7" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span> <span type="w">to</span> <span type="w">me</span>: "<span type="w">A</span> <span type="w">messenger</span> <span type="r">[</span><span type="w">of</span><span type="r">]</span> <span type="w">Midas</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">has</span> <span type="w">come</span> <span type="w">to</span> <span type="w">me</span>, <span type="w">bringing</span> <span type="w">me</span> <span type="w">14</span> <span type="w">men</span> <span type="w">of</span> <span type="w">Que</span> <span type="w">whom</span> <span type="w">Urik</span> <span type="w">had</span> <span type="w">sent</span> <span type="w">to</span> <span type="w">Urarṭu</span> <span type="w">as</span> <span type="w">an</span> <span type="w">embassy</span>" <span type="w">—</span> <span type="w">this</span> <span type="w">is</span> <span type="w">extremely</span> <span type="w">good</span>! <span type="w">My</span> <span type="w">gods</span> <span type="w">Aššur</span>, <span type="w">Šamaš</span>, <span type="w">Bel</span> <span type="w">and</span> <span type="w">Nabû</span> <span type="w">have</span> <span type="w">now</span> <span type="w">taken</span> <span type="w">action</span>, <span type="w">and</span> <span type="w">without</span> <span type="w">a</span> <span type="w">battle</span> <span type="r">[</span><span type="w">or</span> <span type="w">any<span type="r">]</span>thing</span>, <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">has</span> <span type="w">given</span> <span type="w">us</span> <span type="w">his</span> <span type="w">word</span> <span type="w">and</span> <span type="w">become</span> <span type="w">our</span> <span type="w">ally</span>!</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.2" n="10" xtr:lab-start-label="10" xtr:lab-start-lnum="10" xtr:se_label="SAA 01 001, 10" xtr:label="10" xtr:sref="P224485.11" xtr:eref="P224485.16" xtr:rows="6" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span>: "<span type="w">I</span> <span type="w">shall</span> <span type="w">not</span> <span type="w">send</span> <span type="w">my</span> <span type="w">messenger</span> <span type="w">to</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">without</span> <span type="w">the</span> <span type="w">permission</span> <span type="w">of</span> <span type="w">the</span> <span type="w">king</span>, <span type="w">my</span> <span type="w">lord</span>" <span type="w">—</span> <span type="w">I</span> <span type="w">am</span>  <span type="w">now</span> <span type="w">writing</span> <span type="w">to</span> <span type="r">(</span><span type="w">tell</span><span type="r">)</span> <span type="w">you</span> <span type="w">that</span> <span type="w">you</span> <span type="w">should</span> <span type="w">not</span> <span type="w">cut</span> <span type="w">off</span> <span type="w">your</span> <span type="w">messenger</span> <span type="w">from</span> <span type="w">the</span> <span type="w">Phrygian's</span> <span type="w">presence</span>. <span type="w">Write</span> <span type="w">to</span> <span type="w">him</span> <span type="w">in</span> <span type="w">friendly</span> <span type="w">terms</span> <span type="w">and</span> <span type="w">constantly</span> <span type="w">listen</span> <span type="w">to</span> <span type="w">news</span> <span type="w">about</span> <span type="w">him</span>, <span type="w">until</span> <span type="w">I</span> <span type="w">have</span> <span type="w">more</span> <span type="w">time</span>.</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.3" n="16" xtr:lab-start-label="16" xtr:lab-start-lnum="16" xtr:se_label="SAA 01 001, 16" xtr:label="16" xtr:sref="P224485.17" xtr:eref="P224485.26" xtr:rows="10" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span>: "<span type="w">Should</span> <span type="w">I</span> <span type="w">send</span> <span type="w">his</span> <span type="w">subjects</span> <span type="w">to</span> <span type="w">him</span> <span type="w">just</span> <span type="w">as</span> <span type="w">he</span> <span type="w">sent</span> <span type="w">me</span> <span type="w">the</span> <span type="w">subjects</span> <span type="w">of</span> <span type="w">the</span> <span type="w">king</span> <span type="w">my</span> <span type="w">lord</span>?" <span type="w">—</span> <span type="w">send</span> <span type="w">them</span> <span type="w">to</span> <span type="w">him</span> <span type="w">so</span> <span type="w">that</span> <span type="w">he</span> <span type="w">will</span> <span type="w">be</span> <span type="w">favourably</span> <span type="w">disposed</span> <span type="w">towards</span> <span type="w">us</span>. <span type="w">Whether</span> <span type="w">100</span> <span type="w">men</span> <span type="w">or</span> <span type="w">10</span>, <span type="w">write</span> <span type="w">to</span> <span type="w">him</span> <span type="w">like</span> <span type="w">this</span>: "<span type="w">I</span> <span type="w">wrote</span> <span type="w">to</span> <span type="w">the</span> <span type="w">king</span> <span type="w">my</span> <span type="w">lord</span> <span type="w">about</span> <span type="w">the</span> <span type="w">men</span> <span type="w">of</span> <span type="w">Que</span> <span type="w">whom</span> <span type="w">you</span> <span type="w">sent</span> <span type="w">to</span> <span type="w">me</span>, <span type="w">and</span> <span type="w">he</span> <span type="w">was</span>  <span type="w">extremely</span> <span type="w">pleased</span>; <span type="w">and</span> <span type="w">in</span> <span type="w">return</span> <span type="w">he</span> <span type="w">wrote</span> <span type="w">to</span> <span type="w">me</span> <span type="r">[</span><span type="w">as</span> <span type="w">follows</span><span type="r">]</span>: '<span type="w">Do</span>  <span type="w">not</span> <span type="w">hold</span> <span type="w">back</span> <span type="w">even</span> <span type="w">a</span> <span type="w">single</span> <span type="w">one</span> <span type="w">of</span> <span type="w">the</span> <span type="w">Phrygians</span> <span type="w">at</span> <span type="w">your</span> <span type="w">court</span>, <span type="w">but</span> <span type="w">send</span> <span type="w">them</span> <span type="w">to</span> <span type="w">Midas</span> <span type="r">[</span><span type="i"><span type="w">immediately</span></span><span type="r">]</span>!' <span type="w">Thus</span> <span type="w">at</span> <span type="w">the</span> <span type="w">king</span> <span type="w">my</span> <span type="w">lord's</span> <span type="w">behest</span> <span type="w">I</span> <span type="w">am</span> <span type="r">(</span><span type="w">now</span><span type="r">)</span> <span type="w">sending</span> <span type="w">you</span> <span type="w">th<span type="r">[</span>ese</span><span type="r">]</span> <span type="w">men</span>."</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.4" n="26" xtr:cid="P224485_project-en.1" xtr:lab-start-label="26" xtr:lab-start-lnum="26" xtr:se_label="SAA 01 001, 26" xtr:label="26" xtr:sref="P224485.27" xtr:eref="P224485.31" xtr:rows="5" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span>: "<span type="w">A</span> <span type="w">messenger</span> <span type="w">of</span> <span type="w">Urpala'a</span> <span type="w">came</span> <span type="w">to</span> <span type="w">me</span> <span type="w">for</span> <span type="w">an</span> <span type="w">audience</span> <span type="w">with</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">messenger</span>" <span type="w">—</span> <span type="w">let</span> <span type="w">him</span> <span type="w">come</span>, <span type="w">and</span>  <span type="w">let</span> <span type="w">Aššur</span>, <span type="w">Šamaš</span>, <span type="w">Bel</span> <span type="w">and</span> <span type="w">Nabû</span> <span type="w">command</span> <span type="w">that</span> <span type="w">all</span> <span type="w">these</span> <span type="w">kings</span> <span type="w">should</span> <span type="w">wipe</span> <span type="w">your</span> <span type="w">sandals</span> <span type="w">with</span> <span type="w">their</span> <span type="w">beards</span>!</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.5" n="31" xtr:cid="P224485_project-en.2" xtr:lab-start-label="31" xtr:lab-start-lnum="31" xtr:se_label="SAA 01 001, 31" xtr:label="31" xtr:sref="P224485.32" xtr:eref="P224485.44" xtr:rows="13" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span>: "<span type="w">Kilar</span> <span type="r">[</span><span type="w">has</span> <span type="w">request<span type="r">]</span>ed</span> <span type="w">from</span> <span type="w">me</span> <span type="w">four</span> <span type="w">districts</span>, <span type="w">saying</span>: '<span type="w">Let</span> <span type="w">them</span> <span type="w">give</span> <span type="w">them</span> <span type="w">to</span> <span type="w">me</span>'" <span type="w">—</span> <span type="w">should</span> <span type="w">you</span> <span type="w">give</span>  <span type="r">[</span><span type="w">these</span><span type="r">]</span> <span type="w">four</span> <span type="w">districts</span> <span type="w">to</span> <span type="w">Kilar</span>, <span type="w">would</span> <span type="w">he</span> <span type="w">not</span> <span type="w">become</span> <span type="w">your</span> <span type="w">equal</span>, <span type="w">and</span> <span type="w">what</span> <span type="w">would</span> <span type="w">you</span> <span type="w">yourself</span> <span type="w">be</span> <span type="w">ruling</span> <span type="w">over</span> <span type="w">as</span> <span type="w">governor</span> <span type="w">then</span>? <span type="w">Tell</span>  <span type="w">him</span> <span type="w">as</span> <span type="w">follows</span>: "<span type="w">Earlier</span>, <span type="w">you</span> <span type="w">were</span> <span type="w">afraid</span> <span type="w">of</span> <span type="w">the</span> <span type="w">Phrygian</span>, <span type="w">but</span> <span type="w">now</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">has</span> <span type="w">made</span> <span type="w">peace</span> <span type="w">with</span> <span type="w">us</span>, <span type="w">so</span> <span type="w">what</span> <span type="w">are</span> <span type="w">you</span> <span type="w">afraid</span> <span type="w">of</span>? <span type="w">Now</span> <span type="w">eat</span> <span type="w">your</span> <span type="w">bread</span> <span type="w">and</span> <span type="w">drink</span> <span type="w">your</span> <span type="w">water</span> <span type="w">under</span> <span type="w">the</span> <span type="w">protection</span> <span type="w">of</span> <span type="w">the</span> <span type="w">king</span>, <span type="w">my</span> <span type="w">lord</span>, <span type="w">and</span> <span type="w">be</span> <span type="w">happy</span>. <span type="w">Do</span> <span type="w">not</span> <span type="w">worry</span> <span type="w">about</span> <span type="w">the</span> <span type="w">Phrygian</span>."</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.6" n="43" xtr:cid="P224485_project-en.3" xtr:lab-start-label="43" xtr:lab-start-lnum="43" xtr:se_label="SAA 01 001, 43" xtr:label="43" xtr:sref="P224485.45" xtr:eref="P224485.58" xtr:rows="14" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="w">what</span> <span type="w">you</span> <span type="w">wrote</span>: "<span type="w">Urpala'a</span> <span type="r">[</span><span type="i"><span type="w">may</span> <span type="w">slip</span> <span type="w">away</span></span><span type="r">]</span> <span type="w">from</span> <span type="w">the</span> <span type="w">king</span>, <span type="w">my</span> <span type="w">lord</span>, <span type="w">on</span> <span type="w">account</span> <span type="w">of</span> <span type="w">the</span> <span type="w">fact</span> <span type="w">that</span> <span type="w">the</span> <span type="w">Atunnaeans</span> <span type="w">and</span> <span type="w">Istuandaeans</span> <span type="w">came</span> <span type="w">and</span> <span type="w">took</span> <span type="w">the</span> <span type="w">cities</span> <span type="w">of</span> <span type="w">Bit-Paruta</span> <span type="w">away</span> <span type="w">from</span> <span type="w">him</span>" <span type="w">—</span> <span type="w">now</span> <span type="w">that</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">has</span> <span type="w">made</span> <span type="w">peace</span> <span type="w">with</span> <span type="w">us</span> <span type="w">and</span> ..., <span type="w">what</span> <span type="w">can</span> <span type="w">all</span> <span type="w">the</span> <span type="w">kings</span> <span type="w">of</span> <span type="w">Tabal</span> <span type="w">do</span> <span type="w">henceforth</span>? <span type="w">You</span> <span type="w">will</span> <span type="w">press</span> <span type="w">them</span> <span type="w">from</span> <span type="w">this</span> <span type="w">side</span> <span type="w">and</span> <span type="w">the</span> <span type="w">Phrygian</span> <span type="w">from</span> <span type="w">that</span> <span type="w">side</span> <span type="w">so</span> <span type="w">that</span>  <span type="r">(</span><span type="w">in</span> <span type="w">no</span> <span type="w">time</span><span type="r">)</span> <span type="w">you</span> <span type="w">will</span> <span type="w">snap</span> <span type="w">your</span> <span type="w">belt</span> <span type="w">on</span> <span type="w">them</span>. <span type="w">Thanks</span> <span type="w">to</span> <span type="w">my</span> <span type="w">gods</span> <span type="w">Aššur</span>, <span type="w">Šamaš</span>, <span type="w">Bel</span> <span type="w">and</span> <span type="w">Nabû</span>, <span type="w">this</span> <span type="w">land</span> <span type="w">has</span> <span type="w">now</span> <span type="w">been</span> <span type="w">trodden</span> <span type="w">under</span>  <span type="w">your</span> <span type="w">feet</span>! <span type="w">Move</span> <span type="w">about</span> <span type="w">as</span> <span type="w">you</span> <span type="w">please</span>, <span type="w">do</span> <span type="w">whatever</span> <span type="w">you</span> <span type="w">have</span> <span type="w">to</span> <span type="w">do</span>, <span type="i"><span type="w">cut</span> <span type="w">the</span> <span type="w">long</span> <span type="w">and</span> <span type="w">lengthen</span> <span type="w">the</span> <span type="w">short</span></span> <span type="w">until</span> <span type="w">I</span> <span type="w">come</span> <span type="w">and</span> <span type="w">give</span> <span type="w">you</span> <span type="r">[</span>...<span type="r">]</span> <span type="w">work</span>!</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.7" n="57" xtr:cid="P224485_project-en.4" xtr:lab-start-label="57" xtr:lab-start-lnum="57" xtr:se_label="SAA 01 001, 57" xtr:label="57" xtr:sref="P224485.59" xtr:eref="P224485.67" xtr:rows="9" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">to</span> <span type="i"><span type="w">Ba<span type="r">[</span>lasu</span></span> <span type="w">concerning</span> <span type="w">whom</span> <span type="w">you</span> <span type="w">wrote</span><span type="r">]</span>, <span type="w">I</span> <span type="w">have</span> <span type="w">heard</span> <span type="w">his</span> <span type="w">words</span> <span type="w">in</span> <span type="w">full</span>. <span type="w">The</span> <span type="w">day</span> <span type="w">you</span> <span type="w">see</span> <span type="w">this</span> <span type="w">letter</span>, <span type="w">appoint</span> <span type="w">his</span> <span type="w">son</span> <span type="w">in</span> <span type="w">his</span> <span type="w">place</span> <span type="w">over</span> <span type="w">his</span> <span type="w">men</span>. <span type="w">His</span> <span type="w">people</span> <span type="w">should</span> <span type="w">be</span> <span type="w">assembled</span> <span type="w">and</span> <span type="w">present</span>, <span type="w">and</span> <span type="w">if</span> <span type="w">he</span> <span type="w">wants</span>, <span type="w">he</span> <span type="w">may</span> <span type="w">take</span> <span type="w">them</span> <span type="w">over</span> <span type="w">the</span> <span type="w">mountains</span> <span type="w">and</span>  <span type="w">settle</span> <span type="w">them</span> <span type="w">there</span>, <span type="w">or</span> <span type="w">they</span> <span type="w">may</span> <span type="w">also</span> <span type="w">live</span> <span type="w">here</span>. <span type="w">As</span> <span type="w">for</span> <span type="w">him</span>, <span type="w">let</span> <span type="w">one</span> <span type="w">of</span> <span type="w">your</span> '<span type="w">third</span> <span type="w">men</span>' <span type="w">pick</span> <span type="w">him</span> <span type="w">up</span> <span type="w">post-haste</span> <span type="w">and</span> <span type="w">let</span> <span type="w">him</span> <span type="w">come</span> <span type="w">here</span>. <span type="w">I</span> <span type="w">will</span> <span type="w">speak</span> <span type="w">kindly</span> <span type="w">with</span> <span type="w">him</span> <span type="w">and</span> <span type="w">encourage</span> <span type="w">him</span>, <span type="w">and</span> <span type="w">in</span> <span type="w">due</span> <span type="w">course</span> <span type="w">I</span> <span type="w">will</span> <span type="w">send</span> <span type="w">word</span> <span type="w">and</span> <span type="w">have</span> <span type="w">his</span> <span type="w">people</span> <span type="r">(</span><span type="w">being</span> <span type="w">kept</span><span type="r">)</span> <span type="w">here</span> <span type="w">returned</span>,  <span type="w">and</span> <span type="w">he</span> <span type="w">too</span> <span type="w">can</span> <span type="w">go</span> <span type="w">and</span> <span type="w">re-enter</span> <span type="w">his</span> <span type="w">house</span>.</span>
+          </p>
+        </div3>
+        <div3 type="tr" xml:id="P224485_project-en.8" n="66" xtr:cid="P224485_project-en.5" xtr:lab-start-label="66" xtr:lab-start-lnum="66" xtr:se_label="SAA 01 001, 66" xtr:label="66" xtr:sref="P224485.68" xtr:eref="P224485.73" xtr:rows="6" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">As</span> <span type="w">for</span> <span type="w">Aplaiu</span>, <span type="w">let</span> <span type="w">your</span> <span type="w">messenger</span> <span type="w">bring</span> <span type="w">him</span> <span type="w">and</span> <span type="w">his</span> <span type="w">people</span> <span type="w">to</span> <span type="w">me</span>, <span type="w">whether</span> <span type="r">(</span><span type="w">they</span> <span type="w">are</span><span type="r">)</span> <span type="w">citizens</span> <span type="w">of</span> <span type="w">Babylon</span>, <span type="w">Borsippa</span>, <span type="w">Kish</span>, <span type="w">Nippur</span>, <span type="w">Uruk</span>, <span type="w">Der</span>, <span type="w">or</span> <span type="r">(</span>...<span type="r">)</span></span>
+          </p>
+        </div3>
+        <div3 type="tr" n="" xtr:ref="P224485.74" subtype="dollar">
+          <p>(SPACER)</p>
+        </div3>
+      </div1>
+    </body>
+  </text>
+</TEI>

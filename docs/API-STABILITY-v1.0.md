@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Last updated 2026-05-29 at v0.73.0 (added `surface_genre_conflicts` as Experimental; re-tiered the +10 tools from v0.58–v0.69; prior update v0.57.0). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-06-02 at v0.74.0 (added `oracc_index_project` + `oracc_get_edition` as Experimental; prior update v0.73.0 added `surface_genre_conflicts`, re-tiered the +10 tools from v0.58–v0.69). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 111 tools (as of v0.73.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 113 tools (as of v0.74.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -66,7 +66,7 @@ These will receive `@stable` tag in v1.0. Signature is locked; bug fixes only.
 
 ---
 
-## Experimental — v1.0 marks as "may change" (30 tools)
+## Experimental — v1.0 marks as "may change" (32 tools)
 
 Recent additions whose API may evolve before v1.0. Bug fixes + signature changes both possible.
 
@@ -81,6 +81,10 @@ Recent additions whose API may evolve before v1.0. Bug fixes + signature changes
 
 ### Observational mining (1, v0.73)
 - `surface_genre_conflicts` (v0.73 — Genre-Conflict Sentinel: identify_composition family vs eBL editorial genre-family disagreements, classified by shared-window rarity into formulaic / likely_misassignment / embedded_quotation_candidate. Observational HYPOTHESES, not labels; corroboration is model-entangled; thresholds + signal taxonomy may revise. Never feeds G2.)
+
+### ORACC adapter (2, v0.74 — BUNDLE-PRIMARY)
+- `oracc_index_project` (v0.74 — project-aware bundle ingest across all 5 corpora (DCCLT / SAAo / RINAP / RIBo / CCP=`ccpo`). PRIMARY path downloads + unzips the build-oracc bundle ZIP (`https://build-oracc.museum.upenn.edu/json/<SLUG>.zip`; SLUG = pathname '/'→'-') via fflate and enumerates from its `catalogue.json` WITH genre/period/provenience. Falls back to the legacy live pager/TEI probe per project only when a bundle is unavailable.)
+- `oracc_get_edition` (v0.74 — multi-corpus edition retrieval. PRIMARY: bundle `corpusjson/<ID>.json` parsed via `parseCdl` (now preserving nonw dividers / deletions / erasure markup) with catalogue genre/period/provenience attached. FALLBACK: live per-text TEI for ids absent from the bundle. CDL/bundle editions carry no translation block.)
 
 ### Calibration utilities (1, v0.50)
 - `recalibrate_lacuna_scores` (v0.50 — Platt scaling for lacuna_semantic; output format may consolidate with `compute_confidence_calibration`)
@@ -152,15 +156,15 @@ Specialized; stable.
 |---|---|---|
 | Canonical (top 10) | 10 | Stable + featured |
 | Stable | 64 | Signature locked |
-| Experimental | 29 | May change |
+| Experimental | 31 | May change |
 | Specialized | 13 | Stable, niche |
 | RAG vault | 4 | Stable |
 | Apkallu / dataset extension | 2 | Stable |
-| **Total unique** | **111** | as of v0.73.0 |
+| **Total unique** | **113** | as of v0.74.0 |
 
 Notes:
 - **Canonical** is a featured re-listing of ten Stable tools (for visibility), not an additional tier — it is not added to the total.
-- The **authoritative unique total is 111** (as of v0.73.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental).
+- The **authoritative unique total is 113** (as of v0.74.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental); v0.74 added `oracc_index_project` + `oracc_get_edition` (both Experimental).
 - The per-tier row counts carry minor pre-existing drift (a few sub-section headers were off by 1–2 before this update, e.g. the Stable header read "50" while its sub-sections summed to 57). Treat the per-tier numbers as approximate; the 110 unique total is the exact figure. A full per-tier recount is deferred to the v1.0 tag.
 
 ---
