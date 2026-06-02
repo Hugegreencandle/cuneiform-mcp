@@ -17,7 +17,7 @@ while ((match = regRegex.exec(src)) !== null) {
 const md = [
   `# cuneiform-mcp — Tool Inventory`,
   ``,
-  `Auto-generated from \`src/index.ts\` via \`scripts/generate-tool-inventory.mjs\`. Last regenerated 2026-05-24 against v0.26.0.`,
+  `Auto-generated from \`src/index.ts\` via \`scripts/generate-tool-inventory.mjs\`. Last regenerated 2026-06-02 against v0.78.0.`,
   ``,
   `**Total tools: ${tools.length}**`,
   ``,

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/align_sign_prototype.schema.json",
+  "title": "align_sign_prototype data payload",
+  "description": "v0.78.0 — ProtoSnap per-sign prototype ALIGNMENT (NOT detection). Snaps a KNOWN sign's prototype skeleton onto a PRE-CROPPED, ALREADY-IDENTIFIED single-sign image (both crop and identity supplied by the caller) and returns a match score + aligned-skeleton path. Does NOT detect/segment/label signs on a tablet photo. Torch-sidecar-gated: when the python3.11 ProtoSnap venv is absent, inference_available is false and the degraded result carries an actionable setup message in warnings. inference_available is REQUIRED so the degraded path is a first-class, schema-valid result, not an error. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["sign_name", "sign_crop_path", "inference_available", "note"],
+  "additionalProperties": false,
+  "properties": {
+    "sign_name": {
+      "type": "string",
+      "description": "The KNOWN sign identity / prompt the caller supplied. An input, not an output — this is alignment, not recognition."
+    },
+    "abz_code": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Optional ABZ sign-list code."
+    },
+    "sign_crop_path": {
+      "type": "string",
+      "description": "Absolute path to the pre-cropped single-sign image that was aligned."
+    },
+    "inference_available": {
+      "type": "boolean",
+      "description": "False when the ProtoSnap torch sidecar is not installed (the default CI/uninstalled state). When false, see warnings for the setup command; agg_score/aligned_skeleton_path stay null."
+    },
+    "device": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Torch device the sidecar ran on (mps/cpu), or null when inference was not run."
+    },
+    "agg_score": {
+      "anyOf": [{ "type": "number" }, { "type": "null" }],
+      "description": "ProtoSnap aggregate alignment / match score, or null when inference was not run."
+    },
+    "aligned_skeleton_path": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Path to the aligned prototype skeleton image written under getCacheDir()/protosnap/<sign>/, or null."
+    },
+    "init_png_path": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Path to the initial (pre-alignment) overlay PNG, or null."
+    },
+    "iterations": {
+      "anyOf": [{ "type": "integer" }, { "type": "null" }],
+      "description": "Number of alignment-optimization iterations performed, or null."
+    },
+    "note": {
+      "type": "string",
+      "description": "Constant scope disclaimer: 'alignment-not-detection; requires installed torch sidecar'."
+    }
+  }
+}

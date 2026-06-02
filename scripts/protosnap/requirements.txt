@@ -1,0 +1,19 @@
+# ProtoSnap sidecar — pinned for Apple-Silicon (M-series) MPS, python3.11 ONLY.
+#
+# These pins are the feasibility crux verified live 2026-06-02 on an M5:
+#  - torch 2.2.1 ships a prebuilt cp311 arm64 wheel (imports clean, real MPS matmul).
+#    python3.14 has NO torch wheel yet — DO NOT use the system python3.
+#  - numpy MUST stay <2 (1.26.4) — torch 2.2.x + opencv/diffusers built against numpy 1.x.
+#  - transformers is PINNED to ~=4.38 on purpose: upstream ProtoSnap leaves it
+#    unpinned and it resolves to 5.x, which breaks diffusers 0.27dev (the dift
+#    feature-extractor import path changed). Do not unpin.
+torch==2.2.1
+torchvision==0.17.1
+numpy==1.26.4
+transformers~=4.38.0
+diffusers==0.27.2
+accelerate~=0.27
+opencv-python-headless~=4.9
+pillow~=10.2
+scipy~=1.12
+gdown~=5.1

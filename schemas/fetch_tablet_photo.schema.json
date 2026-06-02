@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/fetch_tablet_photo.schema.json",
+  "title": "fetch_tablet_photo data payload",
+  "description": "v0.78.0 — Fetch + cache a full-res eBL tablet photo (JPEG) to local disk. Resolves the FETCHABLE eBL REST endpoint (.../api/fragments/{id}/photo) and caches under getCacheDir()/photos/<id>.jpg. cache_path is null (with a warning) when eBL has no photo on file or is unreachable — the tool degrades gracefully and never errors. Returns the local path + size + content-type only; the photo is British-Museum-collection material fetched to the caller's cache for analysis, NOT redistributed. Wrapped in StructuredEnvelope.",
+  "type": "object",
+  "required": ["tablet_id", "ebl_photo_api_url", "cache_path", "bytes", "content_type", "cached"],
+  "additionalProperties": false,
+  "properties": {
+    "tablet_id": { "type": "string" },
+    "ebl_photo_api_url": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "The fetchable eBL REST photo endpoint resolved for this tablet."
+    },
+    "cache_path": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "Absolute path to the cached JPEG on local disk, or null if no photo could be fetched (see warnings)."
+    },
+    "bytes": {
+      "anyOf": [{ "type": "integer" }, { "type": "null" }],
+      "description": "Size of the cached JPEG in bytes, or null if not fetched."
+    },
+    "content_type": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "HTTP content-type of the fetched image (normally image/jpeg), or null."
+    },
+    "cached": {
+      "type": "boolean",
+      "description": "True if an existing cached file was reused; false if freshly downloaded (or not fetched)."
+    }
+  }
+}

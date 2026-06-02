@@ -9,7 +9,14 @@
   "properties": {
     "tablet_id": { "type": "string" },
     "ebl_fragment_url": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
-    "ebl_photo_url": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "ebl_photo_url": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "v0.78.0 — the HUMAN SPA viewer route (.../fragmentarium/{id}/photo). Opens an HTML page and 302-redirects; NOT directly fetchable as an image. For raw bytes use ebl_photo_api_url + fetch_tablet_photo."
+    },
+    "ebl_photo_api_url": {
+      "anyOf": [{ "type": "string" }, { "type": "null" }],
+      "description": "v0.78.0 — the FETCHABLE eBL REST endpoint (.../api/fragments/{id}/photo) that serves raw image/jpeg bytes. Optional (the catch-path fallback may omit it). British-Museum-collection material — link/fetch-to-cache only."
+    },
     "ancient_find_spot": {
       "anyOf": [{ "type": "string" }, { "type": "null" }],
       "description": "Ancient dig-site provenance (e.g. 'Kuyunjik', 'Sippar'). Distinct from modern museum collection prefix."

@@ -1,8 +1,8 @@
 # cuneiform-mcp — Tool Inventory
 
-Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-05-24 against v0.26.0.
+Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-06-02 against v0.78.0.
 
-**Total tools: 113**
+**Total tools: 115**
 
 ## `lookup_sign`
 
@@ -262,7 +262,15 @@ Render a Newick stemma string (typically from v0.33 build_stemma_with_rooting or
 
 ## `get_tablet_image_links`
 
-Return the eBL fragmentarium landing URL + photo endpoint URL + ancient find-spot for a tablet. Per panel-review §3.24 / Patel: ancient find-spot (e.g. 'Kuyunjik', 'Sippar') is distinct from modern museum collection prefix (K.*, BM.*, Sm.*) and surfaces archaeological provenance for downstream consu…
+Return the eBL fragmentarium landing URL + photo URLs + ancient find-spot for a tablet. Two photo URLs are returned: `ebl_photo_url` is the HUMAN SPA viewer route (.../fragmentarium/{id}/photo — opens an HTML page, 302-redirects, NOT directly fetchable as an image), and `ebl_photo_api_url` is the FE…
+
+## `fetch_tablet_photo`
+
+Fetch + cache a FULL-RES eBL tablet photo (JPEG) to local disk and return its path. Resolves the FETCHABLE eBL REST endpoint (https://www.ebl.lmu.de/api/fragments/{id}/photo — serves raw image/jpeg; distinct from the SPA viewer route which only 302-redirects to an HTML page), downloads it, and cache…
+
+## `align_sign_prototype`
+
+ProtoSnap per-sign prototype ALIGNMENT — NOT sign detection. Given a PRE-CROPPED, ALREADY-IDENTIFIED single-sign image (you supply BOTH the crop path AND the sign's known identity), snap a prototype skeleton of that sign onto the crop and return a match score + aligned-skeleton path. It does NOT det…
 
 ## `compute_confidence_calibration`
 
@@ -450,9 +458,9 @@ Genre-Conflict Sentinel. Surfaces tablets where identify_composition's high-conf
 
 ## `oracc_index_project`
 
-Unlock/inventory one of the 5 target ORACC corpora (DCCLT, SAAo, RINAP, RIBo, CCP) from the build-oracc BUNDLE ZIP (`https://build-oracc.museum.upenn.edu/json/<SLUG>.zip` — SLUG = project pathname with `/`→`-`; CCP ships as `ccpo`). The bundle is downloaded + unzipped (fflate) once and cached under `getCacheDir()/oracc/<SLUG>/`; subsequent calls reuse the cache (`refresh:true` re-downloads). Enumeration + per-text genre/period/provenience/designation/cdli_id come from the bundle's `catalogue.json` — NOT the live pager. Returns counts + genre/period histograms + a paged metadata-bearing sample. Falls back to the legacy live pager/TEI probe only if a project's bundle is unavailable.
+Unlock/inventory one of the 5 target ORACC corpora (DCCLT, SAAo, RINAP, RIBo, CCP) from the build-oracc BUNDLE ZIP (https://build-oracc.museum.upenn.edu/json/<SLUG>.zip — SLUG = project pathname with '/'→'-'; CCP ships as 'ccpo'). The bundle is downloaded + unzipped once and cached under getCacheDir…
 
 ## `oracc_get_edition`
 
-Retrieve one parsed ORACC edition (transliteration + lemma/gloss stream + line numbers) by project + text_id, with genre/period/provenience metadata **attached**. PRIMARY channel: the build-oracc bundle's `corpusjson/<ID>.json` (CDL), parsed via `parseCdl` (now preserving nonw dividers / scribal deletions / erasure markup) and enriched from `catalogue.json`. FALLBACK: live per-text TEI (saao P-ids, rinap Q-ids; reuses the get_oracc_text parser) when an id is absent from the bundle. CDL editions carry no translation block; TEI editions do.
+Retrieve one parsed ORACC edition (transliteration + lemma/gloss stream + line numbers) by project + text_id, with genre/period/provenience metadata ATTACHED. PRIMARY channel: the build-oracc bundle's corpusjson/<ID>.json (CDL), parsed into lines + tokens (now preserving nonw dividers/deletions/eras…
 
