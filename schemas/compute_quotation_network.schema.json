@@ -90,7 +90,26 @@
           "items": { "type": "string" }
         },
         "scc_count": { "type": "integer", "minimum": 0 },
-        "scc_largest_size": { "type": "integer", "minimum": 0 }
+        "scc_largest_size": { "type": "integer", "minimum": 0 },
+        "directed_chunk_pairs": { "type": "integer", "minimum": 0 },
+        "symmetric_chunk_pairs": { "type": "integer", "minimum": 0 },
+        "directed_edge_fraction": { "type": "number", "minimum": 0 },
+        "edges_pruned_below_threshold": { "type": "integer", "minimum": 0 },
+        "recommended_min_edge_weight": { "type": "number", "minimum": 0 },
+        "hub_fanout_threshold": { "type": "number", "minimum": 0 },
+        "hub_tablets_demoted": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tablet_id", "chunk_fanout"],
+            "additionalProperties": false,
+            "properties": {
+              "tablet_id": { "type": "string" },
+              "chunk_fanout": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "weight_demoted_by_hub_guard": { "type": "number", "minimum": 0 }
       }
     },
     "output_paths": {
