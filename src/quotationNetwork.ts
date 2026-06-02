@@ -47,6 +47,7 @@ import { buildCitationGraph, type CitationEdge } from "./citationGraph.js";
 import {
   type ChunkIndexEntry,
   getChunksAboveHostCount,
+  getChunksContaining,
   loadChunkIndex,
 } from "./chunkIndex.js";
 import { identifyComposition } from "./identifyComposition.js";
@@ -94,6 +95,10 @@ export type QuotationNetworkMetrics = {
   directed_edge_fraction: number; // directed / (directed + symmetric); 1.0 = fully directed
   edges_pruned_below_threshold: number; // edges dropped by minEdgeWeight
   recommended_min_edge_weight: number; // median surviving edge weight (sparsification knob)
+  /** v0.77 hub-demotion guard. */
+  hub_fanout_threshold: number; // applied chunk-fanout threshold; hosts above it are demoted
+  hub_tablets_demoted: Array<{ tablet_id: string; chunk_fanout: number }>; // promiscuous hubs (desc), no silent demotion
+  weight_demoted_by_hub_guard: number; // total chunk_parallel weight removed by the guard
 };
 
 export type QuotationNetworkOutputPaths = {
@@ -125,6 +130,19 @@ export type ComputeQuotationNetworkOptions = {
   minEdgeWeight?: number;
   /** Minimum citation-stream `shared_chunks_count` threshold. Default 2. */
   minCitations?: number;
+  /**
+   * v0.77 hub-demotion guard. A chunk co-hosted by a PROMISCUOUS HUB — a long,
+   * low-damage tablet (e.g. the 3,798-sign extispicy compendium IM.67692) that
+   * shares a length-20 window with many unrelated tablets by chance — inflates
+   * every edge its composition touches, because it recurs across many chunks
+   * (the per-chunk 1/host_count damping does not counter cross-chunk fanout).
+   * A host whose chunk-fanout (number of distinct chunk entries it co-hosts)
+   * exceeds this threshold has its chunks' weight scaled by threshold/fanout.
+   * Default = data-driven: max(50, p99 of contributing-host fanouts), so small
+   * corpora and the synthetic fixture are never demoted. Set 0 / Infinity to
+   * disable. Demoted hubs are always surfaced in metrics — never silently.
+   */
+  hubFanoutThreshold?: number;
   /** Output rendering mode for the human-readable surface. Default "summary". */
   format?: "json" | "dot" | "summary";
   /** Override cache root for tests. */
@@ -520,8 +538,41 @@ export function computeQuotationNetwork(
   let directedChunkPairs = 0;
   let symmetricChunkPairs = 0;
 
+  // ─── Hub-demotion guard (v0.77) ───────────────────────────────────────
+  // Per-host chunk-fanout (number of distinct chunk entries a tablet co-hosts).
+  // A promiscuous hub recurs across many chunks and inflates every edge its
+  // composition touches; we scale such chunks' weight by threshold/fanout.
+  const fanoutMemo = new Map<string, number>();
+  const fanout = (id: string): number => {
+    let f = fanoutMemo.get(id);
+    if (f === undefined) {
+      f = getChunksContaining(id).length;
+      fanoutMemo.set(id, f);
+    }
+    return f;
+  };
+  const hubDemoted = new Map<string, number>(); // tablet_id → fanout
+  let weightDemotedByHubGuard = 0;
+
   // ─── Stream 1: chunk-parallel evidence ────────────────────────────────
   const chunkIndex = loadChunkIndex();
+  // Applied fanout threshold: explicit option, else data-driven p99 of the
+  // contributing hosts' fanouts floored at 50 (so small corpora / the synthetic
+  // fixture are never demoted). 0 or negative disables the guard.
+  const hubFanoutThreshold = (() => {
+    if (opts.hubFanoutThreshold != null) {
+      return opts.hubFanoutThreshold <= 0 ? Infinity : opts.hubFanoutThreshold;
+    }
+    if (!chunkIndex) return Infinity;
+    const hosts = new Set<string>();
+    for (const e of getChunksAboveHostCount(2)) {
+      if (e.length < minChunkLength) continue;
+      for (const o of e.occurrences) hosts.add(o.tablet_id);
+    }
+    if (hosts.size === 0) return Infinity;
+    const fs = Array.from(hosts, (h) => fanout(h)).sort((a, b) => a - b);
+    return Math.max(50, fs[Math.min(fs.length - 1, Math.floor(fs.length * 0.99))]);
+  })();
   if (!chunkIndex) {
     warnings.push("chunk-index not loaded; chunk_parallel evidence stream disabled");
   }
@@ -595,7 +646,23 @@ export function computeQuotationNetwork(
 
       // Weight per directed cross-composition pair: chunk_length × 1/host_count
       const hostCount = entry.occurrences.length;
-      const weight = entry.length * (1 / Math.max(1, hostCount));
+      let weight = entry.length * (1 / Math.max(1, hostCount));
+      // Hub-demotion: if a promiscuous host co-hosts this chunk, scale weight by
+      // threshold/maxFanout so its cross-chunk recurrence cannot inflate edges.
+      let maxFanout = 0;
+      for (const o of entry.occurrences) {
+        const f = fanout(o.tablet_id);
+        if (f > maxFanout) maxFanout = f;
+      }
+      if (maxFanout > hubFanoutThreshold) {
+        const full = weight;
+        weight = weight * (hubFanoutThreshold / maxFanout);
+        weightDemotedByHubGuard += full - weight;
+        for (const o of entry.occurrences) {
+          const f = fanout(o.tablet_id);
+          if (f > hubFanoutThreshold) hubDemoted.set(o.tablet_id, f);
+        }
+      }
 
       const compIds = Array.from(occByComposition.keys());
       // Each unordered pair gets a chronology-directed edge (later-median-period
@@ -782,7 +849,22 @@ export function computeQuotationNetwork(
     directed_edge_fraction: totalChunkPairs > 0 ? +(directedChunkPairs / totalChunkPairs).toFixed(4) : 0,
     edges_pruned_below_threshold: edgesPruned,
     recommended_min_edge_weight: +medianWeight.toFixed(4),
+    hub_fanout_threshold: Number.isFinite(hubFanoutThreshold) ? hubFanoutThreshold : 0,
+    hub_tablets_demoted: Array.from(hubDemoted, ([tablet_id, chunk_fanout]) => ({ tablet_id, chunk_fanout }))
+      .sort((a, b) => b.chunk_fanout - a.chunk_fanout)
+      .slice(0, 25),
+    weight_demoted_by_hub_guard: +weightDemotedByHubGuard.toFixed(4),
   };
+  if (hubDemoted.size > 0) {
+    const top = Array.from(hubDemoted)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([t, f]) => `${t} (fanout ${f})`)
+      .join(", ");
+    warnings.push(
+      `hub-demotion guard: ${hubDemoted.size} promiscuous host(s) above fanout ${Number.isFinite(hubFanoutThreshold) ? hubFanoutThreshold : "∞"} had their chunks' weight scaled down to prevent edge inflation — top: ${top} (see metrics.hub_tablets_demoted).`,
+    );
+  }
 
   // ─── Write artifacts ──────────────────────────────────────────────────
   const ts = isoTimestamp();

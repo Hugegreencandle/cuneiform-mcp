@@ -154,6 +154,29 @@ describe("computeQuotationNetwork — synthetic chunk-index", () => {
       expect(r.metrics.isolate_compositions).not.toContain(live);
     }
   });
+
+  it("hub-demotion guard demotes a high-fanout host, surfaces it, and shrinks its edges", async () => {
+    const { computeQuotationNetwork, _resetForTests } = await importNetwork();
+    _resetForTests();
+    // BM.47463 co-hosts 3 chunks (h1,h2,h3) — the fixture's highest fanout.
+    const base = computeQuotationNetwork({ cacheDirOverride: TMP_DIR }); // default threshold (floor 50) → nothing demoted
+    const guarded = computeQuotationNetwork({ cacheDirOverride: TMP_DIR, hubFanoutThreshold: 2 });
+
+    // Default floor leaves the small fixture untouched (no regression).
+    expect(base.metrics.hub_tablets_demoted.length).toBe(0);
+    expect(base.metrics.weight_demoted_by_hub_guard).toBe(0);
+
+    // The guard fires, names the hub (no silent demotion), and reports threshold.
+    expect(guarded.metrics.hub_fanout_threshold).toBe(2);
+    expect(guarded.metrics.hub_tablets_demoted.map((h) => h.tablet_id)).toContain("BM.47463");
+    expect(guarded.metrics.weight_demoted_by_hub_guard).toBeGreaterThan(0);
+
+    // Edges survive (weight is scaled, not removed) but the hub's edge shrinks.
+    const w = (r: { edges: Array<{ source_composition: string; target_composition: string; weight: number }> }, s: string, t: string) =>
+      r.edges.find((e) => e.source_composition === s && e.target_composition === t)?.weight ?? 0;
+    expect(w(guarded, "mis_pi", "surpu")).toBeGreaterThan(0);
+    expect(w(guarded, "mis_pi", "surpu")).toBeLessThan(w(base, "mis_pi", "surpu"));
+  });
 });
 
 describe("graphMetrics primitives", () => {
