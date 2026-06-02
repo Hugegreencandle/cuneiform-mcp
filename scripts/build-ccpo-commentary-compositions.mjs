@@ -104,18 +104,20 @@ const CCP_DECODER = {
   "2.3": "namburbi",
 };
 
-// Descriptive genres_comment keyword fallback (no CCP number present).
-function familyFromKeywords(gc) {
-  const s = gc.toLowerCase();
-  if (/\bnbgt\b|grammatical/.test(s)) return "other"; // N1: NBGT base absent from eBL — keep generic
-  if (/astr|astrolog|eae|enuma anu enlil|venus|lunar eclipse/.test(s)) return "eae";
-  if (/terr omens|šumma ālu|summa alu/.test(s)) return "alu";
-  if (/izbu|šumma izbu|šumma immeru|summa immeru/.test(s)) return "izbu";
-  if (/extispic|bārûtu|barutu|šumma immeru/.test(s)) return "izbu";
+// Keyword decoder over free text (genres_comment OR designation). Returns a
+// family or NULL (no match) so the caller can fall through to the next source.
+function familyFromText(s0) {
+  const s = (s0 || "").toLowerCase();
+  if (!s) return null;
+  if (/\bnbgt\b|grammatical/.test(s)) return null; // NBGT base absent from eBL — leave unclassified
+  if (/astr|astrolog|\beae\b|enuma anu enlil|enūma anu enlil|venus|lunar eclipse/.test(s)) return "eae";
+  if (/terr omens|šumma ?ālu|šumma ?alu|summa ?alu/.test(s)) return "alu";
+  if (/izbu|šumma izbu|šumma immeru|summa immeru|extispic|bārûtu|barutu/.test(s)) return "izbu";
   if (/therapeut|bulṭu|medical/.test(s)) return "therapeutic";
   if (/sagig|sa-gig|diagnostic/.test(s)) return "sagig";
-  if (/ludlul|theodicy|explanatory/.test(s)) return "other";
-  return "other";
+  if (/god list|god names|an ?= ?anum|an-anum/.test(s)) return "god_list";
+  if (/lugal-?e/.test(s)) return "lugale";
+  return null; // no match — caller falls through to designation, then "other"
 }
 
 function unesc(s) {
@@ -135,14 +137,22 @@ function familyFromCcpNumber(ccp) {
   return null;
 }
 
-function decodeFamily(genresComment) {
-  const gc = unesc(genresComment);
+function decodeFamily(member) {
+  const gc = unesc(member.genres_comment);
   const m = gc.match(/ccp\s+([0-9][0-9a-zA-Z.]*?)(?:[:\s]|$)/i);
   if (m) {
     const fam = familyFromCcpNumber(m[1]);
     if (fam) return { family: fam, via: "ccp_number", ccp: m[1] };
   }
-  return { family: familyFromKeywords(gc), via: "keyword", ccp: null };
+  let fam = familyFromText(gc);
+  if (fam) return { family: fam, via: "genres_comment", ccp: null };
+  // Many commentaries carry the base text ONLY in the designation, e.g.
+  // "Commentary A on Šumma Alu 22-23" / "Commentary B on Enuma Anu Enlil 20".
+  // This recovers the high-overlap commentaries the genres_comment pass missed
+  // (they were the dominant ccp_<pid>↔commentary_<fam> "noise" edges).
+  fam = familyFromText(unesc(member.designation));
+  if (fam) return { family: fam, via: "designation", ccp: null };
+  return { family: "other", via: "none", ccp: null };
 }
 
 // ─── Load inputs ───────────────────────────────────────────────────────────
@@ -154,18 +164,30 @@ const pids = ccpoSigns.map((r) => r._id);
 console.error(`  ${pids.length} ccpo members from ccpo-signs.json`);
 
 // ─── Decode per member ─────────────────────────────────────────────────────
-const memberMap = {}; // P-number → commentary_<family>
+const memberMap = {}; // P-number → commentary_<family> (known base) | ccp_<pid> (singleton, null base)
+const memberFamily = {}; // P-number → decoded family (provenance, even for singletons)
 const famCounts = {};
-const viaCounts = { ccp_number: 0, keyword: 0 };
+const viaCounts = {};
+let singletonCount = 0;
 for (const pid of pids) {
   const e = members[pid] || {};
-  const { family, via } = decodeFamily(e.genres_comment);
-  const commId = `commentary_${family}`;
+  const { family, via } = decodeFamily(e);
+  memberFamily[pid] = family;
+  // Null-base families (other, uncertain) are NOT pooled into a single
+  // commentary_<family> node — that 134-member catch-all manufactured the
+  // dominant spurious edges (commentary_alu↔commentary_other w=3036). Give each
+  // its OWN singleton composition id so it forms no aggregated hub, while a
+  // genuine verbatim shared chunk with a base text still surfaces as a
+  // low-weight commentary→base edge.
+  const baseKnown = FAMILIES[family] && FAMILIES[family].base_id !== null;
+  const commId = baseKnown ? `commentary_${family}` : `ccp_${pid}`;
+  if (!baseKnown) singletonCount++;
   memberMap[pid] = commId;
   famCounts[family] = (famCounts[family] || 0) + 1;
-  viaCounts[via]++;
+  viaCounts[via] = (viaCounts[via] || 0) + 1;
 }
-console.error(`  decode breakdown: ccp_number=${viaCounts.ccp_number} keyword=${viaCounts.keyword}`);
+console.error(`  decode breakdown: ${JSON.stringify(viaCounts)}`);
+console.error(`  null-base commentaries singletonized (no commentary_other/uncertain hub): ${singletonCount}`);
 console.error(`  family counts: ${JSON.stringify(famCounts)}`);
 
 // Guardrail: the gold positives must decode to their named base family.
@@ -201,13 +223,20 @@ const familiesArtifact = {
     Object.entries(FAMILIES).map(([k, v]) => [`commentary_${k}`, { name: `Commentary on ${v.name}`, base_id: v.base_id }]),
   ),
   members: memberMap,
+  member_families: memberFamily, // decoded family per member, incl. those singletonized (other/uncertain)
+  singletonized_null_base: singletonCount,
 };
 writeFileSync(FAMILIES_OUT, JSON.stringify(familiesArtifact, null, 2));
 console.error(`✓ wrote ${FAMILIES_OUT} (${pids.length} members)`);
 
 // ─── Artifact 2: ccpo-commentary-compositions.json (registry-mergeable) ────
-// Only emit buckets that actually have members, to keep the artifact tight.
-const usedFamilies = new Set(Object.values(memberMap).map((c) => c.replace(/^commentary_/, "")));
+// (a) decoded family buckets (base known). Null-base ids are ccp_<pid>
+// singletons, handled in (b) — exclude them here.
+const usedFamilies = new Set(
+  Object.values(memberMap)
+    .filter((c) => c.startsWith("commentary_"))
+    .map((c) => c.replace(/^commentary_/, "")),
+);
 const compositions = [];
 for (const fam of usedFamilies) {
   const meta = FAMILIES[fam];
@@ -241,6 +270,38 @@ for (const fam of usedFamilies) {
     uri: `https://ccp.yale.edu/#${id}`,
     base_composition_id: meta.base_id,
     source: "ccpo-ingest (Stage B)",
+  });
+}
+// (b) singleton compositions — one per null-base commentary (replaces the
+// commentary_other / commentary_uncertain catch-all). Each is a DISTINCT
+// specific_composition so the resolver's cache tier accepts it, but it pools
+// with nothing, so no aggregated hub edge can form.
+for (const [pid, id] of Object.entries(memberMap)) {
+  if (!id.startsWith("ccp_")) continue;
+  compositions.push({
+    id,
+    name: `Unclassified ccpo commentary ${pid}`,
+    name_akkadian: "ṣâtu/mukallimtu (unidentified base)",
+    description:
+      `ccpo commentary ${pid} whose base text could not be decoded from catalogue metadata (decoder family: ${memberFamily[pid]}). Registered as a DISTINCT singleton composition — NOT pooled into a commentary_other/uncertain catch-all — so it forms no spurious aggregated edges; a genuine verbatim shared chunk with a base text still surfaces as a low-weight commentary→base edge.`,
+    composition_type: "specific_composition",
+    exemplar_tablets: [],
+    paper_sections: ["§ccpo-ingest"],
+    typical_genre: "commentary",
+    typical_period: "Neo-Assyrian / Neo-Babylonian",
+    parent_curriculum: null,
+    print_editions: [
+      {
+        citation: "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+        title: "Babylonian and Assyrian Text Commentaries",
+        series: "Guides to the Mesopotamian Textual Record 5",
+        publisher: "Ugarit-Verlag",
+      },
+    ],
+    external_ids: { ebl_canonical_genre: null, ogsl: null, cad_lemma: null },
+    uri: `https://ccp.yale.edu/${pid}`,
+    base_composition_id: null,
+    source: "ccpo-ingest (Stage B) singleton",
   });
 }
 // ── Base compositions named by the gold set but ABSENT from the citable
@@ -307,7 +368,9 @@ if (!existsSync(ASSIGNMENTS)) {
     const e = members[pid] || {};
     asg.assignments[pid] = {
       top_composition_id: commId,
-      top_composition_name: `Commentary on ${FAMILIES[commId.replace(/^commentary_/, "")].name}`,
+      top_composition_name: commId.startsWith("ccp_")
+        ? `Unclassified ccpo commentary ${pid}`
+        : `Commentary on ${FAMILIES[commId.replace(/^commentary_/, "")].name}`,
       composition_type: "specific_composition",
       confidence: 1.0,
       is_in_exemplar_list: false,
