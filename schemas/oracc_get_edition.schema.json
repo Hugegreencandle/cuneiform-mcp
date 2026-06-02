@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/oracc_get_edition.schema.json",
+  "title": "oracc_get_edition data payload",
+  "description": "Structured payload for the `oracc_get_edition` tool. PRIMARY: reads corpusjson/<ID>.json from the cached build-oracc bundle, parses it via parseCdl (preserving nonw dividers / scribal deletions / erasure markup), and ATTACHES genre/period/provenience from the bundle's catalogue.json. FALLBACK: live per-text TEI (saao P-ids, rinap Q-ids; reuses the get_oracc_text parser) when the id is absent from the bundle. `found=false` with a precise warning when neither channel resolves. CDL/bundle editions carry NO translation (translation block_count = 0); TEI editions do.",
+  "type": "object",
+  "required": ["project", "text_id", "found"],
+  "additionalProperties": false,
+  "properties": {
+    "project": { "type": "string" },
+    "text_id": { "type": "string" },
+    "found": { "type": "boolean" },
+    "channel": {
+      "type": "string",
+      "enum": ["tei", "corpusjson", "bundle"],
+      "description": "Which channel served the edition: 'bundle' (build-oracc CDL, metadata attaches), 'tei' (live per-text TEI XML fallback), or 'corpusjson' (legacy opendata fast-path)."
+    },
+    "warning": { "type": "string", "description": "Human-readable failure reason when `found=false`." },
+    "title": { "type": "string", "description": "Edition title (catalogue designation / TEI header, or text id)." },
+    "cdli_id": {
+      "type": "string",
+      "description": "Cross-reference into CDLI (catalogue.json cdli_id for the bundle channel, or TEI header). May equal `text_id`."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Per-text catalogue metadata (bundle channel only).",
+      "properties": {
+        "genre": { "type": ["string", "null"] },
+        "period": { "type": ["string", "null"] },
+        "provenience": { "type": ["string", "null"] },
+        "designation": { "type": ["string", "null"] }
+      }
+    },
+    "cached": { "type": "boolean", "description": "true when the parsed edition was served from the on-disk cache." },
+    "transliteration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line_count", "lines", "truncated"],
+      "properties": {
+        "line_count": { "type": "integer", "minimum": 0 },
+        "lines": { "type": "array", "items": { "type": "string" } },
+        "truncated": { "type": "boolean" }
+      }
+    },
+    "translation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["block_count", "blocks", "truncated"],
+      "properties": {
+        "block_count": { "type": "integer", "minimum": 0 },
+        "blocks": { "type": "array", "items": { "type": "string" } },
+        "truncated": { "type": "boolean" }
+      }
+    }
+  }
+}

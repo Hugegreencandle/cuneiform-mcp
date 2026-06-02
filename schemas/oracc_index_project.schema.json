@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/danebrown/cuneiform-mcp/schemas/oracc_index_project.schema.json",
+  "title": "oracc_index_project data payload",
+  "description": "Structured payload for the `oracc_index_project` tool. PRIMARY path: downloads + unzips the build-oracc bundle ZIP (https://build-oracc.museum.upenn.edu/json/<SLUG>.zip; SLUG = project pathname with '/'->'-'; CCP ships as 'ccpo'), caches the extracted catalogue.json + corpus.json + corpusjson/*.json under getCacheDir()/oracc/<SLUG>/, and enumerates texts from catalogue.json WITH per-text genre/period/provenience/designation/cdli_id. Two payload shapes are possible: (A) the bundle shape (ingest_channel='bundle', total/editions_available/genres/periods/sample), and (B) the legacy pager-fallback shape (ingest_channel in corpusjson/tei/pager-only/unavailable, text_ids/reported_total) used only when a project's bundle is unavailable.",
+  "type": "object",
+  "required": ["project", "ingest_channel"],
+  "additionalProperties": true,
+  "properties": {
+    "project": { "type": "string", "description": "Normalized project pathname (leading/trailing slashes trimmed)." },
+    "slug": { "type": "string", "description": "Bundle SLUG (project pathname with '/'->'-'; CCP -> 'ccpo')." },
+    "ingest_channel": {
+      "type": "string",
+      "enum": ["bundle", "corpusjson", "tei", "pager-only", "unavailable"],
+      "description": "'bundle' = build-oracc bundle ingest (primary, metadata attaches). The rest are legacy live-mirror fallback channels."
+    },
+    "url": { "type": "string", "description": "Source URL (bundle zip url for the bundle channel; pager url for fallbacks)." },
+    "from_cache": { "type": "boolean", "description": "true when the extracted bundle was reused from the on-disk cache rather than re-downloaded." },
+    "total": { "type": "integer", "minimum": 0, "description": "Total texts catalogued in the bundle (== catalogue members)." },
+    "editions_available": { "type": "integer", "minimum": 0, "description": "Non-stub corpusjson editions present in the bundle." },
+    "stubs_skipped": { "type": "integer", "minimum": 0, "description": "0-byte corpusjson stubs skipped during ingest." },
+    "genres": { "type": "object", "description": "Top genre buckets (genre -> count) from catalogue.json.", "additionalProperties": { "type": "integer" } },
+    "periods": { "type": "object", "description": "Top period buckets (period -> count) from catalogue.json.", "additionalProperties": { "type": "integer" } },
+    "sample": {
+      "type": "array",
+      "description": "Paged sample of catalogued texts with attached metadata.",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "id": { "type": "string" },
+          "genre": { "type": ["string", "null"] },
+          "period": { "type": ["string", "null"] },
+          "provenience": { "type": ["string", "null"] },
+          "designation": { "type": ["string", "null"] },
+          "cdli_id": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "count": { "type": "integer", "minimum": 0, "description": "Rows returned in `sample` (bundle channel) or `text_ids` (fallback)." },
+    "cached": { "type": "boolean", "description": "true when served from the on-disk cache." },
+    "tei_id_type": { "type": "string", "enum": ["P", "Q", "none"], "description": "(fallback) id-type returning a live <TEI> body." },
+    "opendata_status": { "type": "string", "enum": ["available", "empty-200", "html-error", "fetch-failed"], "description": "(fallback) verdict on the legacy /<proj>/corpus.json probe." },
+    "pager_available": { "type": "boolean", "description": "(fallback) whether the pager responded with a parseable page." },
+    "tei_sample_id": { "type": "string" },
+    "text_ids": { "type": "array", "items": { "type": "string" }, "description": "(fallback) deduped [PQX]NNNNN ids enumerated from the pager." },
+    "reported_total": { "type": "integer", "minimum": 0 },
+    "query": { "type": "string" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -8,6 +8,25 @@ import tls from "node:tls";
 import { URL as NodeURL } from "node:url";
 import { provenance, schemaId, type Provenance } from "./types.js";
 import {
+  probeProjectCapability,
+  enumerateTextIds,
+  fetchEdition,
+  bundleIndexProject,
+  normalizeProject as normalizeOraccProject,
+  manifestPath,
+  readManifestCache,
+  writeManifestCache,
+  editionPath,
+  readEditionCache,
+  writeEditionCache,
+  teiUrl as oraccTeiUrl,
+  pagerUrl as oraccPagerUrl,
+  MANIFEST_TTL_MS,
+  NEGATIVE_TTL_MS,
+  EDITION_TTL_MS,
+} from "./oracc/opendata.js";
+import { bundleUrl as oraccBundleUrl } from "./oracc/bundle.js";
+import {
   queryResearch,
   getBrief,
   listBriefs,
@@ -405,7 +424,7 @@ function oraccHttpsGet(url: string): Promise<FetchOutcome> {
   });
 }
 
-const VERSION = "0.73.0";
+const VERSION = "0.74.0";
 
 const URLS = {
   CDLI_BASE: "https://cdli.earth",
@@ -11094,10 +11113,347 @@ server.registerTool(
   },
 );
 
+// 112. oracc_index_project — LIVE (project-aware ORACC opendata adapter).
+server.registerTool(
+  "oracc_index_project",
+  {
+    description:
+      "Unlock/inventory one of the 5 target ORACC corpora (DCCLT, SAAo, RINAP, RIBo, CCP) from the build-oracc BUNDLE ZIP (https://build-oracc.museum.upenn.edu/json/<SLUG>.zip — SLUG = project pathname with '/'→'-'; CCP ships as 'ccpo'). The bundle is downloaded + unzipped once and cached under getCacheDir()/oracc/<SLUG>/; subsequent calls reuse the cache (pass refresh:true to re-download). Enumeration comes from the bundle's catalogue.json — which carries per-text genre/period/provenience/designation/cdli_id — NOT the live pager (which 500s on empty q). Returns {project, slug, ingest_channel:'bundle', total, editions_available, stubs_skipped, genres{}, periods{}, sample[]} where each sample row attaches genre/period/provenience. genre/period NOW ATTACH (this was impossible with the dead opendata catalogue.json). If the bundle is unavailable for a project, falls back to a live pager/TEI capability probe. This is the discovery surface that tells the agent which texts oracc_get_edition can ingest. Bundle cached 7d. v0.74.0.",
+    inputSchema: {
+      project: z
+        .string()
+        .min(1)
+        .describe(
+          "ORACC project code, e.g. 'dcclt', 'saao/saa01', 'rinap/rinap1', 'ribo/babylon7'. Leading/trailing slashes are trimmed.",
+        ),
+      query: z
+        .string()
+        .optional()
+        .describe("Pager query to scope id enumeration (default '' = all texts in the project)."),
+      max_ids: z
+        .number()
+        .int()
+        .positive()
+        .max(2000)
+        .optional()
+        .describe("Cap enumerated text ids (default 500)."),
+      refresh: z.boolean().optional().describe("Bypass the cached manifest and re-probe."),
+    },
+  },
+  async ({ project, query, max_ids, refresh }) => {
+    const proj = normalizeOraccProject(project);
+    const q = query ?? "";
+    const cap = max_ids ?? 500;
+    const SCHEMA = schemaId("oracc_index_project");
+
+    // PRIMARY: build-oracc bundle. Enumerate from catalogue.json (genre/period
+    // attach). ensureBundle() reuses the on-disk cache; refresh re-downloads.
+    const idx = await bundleIndexProject(proj, { limit: cap, force: refresh === true });
+    if (idx.ok) {
+      const data = {
+        project: idx.project,
+        slug: idx.slug,
+        ingest_channel: "bundle" as const,
+        url: idx.url,
+        from_cache: idx.fromCache,
+        total: idx.total,
+        editions_available: idx.editionsAvailable,
+        stubs_skipped: idx.stubsSkipped,
+        genres: idx.genres,
+        periods: idx.periods,
+        sample: idx.sample.map((e) => ({
+          id: e.id,
+          genre: e.genre,
+          period: e.period,
+          provenience: e.provenience,
+          designation: e.designation,
+          cdli_id: e.cdli_id,
+        })),
+        count: idx.sample.length,
+      };
+      const topGenres = Object.entries(idx.genres).slice(0, 5).map(([g, n]) => `${g} (${n})`).join(", ");
+      const topPeriods = Object.entries(idx.periods).slice(0, 5).map(([p, n]) => `${p} (${n})`).join(", ");
+      const lines = [
+        `oracc_index_project — ${idx.project} [bundle: ${idx.slug}.zip${idx.fromCache ? ", cached" : ", freshly ingested"}]`,
+        `  ${idx.total} catalogued text(s) · ${idx.editionsAvailable} editions in bundle · ${idx.stubsSkipped} stubs skipped`,
+        ...(topGenres ? [`  genres: ${topGenres}`] : []),
+        ...(topPeriods ? [`  periods: ${topPeriods}`] : []),
+        ``,
+        `  showing ${data.sample.length} of ${idx.total}:`,
+        ...data.sample.slice(0, 30).map(
+          (e) => `  ${e.id}  ${e.designation ?? ""}${e.genre ? `  [${e.genre}` : ""}${e.period ? `${e.genre ? " · " : "  ["}${e.period}` : ""}${e.genre || e.period ? "]" : ""}${e.provenience ? `  @ ${e.provenience}` : ""}`,
+        ),
+        ``,
+        `  → Edition ingest WITH genre/period/provenience via oracc_get_edition (bundle CDL channel).`,
+      ];
+      return structuredResult(lines.join("\n"), {
+        schema: SCHEMA,
+        data: { ...data, cached: idx.fromCache },
+        provenance: provenance("ORACC", idx.url, VERSION),
+      });
+    }
+
+    // FALLBACK: bundle unavailable — legacy live pager/TEI capability probe.
+    const url = oraccPagerUrl(proj, q);
+    type Manifest = {
+      project: string;
+      ingest_channel: string;
+      tei_id_type: string;
+      opendata_status: string;
+      pager_available: boolean;
+      tei_sample_id?: string;
+      text_ids: string[];
+      count: number;
+      reported_total: number;
+      query: string;
+      notes: string[];
+    };
+
+    if (!refresh) {
+      const cached = await readManifestCache<Manifest>(proj);
+      if (cached && cached.query === q) {
+        const lines = [
+          `oracc_index_project — ${cached.project} (pager fallback, cached)`,
+          `  ingest_channel: ${cached.ingest_channel} · tei_id_type: ${cached.tei_id_type} · opendata: ${cached.opendata_status} · pager: ${cached.pager_available}`,
+          `  ${cached.count} text id(s)${cached.reported_total > cached.count ? ` of ${cached.reported_total} reported` : ""}${cached.query ? ` for query "${cached.query}"` : ""}`,
+          ...(cached.text_ids.length ? [`  ${cached.text_ids.slice(0, 30).join(" ")}${cached.text_ids.length > 30 ? " …" : ""}`] : []),
+        ];
+        return structuredResult(lines.join("\n"), {
+          schema: SCHEMA,
+          data: { ...cached, cached: true },
+          provenance: provenance("ORACC", url, VERSION),
+          warnings: cached.notes.length > 0 ? cached.notes : undefined,
+        });
+      }
+    }
+
+    const cap2 = await probeProjectCapability(proj);
+    const notes = [`bundle unavailable for ${oraccBundleUrl(proj)}: ${idx.warning}`, ...cap2.notes];
+
+    let textIds: string[] = [];
+    let reportedTotal = 0;
+    if (cap2.ingestChannel !== "unavailable") {
+      const enumRes = await enumerateTextIds(proj, q, cap);
+      textIds = enumRes.textIds;
+      reportedTotal = enumRes.reportedTotal;
+      for (const w of enumRes.warnings) notes.push(w);
+    }
+
+    const manifest: Manifest = {
+      project: proj,
+      ingest_channel: cap2.ingestChannel,
+      tei_id_type: cap2.teiIdType,
+      opendata_status: cap2.corpusJson,
+      pager_available: cap2.pagerAvailable,
+      ...(cap2.teiSampleId ? { tei_sample_id: cap2.teiSampleId } : {}),
+      text_ids: textIds,
+      count: textIds.length,
+      reported_total: reportedTotal,
+      query: q,
+      notes,
+    };
+
+    const ttl =
+      cap2.ingestChannel === "unavailable" || (textIds.length === 0 && !cap2.pagerAvailable)
+        ? NEGATIVE_TTL_MS
+        : MANIFEST_TTL_MS;
+    await writeManifestCache(proj, manifest, ttl);
+
+    const lines = [
+      `oracc_index_project — ${proj} (pager fallback — bundle unavailable)`,
+      `  ingest_channel: ${cap2.ingestChannel} · tei_id_type: ${cap2.teiIdType} · opendata: ${cap2.corpusJson} · pager: ${cap2.pagerAvailable}`,
+      `  ${textIds.length} text id(s)${reportedTotal > textIds.length ? ` of ${reportedTotal} reported (pager pagination not followed)` : ""}${q ? ` for query "${q}"` : ""}`,
+      ...(textIds.length ? [`  ${textIds.slice(0, 30).join(" ")}${textIds.length > 30 ? " …" : ""}`] : []),
+      ...(notes.length ? [``, ...notes.map((n) => `  · ${n}`)] : []),
+    ];
+
+    return structuredResult(lines.join("\n"), {
+      schema: SCHEMA,
+      data: { ...manifest, cached: false },
+      provenance: provenance("ORACC", url, VERSION),
+      warnings: notes.length > 0 ? notes : undefined,
+    });
+  },
+);
+
+// 113. oracc_get_edition — LIVE (multi-corpus edition retrieval w/ channel auto-select).
+server.registerTool(
+  "oracc_get_edition",
+  {
+    description:
+      "Retrieve one parsed ORACC edition (transliteration + lemma/gloss stream + line numbers) by project + text_id, with genre/period/provenience metadata ATTACHED. PRIMARY channel: the build-oracc bundle's corpusjson/<ID>.json (CDL), parsed into lines + tokens (now preserving nonw dividers/deletions/erasure markup) and enriched from catalogue.json with genre/period/provenience/designation/cdli_id. FALLBACK: live per-text TEI (saao P-ids, rinap Q-ids; reuses the get_oracc_text parser) when an id is not in the bundle. The multi-corpus generalization of get_oracc_text. Returns found:false with a precise warning when neither channel resolves. NB: CDL editions carry NO translation block (the opendata channel does not bundle it per-text); TEI editions do. Parsed editions cached under getCacheDir()/oracc/<proj>/editions/<id>.json (7d TTL; 1h for negatives). v0.74.0.",
+    inputSchema: {
+      project: z
+        .string()
+        .min(1)
+        .describe("ORACC project code, e.g. 'saao/saa01', 'rinap/rinap1'. Leading/trailing slashes are trimmed."),
+      text_id: z.string().min(1).describe("Text identifier, e.g. 'P224485' (saao) or 'Q003414' (rinap)."),
+      max_lines: z
+        .number()
+        .int()
+        .positive()
+        .max(2000)
+        .optional()
+        .describe("Cap transliteration + translation lines returned (default 300)."),
+      refresh: z.boolean().optional().describe("Bypass the cached edition and re-fetch."),
+    },
+  },
+  async ({ project, text_id, max_lines, refresh }) => {
+    const proj = normalizeOraccProject(project);
+    const cap = max_lines ?? 300;
+    const SCHEMA = schemaId("oracc_get_edition");
+
+    type EditionMeta = {
+      genre: string | null;
+      period: string | null;
+      provenience: string | null;
+      designation: string | null;
+    };
+    type EditionData = {
+      project: string;
+      text_id: string;
+      found: boolean;
+      channel?: "tei" | "corpusjson" | "bundle";
+      warning?: string;
+      title?: string;
+      cdli_id?: string;
+      metadata?: EditionMeta;
+      transliteration?: { line_count: number; lines: string[]; truncated: boolean };
+      translation?: { block_count: number; blocks: string[]; truncated: boolean };
+    };
+
+    if (!refresh) {
+      const cached = await readEditionCache<EditionData>(proj, text_id);
+      if (cached) {
+        const channelUrl =
+          cached.channel === "tei"
+            ? oraccTeiUrl(proj, text_id)
+            : cached.channel === "bundle"
+              ? `${oraccBundleUrl(proj)}#corpusjson/${text_id}.json`
+              : oraccPagerUrl(proj, "");
+        return structuredResult(renderEdition(cached, proj, text_id, channelUrl, true), {
+          schema: SCHEMA,
+          data: { ...cached, cached: true },
+          provenance: provenance("ORACC", channelUrl, VERSION, {
+            citation: cached.title && cached.title !== text_id ? cached.title : undefined,
+          }),
+          warnings: cached.warning ? [cached.warning] : undefined,
+        });
+      }
+    }
+
+    const result = await fetchEdition(proj, text_id);
+    if (!result.found) {
+      const data: EditionData = { project: proj, text_id, found: false, warning: result.warning };
+      await writeEditionCache(proj, text_id, data, NEGATIVE_TTL_MS);
+      return structuredResult(
+        `No ORACC edition for ${proj}/${text_id}.\n${result.warning}\nSource: ${result.url}`,
+        {
+          schema: SCHEMA,
+          data: { ...data, cached: false },
+          provenance: provenance("ORACC", result.url, VERSION),
+          warnings: [result.warning],
+        },
+      );
+    }
+
+    const isTei = result.channel === "tei";
+    const xlitAll = isTei ? result.tei!.transliteration : result.cdl!.transliteration;
+    const transAll = isTei ? result.tei!.translation : result.cdl!.translation;
+    // Bundle/CDL channel: attached catalogue metadata supplies the title
+    // (designation) + cdli_id; otherwise fall back to the TEI/text id.
+    const meta = result.channel === "bundle" ? result.meta : undefined;
+    const title = isTei
+      ? result.tei!.title
+      : (meta?.designation ?? result.cdl!.textId ?? text_id);
+    const cdliId = isTei ? result.tei!.cdliId : (meta?.cdli_id ?? null);
+
+    const xlit = xlitAll.slice(0, cap);
+    const xlitTruncated = xlitAll.length > cap;
+    const trans = transAll.slice(0, cap);
+    const transTruncated = transAll.length > cap;
+
+    const data: EditionData = {
+      project: proj,
+      text_id,
+      found: true,
+      channel: result.channel,
+      title,
+      ...(cdliId ? { cdli_id: cdliId } : {}),
+      ...(meta
+        ? {
+            metadata: {
+              genre: meta.genre,
+              period: meta.period,
+              provenience: meta.provenience,
+              designation: meta.designation,
+            },
+          }
+        : {}),
+      transliteration: { line_count: xlitAll.length, lines: xlit, truncated: xlitTruncated },
+      translation: { block_count: transAll.length, blocks: trans, truncated: transTruncated },
+    };
+    await writeEditionCache(proj, text_id, data, EDITION_TTL_MS);
+
+    const warnings: string[] = [];
+    if (xlitTruncated) warnings.push(`transliteration truncated to first ${cap} of ${xlitAll.length} lines.`);
+    if (transTruncated) warnings.push(`translation truncated to first ${cap} of ${transAll.length} blocks.`);
+    if (!isTei) warnings.push("CDL/bundle channel carries no translation (translation block_count = 0).");
+
+    return structuredResult(renderEdition(data, proj, text_id, result.url, false), {
+      schema: SCHEMA,
+      data: { ...data, cached: false },
+      provenance: provenance("ORACC", result.url, VERSION, {
+        citation: title !== text_id ? title : undefined,
+      }),
+      warnings: warnings.length > 0 ? warnings : undefined,
+    });
+  },
+);
+
+function renderEdition(
+  data: {
+    found: boolean;
+    channel?: "tei" | "corpusjson" | "bundle";
+    title?: string;
+    cdli_id?: string;
+    metadata?: { genre: string | null; period: string | null; provenience: string | null; designation: string | null };
+    warning?: string;
+    transliteration?: { line_count: number; lines: string[]; truncated: boolean };
+    translation?: { block_count: number; blocks: string[]; truncated: boolean };
+  },
+  proj: string,
+  textId: string,
+  url: string,
+  cached: boolean,
+): string {
+  if (!data.found) {
+    return `No ORACC edition for ${proj}/${textId}.\n${data.warning ?? ""}\nSource: ${url}`;
+  }
+  const xlit = data.transliteration ?? { line_count: 0, lines: [], truncated: false };
+  const trans = data.translation ?? { block_count: 0, blocks: [], truncated: false };
+  const m = data.metadata;
+  const metaLine =
+    m && (m.genre || m.period || m.provenience)
+      ? `  ${[m.genre && `genre: ${m.genre}`, m.period && `period: ${m.period}`, m.provenience && `provenience: ${m.provenience}`].filter(Boolean).join(" · ")}`
+      : null;
+  return [
+    `${data.title ?? textId}  (${proj} / ${textId}${data.cdli_id && data.cdli_id !== textId ? ` ↔ ${data.cdli_id}` : ""})  [${data.channel}${cached ? ", cached" : ""}]`,
+    ...(metaLine ? [metaLine] : []),
+    `Source: ${url}`,
+    ``,
+    `— TRANSLITERATION (${xlit.line_count} line${xlit.line_count === 1 ? "" : "s"}${xlit.truncated ? `, showing first ${xlit.lines.length}` : ""}) —`,
+    ...(xlit.lines.length ? xlit.lines : ["  (no lines parsed)"]),
+    ``,
+    `— TRANSLATION (${trans.block_count} block${trans.block_count === 1 ? "" : "s"}${trans.truncated ? `, showing first ${trans.blocks.length}` : ""}) —`,
+    ...(trans.blocks.length ? trans.blocks : ["  (no translation blocks)"]),
+  ].join("\n");
+}
+
 async function main() {
   if (process.argv.includes("--smoke")) {
     process.stderr.write(
-      `cuneiform-mcp v${VERSION} smoke OK — 111 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56) + v0.58 cluster_by_scribal_provenance (two-tier port of wallet-fingerprint v0.7 funded_by/first_out_to back to cuneiform — first_copy_event from chunkIndex co-occurrence, first_citation_target from inverted buildCitationGraph, complements v0.48 geographic find-spot clustering with textual-lineage clustering) + v0.61.0 explain_pair_score (T1-A: full provenance trace for any pairwise verdict — per-axis raw signals from compare_tablet_pair + Bayesian fusion per-feature additive decomposition + cross-axis methods-paper §3.4 verdict + full calibration history per axis with version/date/threshold/source-doc/rationale per milestone; closes the "WHY did the model say X?" loop for reviewers/collaborators without forcing them to read v0.18.x-v0.60 release notes) + v0.62.0 export_session (T1-C: session ring buffer + snapshot tool — every structuredContent envelope is captured automatically into a ring buffer, snapshot to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md} bundles a research session for reproducible handoffs without re-running every tool) + v0.63.0 diff_corpus_versions (T2-A: cache-snapshot delta tool — content-hash manifests + read-only diff for reproducibility audits, enrichment-burst impact assessments, and pinning methods-paper claims to specific cache states; no mutation of cache contents) + v0.64.0 auto_validate_from_resolutions (T1-B PROPOSAL-ONLY: replays prioritize_validation_queue candidates against external-anchor rules from methods paper §3.6 / §3.7.3 / §3.11, writes proposals to docs/auto-validation-proposals-<iso-ts>.md, NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — mtime captured before/after for audit; safety contract throws if mode !== "propose") + v0.65.0 cdli_ebl_crosswalk (bidirectional CDLI ↔ eBL ID mapping: accepts P-number / bare integer id / eBL museum number, auto-detects input type, normalizes museum-number forms preserving date-style internal dashes, surfaces matches with confidence tagged 'native' from typed cross-references on either upstream or 'inferred_via_museum_number' from CDLI museum_no parse when external_resources lacks the eBL row — closes the asymmetric-reliability gap demonstrated by P572493 ↔ BM.47463; CDLI ' + '-separated join expressions expand into multiple matches) + v0.66.0 detect_bilingual_tablet + find_bilingual_tablets (Sumerian/Akkadian classifier — live per-Word language-tag walk over eBL /fragments/{id} discriminates true bilinguals from Akkadian-with-sumerograms via the lemmatizer's correct tagging of EN₂/MUŠEN/etc. as language=AKKADIAN; cache-backed corpus surface reads ~/.cache/cuneiform-mcp/bilingual-index.json built by scripts/build-bilingual-index.mjs which pre-filters the corpus via a 12-entry bilingual-genre prior (Lugal-e / Angim / Udugḫul / Mīs pî / Šurpu / Diri / Ura / An=Anum / Izi / Lamentations / Šuʾila / Marduk's Address) cutting API budget from ~36K → ~4,370 tablets; validation anchors K.4178=interlinear_bilingual, K.133=alternating_line_bilingual, K.2798=akkadian_with_sumerograms, K.4928=insufficient_data; classifier is conservative — prefers uncertain/insufficient_data over false-positive bilingual call)) + v0.68.0 compute_quotation_network (corpus-wide DIRECTED MULTIGRAPH at the COMPOSITION level — aggregates v0.20 build_citation_graph commentary→base tablet edges + chunk-index cross-composition shared-chunk hosts into a single composition→composition multigraph; tablet→composition resolution via registry exemplars + v0.54 composition-assignments cache + v0.32 identifyComposition fallback at conf ≥ 0.5; surface metrics in-degree/out-degree/sampled-source betweenness/Tarjan SCC; writes graph.json + graph.dot + summary.md to ~/.cache/cuneiform-mcp/quotation-network/<iso-ts>/; validation anchors Maqlû ↔ Šurpu + Mīs pî → Bīt salāʾ mê expected on live corpus) + v0.69.0 discover_compositions (unsupervised cluster discovery — k-means / hierarchical Ward / DBSCAN-like over the v0.15 Random-Indexing tablet embeddings, deliberately avoiding genre labels or the exemplar registry as a prior; novelty score = 1 − max cosine to any registered composition centroid; clusters above threshold surfaced as candidate new compositions with dominant-metadata-driven suggested labels; methodological negative-control to every other registry-prior tool in the corpus; writes JSON + summary.md to ~/.cache/cuneiform-mcp/composition-discovery/<iso-ts>/) + v0.70-v0.72 (no new tools: §3.4 decision-tree boundary calibration / RULE_D composition-sibling proposals / quotation-network chronology directionality + edge-weight threshold) + v0.73.0 surface_genre_conflicts (Genre-Conflict Sentinel — high-confidence identify_composition assignments whose composition-family disagrees with the eBL editorial genre-family, corroborated by a verbatim shared length-20 chunk with a registry exemplar; observational cross-genre quotation candidates, NOT a label source; re-discovers K.2290/K.2419 medical-Teeth tablets sharing a Mīs pî incantation with exemplar K.163))\n`,
+      `cuneiform-mcp v${VERSION} smoke OK — 113 tools registered, all live, all emit structuredContent envelopes per PROTOCOL.md (v0.5 corpus + v0.6 retrieval + v0.7 Discovery Engine + v0.8 Mesopotamian-internal + v0.9-v0.12 expansions + v0.13 Primary-Source Discovery Engine v2.0 + v0.14.0 RAG + v0.14.2 Sign-Inference Engine + v0.14.3 Biblical-Parallel Finder + v0.15.0 Semantic-Embeddings Mode C + v0.16.0 Anomaly Surface + v0.17.0 Refinement + Fuzzy Parallels + v0.17.1 Cluster Reconstructor + v0.18.0 Lacuna Restorer + Scribal Fingerprint + v0.18.4 Collection Coverage + reconstruct_cluster min_sign_count quality filter + v0.18.5 list_collection_prefixes + v0.18.6 find_short_fragments + v0.18.7 cluster_pair_similarity_matrix + v0.18.8 compare_tablet_pair + v0.18.9 find_scribal_groups + v0.18.10 audit_cluster + find_orthographic_outliers_in_prefix + find_cross_prefix_scribal_links + v0.18.11 compare_clusters + find_strongest_fuzzy_pairs_in_prefix + corpus_health_report + v0.18.12 find_tablet_neighborhood + find_lacuna_restoration_candidates + find_thematic_cluster_in_prefix + v0.18.13 enrich_prefix_metadata + fragment_metadata_coverage + v0.18.14 find_unpublished_in_publication + compare_dialects + find_tablets_by_genre + v0.18.15 compare_prefix_pair + find_genre_anchor_tablets_in_prefix + find_tablets_by_provenance + v0.18.16 find_join_candidates_in_prefix + find_lineage_chain + find_high_join_count_tablets + v0.18.17 find_isolate_compositions + find_signature_evolution_in_lineage + extend_dataset_to_motif + v0.18.18 audit_cluster marginal_signal_count bugfix + v0.18.19 find_embedded_fragments + commentary_quotes_base_text verdict + sig-evolution DEFAULT_MAX_CHAIN 15→8 + v0.19.0 find_chunk_parallels + v0.19.1 host_genres_spanned + v0.20.0 corpus-wide chunk discovery — find_formulaic_passages + trace_chunk_diffusion + build_citation_graph + v0.21.0 find_incipits (length-10 chunk-hash index for opening formulae) + prioritize_validation_queue (active-learning ranker) + v0.22.0 build_canonical_recension_tree (neighbor-joining stemma from chunk-overlap) + build_scribal_school_graph (joint scribal+provenance clustering) + v0.23.0 find_similar_signs (sign2vec PPMI+SVD sign-level semantic embeddings) + v0.24.0 compute_lexical_substitution_score (claim 30 cash-out — sign2vec aggregated to tablet-pair level) + v0.25.0 compare_sign_embedding_configs (sign2vec ensemble) + compute_lexical_substitution_lift (baseline-normalized, +2.24σ separation on K.5896 ↔ K.9508 sibling pair) + v0.26.0 compare_sign_neighbors_across_periods (NA/NB diachronic + register drift) + recommend_archetype_thresholds (Round-3 Lever 5 cash-out — 7 archetype profiles) + v0.27.0 compare_sign_neighbors_register_matched (isolates diachronic from register, 3.77/5 vs 4.06/5 confirms diachronic axis is population-dominant) + v0.28.0 cluster_signs_by_embedding (k-means sign-taxonomy on sign2vec — 12 emergent classes including 2 numerical) + find_formulaic_passages_per_period (NA/NB chunk-hash partition — top NA-only formula has 120 hosts and 0 NB transmission) + v0.29.0 compute_joint_pair_score (Bayesian fusion bootstrap, 98.1% training acc on 52-pair set) + analyze_joins_graph (manuscript joins, 4,361 tablets with joins, top: K.7563 with 70 joins) + find_numerical_chunks (data-driven 112-sign empirical filter replacing v0.21's 2-sign hardcoded list) + v0.30.0 restore_lacuna_semantic (sign2vec-augmented lacuna prediction, 90% α=0/α=1 disagreement = independent semantic signal) + v0.31.0 record_validation_resolution + list_validation_resolutions (persistent active-learning feedback loop — closes the v1.0 ≥100-positives readiness gate organically as the validation queue is worked) + v0.32.0 identify_composition (composition assignment via joint chunk-overlap + sign2vec-centroid scoring against methods-paper exemplar registry — Mīs pî / Šurpu / Udug-ḫul / Bīt salāʾ mê / āšipūtu KAR-44 curriculum, §3.19) + v0.33.0 build_stemma_with_rooting (3 rooting heuristics on v0.22 NJ trees — earliest_period / most_chunk_hosts / outgroup_witness, §3.20) + v0.34.0 score_tablet_completeness (fragment-vs-composition gap — sign_count_ratio + chunk_coverage_ratio against canonical-chunk backbone, §3.21) + v0.35.0 find_composition_lineage (transmission tracer: BFS witnesses → bucket by period × provenance → chunk-sharing edges + bridge witnesses, §3.22 — closes Tier-1 from v0.31+ doc, 5 of 5 ideas shipped) + v0.36.0 damaged_passage_composition_probability (probabilistic classifier accepting raw signs strings + optional restoration-marginalization via v0.30 lacuna restorer, §3.23 — first Tier-2 item) + v0.37.0 list_compositions + versioned registry artifact data/compositions-v1.json (5 → 11 compositions: Maqlû + EAE + Šumma izbu + Šumma ālu + Bārûtu + Diri/Aa; print_editions + external_ids + persistent URIs per panel-review §3.24) + v0.38.0 registry-bootstrap-note propagation across 4 registry-dependent tools (identify_composition + score_tablet_completeness + find_composition_lineage + damaged_passage_composition_probability) — addresses Mertens/Lindqvist overconfidence-by-association concern; cross-tool consistency audit round 24 verifies all 4 tools agree on K.5896 → mis_pi) + v0.39.0 render_stemma_svg (Newick → cladogram SVG, panel-review Yamamoto ask) + get_tablet_image_links (eBL fragmentarium URLs + ancient_find_spot vs modern_collection_prefix per Patel ask) + v0.40.0 compute_confidence_calibration (reliability diagram + Brier + ECE/MCE per panel Lindqvist ask) + scripts/benchmark-lacuna-bleu.mjs (BLEU/CHRF on synthetic gaps, comparable with Gutherz 2023) + v0.41.0 docs: API-STABILITY-v1.0.md (92 tools tiered: canonical 10 / stable 50 / experimental 24 / specialized 16) + PANEL-RESPONSE.md (12 of 15 panel asks shipped, 3 externally gated with documented blockers) + methods paper §3.24 + §3.25 + claims 44-45) + v0.42.0 find_sign_glyph (ABZ → Unicode cuneiform glyph, Tier-3 #11, §3.26) + v0.43.0 extract_citation_network (scholarly co-citation graph from biblical + mesopotamian parallels, Tier-3 #10, §3.27) + v0.44.0 find_lemma_parallel (lemma-Jaccard parallel finder complementing v0.18 sign-trigrams, Tier-3 #9, §3.28 — CLOSES TIER-3) + v0.45.0 ancient_find_spot collection-fallback (panel-ask Patel — uses metadata.collection when provenance.region absent; K.5896 now resolves to Kuyunjik) + lemma-index merge-with-existing (incremental enrichment 21→~200 chunk-hosts) + v0.46.0 ABZ glyph map full-Borger expansion via list-filter endpoint (222 entries → expected ~500+; ABZ168 K.5896 hard fail recovered) + v0.47.0 validation-resolutions store seeded (12 positives + 30 negatives) + train-joint-pair-model.mjs wired to read store (v1.0 progress 24%) + v0.48.0 find_provenance_clusters (ancient find-spot vs museum collection clustering, panel-ask Patel + §3.29 claim 49) + v0.49.0 compute_axis_disagreement (sign-trigram vs lemma-Jaccard cross-axis audit, §3.30 claim 50) + v0.50.0 recalibrate_lacuna_scores Platt scaling (§3.31 claim 51 — closes §3.25 overconfidence finding) + v0.51.0 held-out evaluation methodology (evaluate-joint-pair-model.mjs train/test split, n=10 test: 90% acc, AUC 0.67, 1 misclassification BM.77056↔K.5896 = curriculum-vs-centerpiece predictable from §3.22 + §3.28, §3.32 claim 52) + v0.52.0 recommend_validation_target (active-learning prioritizer, closes v0.31 loop, picks pairs near v0.29 decision boundary for max info gain, §3.33 claim 53) + v0.53.0 V1.0-READINESS-SUMMARY.md consolidation (99 tools / 53 claims / 21 audit rounds / 206 tests PASS / 14 of 18 panel asks shipped) + v0.54.0 corpus composition-assignment discovery (200-tablet scan in 2.7s yields 20 discovered candidate exemplars outside registry — 16 Mīs pî + 4 Udug-ḫul; full-corpus extrapolation ~250 candidates makes v1.0 G1 operationally reachable, §3.34 claim 54) + v0.55.0 list_candidate_exemplars (review-ready surface for the 310 discovered candidates, filterable by composition + confidence, suggested pair anchors ready for record_validation_resolution; **TOOL COUNT 100 MILESTONE**, §3.35 claim 55) + v0.56.0 v0.29 6th feature composition_assignment_match (sourced from v0.54 cache, training acc 0.9423→0.9615, BM.77056↔K.5896 misclassification p=0.046→0.328 +28pp toward correct, §3.36 claim 56) + v0.58 cluster_by_scribal_provenance (two-tier port of wallet-fingerprint v0.7 funded_by/first_out_to back to cuneiform — first_copy_event from chunkIndex co-occurrence, first_citation_target from inverted buildCitationGraph, complements v0.48 geographic find-spot clustering with textual-lineage clustering) + v0.61.0 explain_pair_score (T1-A: full provenance trace for any pairwise verdict — per-axis raw signals from compare_tablet_pair + Bayesian fusion per-feature additive decomposition + cross-axis methods-paper §3.4 verdict + full calibration history per axis with version/date/threshold/source-doc/rationale per milestone; closes the "WHY did the model say X?" loop for reviewers/collaborators without forcing them to read v0.18.x-v0.60 release notes) + v0.62.0 export_session (T1-C: session ring buffer + snapshot tool — every structuredContent envelope is captured automatically into a ring buffer, snapshot to ~/.cache/cuneiform-mcp/sessions/<iso-ts>.{json,md} bundles a research session for reproducible handoffs without re-running every tool) + v0.63.0 diff_corpus_versions (T2-A: cache-snapshot delta tool — content-hash manifests + read-only diff for reproducibility audits, enrichment-burst impact assessments, and pinning methods-paper claims to specific cache states; no mutation of cache contents) + v0.64.0 auto_validate_from_resolutions (T1-B PROPOSAL-ONLY: replays prioritize_validation_queue candidates against external-anchor rules from methods paper §3.6 / §3.7.3 / §3.11, writes proposals to docs/auto-validation-proposals-<iso-ts>.md, NEVER mutates ~/.cache/cuneiform-mcp/validation-resolutions.json — mtime captured before/after for audit; safety contract throws if mode !== "propose") + v0.65.0 cdli_ebl_crosswalk (bidirectional CDLI ↔ eBL ID mapping: accepts P-number / bare integer id / eBL museum number, auto-detects input type, normalizes museum-number forms preserving date-style internal dashes, surfaces matches with confidence tagged 'native' from typed cross-references on either upstream or 'inferred_via_museum_number' from CDLI museum_no parse when external_resources lacks the eBL row — closes the asymmetric-reliability gap demonstrated by P572493 ↔ BM.47463; CDLI ' + '-separated join expressions expand into multiple matches) + v0.66.0 detect_bilingual_tablet + find_bilingual_tablets (Sumerian/Akkadian classifier — live per-Word language-tag walk over eBL /fragments/{id} discriminates true bilinguals from Akkadian-with-sumerograms via the lemmatizer's correct tagging of EN₂/MUŠEN/etc. as language=AKKADIAN; cache-backed corpus surface reads ~/.cache/cuneiform-mcp/bilingual-index.json built by scripts/build-bilingual-index.mjs which pre-filters the corpus via a 12-entry bilingual-genre prior (Lugal-e / Angim / Udugḫul / Mīs pî / Šurpu / Diri / Ura / An=Anum / Izi / Lamentations / Šuʾila / Marduk's Address) cutting API budget from ~36K → ~4,370 tablets; validation anchors K.4178=interlinear_bilingual, K.133=alternating_line_bilingual, K.2798=akkadian_with_sumerograms, K.4928=insufficient_data; classifier is conservative — prefers uncertain/insufficient_data over false-positive bilingual call)) + v0.68.0 compute_quotation_network (corpus-wide DIRECTED MULTIGRAPH at the COMPOSITION level — aggregates v0.20 build_citation_graph commentary→base tablet edges + chunk-index cross-composition shared-chunk hosts into a single composition→composition multigraph; tablet→composition resolution via registry exemplars + v0.54 composition-assignments cache + v0.32 identifyComposition fallback at conf ≥ 0.5; surface metrics in-degree/out-degree/sampled-source betweenness/Tarjan SCC; writes graph.json + graph.dot + summary.md to ~/.cache/cuneiform-mcp/quotation-network/<iso-ts>/; validation anchors Maqlû ↔ Šurpu + Mīs pî → Bīt salāʾ mê expected on live corpus) + v0.69.0 discover_compositions (unsupervised cluster discovery — k-means / hierarchical Ward / DBSCAN-like over the v0.15 Random-Indexing tablet embeddings, deliberately avoiding genre labels or the exemplar registry as a prior; novelty score = 1 − max cosine to any registered composition centroid; clusters above threshold surfaced as candidate new compositions with dominant-metadata-driven suggested labels; methodological negative-control to every other registry-prior tool in the corpus; writes JSON + summary.md to ~/.cache/cuneiform-mcp/composition-discovery/<iso-ts>/) + v0.70-v0.72 (no new tools: §3.4 decision-tree boundary calibration / RULE_D composition-sibling proposals / quotation-network chronology directionality + edge-weight threshold) + v0.73.0 surface_genre_conflicts (Genre-Conflict Sentinel — high-confidence identify_composition assignments whose composition-family disagrees with the eBL editorial genre-family, corroborated by a verbatim shared length-20 chunk with a registry exemplar; observational cross-genre quotation candidates, NOT a label source; re-discovers K.2290/K.2419 medical-Teeth tablets sharing a Mīs pî incantation with exemplar K.163)) + v0.74.0 oracc_index_project + oracc_get_edition (project-aware Oracc adapter, BUNDLE-PRIMARY — downloads + unzips the build-oracc bundle ZIP https://build-oracc.museum.upenn.edu/json/<SLUG>.zip (SLUG = pathname '/'→'-'; CCP=ccpo) via fflate, caches extracted catalogue.json + corpus.json + corpusjson/*.json under getCacheDir()/oracc/<SLUG>/ 7d, skips 0-byte stubs; genuinely unlocks all 5 corpora (dcclt, saao/saa01, rinap/rinap1, ribo/babylon7, ccpo) WITH genre/period/provenience — oracc_index_project enumerates from catalogue.json, oracc_get_edition parses corpusjson via parseCdl (now preserves nonw dividers/deletions/erasure markup) + attaches catalogue metadata; live TEI/pager retained as fallback for ids absent from the bundle)\n`,
     );
     process.exit(0);
   }
@@ -11107,7 +11463,7 @@ async function main() {
   }
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (111 tools)\n`);
+  process.stderr.write(`cuneiform-mcp v${VERSION} listening on stdio (113 tools)\n`);
 }
 
 main().catch((err) => {

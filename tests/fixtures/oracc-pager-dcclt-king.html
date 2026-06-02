@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <meta charset="utf-8"/>
+  <meta name="generator" content="oracc/px p4html.xml "/>
+  <link rel="stylesheet" type="text/css" href="/css/p4.css"/>
+  <link rel="stylesheet" type="text/css" href="/css/p4-cuneify.css"/>
+  <link rel="stylesheet" type="text/css" href="/dcclt/css/p3colours.css"/>
+  <link rel="stylesheet" type="text/css" href="/dcclt/css/projcss.css"/>
+  <script type="text/javascript" src="/js/p4.js">&#160;</script>
+  <script type="text/javascript" src="/js/p4cbd.js">&#160;</script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"><![CDATA[ ]]></script>
+  <title>dcclt</title>    
+</head>
+  <body onload="p4Onload()"><div id="p4Pager" class="bborder-top srch page dtra rref default" data-proj="dcclt" data-srch="s.pRLQtM" data-zoom="0" data-sort="123" data-qury="king">
+  <div id="p4Masthead">
+    <p id="p4HeadTitle" class="banner bborder-top bborder1-bot">
+      <a href="/">Oracc:</a> <a href="/dcclt">dcclt &#x2014; Digital Corpus of Cuneiform Lexical Texts</a>
+    </p>
+  </div>
+  <div id="p4Header" class="menu banner bborder-bot">
+    <p id="p4Banner">
+      <span id="p4Icons">
+	
+  <img class="p4icon" src="/img/p3-dd.png"
+       alt="Toggle menu drop-down" title="Toggle menu drop-down"
+       onclick="toggle_dd()"/>
+  <img id="p4HelpIcon" class="p4icon"
+       src="/img/p3-help.png" alt="Help" title="Help"
+       onclick="window.location='/doc/help/visitingoracc/gettingstarted/index.html'"/>
+  <img id="p4ResetIcon" class="p4icon"
+       src="/img/p3-reset.png" alt="Reset pager" title="Reset pager"
+       onclick="resetPager()"/>
+  <img id="p4MoreIcon" class="p4icon"
+       src="/img/p3-plus.png" alt="More resources" title="More resources"
+       onclick="window.location='/dcclt/hub.html'"/>
+
+      </span>
+    </p>
+    <div id="p4Search">
+  <form action="javascript://" onsubmit="act_srch()">
+    <p>
+      <!--Oracc Search:-->
+      <input id="p4SrchBox" type="text" size="30"
+	     value="king"/>
+      <input type="submit" style="display: none"/>
+      <img id="p4SrchGo" class="p4icon" src="/img/p3-search.png"
+	   alt="Search" title="Search" onclick="act_srch()"/>
+    </p>
+    <p id="p4SrchChars">(j=ŋ&#xa0;sz=š&#xa0;s,=ṣ&#xa0;t,=ṭ&#xa0;0-9=₀-₉; &apos;=alef)</p>
+  </form>
+</div>
+
+    <div id="p4Controls">
+      
+  <div id="p4itemNav" class="p4items" data-ityp="ITEM" data-inth="" data-imax="282">
+    <p class="bg-dk">
+
+      
+      <img id="p4ToggleMeta" class="p4icon" src="/img/p3-full.png"
+	   alt="Toggle metadata pane" title="Toggle metadata pane" onclick="toggle_md()"/>
+      
+      <img id="p4PageItem" class="p4icon p4spread" src="/img/p3-pageitem.png"
+	   alt="Toggle Page/Item view" title="Return to Page view"
+	   onclick="toggle_pi()"/>
+
+      <!--Item-->
+      <img id="p4ItemPrev" class="p4icon p4spread" src="/img/p3-backward.png"
+	   alt="Item back" title="Item back"
+	   onclick="act_item_prev()"/>
+      
+      <span id="p4ItemView"> [ITEM  of 282] </span>
+      
+      <img id="p4ItemNext" class="p4icon p4spread" src="/img/p3-forward.png"
+	   alt="Item forward" title="Item forward"
+	   onclick="act_item_next()"/>
+
+      <span id="p4SrchResults" class="p4srchresults" data-tmax="" data-rmax="323">
+	 Texts [323 matches]
+      </span>
+
+      <span id="p4Translations">
+	
+	<input id="p4Transonly" type="checkbox" onchange="toggle_to()"
+	       value="@@pui_transonly()@@"/>&#xa0;only
+      </span>
+
+    </p>
+  </div>
+
+  <div id="p4PageNav" class="p4pages" data-page="1" data-pmax="12" data-imax="282">
+    <p class="p3toccenter bg-dk">
+
+      <button id="p4Zoom" class="p4spread" onclick="act_zoom('0')">All Results</button>
+
+      <img id="p4PagePrev" class="p4icon p4spread" src="/img/p3-backward.png"
+	   alt="Page back" title="Page back"
+	   onclick="act_prev()"/>
+      
+      <!--Page-->
+      <input id="p4Pageset" type="text" onchange="act_page()" size="3" value="1"/>
+
+      <img id="p4PageNext" class="p4icon p4spread" src="/img/p3-forward.png"
+	   alt="Page forward" title="Page forward"
+	   onclick="act_next()"/>
+
+      282 items
+      /
+      12 pages
+
+      <span id="p4SrchResultpages" class="p4srchresults">[323 matches]</span>
+
+      <span id="p4CeType" class="cetype"><select id="p4CESelect" onchange="act_ce_switch(event)" value="line">
+  <option value="line" selected="selected">Line</option>
+  <option value="unit">Sentence</option>
+  <option value="kwic">KWIC</option>
+</select>
+</span>
+    </p>
+  </div>
+
+
+    </div>
+  </div>
+  <div id="p4Data">
+    <div id="p4Menu">
+<div id="p4MenuSorter">
+<select id="p4MenuSelect" onchange="act_sorter()" value="123">
+<option value="123" selected="selected">Time/Genre/Place</option>
+<option value="132">Time/Place/Genre</option>
+<option value="213">Genre/Time/Place</option>
+<option value="231">Genre/Place/Time</option>
+<option value="312">Place/Time/Genre</option>
+<option value="321">Place/Genre/Time</option>
+</select>
+</div>
+<div id="p4MenuOutline" class="pgotl level0" data-zmax="72"><h2>Ebla</h2><div class="pgotl level1"><h3>Bilingual exercise</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(1)" data-zoom="1">Ebla [1]</a></p></div></div><h2>Old Babylonian</h2><div class="pgotl level1"><h3>Acrographic Word Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(2)" data-zoom="2">unknown [1]</a></p></div><h3>Lexical</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(3)" data-zoom="3">uncertain [1]</a></p></div><h3>OB Diri</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(4)" data-zoom="4">unclear [1]</a></p></div><h3>OB Lu</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(5)" data-zoom="5">Isin [4]</a></p><p><a href="javascript://" onclick="act_zoom(6)" data-zoom="6">uncertain [1]</a></p></div><h3>OB Nippur Diri</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(7)" data-zoom="7">Nippur [1]</a></p></div><h3>OB Nippur Lu</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(8)" data-zoom="8">uncertain [1]</a></p></div><h3>OB Sippar Ura 1-2</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(9)" data-zoom="9">Nippur [1]</a></p></div><h3>OB Ura</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(10)" data-zoom="10">Isin [1]</a></p><p><a href="javascript://" onclick="act_zoom(11)" data-zoom="11">uncertain [4]</a></p><p><a href="javascript://" onclick="act_zoom(12)" data-zoom="12">unclear [2]</a></p></div><h3>Proverb Collection</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(13)" data-zoom="13">Nippur [1]</a></p></div><h3>Sign Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(14)" data-zoom="14">Nippur [3]</a></p></div><h3>Thematic Word Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(15)" data-zoom="15">Nippur [2]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(16)" data-zoom="16">Ur [1]</a></p><p><a href="javascript://" onclick="act_zoom(17)" data-zoom="17">uncertain [1]</a></p></div></div><h2>Middle Assyrian</h2><div class="pgotl level1"><h3>Ea 2</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(18)" data-zoom="18">Assur [1]</a></p></div><h3>Kagal</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(19)" data-zoom="19">uncertain [2]</a></p></div><h3>Ura</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(20)" data-zoom="20">Assur [1]</a></p></div><h3>Šarru</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(21)" data-zoom="21">Nineveh [53]</a></p></div></div><h2>Middle Babylonian</h2><div class="pgotl level1"><h3>Izi Boghazkoy</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(22)" data-zoom="22">Hattusa [1]</a></p></div><h3>Sa</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(23)" data-zoom="23">Ugarit [6]</a></p></div><h3>Sag</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(24)" data-zoom="24">Emar [2]</a></p></div><h3>Thematic Word Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(25)" data-zoom="25">unknown [2]</a></p></div><h3>ur5-ra wooden objects</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(26)" data-zoom="26">Ugarit [1]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(27)" data-zoom="27">Babylon [9]</a></p><p><a href="javascript://" onclick="act_zoom(28)" data-zoom="28">Emar [5]</a></p><p><a href="javascript://" onclick="act_zoom(29)" data-zoom="29">Nippur [2]</a></p><p><a href="javascript://" onclick="act_zoom(30)" data-zoom="30">uncertain [2]</a></p></div></div><h2>Neo-Assyrian</h2><div class="pgotl level1"><h3>A₂ = idu</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(31)" data-zoom="31">Nineveh [5]</a></p></div><h3>An = Anum</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(32)" data-zoom="32">Nineveh [7]</a></p></div><h3>Antagal</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(33)" data-zoom="33">Nineveh [10]</a></p></div><h3>Diri</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(34)" data-zoom="34">Nineveh [2]</a></p></div><h3>Ea</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(35)" data-zoom="35">Assur [1]</a></p></div><h3>Emesal Vocabulary</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(36)" data-zoom="36">Nineveh [3]</a></p></div><h3>Erimhuš</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(37)" data-zoom="37">Nineveh [1]</a></p></div><h3>Explanatory god  list</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(38)" data-zoom="38">Nineveh [3]</a></p></div><h3>Group vocabulary</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(39)" data-zoom="39">Nineveh [6]</a></p></div><h3>Izi = išatu</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(40)" data-zoom="40">Nineveh [1]</a></p></div><h3>Murgud</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(41)" data-zoom="41">Assur [2]</a></p><p><a href="javascript://" onclick="act_zoom(42)" data-zoom="42">Nineveh [7]</a></p></div><h3>Nabnitu</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(43)" data-zoom="43">Nineveh [11]</a></p></div><h3>Synonym list An</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(44)" data-zoom="44">Nineveh [1]</a></p></div><h3>Unidentified</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(45)" data-zoom="45">Nineveh [1]</a></p></div><h3>Ura</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(46)" data-zoom="46">Assur [2]</a></p><p><a href="javascript://" onclick="act_zoom(47)" data-zoom="47">Nineveh [9]</a></p></div><h3>Šarru</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(48)" data-zoom="48">Nineveh [36]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(49)" data-zoom="49">Huzirina [14]</a></p></div></div><h2>Neo-Babylonian</h2><div class="pgotl level1"><h3>Ea</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(50)" data-zoom="50">Babylon [1]</a></p></div><h3>Emesal Vocab.</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(51)" data-zoom="51">Babylon [3]</a></p></div><h3>Erimhuš</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(52)" data-zoom="52">Babylon [1]</a></p></div><h3>Murgud</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(53)" data-zoom="53">unclear [1]</a></p></div><h3>Ura</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(54)" data-zoom="54">Nippur [2]</a></p><p><a href="javascript://" onclick="act_zoom(55)" data-zoom="55">Sippar [1]</a></p><p><a href="javascript://" onclick="act_zoom(56)" data-zoom="56">uncertain [1]</a></p><p><a href="javascript://" onclick="act_zoom(57)" data-zoom="57">unclear [1]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(58)" data-zoom="58">unclear [9]</a></p></div></div><h2>Late Babylonian</h2><div class="pgotl level1"><h3>Aa</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(59)" data-zoom="59">Sippar [3]</a></p></div><h3>Syllabary B</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(60)" data-zoom="60">Sippar [1]</a></p></div></div><h2>Achaemenid</h2><div class="pgotl level1"><h3>NBGT</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(61)" data-zoom="61">Nippur [1]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(62)" data-zoom="62">unclear [1]</a></p></div></div><h2>Hellenistic</h2><div class="pgotl level1"><h3>Catalogue</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(63)" data-zoom="63">Uruk [1]</a></p></div><h3>Ea</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(64)" data-zoom="64">Uruk [1]</a></p></div><h3>Erimhuš</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(65)" data-zoom="65">Uruk [2]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(66)" data-zoom="66">Uruk [7]</a></p></div></div><h2>First Millennium</h2><div class="pgotl level1"><h3>Other Vocabularies</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(67)" data-zoom="67">unknown [1]</a></p></div><h3>Sign Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(68)" data-zoom="68">unknown [4]</a></p></div><h3>Thematic Word Lists</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(69)" data-zoom="69">unknown [1]</a></p></div></div><h2>unknown</h2><div class="pgotl level1"><h3>Ea</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(70)" data-zoom="70">unclear [1]</a></p></div><h3>Ura</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(71)" data-zoom="71">Uruk [1]</a></p></div><h3>unknown</h3><div class="pgotl level2"><p><a href="javascript://" onclick="act_zoom(72)" data-zoom="72">Kiš [1]</a></p></div></div></div></div>
+
+    <div id="p4Content">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="ce" id="p4CEtraContent">
+  <div class="tra">
+    <h2 class="ce-heading h2 border-top heading">Ebla/Bilingual exercise/Ebla</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">general</span>, <span class="w">leader</span>, <span class="w selected">king</span>	</span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P242328_project-en.11">(MEE 4 89 + MEE 4 90 + MEE 4, 113, o iii 4)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/Acrographic Word Lists/unknown</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">contest</span> <span class="w">between</span> <span class="w">lords</span> <span class="w">and</span> <span class="w selected">kings</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000050_project-en.1017">(OB Nippur Izi, Tab.II, 420)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/Lexical/uncertain</h2>
+    <p class="refline tr">
+      <span class="cell">
+        <span class="w selected">king</span>
+      </span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P209815_project-en.6">(Ontario 2, 499, r 4)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Diri/unclear</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">platform</span> <span class="w">for</span> <span class="w">statue</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P447992_project-en.176">(OECT 04, 152, c ii 46)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Lu/Isin</h2>
+    <p class="refline tr">
+      <span class="cell">
+        <span class="w selected">king</span>
+      </span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P247810_project-en.1">(IB 1514, o i 2)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">son</span> <span class="w">of</span> <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P247810_project-en.2">(IB 1514, o i 3)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">barber</span> <span class="w">of</span> <span class="w">his</span> <span class="r">(</span><span class="w">the</span> <span class="w selected">king's</span><span class="r">)</span> <span class="w">head</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P247810_project-en.21">(IB 1514, o iii 4)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">cup-bearer</span> <span class="w">of</span> <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P247810_project-en.41">(IB 1514, o iii 29')</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Lu/uncertain</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">musician</span> <span class="w">in</span> <span class="w">service</span> <span class="w">of</span> <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P388343_project-en.12">(Education in the Earliest Schools no. 137, o 13)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Nippur Diri/Nippur</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">boxwood</span> = <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P229672_project-en.99">(MSL 15, 008 A, r i 9)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Nippur Lu/uncertain</h2>
+    <p class="refline tr">
+      <span class="cell">
+        <span class="w selected">king</span>
+      </span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P273812_project-en.1">(Education in the Earliest Schools no. 023, o 2)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Sippar Ura 1-2/Nippur</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">administrator</span> <span class="w">of</span> <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P229901_project-en.5">(HS 1702, o i' 10')</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Ura/Isin</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">the</span> <span class="w">year</span> <span class="w">that</span> <span class="w selected">king</span> <span class="w">Samsuiluna</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P459217_project-en.134">(IB 1547, r iv 14)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Ura/uncertain</h2>
+    <p class="refline tr">
+      <span class="cell">
+        <span class="w selected">king</span>
+      </span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P253242_project-en.11">(CUSAS 12, 3.2.03, r 2)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">son</span> <span class="w">of</span> <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P253242_project-en.12">(CUSAS 12, 3.2.03, r 3)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">Year</span> <span class="w">in</span> <span class="w">which</span> <span class="w">Samsuʾilune</span>, <span class="w">the</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P349874_project-en.12">(DoCu 495, r ii 7')</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">smote</span> <span class="w">the</span> <span class="w">hateful</span> <span class="w selected">kings</span> <span class="r">[</span><span class="w">who</span> <span class="w">had</span> <span class="w">brought</span> <span class="w">the</span> <span class="w">people</span> <span class="w">of</span> <span class="w">Akkad</span> <span class="w">to</span> <span class="w">revolt</span><span class="r">]</span> <span class="r">(</span><span class="w">Samsuʾiluna</span> <span class="w">year</span> <span class="w">14</span>; <span class="w">approximately</span> <span class="w">1735</span> <span class="w">BCE</span><span class="r">)</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P349874_project-en.13">(DoCu 495, r ii 8')</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/OB Ura/unclear</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">linen</span> <span class="w">for</span> <span class="w">the</span> <span class="w">crown</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="X005009_project-en.0">(CUNES 51-10-087, o 1)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">linen</span> <span class="w">for</span> <span class="w">the</span> <span class="w">crown</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="X005009_project-en.3">(CUNES 51-10-087, r 1)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/Proverb Collection/Nippur</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="literal"><span class="w">socle</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span> = <span class="w">brown</span> <span class="w">banded</span> <span class="w">agate</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="P229686_project-en.9">(OIM A 30175 3N-T0168, r ii 11)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/Sign Lists/Nippur</h2>
+    <p class="refline tr">
+      <span class="cell"><span class="w">boxwood</span> = <span class="w selected">king</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000057_project-en.185">(OB Nippur Diri, 169)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w">rites</span> <span class="r">[</span><span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span><span class="r">]</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000057_project-en.330">(OB Nippur Diri, 358)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="literal"><span class="w">socle</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span> = <span class="w">brown</span> <span class="w">banded</span> <span class="w">agate</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000057_project-en.361">(OB Nippur Diri, Seg.2, 11)</a>
+    </p>
+    <h2 class="ce-heading h2 border-top heading">Old Babylonian/Thematic Word Lists/Nippur</h2>
+    <p class="refline tr">
+      <span class="cell">
+        <span class="literal"><span class="w">composite</span> <span class="w">bow</span> <span class="w">for</span> <span class="w">the</span> <span class="w">hand</span> <span class="w">of</span> <span class="w">a</span> <span class="w selected">king</span></span>
+      </span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000039_project-en.614">(OB Nippur Ura 1, 552a)</a>
+    </p>
+    <p class="refline tr">
+      <span class="cell"><span class="w selected">King</span> <span class="w">Anzud</span></span>
+    </p>
+    <p class="label">
+      <a href="javascript://" onclick="act_iref(event)" data-iref="Q000042_project-en.214">(OB Nippur Ura 5, 215)</a>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </div>
+  <div id="p4Footer">
+    
+
+  </div>
+</div>
+</body>
+</html>

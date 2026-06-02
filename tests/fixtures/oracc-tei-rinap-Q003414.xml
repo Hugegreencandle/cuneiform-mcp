@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="http://oracc.museum.upenn.edu/css/xtf2tei.css" type="text/css"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:norm="http://oracc.org/ns/norm/1.0" xmlns:xmd="http://oracc.org/ns/xmd/1.0" xmlns:tei="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title><note xmlns:xl="http://www.w3.org/1999/xlink" type="helplink" xl:type="simple" xl:href="http://oracc.museum.upenn.edu/doc/user/teicolours.html" xl:show="new">(A key to the colourization may be found at: 
+		http://oracc.museum.upenn.edu/doc/user/teicolours.html.)</note><name xmlns:xl="http://www.w3.org/1999/xlink" xl:type="simple" xl:href="http://cdli.ucla.edu/Q003414" xl:show="new" type="cdlicat:id_text">Q003414</name> = <name type="cdlicat:primary_publication">Tiglath-pileser III 1</name></title>
+        <respStmt>
+          <resp>generated at <date>2021-03-23T06:00</date> by </resp>
+          <name type="program">xtf2tei.xsl 1.1</name>
+        </respStmt>
+      </titleStmt>
+      <publicationStmt>
+        <availability>
+          <p>Electronic manuscript</p>
+        </availability>
+      </publicationStmt>
+      <sourceDesc>
+        <bibl>
+          <name type="file">rinap/rinap1/Q003414.xtf</name>
+        </bibl>
+      </sourceDesc>
+    </fileDesc>
+  </teiHeader>
+  <text xml:lang="akk" type="transliteration" subtype="transliteration">
+    <body>
+      <div1 type="discourse" subtype="body">
+        <p><s xml:lang="akk" xml:id="Q003414.U2">
+<lb n="1"/>
+<w lemma="perʾu[bud//offspring]N" xml:id="Q003414.l0009c"><c type="sign" subtype="logo">NUNUZ</c></w>
+<placeName><settlement><w lemma="Baltil[Aššur//Aššur]QN" xml:id="Q003414.l0009d">bal-til<c type="determinative" rend="post" subtype="semantic"><g type="sign" subtype="logo">KI</g></c></w>
+</settlement></placeName><w lemma="šūquru[very valuable//very valuable]AJ" xml:id="Q003414.l0009e">šu-<damageSpan spanTo="#d.Q003414.2.3.2"/>qu-ru<anchor type="damage" xml:id="d.Q003414.2.3.2"/></w>
+<w lemma="narāmu[loved one//loved one]N" xml:id="Q003414.l0009f">na-ram</w>
+<w xml:id="Q003414.l000a0"><c type="determinative" rend="pre" subtype="semantic">d</c><anchor type="breakStart" xml:id="Q003414.2.5.1"/><addSpan type="maybe" spanTo="#s.m.Q003414.2.5.1"/>...<anchor xml:id="s.m.Q003414.2.5.1" type="maybe"/></w>
+<w lemma="Šerua[1//1]DN" xml:id="Q003414.l000a1"><c type="determinative" rend="pre" subtype="semantic">d</c>še<anchor type="breakEnd" corresp="#Q003414.2.5.1"/>-ru-a</w>
+<w xml:id="Q003414.l000a2"><c type="sign" subtype="logo">AB</c></w>
+<w xml:id="Q003414.l000a3"><c type="sign" subtype="logo">BA</c></w>
+<w xml:id="Q003414.l000a4">x</w>
+<w xml:id="Q003414.l000a5">x</w>
+<lb n="2"/>
+<w lemma="pitqu[brickwork//creation]N" xml:id="Q003414.l000a6">pi-tiq</w>
+<w lemma="Ninmena[1//1]DN" xml:id="Q003414.l000a7"><c type="determinative" rend="pre" subtype="semantic">d</c>nin-<damageSpan spanTo="#d.Q003414.3.2.3"/>men-na<anchor type="damage" xml:id="d.Q003414.3.2.3"/></w>
+<w lemma="ša[that//who]REL" xml:id="Q003414.l000a8">ša₂</w>
+<w lemma="ana[to//for]PRP" xml:id="Q003414.l000a9">a-na</w>
+<w lemma="bēlūtu[rule//lordship]N" xml:id="Q003414.l000aa">be-lut</w>
+<w lemma="mātu[land//land]N" xml:id="Q003414.l000ab"><damageSpan spanTo="#d.Q003414.3.6.1"/><c type="sign" subtype="logo">KUR</c>.<c type="sign" subtype="logo">KUR</c><anchor type="damage" xml:id="d.Q003414.3.6.1"/></w>
+<w xml:id="Q003414.l000ac"><anchor type="breakStart" xml:id="Q003414.3.7.0"/><addSpan type="maybe" spanTo="#s.m.Q003414.3.7.0"/>...<anchor xml:id="s.m.Q003414.3.7.0" type="maybe"/><anchor type="breakEnd" corresp="#Q003414.3.7.0"/></w>
+<w xml:id="Q003414.l000ad"><c type="sign" subtype="logo">AN</c></w>
+<note type="inline" rend="dollar"/>
+<w xml:id="Q003414.l000ae"><c type="sign" subtype="logo">TI</c></w>
+<w xml:id="Q003414.l000af"><c type="sign" subtype="logo">AL</c></w>
+<note type="inline" rend="dollar"/>
+<w xml:id="Q003414.l000b0"><c type="sign" subtype="logo">ŠID</c></w>
+<w xml:id="Q003414.l000b1">x</w>
+<lb n="3"/>
+<w lemma="rabû[be(come) big//grow up]V" xml:id="Q003414.l000b2">ir-bu-u₂</w>
+<w lemma="ana[to//to]PRP" xml:id="Q003414.l000b3">a-na</w>
+<w lemma="šarrūtu[kingship//kingship]N" xml:id="Q003414.l000b4"><c type="sign" subtype="logo">LUGAL</c>-u₂-ti</w>
+<w lemma="šakkanakku[(military) governor//(military) governor]N" xml:id="Q003414.l000b5"><c type="sign" subtype="logo">GIR₃</c>.<c type="sign" subtype="logo">NITA₂</c></w>
+<w xml:id="Q003414.l000b6">x</w>
+<w xml:id="Q003414.l000b7"><anchor type="breakStart" xml:id="Q003414.4.6.0"/><addSpan type="maybe" spanTo="#s.m.Q003414.4.6.0"/>...<anchor xml:id="s.m.Q003414.4.6.0" type="maybe"/><anchor type="breakEnd" corresp="#Q003414.4.6.0"/></w>
+<w xml:id="Q003414.l000b8">x</w>
+<w xml:id="Q003414.l000b9">x</w>
+<w xml:id="Q003414.l000ba">x</w>
+<w xml:id="Q003414.l000bb"><corr cert="low">ma</corr></w>
+<lb n="4"/>
+<w lemma="muṣṣibu[one who increases//one who increases]N" xml:id="Q003414.l000bc"><damageSpan spanTo="#d.Q003414.5.3.1"/>mu-ṣib</w>
+<w lemma="šagigurrû[free-will offering//free-will offering]N" xml:id="Q003414.l000bd"><c type="sign" subtype="logo">ŠA₃</c>.<c type="sign" subtype="logo">IGI</c>.<c type="sign" subtype="logo">GURU₆</c>.<c type="sign" subtype="logo">MEŠ</c></w>
+<w lemma="ana[to//for]PRP" xml:id="Q003414.l000be">a-na<anchor type="damage" xml:id="d.Q003414.5.3.1"/></w>
+<w xml:id="Q003414.l000bf">x</w>
+<w xml:id="Q003414.l000c0">x</w>
+<w xml:id="Q003414.l000c1">x</w>
+<w xml:id="Q003414.l000c2">x</w>
+<w xml:id="Q003414.l000c3">x</w>
+<w xml:id="Q003414.l000c4"><anchor type="breakStart" xml:id="Q003414.5.9.0"/>x<anchor type="breakEnd" corresp="#Q003414.5.9.0"/></w>
+<w xml:id="Q003414.l000c5">x</w>
+<w xml:id="Q003414.l000c6"><anchor type="breakStart" xml:id="Q003414.5.11.0"/><addSpan type="maybe" spanTo="#s.m.Q003414.5.11.0"/>...<anchor xml:id="s.m.Q003414.5.11.0" type="maybe"/><anchor type="breakEnd" corresp="#Q003414.5.11.0"/></w>
+<w lemma="šurīnu[(divine) emblem//(divine) emblem]N" xml:id="Q003414.l000c7">šu-ri-<damageSpan spanTo="#d.Q003414.5.12.3"/><corr cert="low">in</corr>-<corr cert="low">ni</corr><anchor type="damage" xml:id="d.Q003414.5.12.3"/></w>
+<lb n="5"/>
+<w lemma="zikaru[male//male]N" xml:id="Q003414.l000c8">zi-ka-ru</w>
+<w lemma="dannu[strong//strong]AJ" xml:id="Q003414.l000c9">dan-nu</w>
+<w lemma="nūru[light//light]N" xml:id="Q003414.l000ca">nu-ur</w>
+<w lemma="kiššatu[totality//totality]N" xml:id="Q003414.l000cb">kiš-šat</w>
+<w lemma="nišu[people//people]N" xml:id="Q003414.l000cc"><c type="sign" subtype="logo">UN</c>.<c type="sign" subtype="logo">MEŠ</c>-šu</w>
+<w lemma="etellu[pre-eminent one//pre-eminent one]N" xml:id="Q003414.l000cd"><damageSpan spanTo="#d.Q003414.6.6.1"/>e-<corr cert="low">tel</corr><anchor type="damage" xml:id="d.Q003414.6.6.1"/></w>
+<w xml:id="Q003414.l000ce"><anchor type="breakStart" xml:id="Q003414.6.7.0"/><addSpan type="maybe" spanTo="#s.m.Q003414.6.7.0"/>...<anchor xml:id="s.m.Q003414.6.7.0" type="maybe"/></w>
+<w lemma="kalû[totality//all]N" xml:id="Q003414.l000cf"><corr cert="low">kal</corr><anchor type="breakEnd" corresp="#Q003414.6.7.0"/></w>
+<w lemma="malku[prince//ruler]N" xml:id="Q003414.l000d0">mal-<damageSpan spanTo="#d.Q003414.6.9.1"/>ki<anchor type="damage" xml:id="d.Q003414.6.9.1"/></w>
+<w xml:id="Q003414.l000d1">x</w>
+<w xml:id="Q003414.l000d2">x</w>
+<w xml:id="Q003414.l000d3">ti</w>
+<lb n="6"/>
+<w lemma="dāʾipu[one who pushes away//one who pushes away]N" xml:id="Q003414.l000d4">da-i-pu</w>
+<w lemma="gērû[opponent//enemy]N" xml:id="Q003414.l000d5">ga-re-e-šu</w>
+<w lemma="eṭlu[manly one//young man]N" xml:id="Q003414.l000d6"><c type="sign" subtype="logo">GURUŠ</c></w>
+<w lemma="qardu[valiant//valiant]AJ" xml:id="Q003414.l000d7">qar-du</w>
+<w lemma="sāpinu[flattener//flattener]N" xml:id="Q003414.l000d8">sa-<damageSpan spanTo="#d.Q003414.7.5.2"/>pi-nu<anchor type="damage" xml:id="d.Q003414.7.5.2"/></w>
+<w xml:id="Q003414.l000d9"><anchor type="breakStart" xml:id="Q003414.7.6.0"/><addSpan type="maybe" spanTo="#s.m.Q003414.7.6.0"/>...<anchor xml:id="s.m.Q003414.7.6.0" type="maybe"/><anchor type="breakEnd" corresp="#Q003414.7.6.0"/></w>
+<w lemma="nakru[enemy//enemy]N" xml:id="Q003414.l000da">na-ki-ri</w>
+<w lemma="ša[that//who]REL" xml:id="Q003414.l000db">ša₂</w>
+<w lemma="huršānu[mountain(s)//mountain(s)]N" xml:id="Q003414.l000dc">hur-sa-<damageSpan spanTo="#d.Q003414.7.9.3"/><corr cert="low">a</corr>-<corr cert="low">ni</corr><anchor type="damage" xml:id="d.Q003414.7.9.3"/></w>
+<lb n="7"/>
+<w lemma="etguru[crossed over//interlocking]AJ" xml:id="Q003414.l000dd">et-gu-ru-ti</w>
+<w lemma="kīma[like//like]PRP" xml:id="Q003414.l000de">ki-ma</w>
+<w lemma="qû[flax//thread]N" xml:id="Q003414.l000df">qe₂-e</w>
+<w lemma="salātu[slit//slice through]V" xml:id="Q003414.l000e0">u₂-sal-li-tu-ma</w>
+<w xml:id="Q003414.l000e1"><damageSpan spanTo="#d.Q003414.8.5.0"/>u₂<anchor type="damage" xml:id="d.Q003414.8.5.0"/>-<anchor type="breakStart" xml:id="Q003414.8.5.1"/>...<anchor type="breakEnd" corresp="#Q003414.8.5.1"/></w>
+<w xml:id="Q003414.l000e2">u₂</w>
+<w xml:id="Q003414.l000e3">x</w>
+<w xml:id="Q003414.l000e4">x</w>
+<w xml:id="Q003414.l000e5">x</w>
+<w xml:id="Q003414.l000e6">x</w>
+</s><note type="other" rend="dollar">Continued in text no. 2</note>
+</p>
+      </div1>
+      <div1 xmlns:xtr="http://oracc.org/ns/xtr/1.0" type="translation" subtype="project" xml:lang="en" xml:id="Q003414_project-en">
+        <div3 type="tr" n="" xtr:ref="Q003414.1" subtype="dollar">
+          <p>Beginning of the Annals missing</p>
+        </div3>
+        <div3 type="tr" xml:id="Q003414_project-en.0" n="(1)" xtr:sref="Q003414.2" xtr:lab-start-label="1" xtr:lab-start-lnum="1" xtr:eref="Q003414.8" xtr:lab-end-label="7" xtr:lab-end-lnum="7" xtr:rows="7" xtr:se_label="Tiglath-pileser III 1, 1" xtr:label="(1)" subtype="tr">
+          <p>
+            <span type="cell"><span type="w">Precious</span> <span type="w">scion</span> <span type="w">of</span> <span type="w">Baltil</span> <span type="r">(</span><span type="w">Aššur</span><span type="r">)</span>, <span type="w">beloved</span> <span type="w">of</span> <span type="w">the</span> <span type="w">god<span type="r">(</span>dess</span><span type="r">)</span> <span type="r">[</span><span type="r">(</span><span type="w">DN</span> <span type="w">and</span><span type="r">)</span> <span type="w">Šē<span type="r">]</span>rūa</span>, ..., <span type="w">creation</span> <span type="w">of</span> <span type="w">the</span> <span type="w">goddess</span> <span type="w">Ninmena</span>, <span type="w">who</span> <span type="r">[</span><span type="r">(</span>...<span type="r">)</span><span type="r">]</span> ... <span type="w">for</span> <span type="w">the</span> <span type="w">dominion</span> <span type="w">of</span> <span type="w">the</span> <span type="w">lands</span>, <span type="r">(</span>...<span type="r">)</span> <span type="w">who</span> <span type="w">grew</span> <span type="w">up</span> <span type="w">to</span> <span type="w">be</span> <span type="w">king</span>, ... <span type="r">[</span><span type="r">(</span>...<span type="r">)</span><span type="r">]</span> <span type="w">governor</span>, <span type="r">[</span><span type="r">(</span>...<span type="r">)</span><span type="r">]</span> ..., <span type="w">the</span> <span type="w">one</span> <span type="w">who</span> <span type="w">increases</span> <span type="w">voluntary</span> <span type="w">offerings</span> <span type="w">for</span> ..., ... <span type="r">[</span><span type="r">(</span>...<span type="r">)</span><span type="r">]</span> <span type="w">of</span> <span type="i"><span type="w">emblems</span></span>, <span type="r">(</span><span type="w">5</span><span type="r">)</span> <span type="w">powerful</span> <span type="w">male</span>, <span type="w">light</span> <span type="w">of</span> <span type="w">all</span> <span type="w">of</span> <span type="w">his</span> <span type="w">people</span>, <span type="i"><span type="w">lord</span> <span type="w">of</span></span> <span type="r">[</span><span type="r">(</span>...<span type="r">)</span> <span type="i"><span type="w">all</span></span><span type="r">]</span> <span type="w">rulers</span> ..., <span type="w">the</span> <span type="w">one</span> <span type="w">who</span> <span type="w">overwhelms</span> <span type="w">his</span> <span type="w">foes</span>, <span type="w">valiant</span> <span type="w">man</span>, <span type="w">the</span> <span type="w">one</span> <span type="w">who</span> <span type="w">destroys</span> <span type="r">[</span><span type="r">(</span>...<span type="r">)</span><span type="r">]</span> <span type="w">enemies</span>, <span type="w">who</span> <span type="w">cuts</span> <span type="r">(</span><span type="w">straight</span><span type="r">)</span> <span type="w">through</span> <span type="w">interlocking</span> <span type="w">mountains</span> <span type="w">like</span> <span type="w">a</span> <span type="r">(</span><span type="w">taut</span><span type="r">)</span> <span type="w">string</span> <span type="w">and</span> ... <span type="r">[</span>...<span type="r">]</span> ...</span>
+          </p>
+        </div3>
+        <div3 type="tr" n="" xtr:ref="Q003414.9" subtype="dollar">
+          <p>Continued in text no. 2</p>
+        </div3>
+      </div1>
+    </body>
+  </text>
+</TEI>

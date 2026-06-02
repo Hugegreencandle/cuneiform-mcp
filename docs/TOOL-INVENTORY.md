@@ -2,7 +2,7 @@
 
 Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-05-24 against v0.26.0.
 
-**Total tools: 111**
+**Total tools: 113**
 
 ## `lookup_sign`
 
@@ -447,4 +447,12 @@ Retrieve the scribal-signature profile for a tablet: top-30 signs whose in-table
 ## `surface_genre_conflicts`
 
 Genre-Conflict Sentinel. Surfaces tablets where identify_composition's high-confidence composition-FAMILY (magic / divination / lexical, from registry typical_genre) disagrees with the tablet's eBL editorial genre-FAMILY (medicine / magic / divination / literature / lexical, from primary_genre), and…
+
+## `oracc_index_project`
+
+Unlock/inventory one of the 5 target ORACC corpora (DCCLT, SAAo, RINAP, RIBo, CCP) from the build-oracc BUNDLE ZIP (`https://build-oracc.museum.upenn.edu/json/<SLUG>.zip` — SLUG = project pathname with `/`→`-`; CCP ships as `ccpo`). The bundle is downloaded + unzipped (fflate) once and cached under `getCacheDir()/oracc/<SLUG>/`; subsequent calls reuse the cache (`refresh:true` re-downloads). Enumeration + per-text genre/period/provenience/designation/cdli_id come from the bundle's `catalogue.json` — NOT the live pager. Returns counts + genre/period histograms + a paged metadata-bearing sample. Falls back to the legacy live pager/TEI probe only if a project's bundle is unavailable.
+
+## `oracc_get_edition`
+
+Retrieve one parsed ORACC edition (transliteration + lemma/gloss stream + line numbers) by project + text_id, with genre/period/provenience metadata **attached**. PRIMARY channel: the build-oracc bundle's `corpusjson/<ID>.json` (CDL), parsed via `parseCdl` (now preserving nonw dividers / scribal deletions / erasure markup) and enriched from `catalogue.json`. FALLBACK: live per-text TEI (saao P-ids, rinap Q-ids; reuses the get_oracc_text parser) when an id is absent from the bundle. CDL editions carry no translation block; TEI editions do.
 
