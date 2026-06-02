@@ -1,13 +1,14 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **115 tools** (v0.78.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **116 tools** (v0.79.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
 
 > **Status:** approaching a v1.0 tag. The API surface is frozen (see [`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)); the remaining gate is the labeled-positives validation set (see [v1.0 readiness](#v10-readiness) below). Methods paper resubmitted to JOHD as a Discussion Paper (2026-05-28).
 
-## What's new — v0.78.0
+## What's new — v0.79.0
 
 The work since v0.18 moved from corpus retrieval into a full **discovery + validation pipeline**, oriented around closing the v1.0 labeled-positives gate.
 
+- **v0.79 — SumTablets Sumerian corpus ingest + `search_sumtablets` (count 115 → 116).** The first **Sumerian** corpus enters the chunk engine. [SumTablets](https://huggingface.co/datasets/colesimmons/SumTablets) (Simmons, Diehl-Martinez & Jurafsky, *"SumTablets: A Transliteration Dataset of Sumerian Tablets"*, ML4AL @ ACL 2024; **CC-BY-4.0**) is **fetched to your cache, never committed** (`scripts/fetch-sumtablets.mjs` — ~46 MB of parquet, ~91.6K tablets across train+validation+test). A name→ABZ bridge mirrors the v0.75 ccpo machinery exactly: `scripts/build-sumtablets-abz-map.mjs` runs the eBL `/api/signs/{NAME}` **Layer-3 gap-fill** over the Sumerian sign names the Akkadian-tuned `data/ccpo-abz-map.json` misses, emitting a small committed layer (`data/sumtablets-abz-map.json`); `scripts/build-sumtablets-signs.mjs` then converts every tablet's `glyph_names` to the eBL all-signs `{_id, signs}` shape (`_id` = CDLI P-number, `X` for damage/unmapped/numerals, structural markers dropped) into `~/.cache/cuneiform-mcp/sumtablets-signs.json`. That cache is concatenated — `existsSync`-guarded, non-breaking when absent — into the **global** chunk-index builder (`scripts/build-chunk-index.mjs`) **and** the shared runtime corpus loader (`src/corpusSource.ts` → `fuzzyParallels.loadCorpus`), so SumTablets P-numbers are first-class chunk-index members **and** usable as `find_chunk_parallels` source/host. It is **deliberately NOT** wired into the per-period index (the corpus is ~86% Ur III, which has no NA/NB partition) — Sumerian tablets live in the global index only, no fabricated period. The new **`search_sumtablets`** tool surfaces the native metadata (CDLI id / period / genre / Latin transliteration) the generic chunk tools don't expose, and **warns on the severe corpus skew** (~86% Ur III, ~94% Administrative) so the dominant shared "chunks" — repetitive admin formulae — aren't mis-read as philological parallels. **Honest scope:** Sumerian tablets are **not** eBL compositions; the ingest fabricates **no** composition assignment (`compute_quotation_network` resolves them to `null` and skips them). `hyparquet` + `hyparquet-compressors` are **devDependencies** only — the server reads the converted cache JSON, never the parquet. *(Measured coverage reported in `data/sumtablets-abz-map.json` build stats.)*
 - **EvaCun 2025 token-prediction harness — `scripts/evacun/` + `scripts/benchmark-evacun.mjs` (benchmark-script-only; NO new tool, count stays 115).** An **honest, gated** harness for the EvaCun missing-WORD restoration task (mirrors the ProtoSnap-Layer-2 pattern: the Node driver only **calls** `scripts/evacun/predict_masked.py` via `execFile` — fixed argv, absolute venv-python path, timeout — and **never throws**). It prints the scored accuracy + top-3 **next to** the published references (majority `0.04` / best single `0.221` / ensemble `0.269`, top-3 `0.377`) when runnable — **or** `data_available:false` / `inference_available:false` with the exact fetch+setup steps. **No score is emitted today** for a **DATA** reason: the real masked-WORD token-prediction files are organizer-distributed with no public DOI, and the Zenodo DOI in circulation (`10.5281/zenodo.17220687`) is a **different** artifact — an MT parallel corpus with no `[MASK]`/word-index/gold/metric (SHA256-verified). The sidecar (a fine-tuned `SLAB-NLP/Akk` MIT BERT-MLM) implements the integrity-critical **word↔subword bridge** (full-span masking + WordPiece detokenisation back to a surface word; exact, case/subscript-sensitive scoring; gap-token exclusion), unit-tested in `tests/evacunBridge.test.ts` + a torch-free `predict_masked.py --selftest`. Weights, the SLAB clone, and the corpus are **gitignored + user-fetched** (the MIT repo ships only our harness code). See [`scripts/evacun/SETUP.md`](scripts/evacun/SETUP.md).
 - **v0.78 — image-modality SCAFFOLD: `fetch_tablet_photo` + `align_sign_prototype` (count 113 → 115).** An **honest two-layer** first step into the image modality. **LAYER 1 (runs now, zero new deps):** `fetch_tablet_photo` resolves the **fetchable** eBL REST endpoint (`https://www.ebl.lmu.de/api/fragments/{id}/photo` — raw `image/jpeg`; distinct from the SPA viewer route `.../fragmentarium/{id}/photo`, which only 302-redirects to an HTML page), downloads the full-res JPEG, and caches it to `getCacheDir()/photos/<id>.jpg` (verified live: K.5896 → 200, ~668 KB). `get_tablet_image_links` now also surfaces `ebl_photo_api_url` alongside the relabelled `ebl_photo_url` (human viewer). **LAYER 2 (honest scaffold, torch-sidecar-GATED):** `align_sign_prototype` runs **ProtoSnap per-sign prototype ALIGNMENT** — it snaps a *known* sign's skeleton onto a **pre-cropped, pre-identified** single-sign crop (both crop and identity are inputs) and returns a match score + aligned skeleton. **It does NOT detect, segment, or label signs on a tablet photo** (no bounding boxes, no labels); end-to-end *tablet photo → signs* needs an upstream detector (DeepScribe / eBL `cuneiform-ocr`) that ProtoSnap does **not** provide and that is **out of scope** here — so there is deliberately **no** `detect_signs_in_photo` tool. When the python3.11 ProtoSnap sidecar venv is absent, `align_sign_prototype` returns `inference_available: false` with the exact setup command and **never throws**. The repo only **calls** `scripts/protosnap/` (`execFile`, fixed argv, absolute venv-python path, timeout); it never **contains** the unlicensed ProtoSnap repo or weights — `setup.sh` clones/downloads them into the user's gitignored cache at their direction (see [`scripts/protosnap/SETUP.md`](scripts/protosnap/SETUP.md)). Tablet photos are British-Museum-collection material — link / fetch-to-cache only, never redistributed.
 - **v0.77 — hub-demotion guard on `compute_quotation_network` (NO new tool; count stays 113).** A **promiscuous hub** — a long, low-damage tablet that co-hosts a length-20 window with many unrelated tablets by chance (e.g. `K.2290`/`K.2419` at chunk-fanout **2737**) — recurs across many chunks and inflates every edge its composition touches (the per-chunk `1/host_count` damping doesn't counter cross-chunk fanout). The guard scales such chunks' weight by `threshold/fanout`, with `threshold` data-driven = `max(50, p99 of contributing-host fanouts)` (default **410** on the live corpus). Demoted hubs are **always surfaced** in `metrics.hub_tablets_demoted` + `weight_demoted_by_hub_guard` + a warning — never silent. Genuine low-fanout edges are preserved (`lugale↔commentary_lugale` unchanged at w=30; `enuma_anu_enlil↔mis_pi` 455→451). Default-on; opt-out via `hubFanoutThreshold: 0`. Closes the last v0.75 ccpo caveat.
@@ -59,11 +60,11 @@ Methods paper resubmitted to the Journal of Open Humanities Data as a Discussion
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 115 tools
+## 116 tools
 
 The toolchain has grown well past the point where a flat list is useful. The authoritative references:
 
-- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 115 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
+- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 116 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
 - **[`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)** — tools tiered by stability (canonical / stable / experimental / specialized) for the v1.0 freeze.
 
 ### The canonical ten (the 80%-of-work API)
@@ -128,12 +129,12 @@ Add to `~/.claude.json` (or the equivalent MCP-config path for your client) unde
 }
 ```
 
-Restart Claude Code. The 115 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 116 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "v0.78.0 smoke OK — 115 tools registered" and exits
+npm run smoke   # prints "v0.79.0 smoke OK — 116 tools registered" and exits
 ```
 
 ## Environment variables
@@ -157,6 +158,22 @@ node scripts/build-signs-index.mjs
 ```
 
 The v0.14 research-vault index is built lazily in-memory on first tool call — no pre-build needed.
+
+### SumTablets Sumerian corpus (optional; enables `search_sumtablets` + Sumerian chunk hosts)
+
+```bash
+# 1. fetch the parquet shards to cache (~46 MB, NOT committed)
+node scripts/fetch-sumtablets.mjs
+# 2. build the small committed ABZ gap-fill layer (eBL Layer-3; ~minutes)
+node scripts/build-sumtablets-abz-map.mjs
+# 3. convert to eBL all-signs {_id,signs} + the search metadata sidecar
+node scripts/build-sumtablets-signs.mjs
+# 4. (re)build the global chunk index so Sumerian tablets become chunk hosts
+#    (the merged ~127K-tablet corpus needs a larger heap)
+node --max-old-space-size=8192 scripts/build-chunk-index.mjs
+```
+
+**Attribution (required).** SumTablets is distributed under **CC-BY-4.0**: Cole Simmons, Richard Diehl-Martinez & Dan Jurafsky, *"SumTablets: A Transliteration Dataset of Sumerian Tablets"*, Proceedings of the 1st Workshop on Machine Learning for Ancient Languages (ML4AL) @ ACL 2024. Dataset: [`colesimmons/SumTablets`](https://huggingface.co/datasets/colesimmons/SumTablets) (CDLI-derived P-numbers + transliterations). The corpus and the ABZ-converted `sumtablets-signs.json` are **fetched to your local cache only — never committed or redistributed**; this repo ships only the harness scripts + the small `data/sumtablets-abz-map.json` gap-fill layer.
 
 ## Validation
 
