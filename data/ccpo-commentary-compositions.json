@@ -1,0 +1,604 @@
+{
+  "$schema": "ccpo-commentary-compositions/v1",
+  "registry_version": "ccpo-commentary-1",
+  "built_at": "2026-06-02T05:09:37.281Z",
+  "note": "Auxiliary commentary-bucket + gold base compositions merged into COMPOSITION_REGISTRY at load time. data/compositions-v1.json (the citable 11-composition methods-paper registry) is NOT modified.",
+  "compositions": [
+    {
+      "id": "an_anum",
+      "name": "An = Anum (God List)",
+      "name_akkadian": "An = Anum (God List)",
+      "description": "Base composition An = Anum (God List), registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_an_anum",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "codex_hammurapi",
+      "name": "Codex Hammurapi",
+      "name_akkadian": "Codex Hammurapi",
+      "description": "Base composition Codex Hammurapi, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_codex_hammurapi",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "commentary_alu",
+      "name": "Commentary on Šumma ālu",
+      "name_akkadian": "ṣâtu/mukallimtu (Šumma ālu)",
+      "description": "Cuneiform commentary tradition (ccpo) on Šumma ālu. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: summa_alu.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_alu",
+      "base_composition_id": "summa_alu",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_codex_hammurapi",
+      "name": "Commentary on Codex Hammurapi",
+      "name_akkadian": "ṣâtu/mukallimtu (Codex Hammurapi)",
+      "description": "Cuneiform commentary tradition (ccpo) on Codex Hammurapi. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: codex_hammurapi.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_codex_hammurapi",
+      "base_composition_id": "codex_hammurapi",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_eae",
+      "name": "Commentary on Enūma Anu Enlil",
+      "name_akkadian": "ṣâtu/mukallimtu (Enūma Anu Enlil)",
+      "description": "Cuneiform commentary tradition (ccpo) on Enūma Anu Enlil. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: enuma_anu_enlil.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_eae",
+      "base_composition_id": "enuma_anu_enlil",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_god_list",
+      "name": "Commentary on God List (An=Anum)",
+      "name_akkadian": "ṣâtu/mukallimtu (God List (An=Anum))",
+      "description": "Cuneiform commentary tradition (ccpo) on God List (An=Anum). Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: an_anum.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_god_list",
+      "base_composition_id": "an_anum",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_iqqur_ipus",
+      "name": "Commentary on Iqqur īpuš",
+      "name_akkadian": "ṣâtu/mukallimtu (Iqqur īpuš)",
+      "description": "Cuneiform commentary tradition (ccpo) on Iqqur īpuš. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: iqqur_ipus.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_iqqur_ipus",
+      "base_composition_id": "iqqur_ipus",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_izbu",
+      "name": "Commentary on Šumma izbu",
+      "name_akkadian": "ṣâtu/mukallimtu (Šumma izbu)",
+      "description": "Cuneiform commentary tradition (ccpo) on Šumma izbu. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: summa_izbu.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_izbu",
+      "base_composition_id": "summa_izbu",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_lexical",
+      "name": "Commentary on Lexical (Diri/Aa)",
+      "name_akkadian": "ṣâtu/mukallimtu (Lexical (Diri/Aa))",
+      "description": "Cuneiform commentary tradition (ccpo) on Lexical (Diri/Aa). Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: diri_aa.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_lexical",
+      "base_composition_id": "diri_aa",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_lugale",
+      "name": "Commentary on Lugal-e",
+      "name_akkadian": "ṣâtu/mukallimtu (Lugal-e)",
+      "description": "Cuneiform commentary tradition (ccpo) on Lugal-e. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: lugale.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_lugale",
+      "base_composition_id": "lugale",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_marduk_address",
+      "name": "Commentary on Marduk's Address",
+      "name_akkadian": "ṣâtu/mukallimtu (Marduk's Address)",
+      "description": "Cuneiform commentary tradition (ccpo) on Marduk's Address. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: marduk_address.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_marduk_address",
+      "base_composition_id": "marduk_address",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_namburbi",
+      "name": "Commentary on Namburbi",
+      "name_akkadian": "ṣâtu/mukallimtu (Namburbi)",
+      "description": "Cuneiform commentary tradition (ccpo) on Namburbi. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: namburbi.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_namburbi",
+      "base_composition_id": "namburbi",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_other",
+      "name": "Commentary on Unclassified commentary",
+      "name_akkadian": "ṣâtu/mukallimtu (Unclassified commentary)",
+      "description": "Cuneiform commentary tradition (ccpo) on Unclassified commentary. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base text not present / unidentified in eBL.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_other",
+      "base_composition_id": null,
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_sagig",
+      "name": "Commentary on Sa-gig / Diagnostic",
+      "name_akkadian": "ṣâtu/mukallimtu (Sa-gig / Diagnostic)",
+      "description": "Cuneiform commentary tradition (ccpo) on Sa-gig / Diagnostic. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: sagig.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_sagig",
+      "base_composition_id": "sagig",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_therapeutic",
+      "name": "Commentary on Therapeutic",
+      "name_akkadian": "ṣâtu/mukallimtu (Therapeutic)",
+      "description": "Cuneiform commentary tradition (ccpo) on Therapeutic. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base composition id: therapeutic.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_therapeutic",
+      "base_composition_id": "therapeutic",
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "commentary_uncertain",
+      "name": "Commentary on Uncertain base",
+      "name_akkadian": "ṣâtu/mukallimtu (Uncertain base)",
+      "description": "Cuneiform commentary tradition (ccpo) on Uncertain base. Registered as a DISTINCT composition bucket so that verbatim quotations of the base text surface as commentary→base edges in compute_quotation_network (folding into the base would self-loop and vanish). Base text not present / unidentified in eBL.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "commentary",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [
+        {
+          "citation": "Frahm, E. 2011. Babylonian and Assyrian Text Commentaries. GMTR 5.",
+          "title": "Babylonian and Assyrian Text Commentaries",
+          "series": "Guides to the Mesopotamian Textual Record 5",
+          "publisher": "Ugarit-Verlag"
+        }
+      ],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#commentary_uncertain",
+      "base_composition_id": null,
+      "source": "ccpo-ingest (Stage B)"
+    },
+    {
+      "id": "iqqur_ipus",
+      "name": "Iqqur īpuš",
+      "name_akkadian": "Iqqur īpuš",
+      "description": "Base composition Iqqur īpuš, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_iqqur_ipus",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "lugale",
+      "name": "Lugal-e",
+      "name_akkadian": "Lugal-e",
+      "description": "Base composition Lugal-e, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_lugale",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "marduk_address",
+      "name": "Marduk's Address",
+      "name_akkadian": "Marduk's Address",
+      "description": "Base composition Marduk's Address, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_marduk_address",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "namburbi",
+      "name": "Namburbi",
+      "name_akkadian": "Namburbi",
+      "description": "Base composition Namburbi, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_namburbi",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "sagig",
+      "name": "Sa-gig (Diagnostic)",
+      "name_akkadian": "Sa-gig (Diagnostic)",
+      "description": "Base composition Sa-gig (Diagnostic), registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_sagig",
+      "source": "ccpo-ingest (Stage B) base composition"
+    },
+    {
+      "id": "therapeutic",
+      "name": "Therapeutic",
+      "name_akkadian": "Therapeutic",
+      "description": "Base composition Therapeutic, registered (auxiliary, off compositions-v1.json) so ccpo commentary→base edges can resolve their base endpoint. Witnesses are seeded ONLY where a verbatim length-20 chunk co-occurs with a ccpo commentary AND the eBL editorial genre confirms the family.",
+      "composition_type": "specific_composition",
+      "exemplar_tablets": [],
+      "paper_sections": [
+        "§ccpo-ingest"
+      ],
+      "typical_genre": "base text (commentated)",
+      "typical_period": "Neo-Assyrian / Neo-Babylonian",
+      "parent_curriculum": null,
+      "print_editions": [],
+      "external_ids": {
+        "ebl_canonical_genre": null,
+        "ogsl": null,
+        "cad_lemma": null
+      },
+      "uri": "https://ccp.yale.edu/#base_therapeutic",
+      "source": "ccpo-ingest (Stage B) base composition"
+    }
+  ]
+}

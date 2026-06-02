@@ -106,6 +106,19 @@ const t0 = Date.now();
 const records = JSON.parse(readFileSync(SIGNS_CACHE, "utf-8"));
 console.error(`  ${records.length} records loaded (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
 
+// ── ccpo-ingest (Stage B): concat ccpo commentaries as first-class members.
+// ccpo-signs.json is the SAME {_id, signs} shape (ABZ codes, X for damage),
+// produced by scripts/build-ccpo-signs.mjs. Guarded by existsSync so the build
+// still runs when ccpo-signs.json is absent. ccpo P-numbers then appear as
+// ChunkOccurrence.tablet_id, which is what lets a commentary share a length-20
+// chunk with a base-text fragment and yields the commentary→base edge.
+const CCPO_SIGNS_CACHE = join(CACHE_DIR, "ccpo-signs.json");
+if (existsSync(CCPO_SIGNS_CACHE)) {
+  const ccpo = JSON.parse(readFileSync(CCPO_SIGNS_CACHE, "utf-8"));
+  for (const r of ccpo) records.push(r);
+  console.error(`  + ${ccpo.length} ccpo records merged (${records.length} total)`);
+}
+
 // hash → Array<{tablet_id, start_position}>
 const byHash = new Map();
 // tablet_id → trigrams_ordered (kept only for tablets whose chunks survive;

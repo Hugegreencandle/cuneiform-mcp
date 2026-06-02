@@ -90,8 +90,31 @@ console.error(
   `  ${Object.keys(metadata).length} metadata entries in ${((Date.now() - tMeta) / 1000).toFixed(1)}s`,
 );
 
-function periodOf(meta) {
-  if (!meta || !meta.script) return null;
+// ── ccpo-ingest (Stage B): period fallback for ccpo tablets, which have NO
+// fragment-metadata row. The ccpo catalogue carries a free-text `period`
+// ("Neo-Assyrian" / "Neo-Babylonian") that we normalize to the same labels.
+const CCPO_PERIOD = new Map();
+{
+  const catPath = join(CACHE_DIR, "oracc", "ccpo", "catalogue.json");
+  if (existsSync(catPath)) {
+    try {
+      const cat = JSON.parse(readFileSync(catPath, "utf-8"));
+      const members = cat.members || cat;
+      for (const pid of Object.keys(members)) {
+        const p = (members[pid] && members[pid].period) || "";
+        if (/neo-?assyrian/i.test(p)) CCPO_PERIOD.set(pid, "Neo-Assyrian");
+        else if (/neo-?babylonian/i.test(p)) CCPO_PERIOD.set(pid, "Neo-Babylonian");
+      }
+    } catch {
+      /* non-fatal */
+    }
+  }
+}
+
+function periodOf(meta, id) {
+  if (!meta || !meta.script) {
+    return id && CCPO_PERIOD.has(id) ? CCPO_PERIOD.get(id) : null;
+  }
   if (typeof meta.script === "string") return meta.script;
   return meta.script.period ?? null;
 }
@@ -149,6 +172,15 @@ const t0 = Date.now();
 const records = JSON.parse(readFileSync(SIGNS_CACHE, "utf-8"));
 console.error(`  ${records.length} records loaded (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
 
+// ── ccpo-ingest (Stage B): concat ccpo commentaries; period comes from the
+// CCPO_PERIOD fallback above (they have no fragment-metadata row). Guarded.
+const CCPO_SIGNS_CACHE = join(CACHE_DIR, "ccpo-signs.json");
+if (existsSync(CCPO_SIGNS_CACHE)) {
+  const ccpo = JSON.parse(readFileSync(CCPO_SIGNS_CACHE, "utf-8"));
+  for (const r of ccpo) records.push(r);
+  console.error(`  + ${ccpo.length} ccpo records merged (${records.length} total)`);
+}
+
 // Per-period working state. Each period gets its own inverted index +
 // per-tablet trigram cache (needed only for the eventual reconstruct pass).
 const perPeriod = new Map();
@@ -179,11 +211,11 @@ for (const r of records) {
     continue;
   }
   const meta = metadata[r._id];
-  if (!meta) {
+  if (!meta && !CCPO_PERIOD.has(r._id)) {
     noMetadata++;
     continue;
   }
-  const pk = periodKey(periodOf(meta));
+  const pk = periodKey(periodOf(meta, r._id));
   if (!pk) {
     otherPeriod++;
     continue;

@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Last updated 2026-06-02 at v0.74.0 (added `oracc_index_project` + `oracc_get_edition` as Experimental; prior update v0.73.0 added `surface_genre_conflicts`, re-tiered the +10 tools from v0.58–v0.69). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-06-02 at v0.75.0 (ccpo commentary↔base-text quotation-edge **ingest milestone** — NO tool delta, count stays 113; prior update v0.74.0 added `oracc_index_project` + `oracc_get_edition` as Experimental; v0.73.0 added `surface_genre_conflicts`, re-tiered the +10 tools from v0.58–v0.69). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 113 tools (as of v0.74.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 113 tools (as of v0.75.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -160,11 +160,11 @@ Specialized; stable.
 | Specialized | 13 | Stable, niche |
 | RAG vault | 4 | Stable |
 | Apkallu / dataset extension | 2 | Stable |
-| **Total unique** | **113** | as of v0.74.0 |
+| **Total unique** | **113** | as of v0.75.0 |
 
 Notes:
 - **Canonical** is a featured re-listing of ten Stable tools (for visibility), not an additional tier — it is not added to the total.
-- The **authoritative unique total is 113** (as of v0.74.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental); v0.74 added `oracc_index_project` + `oracc_get_edition` (both Experimental).
+- The **authoritative unique total is 113** (as of v0.75.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental); v0.74 added `oracc_index_project` + `oracc_get_edition` (both Experimental); **v0.75 added NO tool** (ccpo quotation-edge ingest milestone — index/data only).
 - The per-tier row counts carry minor pre-existing drift (a few sub-section headers were off by 1–2 before this update, e.g. the Stable header read "50" while its sub-sections summed to 57). Treat the per-tier numbers as approximate; the 110 unique total is the exact figure. A full per-tier recount is deferred to the v1.0 tag.
 
 ---

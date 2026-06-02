@@ -80,6 +80,29 @@ function loadArtifact(): RegistryArtifact {
   try {
     const raw = readFileSync(path, "utf-8");
     _artifact = JSON.parse(raw) as RegistryArtifact;
+    // ── ccpo-ingest (Stage B): merge auxiliary commentary-bucket compositions.
+    // data/ccpo-commentary-compositions.json registers the ~13 commentary
+    // families (commentary_eae, commentary_alu, …) as DISTINCT compositions so
+    // that compute_quotation_network resolves ccpo tablets away from their base
+    // composition (folding them in would self-loop the shared chunk and the
+    // commentary→base edge would vanish). The citable 11-composition methods-
+    // paper registry (compositions-v1.json) is NOT touched. Guarded so absence
+    // is non-breaking and the build still runs without the artifact.
+    const auxPath = join(dataDir(), "ccpo-commentary-compositions.json");
+    if (existsSync(auxPath)) {
+      try {
+        const aux = JSON.parse(readFileSync(auxPath, "utf-8")) as { compositions?: CompositionEntry[] };
+        const have = new Set(_artifact.compositions.map((c) => c.id));
+        for (const c of aux.compositions ?? []) {
+          if (c && c.id && !have.has(c.id)) {
+            _artifact.compositions.push(c);
+            have.add(c.id);
+          }
+        }
+      } catch {
+        // Malformed auxiliary file is non-fatal — base registry still loads.
+      }
+    }
     return _artifact;
   } catch (e) {
     _loadError = e instanceof Error ? e.message : String(e);
