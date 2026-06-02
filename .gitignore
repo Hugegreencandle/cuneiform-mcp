@@ -12,3 +12,6 @@ _private/
 # ephemeral agent / tooling dirs — never commit
 .claude/
 .playwright-mcp/
+
+# generated CuneiBERT training data — never commit
+scripts/cuneibert/dataset/
