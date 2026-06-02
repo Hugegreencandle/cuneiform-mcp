@@ -13,7 +13,7 @@ authors:
     email: dane@kairovault.com
     affiliation: "Independent researcher, Tokyo, Japan"
 type: software
-license: CC-BY-4.0
+license: MIT
 repository-code: "https://github.com/Hugegreencandle/cuneiform-mcp"
 version: "0.18.3"
 date-released: "2026-05-16"
