@@ -23,6 +23,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { loadCorpusRecords } from "./corpusSource.js";
 
 const ALL_SIGNS_FILE = "all-signs-full.json";
 const EXCLUSIONS_FILE = "corpus-exclusions.json";
@@ -125,7 +126,9 @@ function loadCorpus(): Map<string, CorpusEntry> | null {
       for (const r of ex.excluded_records ?? []) excluded.add(r.id);
     }
 
-    const records = JSON.parse(readFileSync(path, "utf-8")) as Array<{ _id: string; signs: string }>;
+    // ccpo-ingest (Stage B): loadCorpusRecords concats ccpo-signs.json when
+    // present so ccpo P-numbers are usable as find_chunk_parallels source/host.
+    const records = (loadCorpusRecords(cacheDir()) ?? []) as Array<{ _id: string; signs: string }>;
     const out = new Map<string, CorpusEntry>();
     const abIdx = new Map<string, Set<string>>();
     const bcIdx = new Map<string, Set<string>>();
