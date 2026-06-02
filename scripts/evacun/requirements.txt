@@ -1,0 +1,22 @@
+# EvaCun sidecar — pinned for Apple-Silicon (M-series) MPS, python3.11 ONLY.
+#
+# Same feasibility crux as scripts/protosnap/requirements.txt (verified live
+# 2026-06-02 on an M5):
+#  - torch 2.2.1 ships a prebuilt cp311 arm64 wheel (imports clean, real MPS
+#    matmul). python3.14 has NO torch wheel yet — DO NOT use the system python3;
+#    setup.sh enforces /opt/homebrew/bin/python3.11.
+#  - numpy MUST stay <2 (1.26.4) — torch 2.2.x was built against numpy 1.x.
+#  - transformers is PINNED to ~=4.38 to match the protosnap stack already proven
+#    to import cleanly with this torch; it ships BertForMaskedLM + the WordPiece
+#    tokenizer the word<->subword bridge needs. Do not unpin to 5.x.
+#
+# This stack is for the MLM fine-tune + masked-word inference sidecar
+# (predict_masked.py). No diffusers/opencv/pillow — that was the ProtoSnap image
+# pipeline; the EvaCun task is text-only.
+torch==2.2.1
+numpy==1.26.4
+transformers~=4.38.0
+accelerate~=0.27
+datasets~=2.18
+tokenizers~=0.15
+safetensors~=0.4

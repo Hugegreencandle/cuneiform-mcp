@@ -22,3 +22,16 @@ scripts/cuneibert/dataset/
 scripts/protosnap/.venv/
 scripts/protosnap/.cache/
 scripts/protosnap/weights/
+
+# feat/evacun-benchmark — EvaCun token-prediction harness. The torch sidecar
+# venv, the SLAB-NLP/Akk clone, the fine-tuned checkpoint, and the EvaCun corpus
+# are user-fetched/derived and carry foreign/unconfirmed licenses. The MIT repo
+# ships ONLY our harness code; everything below is cache-only / never committed.
+scripts/evacun/.venv/
+scripts/evacun/.cache/
+scripts/evacun/weights/
+
+# python bytecode from the torch sidecars' --selftest runs — build artifacts,
+# never source (e.g. scripts/evacun/__pycache__/predict_masked.cpython-3xx.pyc).
+__pycache__/
+*.pyc
