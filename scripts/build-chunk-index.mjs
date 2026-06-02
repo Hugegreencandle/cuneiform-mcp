@@ -19,7 +19,14 @@
 //
 // Runtime target: <15 minutes on a single core, 35K-tablet corpus.
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  existsSync,
+  mkdirSync,
+  openSync,
+  writeSync,
+  closeSync,
+} from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -119,11 +126,30 @@ if (existsSync(CCPO_SIGNS_CACHE)) {
   console.error(`  + ${ccpo.length} ccpo records merged (${records.length} total)`);
 }
 
+// ── SumTablets-ingest (Stage B): concat the ABZ-converted Sumerian tablets as
+// first-class GLOBAL chunk-index members. sumtablets-signs.json is the SAME
+// {_id, signs} shape (unpadded ABZ codes, X for damage/unmapped), produced by
+// scripts/build-sumtablets-signs.mjs. Guarded by existsSync so the build still
+// runs when it is absent. SumTablets CDLI P-numbers then appear as
+// ChunkOccurrence.tablet_id — which is what lets a Sumerian tablet share a
+// length-20 chunk with another tablet and surface as a find_chunk_parallels
+// host/source. NOTE: NOT wired into build-chunk-index-per-period.mjs — the
+// SumTablets corpus is ~86% Ur III (no per-period NA/NB index), so Sumerian
+// tablets correctly live in the GLOBAL index only (no fabricated NA/NB period).
+const SUMTABLETS_SIGNS_CACHE = join(CACHE_DIR, "sumtablets-signs.json");
+if (existsSync(SUMTABLETS_SIGNS_CACHE)) {
+  const sum = JSON.parse(readFileSync(SUMTABLETS_SIGNS_CACHE, "utf-8"));
+  for (const r of sum) records.push(r);
+  console.error(`  + ${sum.length} SumTablets records merged (${records.length} total)`);
+}
+
 // hash → Array<{tablet_id, start_position}>
 const byHash = new Map();
 // tablet_id → trigrams_ordered (kept only for tablets whose chunks survive;
 // we don't know that until after singleton pruning, so retain per-source for
-// reconstruction). For 35K tablets averaging ~120 trigrams this is bounded.
+// reconstruction). For the merged ~127K-tablet corpus (eBL ~35K + ccpo +
+// ~91.6K SumTablets) this retains every tablet's trigrams in memory — run with
+// `node --max-old-space-size=8192 scripts/build-chunk-index.mjs` (see header).
 const trigramsByTablet = new Map();
 
 let totalWindows = 0;
@@ -173,10 +199,15 @@ console.error(
   `  ${totalNonSingleton} non-singleton hashes (${((Date.now() - t2) / 1000).toFixed(1)}s)`,
 );
 
-// Sanity assertion from the plan: 100K-500K expected on a 35K-tablet corpus.
-if (totalNonSingleton < 100_000 || totalNonSingleton > 500_000) {
+// Sanity band, widened for the merged corpus (v0.79.0). The base eBL (~35K)
+// corpus lands ~100K-500K non-singleton hashes; the ~91.6K admin-heavy
+// (~94% Administrative, formulaic Ur III) SumTablets ingest legitimately pushes
+// this well past 500K, so the old 100K-500K band fired a spurious warning on
+// every merged build. Treat only an absurd count (empty index or runaway) as a
+// red flag; the count itself is logged above for the operator.
+if (totalNonSingleton < 50_000 || totalNonSingleton > 5_000_000) {
   console.error(
-    `  ⚠ non-singleton count outside expected 100K-500K band — investigate before shipping`,
+    `  ⚠ non-singleton count ${totalNonSingleton} outside sane 50K-5M band — investigate before shipping`,
   );
 }
 
@@ -187,22 +218,42 @@ entries.sort((a, b) => b.occurrences.length - a.occurrences.length);
 
 if (!existsSync(CACHE_DIR)) mkdirSync(CACHE_DIR, { recursive: true });
 
-const out = {
-  version: MCP_VERSION,
-  build_timestamp: new Date().toISOString(),
-  window_length: WINDOW,
-  total_tablets: tabletsProcessed,
-  total_windows_seen: totalWindows,
-  total_unique_hashes: byHash.size,
-  total_non_singleton_hashes: totalNonSingleton,
-  entries,
-};
-
 console.error("");
 console.error(`Writing ${OUT_PATH}...`);
 const t3 = Date.now();
-writeFileSync(OUT_PATH, JSON.stringify(out));
-const sizeMb = (JSON.stringify(out).length / 1024 / 1024).toFixed(1);
+
+// STREAMING WRITE (v0.79.0). The SumTablets ingest (~91.6K admin-heavy tablets)
+// pushes the non-singleton chunk count high enough that a single
+// JSON.stringify(out) of the whole object exceeds V8's max string length
+// (~512 MB on 64-bit) → "RangeError: Invalid string length", independent of
+// --max-old-space-size. The base eBL (+ccpo) corpus stayed under that limit, so
+// the old monolithic writeFileSync(JSON.stringify(out)) worked there; it does
+// NOT scale to the merged corpus. We stream the header + each entry + footer to
+// an fd instead, so no single giant string is ever materialised. The emitted
+// bytes are identical JSON (same top-level keys, same `entries` array order).
+let bytesWritten = 0;
+const fd = openSync(OUT_PATH, "w");
+function w(s) {
+  const buf = Buffer.from(s, "utf-8");
+  writeSync(fd, buf);
+  bytesWritten += buf.length;
+}
+w(
+  `{"version":${JSON.stringify(MCP_VERSION)},` +
+    `"build_timestamp":${JSON.stringify(new Date().toISOString())},` +
+    `"window_length":${WINDOW},` +
+    `"total_tablets":${tabletsProcessed},` +
+    `"total_windows_seen":${totalWindows},` +
+    `"total_unique_hashes":${byHash.size},` +
+    `"total_non_singleton_hashes":${totalNonSingleton},` +
+    `"entries":[`,
+);
+for (let i = 0; i < entries.length; i++) {
+  w((i === 0 ? "" : ",") + JSON.stringify(entries[i]));
+}
+w("]}");
+closeSync(fd);
+const sizeMb = (bytesWritten / 1024 / 1024).toFixed(1);
 console.error(`✓ wrote ${OUT_PATH}  (${sizeMb} MB, ${((Date.now() - t3) / 1000).toFixed(1)}s)`);
 
 console.error("");

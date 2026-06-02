@@ -1,8 +1,8 @@
 # cuneiform-mcp API stability classification (v1.0 readiness)
 
-Generated 2026-05-25 after the v0.40 release. Last updated 2026-06-02 at v0.78.0 (image-modality SCAFFOLD: `fetch_tablet_photo` [Stable — verified-working eBL JPEG fetch+cache] + `align_sign_prototype` [Experimental — ProtoSnap per-sign *alignment*, torch-sidecar-gated, NOT tablet-photo sign detection]; count 113 → **115**; prior update v0.75.0 ccpo ingest milestone NO tool delta; v0.74.0 added `oracc_index_project` + `oracc_get_edition` as Experimental; v0.73.0 added `surface_genre_conflicts`). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
+Generated 2026-05-25 after the v0.40 release. Last updated 2026-06-02 at v0.79.0 (SumTablets Sumerian corpus ingest: `search_sumtablets` [Experimental — cached-metadata search over the CC-BY-4.0 SumTablets corpus; the corpus is ABZ-converted into the global chunk index but fabricates NO composition assignment]; count 115 → **116**; prior update v0.78.0 image-modality SCAFFOLD added `fetch_tablet_photo` [Stable] + `align_sign_prototype` [Experimental, torch-sidecar-gated]; v0.75.0 ccpo ingest milestone NO tool delta; v0.74.0 added `oracc_index_project` + `oracc_get_edition` as Experimental; v0.73.0 added `surface_genre_conflicts`). Addresses panel-review §3.24 / Al-Sayyid's ask: "88 tools is too many. What's the canonical ten?"
 
-This document classifies the 115 tools (as of v0.78.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
+This document classifies the 116 tools (as of v0.79.0) by **stability tier**. Tools in the **canonical** tier are the ones a researcher should learn first; the **stable** tier is the broader v1.0 API freeze; **experimental** tools may change shape before v1.0; **deprecated** tools should not be used in new work.
 
 ---
 
@@ -156,15 +156,15 @@ Specialized; stable.
 |---|---|---|
 | Canonical (top 10) | 10 | Stable + featured |
 | Stable | 65 | Signature locked |
-| Experimental | 32 | May change |
+| Experimental | 33 | May change |
 | Specialized | 13 | Stable, niche |
 | RAG vault | 4 | Stable |
 | Apkallu / dataset extension | 2 | Stable |
-| **Total unique** | **115** | as of v0.78.0 |
+| **Total unique** | **116** | as of v0.79.0 |
 
 Notes:
 - **Canonical** is a featured re-listing of ten Stable tools (for visibility), not an additional tier — it is not added to the total.
-- The **authoritative unique total is 115** (as of v0.78.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental); v0.74 added `oracc_index_project` + `oracc_get_edition` (both Experimental); **v0.75 added NO tool** (ccpo quotation-edge ingest milestone — index/data only); **v0.78 added 2** — `fetch_tablet_photo` (Stable) + `align_sign_prototype` (Experimental, torch-sidecar-gated alignment scaffold — NOT detection).
+- The **authoritative unique total is 116** (as of v0.79.0), per `docs/TOOL-INVENTORY.md` (auto-generated from `server.registerTool` calls) and the smoke banner. The v0.71 re-tier added the +10 tools from v0.58–v0.69 as 7 Stable + 3 Experimental; v0.73 added `surface_genre_conflicts` (Experimental); v0.74 added `oracc_index_project` + `oracc_get_edition` (both Experimental); **v0.75 added NO tool** (ccpo quotation-edge ingest milestone — index/data only); **v0.78 added 2** — `fetch_tablet_photo` (Stable) + `align_sign_prototype` (Experimental, torch-sidecar-gated alignment scaffold — NOT detection); **v0.79 added 1** — `search_sumtablets` (Experimental, cached-metadata search over the CC-BY-4.0 SumTablets Sumerian corpus; ingest milestone, fabricates no composition assignment).
 - The per-tier row counts carry minor pre-existing drift (a few sub-section headers were off by 1–2 before this update, e.g. the Stable header read "50" while its sub-sections summed to 57). Treat the per-tier numbers as approximate; the 110 unique total is the exact figure. A full per-tier recount is deferred to the v1.0 tag.
 
 ---

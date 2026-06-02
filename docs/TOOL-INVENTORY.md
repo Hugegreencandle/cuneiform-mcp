@@ -1,8 +1,8 @@
 # cuneiform-mcp — Tool Inventory
 
-Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-06-02 against v0.78.0.
+Auto-generated from `src/index.ts` via `scripts/generate-tool-inventory.mjs`. Last regenerated 2026-06-02 against v0.79.0.
 
-**Total tools: 115**
+**Total tools: 116**
 
 ## `lookup_sign`
 
@@ -271,6 +271,10 @@ Fetch + cache a FULL-RES eBL tablet photo (JPEG) to local disk and return its pa
 ## `align_sign_prototype`
 
 ProtoSnap per-sign prototype ALIGNMENT — NOT sign detection. Given a PRE-CROPPED, ALREADY-IDENTIFIED single-sign image (you supply BOTH the crop path AND the sign's known identity), snap a prototype skeleton of that sign onto the crop and return a match score + aligned-skeleton path. It does NOT det…
+
+## `search_sumtablets`
+
+Search the SumTablets Sumerian corpus (Simmons, Diehl-Martinez & Jurafsky, ML4AL @ ACL 2024; HF colesimmons/SumTablets, CC-BY-4.0) by id / period / genre / transliteration substring. SumTablets is fetched to your local cache (NOT committed — CC-BY-4.0, attribution required) and ABZ-converted so its …
 
 ## `compute_confidence_calibration`
 

@@ -16,6 +16,7 @@ import { homedir } from "node:os";
 
 export const ALL_SIGNS_FILE = "all-signs-full.json";
 export const CCPO_SIGNS_FILE = "ccpo-signs.json";
+export const SUMTABLETS_SIGNS_FILE = "sumtablets-signs.json";
 
 export type CorpusSignsRecord = { _id: string; signs: string };
 
@@ -25,9 +26,10 @@ export function corpusCacheDir(): string {
 
 /**
  * Load the raw {_id, signs} corpus the chunk/fuzzy engines index: the eBL
- * all-signs dump CONCATENATED with the ccpo commentary editions when present.
- * Returns null only when the primary all-signs cache is missing (matches the
- * prior loaders' contract); ccpo is always optional/additive.
+ * all-signs dump CONCATENATED with the ccpo commentary editions AND the
+ * SumTablets Sumerian tablets when present. Returns null only when the primary
+ * all-signs cache is missing (matches the prior loaders' contract); ccpo and
+ * SumTablets are always optional/additive.
  */
 export function loadCorpusRecords(cacheDirOverride?: string): CorpusSignsRecord[] | null {
   const dir = cacheDirOverride || corpusCacheDir();
@@ -43,6 +45,21 @@ export function loadCorpusRecords(cacheDirOverride?: string): CorpusSignsRecord[
       for (const r of ccpo) records.push(r);
     } catch {
       // Malformed ccpo cache is non-fatal — base corpus still loads.
+    }
+  }
+
+  // SumTablets (Sumerian) ABZ-converted tablets — same {_id, signs} shape,
+  // produced by scripts/build-sumtablets-signs.mjs. Mirrors the ccpo block:
+  // existsSync-guarded + try/catch so absence/corruption is non-breaking, and
+  // SumTablets P-numbers become first-class chunk/fuzzy hosts. Sumerian tablets
+  // are NOT eBL compositions — they participate only as chunk-index hosts.
+  const sumtabletsPath = join(dir, SUMTABLETS_SIGNS_FILE);
+  if (existsSync(sumtabletsPath)) {
+    try {
+      const sum = JSON.parse(readFileSync(sumtabletsPath, "utf-8")) as CorpusSignsRecord[];
+      for (const r of sum) records.push(r);
+    } catch {
+      // Malformed SumTablets cache is non-fatal — base + ccpo still load.
     }
   }
   return records;
