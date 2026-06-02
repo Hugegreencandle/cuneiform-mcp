@@ -1,13 +1,14 @@
 # cuneiform-mcp
 
-MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **113 tools** (v0.77.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
+MCP server exposing CDLI, ORACC, OGSL, and eBL/Fragmentarium cuneiform corpora to LLM agents, plus a research toolchain for **manuscript-witness discovery, composition assignment, stemma reconstruction, transmission tracing, lacuna restoration, scribal fingerprinting, and an active-learning validation loop**. **115 tools** (v0.78.0), all returning typed `structuredContent` envelopes with source-of-record provenance.
 
 > **Status:** approaching a v1.0 tag. The API surface is frozen (see [`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)); the remaining gate is the labeled-positives validation set (see [v1.0 readiness](#v10-readiness) below). Methods paper resubmitted to JOHD as a Discussion Paper (2026-05-28).
 
-## What's new — v0.77.0
+## What's new — v0.78.0
 
 The work since v0.18 moved from corpus retrieval into a full **discovery + validation pipeline**, oriented around closing the v1.0 labeled-positives gate.
 
+- **v0.78 — image-modality SCAFFOLD: `fetch_tablet_photo` + `align_sign_prototype` (count 113 → 115).** An **honest two-layer** first step into the image modality. **LAYER 1 (runs now, zero new deps):** `fetch_tablet_photo` resolves the **fetchable** eBL REST endpoint (`https://www.ebl.lmu.de/api/fragments/{id}/photo` — raw `image/jpeg`; distinct from the SPA viewer route `.../fragmentarium/{id}/photo`, which only 302-redirects to an HTML page), downloads the full-res JPEG, and caches it to `getCacheDir()/photos/<id>.jpg` (verified live: K.5896 → 200, ~668 KB). `get_tablet_image_links` now also surfaces `ebl_photo_api_url` alongside the relabelled `ebl_photo_url` (human viewer). **LAYER 2 (honest scaffold, torch-sidecar-GATED):** `align_sign_prototype` runs **ProtoSnap per-sign prototype ALIGNMENT** — it snaps a *known* sign's skeleton onto a **pre-cropped, pre-identified** single-sign crop (both crop and identity are inputs) and returns a match score + aligned skeleton. **It does NOT detect, segment, or label signs on a tablet photo** (no bounding boxes, no labels); end-to-end *tablet photo → signs* needs an upstream detector (DeepScribe / eBL `cuneiform-ocr`) that ProtoSnap does **not** provide and that is **out of scope** here — so there is deliberately **no** `detect_signs_in_photo` tool. When the python3.11 ProtoSnap sidecar venv is absent, `align_sign_prototype` returns `inference_available: false` with the exact setup command and **never throws**. The repo only **calls** `scripts/protosnap/` (`execFile`, fixed argv, absolute venv-python path, timeout); it never **contains** the unlicensed ProtoSnap repo or weights — `setup.sh` clones/downloads them into the user's gitignored cache at their direction (see [`scripts/protosnap/SETUP.md`](scripts/protosnap/SETUP.md)). Tablet photos are British-Museum-collection material — link / fetch-to-cache only, never redistributed.
 - **v0.77 — hub-demotion guard on `compute_quotation_network` (NO new tool; count stays 113).** A **promiscuous hub** — a long, low-damage tablet that co-hosts a length-20 window with many unrelated tablets by chance (e.g. `K.2290`/`K.2419` at chunk-fanout **2737**) — recurs across many chunks and inflates every edge its composition touches (the per-chunk `1/host_count` damping doesn't counter cross-chunk fanout). The guard scales such chunks' weight by `threshold/fanout`, with `threshold` data-driven = `max(50, p99 of contributing-host fanouts)` (default **410** on the live corpus). Demoted hubs are **always surfaced** in `metrics.hub_tablets_demoted` + `weight_demoted_by_hub_guard` + a warning — never silent. Genuine low-fanout edges are preserved (`lugale↔commentary_lugale` unchanged at w=30; `enuma_anu_enlil↔mis_pi` 455→451). Default-on; opt-out via `hubFanoutThreshold: 0`. Closes the last v0.75 ccpo caveat.
 - **v0.76 — `longest_contiguous_run` on `find_chunk_parallels` (contiguity-aware reporting, NO new tool; count stays 113).** Each chunk now reports the longest **strictly-contiguous** verbatim sign run, distinct from `chunk_length`'s trigram-position *span* (which can bridge X-damage gaps via the 2-of-3 inverted index). The render flags chunks whose run ≪ span as **SPARSE ALIGNMENT**, so a gappy multi-host chunk is never mis-read as a single verbatim quotation; consumers can filter gappy hub artifacts via `longest_contiguous_run ≥ N`. Verified: `P461247` (Lugal-e commentary) yields a clean verbatim block (run 25 = span), while `P393722` (EAE commentary) is all sparse (runs 8–13 vs spans 23–37). Closes the contiguity-overstatement caveat flagged in the v0.75 ccpo adversarial review.
 - **v0.75 — ccpo commentary↔base-text quotation edges (ingest milestone, NO new tool; tool count stays 113).** The v0.74 ORACC adapter is now wired into the chunk engine: a CDL→eBL-ABZ converter (`src/oracc/cdl.ts:cdlToAbzSigns` + `data/ccpo-abz-map.json`, 99.99% non-damage coverage) lifts all **205 CCP commentary editions** to eBL all-signs `{_id, signs}`, written to `~/.cache/cuneiform-mcp/ccpo-signs.json` (`scripts/build-ccpo-signs.mjs`). That cache is concatenated — `existsSync`-guarded, non-breaking when absent — into **both** chunk-index builders (`scripts/build-chunk-index.mjs` + `scripts/build-chunk-index-per-period.mjs`, ccpo periods sourced from the catalogue) and into the **shared runtime corpus loader** (`src/corpusSource.ts` → `fuzzyParallels.loadCorpus`), so ccpo P-numbers are first-class chunk-index members **and** usable as `find_chunk_parallels` source/host. Each commentary registers as a **distinct** composition (`commentary_<family>` buckets via a CCP-number gold decoder: 3.1=EAE / 3.5=Šumma ālu / 3.6=Šumma izbu / 4.1=Sa-gig / 1.2=Lugal-e / 5=Codex Hammurapi / 7.1=God List; `data/ccpo-commentary-families.json` + `data/ccpo-commentary-compositions.json`, merged into the registry at load time — **`compositions-v1.json` stays frozen**) so that `compute_quotation_network` surfaces emergent commentary↔base edges instead of self-loop-erasing them. **Verified:** `lugale ↔ commentary_lugale` (Lugal-e fragment `BM.38155` + ccpo commentary `P461247` share a verbatim length-20 chunk) fires, while the negative controls N1 (NBGT), N2 (Uncertain `7.2.u86`), N3 (Therapeutic?) and a synthetic randomized-ABZ commentary all produce **zero** edges.
@@ -57,11 +58,11 @@ Methods paper resubmitted to the Journal of Open Humanities Data as a Discussion
 | v0.3 | `find_join_candidates` (lineToVec port) |
 | v0.1 | Initial 8-tool MCP wrapping CDLI/ORACC/OGSL/eBL |
 
-## 113 tools
+## 115 tools
 
 The toolchain has grown well past the point where a flat list is useful. The authoritative references:
 
-- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 113 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
+- **[`docs/TOOL-INVENTORY.md`](docs/TOOL-INVENTORY.md)** — the full auto-generated list of all 115 tools with one-line descriptions (regenerate with `node scripts/generate-tool-inventory.mjs`).
 - **[`docs/API-STABILITY-v1.0.md`](docs/API-STABILITY-v1.0.md)** — tools tiered by stability (canonical / stable / experimental / specialized) for the v1.0 freeze.
 
 ### The canonical ten (the 80%-of-work API)
@@ -126,12 +127,12 @@ Add to `~/.claude.json` (or the equivalent MCP-config path for your client) unde
 }
 ```
 
-Restart Claude Code. The 113 tools become callable as `mcp__cuneiform__*`.
+Restart Claude Code. The 115 tools become callable as `mcp__cuneiform__*`.
 
 ## Smoke test
 
 ```bash
-npm run smoke   # prints "v0.77.0 smoke OK — 113 tools registered" and exits
+npm run smoke   # prints "v0.78.0 smoke OK — 115 tools registered" and exits
 ```
 
 ## Environment variables

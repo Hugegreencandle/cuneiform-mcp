@@ -230,6 +230,28 @@ export function getEblPhotoUrl(tabletId: string): string | null {
 }
 
 /**
+ * v0.78 — Construct the FETCHABLE eBL photo API URL for a tablet.
+ *
+ * Distinct from getEblPhotoUrl(): that returns the SPA viewer route
+ * (.../fragmentarium/{id}/photo) which 302-redirects to an HTML page and is
+ * NOT directly fetchable as an image. This returns the JSON/REST API endpoint
+ * (.../api/fragments/{id}/photo) which serves the raw `image/jpeg` bytes
+ * (verified live 2026-06-02: K.5896 → HTTP 200, image/jpeg, ~668 KB).
+ *
+ * Returns null for empty/malformed IDs. As with the viewer URL, eBL only hosts
+ * photos for ~60-70% of transliterated tablets; a 404/redirect at fetch time
+ * means no photo is on file. The image itself is British-Museum-collection
+ * material — link/fetch-to-local-cache only, never redistribute.
+ *
+ * Pattern: https://www.ebl.lmu.de/api/fragments/{MUSEUM_NUMBER}/photo
+ */
+export function getEblPhotoApiUrl(tabletId: string): string | null {
+  if (!tabletId || tabletId.length === 0) return null;
+  const encoded = encodeURIComponent(tabletId);
+  return `https://www.ebl.lmu.de/api/fragments/${encoded}/photo`;
+}
+
+/**
  * v0.39 — Construct the eBL fragmentarium landing URL for a tablet.
  * Distinct from the photo URL — this is the human-readable entry point.
  */

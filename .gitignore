@@ -15,3 +15,10 @@ _private/
 
 # generated CuneiBERT training data — never commit
 scripts/cuneibert/dataset/
+
+# v0.78.0 image-modality — ProtoSnap sidecar venv + clone + weights are
+# UNLICENSED upstream and user-fetched; tablet photos are BM-collection material.
+# Cache-only / never committed (the runtime caches live under ~/.cache/cuneiform-mcp/).
+scripts/protosnap/.venv/
+scripts/protosnap/.cache/
+scripts/protosnap/weights/
