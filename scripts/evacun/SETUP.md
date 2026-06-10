@@ -50,9 +50,24 @@ masks). This was **SHA256-verified during recon**. Building a `[MASK]` / word-in
 / accuracy parser against it would parse a format that does not exist there — the
 exact overclaim to avoid.
 
-**To clear:** request the real token-prediction `train` + `valid` files from the
-EvaCun 2025 organizers (Gordin / Sahala / Spencer / Klein; `ufal.mff.cuni.cz` or
-the task repo) and place them under:
+**GATE STATUS: PERMANENTLY CLOSED (2026-06-11).** The files were requested from
+the organizers and **officially declined** — Shai Gordin replied that the
+agreement with the task's sponsors prohibits sharing the data publicly after the
+event. **Do not re-request.** The official EvaCun test set will never be
+available here, so no head-to-head EvaCun accuracy can ever be printed —
+the harness's honest `data_available:false` posture is now the permanent,
+correct behavior.
+
+**The sanctioned avenue instead (from the same reply):** both **eBL** and
+**Archibab** — the two sources the task corpus was drawn from (eBL Canonical +
+Archibab Old-Babylonian) — now expose public APIs. A future **EvaCun-style**
+benchmark can be built from API data using the published protocol (mask 15% of
+words, accuracy + top-3). Any such number MUST be labeled
+*"EvaCun-style protocol on self-drawn eBL/Archibab data — NOT the official test
+set, NOT comparable head-to-head with the published 0.221/0.269 figures."*
+Tracked as an expansion-backlog item; not built.
+
+The original (now unreachable) clearing path is kept below for the record:
 
 ```
 scripts/evacun/.cache/corpus/        # gitignored; license unconfirmed
